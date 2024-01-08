@@ -147,7 +147,7 @@ class Killaura extends Zuri implements Listener {
 				}
 			}
 			if (!isset($entities[$entity->getId()])) {
-				$this->fail($player);
+				$this->fail($damager);
 			}
 		}
 	}

@@ -70,10 +70,10 @@ class Reach extends Zuri implements Listener {
 	// V2 - just check again...
 	public function reachV2(EntityDamageEvent $event) {
 		if ($event instanceof EntityDamageByEntityEvent && $event->getEntity() instanceof Player && $event->getDamager() instanceof Player) {
-			if ($this->canBypass($damager)) {
+			if ($this->canBypass($event->getDamager())) {
 				return;
 			}
-			if ($this->isLagging($damager)) {
+			if ($this->isLagging($event->getDamager())) {
 				return;
 			}
 			if ($event->getDamager()->getGamemode()->equals(GameMode::CREATIVE())) {
@@ -93,10 +93,10 @@ class Reach extends Zuri implements Listener {
 	// V3 - just checking again
 	public function reachV3(EntityDamageEvent $event) {
 		if ($event instanceof EntityDamageByEntityEvent && $event->getEntity() instanceof Player && $event->getDamager() instanceof Player) {
-			if ($this->canBypass($damager)) {
+			if ($this->canBypass($event->getDamager())) {
 				return;
 			}
-			if ($this->isLagging($damager)) {
+			if ($this->isLagging($event->getDamager())) {
 				return;
 			}
 			if (!$event->getDamager()->canInteract($event->getEntity()->getLocation()->add(0.5, 0.5, 0.5), $event->getEntity()->isCreative() ? Anticheat::getInstance()->getConfig()->getNested("max-reach-distance-creative", Reach::MAX_REACH_DISTANCE_CREATIVE_V3) : Anticheat::getInstance()->getConfig()->getNested("max-reach-distance-survival", Reach::MAX_REACH_DISTANCE_SURVIVAL_V3))) {
