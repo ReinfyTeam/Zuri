@@ -289,7 +289,7 @@ class PlayerAPI implements IPlayerAPI {
 			$world->getBlock($location->subtract(0, 2, 0))
 		];
 		foreach ($blocksAround as $block) {
-			if ($block->getTypeId() === BlockLegacyIds::COBWEB) {
+			if ($block->getTypeId() === BlockTypeIds::COBWEB) {
 				return true;
 			}
 		}
@@ -306,7 +306,7 @@ class PlayerAPI implements IPlayerAPI {
 			$world->getBlock($location->getSide(Facing::EAST)->add(0, 1, 0))
 		];
 		foreach ($blocksAround as $block) {
-			if ($block->getTypeId() !== BlockLegacyIds::AIR) {
+			if ($block->getTypeId() !== BlockTypeIds::AIR) {
 				return true;
 			}
 		}
