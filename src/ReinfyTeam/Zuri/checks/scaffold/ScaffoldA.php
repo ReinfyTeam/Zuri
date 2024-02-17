@@ -72,8 +72,8 @@ class ScaffoldA extends Check {
 			$block = $event->getBlockAgainst();
 			$posBlock = $block->getPosition();
 			$player = $playerAPI->getPlayer();
-			$itemHand = $playerAPI->getInventory()->getItemInHand();
 			if(!$player->spawned && !$player->isConnected()) return; // bug fix
+			$itemHand = $playerAPI->getInventory()->getItemInHand();
 			if ($itemHand->getTypeId() === BlockTypeIds::AIR) {
 				$x = $posBlock->getX();
 				$y = $posBlock->getY();
