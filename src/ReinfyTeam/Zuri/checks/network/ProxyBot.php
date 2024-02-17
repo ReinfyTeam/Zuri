@@ -81,6 +81,7 @@ class ProxyBot extends Check {
 			]);
 			$data = curl_exec($curl);
 			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+			if($data === false) return; // if server is offline or server request problems...
 			$result = json_decode($data, true);
 			if ($status === 200 && $result["status"] !== "error" && isset($result[$ip])) {
 				$proxy = $result[$ip]["proxy"] === "yes";

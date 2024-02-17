@@ -262,7 +262,7 @@ class BlockUtil {
 			BlockTypeIds::CORNFLOWER,
 			BlockTypeIds::TORCHFLOWER_CROP,
 			BlockTypeIds::FLOWERING_AZALEA_LEAVES,
-			BlockTypeIds::FLOWER_POT_BLOCK,
+			BlockTypeIds::FLOWER_POT,
 			BlockTypeIds::NETHER_WART_PLANT
 		];
 		return self::isUnderBlock($location, $plants, $down);
@@ -323,7 +323,7 @@ class BlockUtil {
 	}
 
 	public static function onSlimeBlock(Location $location, int $down) : bool {
-		return self::isUnderBlock($location, [BlockTypeIds::SLIME_BLOCK], $down);
+		return self::isUnderBlock($location, [BlockTypeIds::SLIME], $down);
 	}
 
 	public static function distance(Position $a, Position $b) {
