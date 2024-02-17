@@ -75,7 +75,7 @@ class Velocity extends Check {
 					if (!$event->isCancelled() && $entity->isOnGround() && !$playerAPI->isInWeb() && !$playerAPI->isUnderBlock() && !$playerAPI->isInBoxBlock()) {
 						$velocity = MathUtil::distance($location->asVector3(), $lastLocation->asVector3());
 						if ($velocity < 0.6 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
-							$this->failed($entity);
+							$this->failed($playerAPI);
 						}
 					}
 					$playerAPI->unsetExternalData("lastLocationV");

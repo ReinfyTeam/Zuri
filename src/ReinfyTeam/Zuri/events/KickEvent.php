@@ -26,9 +26,10 @@ namespace ReinfyTeam\Zuri\events;
 
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\Discord\Discord;
+use ReinfyTeam\Zuri\player\PlayerAPI;
 
 class KickEvent {
-	private RCPlayerAPI $player;
+	private PlayerAPI $player;
 	private string $reason;
 
 	public function __construct(PlayerAPI $player, string $reason = "") {

@@ -174,7 +174,7 @@ class PlayerListener extends Listener {
 	}
 
 	public function onPlayerPlace(BlockPlaceEvent $event) : void {
-		$block = $event->getBlock();
+		$block = $event->getBlockAgainst();
 		$x = $block->getPosition()->getX();
 		$z = $block->getPosition()->getZ();
 		$player = $event->getPlayer();
@@ -250,7 +250,7 @@ class PlayerListener extends Listener {
 
 	public function onPlayerQuit(PlayerQuitEvent $event) {
 		PlayerAPI::getAPIPlayer($event->getPlayer());
-		PlayerAPI::removeRCPlayer($event->getPlayer());
+		PlayerAPI::removeAPIPlayer($event->getPlayer());
 	}
 
 	public function onPlayerJoin(PlayerJoinEvent $event) {

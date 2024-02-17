@@ -50,8 +50,7 @@ class ServerListener extends Listener {
 			$this->ip[$ip] = 1;
 		} else {
 			if ($this->ip[$ip] >= ConfigManager::getData(ConfigManager::NETWORK_LIMIT)) {
-				$event->setKickReason(0, ConfigManager::getData(ConfigManager::NETWORK_MESSAGE));
-				$event->getFinalKickMessage();
+				$event->setKickFlag(0, ConfigManager::getData(ConfigManager::NETWORK_MESSAGE));
 			} else {
 				$this->ip[$ip] += 1;
 			}

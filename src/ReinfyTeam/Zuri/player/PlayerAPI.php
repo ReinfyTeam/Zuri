@@ -33,7 +33,7 @@ use ReinfyTeam\Zuri\components\player\IPlayerAPI;
 use function microtime;
 
 class PlayerAPI implements IPlayerAPI {
-	/** @var RCPlayerAPI[] */
+	/** @var PlayerAPI[] */
 	public static array $players = [];
 
 	public static function getAPIPlayer(Player $player) : PlayerAPI {

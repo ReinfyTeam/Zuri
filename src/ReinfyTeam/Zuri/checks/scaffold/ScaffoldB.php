@@ -72,7 +72,7 @@ class ScaffoldB extends Check {
 			$pitch = abs($playerAPI->getLocation()->getPitch());
 			if (
 				$pitch < 35 &&
-				$event->getBlock()->getPosition()->getY() < $playerAPI->getLocation()->getY() &&
+				$event->getBlockAgainst()->getPosition()->getY() < $playerAPI->getLocation()->getY() &&
 				$playerAPI->getPing() < self::getData(self::PING_LAGGING)
 			) {
 				$this->failed($playerAPI);

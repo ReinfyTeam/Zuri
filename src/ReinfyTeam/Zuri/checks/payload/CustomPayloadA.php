@@ -72,8 +72,7 @@ class CustomPayloadA extends Check {
 			if ($extraData["DeviceOS"] === DeviceOS::ANDROID) {
 				$model = explode(" ", $extraData["DeviceModel"], 2)[0];
 				if ($model !== strtoupper($model) && $model !== "") {
-					$event->setKickReason(0, self::getData(self::ANTIBOT_MESSAGE));
-					$event->getFinalKickMessage();
+					$event->setKickFlags(0, self::getData(self::ANTIBOT_MESSAGE));
 				}
 			}
 		}

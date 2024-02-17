@@ -197,12 +197,11 @@ class BlockUtil {
 			BlockTypeIds::GRANITE_STAIRS,
 			BlockTypeIds::ANDESITE_STAIRS,
 			BlockTypeIds::DARK_OAK_STAIRS,
-			BlockTypeIds::END_BRICK_STAIRS,
+			BlockTypeIds::END_STONE_BRICKS,
 			BlockTypeIds::SANDSTONE_STAIRS,
 			BlockTypeIds::PRISMARINE_STAIRS,
 			BlockTypeIds::COBBLESTONE_STAIRS,
 			BlockTypeIds::NETHER_BRICK_STAIRS,
-			BlockTypeIds::NORMAL_STONE_STAIRS,
 			BlockTypeIds::RED_SANDSTONE_STAIRS,
 			BlockTypeIds::SMOOTH_QUARTZ_STAIRS,
 			BlockTypeIds::DARK_PRISMARINE_STAIRS,
@@ -232,9 +231,7 @@ class BlockUtil {
 	public static function isOnLiquid(Location $location, int $down) : bool {
 		$liquid = [
 			BlockTypeIds::WATER,
-			BlockTypeIds::LAVA,
-			BlockTypeIds::FLOWING_WATER,
-			BlockTypeIds::FLOWING_LAVA
+			BlockTypeIds::LAVA
 		];
 		return self::isUnderBlock($location, $liquid, $down);
 	}
@@ -242,8 +239,7 @@ class BlockUtil {
 	public static function isOnAdhesion(Location $location, int $down) : bool {
 		$adhesion = [
 			BlockTypeIds::LADDER,
-			BlockTypeIds::VINES,
-			BlockTypeIds::SCAFFOLDING
+			BlockTypeIds::VINES
 		];
 		return self::isUnderBlock($location, $adhesion, $down);
 	}
@@ -251,20 +247,21 @@ class BlockUtil {
 	public static function isOnPlant(Location $location, int $down) : bool {
 		$plants = [
 			BlockTypeIds::GRASS_PATH,
-			BlockTypeIds::CARROT_BLOCK,
-			BlockTypeIds::SUGARCANE_BLOCK,
+			BlockTypeIds::CARROTS,
+			BlockTypeIds::SUGARCANE,
 			BlockTypeIds::PUMPKIN_STEM,
-			BlockTypeIds::POTATO_BLOCK,
+			BlockTypeIds::POTATO,
 			BlockTypeIds::DEAD_BUSH,
 			BlockTypeIds::SWEET_BERRY_BUSH,
 			BlockTypeIds::SAPLING,
 			BlockTypeIds::SEAGRASS,
-			BlockTypeIds::WHEAT_BLOCK,
+			BlockTypeIds::WHEAT,
 			BlockTypeIds::TALL_GRASS,
-			BlockTypeIds::RED_FLOWER,
+			BlockTypeIds::TORCHFLOWER,
 			BlockTypeIds::CHORUS_FLOWER,
-			BlockTypeIds::YELLOW_FLOWER,
-			BlockTypeIds::DOUBLE_PLANT,
+			BlockTypeIds::CORNFLOWER,
+			BlockTypeIds::TORCHFLOWER_CROP,
+			BlockTypeIds::FLOWERING_AZALEA_LEAVES,
 			BlockTypeIds::FLOWER_POT_BLOCK,
 			BlockTypeIds::NETHER_WART_PLANT
 		];
@@ -273,14 +270,14 @@ class BlockUtil {
 
 	public static function isOnDoor(Location $location, int $down) : bool {
 		$doors = [
-			BlockTypeIds::OAK_DOOR_BLOCK,
-			BlockTypeIds::IRON_DOOR_BLOCK,
-			BlockTypeIds::DARK_OAK_DOOR_BLOCK,
-			BlockTypeIds::BIRCH_DOOR_BLOCK,
-			BlockTypeIds::ACACIA_DOOR_BLOCK,
-			BlockTypeIds::JUNGLE_DOOR_BLOCK,
-			BlockTypeIds::SPRUCE_DOOR_BLOCK,
-			BlockTypeIds::WOODEN_DOOR_BLOCK,
+			BlockTypeIds::OAK_DOOR,
+			BlockTypeIds::IRON_DOOR,
+			BlockTypeIds::DARK_OAK_DOOR,
+			BlockTypeIds::BIRCH_DOOR,
+			BlockTypeIds::ACACIA_DOOR,
+			BlockTypeIds::JUNGLE_DOOR,
+			BlockTypeIds::SPRUCE_DOOR,
+			BlockTypeIds::WOODEN_DOOR,
 			BlockTypeIds::DARK_OAK_TRAPDOOR,
 			BlockTypeIds::TRAPDOOR,
 			BlockTypeIds::IRON_TRAPDOOR,
@@ -319,7 +316,7 @@ class BlockUtil {
 
 	public static function isOnSnow(Location $location, int $down) : bool {
 		$snow = [
-			BlockTypeIds::SNOW_BLOCK,
+			BlockTypeIds::SNOW,
 			BlockTypeIds::SNOW_LAYER
 		];
 		return self::isUnderBlock($location, $snow, $down);
