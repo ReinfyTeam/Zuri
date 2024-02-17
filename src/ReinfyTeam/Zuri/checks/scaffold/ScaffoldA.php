@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\scaffold;
 
 use pocketmine\event\block\BlockPlaceEvent;
+use pocketmine\block\BlockTypeIds;
 use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
@@ -70,8 +71,10 @@ class ScaffoldA extends Check {
 		if ($event instanceof BlockPlaceEvent) {
 			$block = $event->getBlockAgainst();
 			$posBlock = $block->getPosition();
+			$player = $playerAPI->getPlayer();
 			$itemHand = $playerAPI->getInventory()->getItemInHand();
-			if ($itemHand->getTypeId() === ItemTypeIds::AIR) {
+			if(!$player->spawned && !$player->isConnected()) return; // bug fix
+			if ($itemHand->getTypeId() === BlockTypeIds::AIR) {
 				$x = $posBlock->getX();
 				$y = $posBlock->getY();
 				$z = $posBlock->getZ();

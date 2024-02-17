@@ -69,6 +69,8 @@ class Velocity extends Check {
 			$entity = $event->getEntity();
 			if ($entity instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($entity);
+				$player = $playerAPI->getPlayer();
+				if(!$player->spawned && !$player->isConnected()) return; // Effect::$effectInstance bug fix
 				$location = $entity->getLocation();
 				$lastLocation = $playerAPI->getExternalData("lastLocationV");
 				if ($lastLocation !== null) {

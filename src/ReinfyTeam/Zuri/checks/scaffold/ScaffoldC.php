@@ -73,6 +73,8 @@ class ScaffoldC extends Check {
 			$block = $event->getBlockAgainst();
 			$posBlock = $block->getPosition();
 			$posPlayer = $playerAPI->getLocation();
+			$player = $playerAPI->getPlayer();
+			if(!$player->spawned && !$player->isConnected()) return; // Effect::$effectInstance bug fix
 			$distance = MathUtil::distance($posPlayer->asVector3(), $posBlock->asVector3());
 			if ($distance < 1.25 && abs($posPlayer->getPitch()) > 40) {
 				$this->failed($playerAPI);

@@ -344,9 +344,9 @@ class PlayerAPI implements IPlayerAPI {
 	//Ping
 	public function getPing() : float {
 		
-		if(!$this->player->isConnected() && !$this->player->spawned) return 0.0; // always check first if player is currently connected before initilizing the main ping. This fixes the player if it is currently connected and ping has been initilized as well.
+		if(!$this->player->isConnected() && !$this->player->spawned) return 0.0; // always check first if player is currently connected before initilizing the main ping. This fixes the player if it is currently connected and ping has been initilized as well. Also, checking first player if its spawn is necessary to do checking after player is spawned as well.
 		
-		return $this->player->getNetworkSession()->getPing() === null ? 0.0 : $this->player->getNetworkSession()->getPing();
+		return $this->player->getNetworkSession()->getPing() === null ? 0.0 : $this->player->getNetworkSession()->getPing(); // TODO: 0.0 frrr ping?
 	}
 
 	//CPS

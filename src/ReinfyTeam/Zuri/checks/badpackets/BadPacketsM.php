@@ -87,6 +87,7 @@ class BadPacketsM extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$nLocation = $playerAPI->getNLocation();
 		$player = $playerAPI->getPlayer();
+		if(!$player->spawned && !$player->isConnected()) return; // Effect::$effectInstance bug fix
 		if ($playerAPI->getOnlineTime() > 10 && !empty($nLocation) && $player->isSurvival()) {
 			$recived = false;
 			if ($packet instanceof MovePlayerPacket) {
