@@ -49,6 +49,7 @@ use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function intval;
 
 class BadPacketsM extends Check {
 	public function getName() : string {

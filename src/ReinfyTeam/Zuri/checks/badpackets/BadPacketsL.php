@@ -31,6 +31,7 @@ use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use function intval;
 use function pow;
 
 class BadPacketsL extends Check {

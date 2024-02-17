@@ -72,7 +72,9 @@ class Reach extends Check {
 			$damager = $event->getDamager();
 			$locEntity = $entity->getLocation();
 			$locDamager = $damager->getLocation();
-			if($damager === null) return;
+			if ($damager === null) {
+				return;
+			}
 			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
 				$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? ($locEntity->getY() - $locDamager->getY()) : 0;

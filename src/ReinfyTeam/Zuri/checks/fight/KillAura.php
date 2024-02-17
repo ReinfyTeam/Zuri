@@ -70,7 +70,9 @@ class KillAura extends Check {
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
 			$locDamager = $damager->getLocation();
-			if($damager === null) return;
+			if ($damager === null) {
+				return;
+			}
 			if ($damager instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
 				$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
