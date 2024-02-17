@@ -64,7 +64,9 @@ class FlyA extends Check {
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
-		if(!$player->spawned && !$player->isConnected()) return; // player is not connected bug
+		if (!$player->spawned && !$player->isConnected()) {
+			return;
+		} // player is not connected bug
 		if (
 			$playerAPI->getAttackTicks() < 40 ||
 			$playerAPI->getOnlineTime() <= 30 ||

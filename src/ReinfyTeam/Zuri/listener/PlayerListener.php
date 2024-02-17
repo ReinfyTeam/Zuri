@@ -75,7 +75,9 @@ class PlayerListener extends Listener {
 		$packet = $event->getPacket();
 		$player = $event->getOrigin()->getPlayer();
 		if ($player !== null) {
-			if(!$player->isConnected() && !$player->spawned) return;
+			if (!$player->isConnected() && !$player->spawned) {
+				return;
+			}
 			$playerAPI = PlayerAPI::getAPIPlayer($player);
 			foreach (self::FILES as $file) {
 				Utils::callDirectory("checks/$file", function (string $namespace) use ($packet, $playerAPI) : void {
@@ -103,7 +105,9 @@ class PlayerListener extends Listener {
 	public function onPlayerMove(PlayerMoveEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$this->checkEvent($event, $playerAPI);
 		if ($playerAPI->isFlagged()) {
 			$event->cancel();
@@ -133,7 +137,9 @@ class PlayerListener extends Listener {
 
 	public function onPlayerInteract(PlayerInteractEvent $event) : void {
 		$player = $event->getPlayer();
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		$block = $event->getBlock();
 		if (!isset($this->blockInteracted[$player->getXuid()])) {
@@ -155,7 +161,9 @@ class PlayerListener extends Listener {
 		$z = $block->getPosition()->getZ();
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$this->checkEvent($event, $playerAPI);
 		if ($playerAPI->isFlagged()) {
 			$event->cancel();
@@ -181,7 +189,9 @@ class PlayerListener extends Listener {
 		$z = $block->getPosition()->getZ();
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$playerAPI->setPlacingTicks(microtime(true));
 		$this->checkEvent($event, $playerAPI);
 		if ($playerAPI->isFlagged()) {
@@ -211,7 +221,9 @@ class PlayerListener extends Listener {
 	public function onInventoryTransaction(InventoryTransactionEvent $event) {
 		$player = $event->getTransaction()->getSource();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$this->checkEvent($event, $playerAPI);
 		foreach ($event->getTransaction()->getInventories() as $inventory) {
 			if ($inventory instanceof ArmorInventory) {
@@ -223,7 +235,9 @@ class PlayerListener extends Listener {
 	public function onInventoryOpen(InventoryOpenEvent $event) {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$playerAPI->setInventoryOpen(true);
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -231,7 +245,9 @@ class PlayerListener extends Listener {
 	public function onInventoryClose(InventoryCloseEvent $event) {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$playerAPI->setInventoryOpen(false);
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -242,14 +258,18 @@ class PlayerListener extends Listener {
 			return;
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($entity);
-		if(!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) return;
+		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
+			return;
+		}
 		$playerAPI->setTeleportTicks(microtime(true));
 	}
 
 	public function onPlayerJump(PlayerJumpEvent $event) {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$playerAPI->setJumpTicks(microtime(true));
 	}
 
@@ -261,7 +281,9 @@ class PlayerListener extends Listener {
 	public function onPlayerJoin(PlayerJoinEvent $event) {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$this->checkEvent($event, $playerAPI);
 		$playerAPI->setJoinedAtTheTime(microtime(true));
 	}
@@ -282,7 +304,9 @@ class PlayerListener extends Listener {
 			return;
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($damager);
-		if(!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) return;
+		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
+			return;
+		}
 		$this->checkJustEvent($event);
 		if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK) {
 			//$event->setAttackCooldown(1);
@@ -303,21 +327,27 @@ class PlayerListener extends Listener {
 	public function onPlayerDeath(PlayerDeathEvent $event) {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$playerAPI->setDeathTicks(microtime(true));
 	}
 
 	public function onPlayerChat(PlayerChatEvent $event) {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$this->checkEvent($event, $playerAPI);
 	}
 
 	public function onPlayerItemHeld(PlayerItemHeldEvent $event) {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$this->checkEvent($event, $playerAPI);
 	}
 
@@ -327,14 +357,18 @@ class PlayerListener extends Listener {
 			return;
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($sender);
-		if(!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) return;
+		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
+			return;
+		}
 		$this->checkEvent($event, $playerAPI);
 	}
 
 	public function onPlayerItemConsume(PlayerItemConsumeEvent $event) {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if(!$player->isConnected() && !$player->spawned) return;
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
 		$this->checkEvent($event, $playerAPI);
 	}
 

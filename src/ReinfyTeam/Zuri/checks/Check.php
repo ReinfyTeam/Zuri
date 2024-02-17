@@ -101,11 +101,11 @@ abstract class Check extends ConfigManager {
 			if (self::getData(self::PERMISSION_BYPASS_ENABLE) === true) {
 				foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
 					if ($p->hasPermission(self::getData(self::PERMISSION_BYPASS_PERMISSION))) {
-						APIProvider::getInstance()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
+						APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
 					}
 				}
 			} else {
-				APIProvider::getInstance()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
+				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
 			}
 		}
 		if ($byPass) {
@@ -118,14 +118,14 @@ abstract class Check extends ConfigManager {
 		if ($automatic && $reachedMaxRealViolations && $this->ban() && $randomizeBan && self::getData(self::BAN_ENABLE) === true) {
 			foreach (self::getData(self::BAN_COMMANDS) as $command) {
 				$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
-				$playerAPI->sendAdminMessage(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
+				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
 			}
 			LogManager::sendLogger(ReplaceText::replace($playerAPI, self::getData(self::BAN_RECENT_LOGS_MESSAGE), $this->getName(), $this->getSubType()));
 			(new BanEvent($playerAPI, $this->getName()))->ban();
 			return true;
 		}
 		if ($automatic && $reachedMaxRealViolations && $this->kick()) {
-			APIProvider::getInstance()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
+			APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 			LogManager::sendLogger(ReplaceText::replace($playerAPI, self::getData(self::KICK_RECENT_LOGS_MESSAGE), $this->getName(), $this->getSubType()));
 			$player->kick(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()), null, ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE_UI), $this->getName(), $this->getSubType()));
 			(new KickEvent($playerAPI, $this->getName()))->kick();
