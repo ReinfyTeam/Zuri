@@ -63,7 +63,7 @@ zuri:
     permissions:
         bypass:
             enable: false
-            permission: "reallycheat.bypass"
+            permission: "zuri.bypass"
     discord:
         enable: false
         webhook: ""

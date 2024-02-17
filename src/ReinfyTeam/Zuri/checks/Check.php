@@ -133,7 +133,7 @@ abstract class Check extends ConfigManager {
 			} else {
 				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 				LogManager::sendLogger(ReplaceText::replace($playerAPI, self::getData(self::KICK_RECENT_LOGS_MESSAGE), $this->getName(), $this->getSubType()));
-				$player->kick(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()), null, "Unfair Advantage");
+				$player->kick("Unfair Advantage: Zuri Anticheat", null, ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE_UI), $this->getName(), $this->getSubType()));
 			}
 				(new KickEvent($playerAPI, $this->getName()))->kick();

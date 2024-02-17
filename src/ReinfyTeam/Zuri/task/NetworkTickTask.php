@@ -44,7 +44,7 @@ class NetworkTickTask extends Task {
 			$ipPlayer = $player->getNetworkSession()->getIp();
 			if (isset($this->network[$player->getXuid()])) {
 				if ($this->network[$player->getXuid()]["ip"] != $ipPlayer) {
-					$player->kick(ConfigManager::getData(ConfigManager::NETWORK_LIMIT));
+					$player->kick(ConfigManager::getData(ConfigManager::NETWORK_MESSAGE), null, ConfigManager::getData(ConfigManager::NETWORK_MESSAGE));
 				}
 			} else {
 				$this->network[$player->getXuid()] = ["ip" => $ipPlayer, "player" => $player];

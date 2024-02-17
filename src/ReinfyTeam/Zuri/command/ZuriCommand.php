@@ -26,6 +26,7 @@ namespace ReinfyTeam\Zuri\command;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\player\Player;
 use pocketmine\plugin\PluginOwned;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\APIProvider;
@@ -43,6 +44,7 @@ class ZuriCommand extends Command implements PluginOwned {
 
 	public function execute(CommandSender $sender, string $label, array $args) : void {
 		$prefix = ConfigManager::getData(ConfigManager::PREFIX);
+		$namecmd = $this->getName();
 		if ($sender instanceof Player) {
 			if (isset($args[0])) {
 				switch($args[0]) {

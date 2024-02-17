@@ -66,8 +66,8 @@ abstract class ConfigPaths implements ComponentWithName {
 	public const KICK_MESSAGE_UI = "zuri.kick.kickmessage";
 	public const KICK_RECENT_LOGS_MESSAGE = "zuri.kick.recentlogs.message";
 
-	public const PERMISSION_BYPASS_ENABLE = "zuri.permissions.enable";
-	public const PERMISSION_BYPASS_PERMISSION = "zuri.permissions.permission";
+	public const PERMISSION_BYPASS_ENABLE = "zuri.permissions.bypass.enable";
+	public const PERMISSION_BYPASS_PERMISSION = "zuri.permissions.bypass.permission";
 
 	public const DISCORD_ENABLE = "zuri.discord.enable";
 	public const DISCORD_WEBHOOK = "zuri.discord.webhook";
