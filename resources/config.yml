@@ -1,0 +1,173 @@
+---
+#
+# Author: ReinfyTeam
+# Github: https://github.com/ReinfyTeam
+# Email: support@reinfyteam.tk
+
+zuri:
+    prefix: "§7(§e§lZuri§r§7) §8>§r"
+    version: "0.0.1" #This config version
+    antibot:
+       message: "§cSorry! You are humman?"
+    network:
+        #This is to limit the player's access to the same address to the server.
+        limit: 3
+        message: "§cSorry the server can't allow access to cross the line."
+    ping:
+        #This is a customization that helps Zuri test the best cheating players.
+        #This is the buyer's discretion if you have custom errors with your server we will not be responsible.
+        normal: 20
+        lagging: 200
+    proxy:
+        ##This is a feature that is still in the development stage. DON'T ENABLE
+        enable: false #Enabling this feature will help every server you're running on your computer be protected by Zuri.
+        ip: 127.0.0.1
+        port: 19132
+    process:
+        auto: true #Enabling this mode will allow Zuri to automatically handle the behavior and issue penalties to the player.
+    alerts:
+        message: "{prefix} §f{player} §7failed §f{module} §7(§c{subtype}§7) §7VL §2{violation}"
+        enable: true
+        admin: false #This will cause the in-game cheat detector to send it to the person with the permissions below
+        permission: "reallycheat.notify"
+    ban:
+        commands:
+            - "ban {player} You are hacking!"
+        message: "{prefix} §f{player} §chas been banned from server for hacking or abuse."
+        enable: true
+        randomize: false
+        recentlogs:
+            message: "{time} > {player} failed {module} ({subtype}) VL {violation} | penalty: BAN"
+    kick:
+        kickmessage: "§fYou have been kicked from the server."
+        message: "{prefix} §f{player} §chas been kicked from server for hacking or abuse."
+        enable: true
+        recentlogs:
+            message: "{time} > {player} failed {module} ({subtype}) VL {violation} | penalty: KICK"
+    captcha:
+        enable: true
+        text: "{prefix} §cType §b{code} §cto get rid of mute!"
+        message: true
+        tip: false
+        title: false
+        randomize: false #If it enable <message, tip, title> must disable
+        code:
+            length: 5
+    permissions:
+        bypass:
+            enable: false
+            permission: "reallycheat.bypass"
+    discord:
+        enable: false
+        webhook: ""
+        player:
+            joined:
+                enable: false
+                text: "{player} has joined the server!"
+            left:
+                enable: false
+                text: "{player} has left the server!"
+            kick:
+                enable: false
+                text: "{player} has been kicked from server for hacking or abuse! When using: {module}"
+            ban:
+                enable: false
+                text: "{player} has been banned from server for hacking or abuse! When using: {module}"
+        server:
+            lagging:
+                enable: false
+                text: "Server is lagging! Zuri can't check hacker! Tick: {tick}"
+    chat:
+        spam:
+            text: "{prefix} §cSo sorry! Each chat only has a fixed time of 2 seconds apart."
+            delay: 2
+        command:
+            text: "{prefix} §cSo sorry! Each command only has a fixed time of 2 seconds apart."
+            delay: 2
+            commands:
+                - "kill"
+        repeat:
+            text: "{prefix} §cSo sorry! Don't go back to your chat last time!"
+    check:
+        autoclick:
+            enable: true
+            maxvl: 1
+        killaura:
+            enable: true
+            maxvl: 1
+        aimassist:
+            enable: true
+            maxvl: 1
+        wrongpitch:
+            enable: true
+            maxvl: 1
+        crasher:
+            enable: true
+            maxvl: 1
+        scaffold:
+            enable: true
+            maxvl: 1
+        inventorycleaner:
+            enable: true
+            maxvl: 1
+        antivoid:
+            enable: true
+            maxvl: 1
+        speed:
+            enable: true
+            maxvl: 1
+        cheststealer:
+            enable: true
+            maxvl: 1
+        instabreak:
+            enable: true
+            maxvl: 1
+        wrongmining:
+            enable: true
+            maxvl: 1
+        blockreach:
+            enable: true
+            maxvl: 1
+        fillblock:
+            enable: true
+            maxvl: 1
+        spam:
+            enable: true
+            maxvl: 1
+        reach:
+            enable: true
+            maxvl: 1
+        fly:
+            enable: true
+            maxvl: 1
+        autoarmor:
+            enable: true
+            maxvl: 1
+        chestaura:
+            enable: true
+            maxvl: 1
+        inventorymove:
+            enable: true
+            maxvl: 1
+        airmovement:
+            enable: true
+            maxvl: 1
+        phase:
+            enable: true
+            maxvl: 1
+        step:
+            enable: true
+            maxvl: 1
+        wrongnetwork:
+            enable: true
+            maxvl: 1
+        custompayload:
+            enable: true
+            maxvl: 1
+        velocity:
+            enable: true
+            maxvl: 1
+        timer:
+            enable: true
+            maxvl: 1
+...
