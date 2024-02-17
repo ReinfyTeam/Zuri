@@ -44,6 +44,11 @@ zuri:
         kickmessage: "§fYou have been kicked from the server."
         message: "{prefix} §f{player} §chas been kicked from server for hacking or abuse."
         enable: true
+        # If this is enabled, this will be used.
+        commands:
+              enabled: false
+              list:
+                 - 'kick {player} "Unfair Advantage"'
         recentlogs:
             message: "{time} > {player} failed {module} ({subtype}) VL {violation} | penalty: KICK"
     captcha:
