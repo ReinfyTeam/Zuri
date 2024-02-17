@@ -4,6 +4,8 @@
 # Github: https://github.com/ReinfyTeam
 # Email: support@reinfyteam.tk
 
+# Zuri is an anticheat made to protect the server from any may unfair advantages from the players. Open-sourced project by ReinfyTeam.
+
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
     version: "0.0.1" #This config version

@@ -54,7 +54,7 @@ This is module using a special method that requires an API: If the server you ar
 Example:
 ```php
 // $player must instance of Player from PMMP //
-$api = API::getInstance()->getAPIPlayer($player);
+$api = PlayerAPI::getInstance()->getAPIPlayer($player);
 $api->setAttackSpecial(< true or false >);
 $api->setBlocksBrokeASec(< it must is number >);
 ```
