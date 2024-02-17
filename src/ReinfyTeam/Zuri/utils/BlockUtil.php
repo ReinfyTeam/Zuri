@@ -192,7 +192,6 @@ class BlockUtil {
 			BlockTypeIds::PURPUR_STAIRS,
 			BlockTypeIds::QUARTZ_STAIRS,
 			BlockTypeIds::SPRUCE_STAIRS,
-			BlockTypeIds::WOODEN_STAIRS,
 			BlockTypeIds::DIORITE_STAIRS,
 			BlockTypeIds::GRANITE_STAIRS,
 			BlockTypeIds::ANDESITE_STAIRS,
@@ -250,11 +249,10 @@ class BlockUtil {
 			BlockTypeIds::CARROTS,
 			BlockTypeIds::SUGARCANE,
 			BlockTypeIds::PUMPKIN_STEM,
-			BlockTypeIds::POTATO,
+			BlockTypeIds::POTATOES,
 			BlockTypeIds::DEAD_BUSH,
 			BlockTypeIds::SWEET_BERRY_BUSH,
-			BlockTypeIds::SAPLING,
-			BlockTypeIds::SEAGRASS,
+			BlockTypeIds::OAK_SAPLING,
 			BlockTypeIds::WHEAT,
 			BlockTypeIds::TALL_GRASS,
 			BlockTypeIds::TORCHFLOWER,
@@ -262,8 +260,7 @@ class BlockUtil {
 			BlockTypeIds::CORNFLOWER,
 			BlockTypeIds::TORCHFLOWER_CROP,
 			BlockTypeIds::FLOWERING_AZALEA_LEAVES,
-			BlockTypeIds::FLOWER_POT,
-			BlockTypeIds::NETHER_WART_PLANT
+			BlockTypeIds::FLOWER_POT
 		];
 		return self::isUnderBlock($location, $plants, $down);
 	}
@@ -277,15 +274,13 @@ class BlockUtil {
 			BlockTypeIds::ACACIA_DOOR,
 			BlockTypeIds::JUNGLE_DOOR,
 			BlockTypeIds::SPRUCE_DOOR,
-			BlockTypeIds::WOODEN_DOOR,
 			BlockTypeIds::DARK_OAK_TRAPDOOR,
-			BlockTypeIds::TRAPDOOR,
+			BlockTypeIds::OAK_TRAPDOOR,
 			BlockTypeIds::IRON_TRAPDOOR,
 			BlockTypeIds::BIRCH_TRAPDOOR,
 			BlockTypeIds::ACACIA_TRAPDOOR,
 			BlockTypeIds::JUNGLE_TRAPDOOR,
 			BlockTypeIds::SPRUCE_TRAPDOOR,
-			BlockTypeIds::WOODEN_TRAPDOOR,
 			BlockTypeIds::DARK_OAK_TRAPDOOR
 		];
 		return self::isUnderBlock($location, $doors, $down);
