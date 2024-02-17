@@ -25,6 +25,6 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\api\check;
 
 class Check {
-	public function check(string $type, string $subType, RCPlayerAPI $player) {
+	public function check(string $type, string $subType, PlayerAPI $player) {
 	}
 }
