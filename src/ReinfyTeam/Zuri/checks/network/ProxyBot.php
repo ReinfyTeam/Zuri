@@ -82,7 +82,7 @@ class ProxyBot extends Check {
 			$data = curl_exec($curl);
 			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 			$result = json_decode($data, true);
-			if ($status === 200 && $result["status"] !== "error") {
+			if ($status === 200 && $result["status"] !== "error" && isset($result[$ip])) {
 				$proxy = $result[$ip]["proxy"] === "yes";
 				if ($proxy) {
 					$event->setKickFlag(0, self::getData(self::ANTIBOT_MESSAGE));
