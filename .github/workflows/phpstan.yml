@@ -22,6 +22,8 @@ jobs:
         uses: shivammathur/setup-php@2.21.1
         with:
           php-version: ${{ matrix.php }}
+        env:
+          COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore Composer package cache
         id: composer-cache

@@ -8,17 +8,17 @@
       }
    ],
    "require": {
-      "pocketmine/pocketmine-mp": "5.4.4",
+      "pocketmine/pocketmine-mp": "^5.4.4",
       "phpstan/phpstan": "^1.10.0",
       "phpstan/phpstan-strict-rules": "^1.0",
       "phpstan/extension-installer": "^1.0"
    },
    "require-dev": {
-      "pocketmine/pocketmine-mp": "5.4.4"
+      "pocketmine/pocketmine-mp": "^5.4.4"
    },
    "autoload": {
       "psr-4": {
-         "ExamplePlugin\\": "../src"
+         "Zuri\\": "../src"
       }
    },
    "config": {
