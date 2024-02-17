@@ -34,7 +34,7 @@ zuri:
         permission: "reallycheat.notify"
     ban:
         commands:
-            - "ban {player} 'Unfair Advantage'"
+            - 'ban {player} "Unfair Advantage"'
         message: "{prefix} §f{player} §chas been banned from server for hacking or abuse."
         enable: true
         randomize: false
