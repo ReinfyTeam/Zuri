@@ -2,6 +2,10 @@
 > Zuri-Rewrite is a new fork code improvement of original Zuri Anticheat.
 **Zuri** is an anticheat made to protect the server from any may unfair advantages from the players. A powerful anticheat made to destroy hackers from your server for PocketMine-MP.
 
+If you are interested with our projects, you may help us by:
+- [Donate via Ko-Fi](https://ko-fi.com/xqwtxon)
+- [Become a Patreon](https://patreon.com/xwertxy)
+
 # Checks
 | **Module Name**             | **Punishment Type**  | **Percentage of Accuracy** |
 |-----------------------------|----------------------|----------------------------|
