@@ -43,7 +43,7 @@ class Utils {
 	public static function callDirectory(string $directory, callable $callable) : void {
 		$main = explode("\\", APIProvider::getInstance()->getDescription()->getMain());
 		unset($main[array_key_last($main)]);
-		$pathPlugin = APIProvider::getInstance()->getServer()->getPluginPath() . "/ReallyCheat";
+		$pathPlugin = APIProvider::getInstance()->getServer()->getPluginPath() . "/" . APIProvider::getInstance()->getDescription()->getName();
 		$main = implode("/", $main);
 		$directory = rtrim(str_replace(DIRECTORY_SEPARATOR, "/", $directory), "/");
 		$dir = rtrim($pathPlugin, "/" . DIRECTORY_SEPARATOR) . "/" . "src/$main/" . $directory;
