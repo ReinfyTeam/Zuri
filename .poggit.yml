@@ -3,6 +3,6 @@ build-by-default: true
 branches:
 - master
 projects:
-  Zuri:
+  Zuri-Rewrite:
     path: ""
 ...
