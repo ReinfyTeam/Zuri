@@ -127,7 +127,7 @@ abstract class Check extends ConfigManager {
 		if ($automatic && $reachedMaxRealViolations && $this->kick()) {
 			$playerAPI->sendAdminMessage(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 			LogManager::sendLogger(ReplaceText::replace($playerAPI, self::getData(self::KICK_RECENT_LOGS_MESSAGE), $this->getName(), $this->getSubType()));
-			$player->kick(self::getData(self::KICK_MESSAGE), null, self::getData(self::KICK_MESSAGE_UI));
+			$player->kick(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()), null, ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE_UI), $this->getName(), $this->getSubType()));
 			(new KickEvent($playerAPI, $this->getName()))->kick();
 			return true;
 		}

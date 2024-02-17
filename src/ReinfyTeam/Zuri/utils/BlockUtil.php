@@ -301,10 +301,10 @@ class BlockUtil {
 			BlockTypeIds::ACACIA_PRESSURE_PLATE,
 			BlockTypeIds::JUNGLE_PRESSURE_PLATE,
 			BlockTypeIds::SPRUCE_PRESSURE_PLATE,
-			BlockTypeIds::WOODEN_PRESSURE_PLATE,
+			BlockTypeIds::OAK_PRESSURE_PLATE,
 			BlockTypeIds::DARK_OAK_PRESSURE_PLATE,
-			BlockTypeIds::HEAVY_WEIGHTED_PRESSURE_PLATE,
-			BlockTypeIds::LIGHT_WEIGHTED_PRESSURE_PLATE
+			BlockTypeIds::WEIGHTED_PRESSURE_PLATE_HEAVY,
+			BlockTypeIds::WEIGHTED_PRESSURE_PLATE_LIGHT
 		];
 		return self::isUnderBlock($location, $plates, $down);
 	}
