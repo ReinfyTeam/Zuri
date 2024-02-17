@@ -29,6 +29,7 @@ use pocketmine\math\Facing;
 use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
 use pocketmine\Server;
+use pocketmine\block\BlockTypeIds;
 use ReinfyTeam\Zuri\components\player\IPlayerAPI;
 use function microtime;
 
