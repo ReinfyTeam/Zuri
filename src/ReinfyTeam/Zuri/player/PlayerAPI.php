@@ -557,12 +557,4 @@ class PlayerAPI implements IPlayerAPI {
 	public function getLocation() {
 		return $this->player->getLocation();
 	}
-
-	public function sendAdminMessage(string $message) : void {
-		foreach (Server::getInstance()->getOnlinePlayers() as $player) {
-			if ($player->hasPermission("zuri.admin") || Server::getInstance()->isOp($player->getName())) {
-				$player->sendMessage($message);
-			}
-		}
-	}
 }

@@ -101,11 +101,11 @@ abstract class Check extends ConfigManager {
 			if (self::getData(self::PERMISSION_BYPASS_ENABLE) === true) {
 				foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
 					if ($p->hasPermission(self::getData(self::PERMISSION_BYPASS_PERMISSION))) {
-						$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
+						APIProvider::getInstance()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
 					}
 				}
 			} else {
-				$player->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
+				APIProvider::getInstance()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
 			}
 		}
 		if ($byPass) {
@@ -125,7 +125,7 @@ abstract class Check extends ConfigManager {
 			return true;
 		}
 		if ($automatic && $reachedMaxRealViolations && $this->kick()) {
-			$playerAPI->sendAdminMessage(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
+			APIProvider::getInstance()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 			LogManager::sendLogger(ReplaceText::replace($playerAPI, self::getData(self::KICK_RECENT_LOGS_MESSAGE), $this->getName(), $this->getSubType()));
 			$player->kick(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()), null, ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE_UI), $this->getName(), $this->getSubType()));
 			(new KickEvent($playerAPI, $this->getName()))->kick();
