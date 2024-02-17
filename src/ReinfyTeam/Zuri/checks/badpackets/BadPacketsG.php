@@ -78,7 +78,7 @@ class BadPacketsG extends Check {
 						$playerAPI->unsetExternalData("avgDeviation");
 						return;
 					} else {
-						$playerAPI->getExternalData("ticksClick", $ticks + 1);
+						$playerAPI->setExternalData("ticksClick", $ticks + 1);
 					}
 					$speed = $ticks * 50;
 					$playerAPI->setExternalData("avgSpeed", (($avgSpeed * 14) + $speed) / 15);

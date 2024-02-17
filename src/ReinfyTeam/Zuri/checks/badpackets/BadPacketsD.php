@@ -27,6 +27,7 @@ namespace ReinfyTeam\Zuri\checks\badpackets;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\player\PlayerAPI;
 use function cos;
 
 class BadPacketsD extends Check {
@@ -62,7 +63,7 @@ class BadPacketsD extends Check {
 		return 5;
 	}
 
-	public function check(DataPacket $packet, RCPlayerAPI $playerAPI) : void {
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();
 			if (

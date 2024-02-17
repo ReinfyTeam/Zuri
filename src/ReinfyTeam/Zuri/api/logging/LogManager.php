@@ -34,7 +34,7 @@ use function fwrite;
 class LogManager implements ILog {
 	public static function contentLogger(string $text) : void {
 		$today = date("Y-m-d");
-		$file = fopen(APIProvider::getInstance()->getDataFolder() . "{$today}.txt", "a+") or die("Unable to open file!");
+		$file = fopen(APIProvider::getInstance()->getDataFolder() . "{$today}.txt", "a+");
 		fwrite($file, "[{$today} " . date("h:i:sA") . "] {$text}\n");
 		fclose($file);
 	}

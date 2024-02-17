@@ -100,7 +100,7 @@ class BadPacketsM extends Check {
 				$shiftedLastDist = $lastDist * 0.91;
 				$equalness = $dist - $shiftedLastDist;
 				$scaledEqualness = $equalness * 138;
-				$idBlockDown = $player->getWorld()->getBlockAt((int) $player->getLocation()->getX(), (int) $player->getLocation()->getY() - 0.01, (int) $player->getLocation()->getZ())->getTypeId();
+				$idBlockDown = $player->getWorld()->getBlockAt(intval($player->getLocation()->getX()), intval($player->getLocation()->getY() - 0.01), intval($player->getLocation()->getZ()))->getTypeId();
 				$isFalling = $playerAPI->getLastGroundY() > $player->getLocation()->getY();
 				$limit += $playerAPI->getJumpTicks() < 40 ? $limit : 0;
 				if ($playerAPI->isOnAdhesion() && !$playerAPI->isOnIce() && $playerAPI->getAttackTicks() > 100 && $player->isSurvival() && !$recived && !$isFalling && $idBlockDown !== 0) {

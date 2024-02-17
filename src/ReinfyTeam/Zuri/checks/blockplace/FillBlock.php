@@ -26,6 +26,7 @@ namespace ReinfyTeam\Zuri\checks\blockplace;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\player\PlayerAPI;
 
 class FillBlock extends Check {
 	public function getName() : string {

@@ -33,7 +33,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use function microtime;
 
 class BadPacketsK extends Check {
-	private $canDamagable = false;
+	private bool $canDamagable = false;
 
 	public function getName() : string {
 		return "AutoClick";

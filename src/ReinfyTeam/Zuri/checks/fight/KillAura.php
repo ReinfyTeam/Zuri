@@ -70,9 +70,10 @@ class KillAura extends Check {
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
 			$locDamager = $damager->getLocation();
+			if($damager === null) return;
 			if ($damager instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
-				$delta = MathUtil::getDeltaDirectionVector($damager, 3);
+				$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
 				$from = new Vector3($locDamager->getX(), $locDamager->getY() + $damager->getEyeHeight(), $locDamager->getZ());
 				$to = $damager->getLocation()->add($delta->getX(), $delta->getY() + $damager->getEyeHeight(), $delta->getZ());
 				$distance = MathUtil::distance($from, $to);
