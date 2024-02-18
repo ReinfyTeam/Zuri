@@ -27,8 +27,8 @@ namespace ReinfyTeam\Zuri\utils;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Location;
 use pocketmine\math\Vector3;
-use pocketmine\world\Position;
 use pocketmine\player\Player;
+use pocketmine\world\Position;
 use function abs;
 use function fmod;
 use function in_array;
@@ -36,7 +36,6 @@ use function pow;
 use function sqrt;
 
 class BlockUtil {
-	
 	public function getSurroundingBlocks(Player $player) : array {
 		$world = $player->getWorld();
 
@@ -66,7 +65,7 @@ class BlockUtil {
 
 		return  [$bpos1, $bpos2, $bpos3, $bpos4, $bpos5, $bpos6, $bpos7, $bpos8, $bpos9];
 	}
-	
+
 	public static function isOnGround(Location $location, int $down) : bool {
 		$id = [BlockTypeIds::AIR];
 		$posX = $location->getX();

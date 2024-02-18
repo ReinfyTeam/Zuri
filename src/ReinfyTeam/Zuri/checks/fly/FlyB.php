@@ -27,7 +27,6 @@ namespace ReinfyTeam\Zuri\checks\fly;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function microtime;
 
 class FlyB extends Check {
 	public function getName() : string {

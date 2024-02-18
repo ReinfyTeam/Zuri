@@ -26,8 +26,6 @@ namespace ReinfyTeam\Zuri\checks\moving;
 
 use pocketmine\block\BlockTypeIds;
 use pocketmine\event\Event;
-use pocketmine\player\Player;
-use pocketmine\entity\Location;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
@@ -71,7 +69,9 @@ class Phase extends Check {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $event->getPlayer();
 			$world = $player->getWorld();
-			if(!$player->isConnected() || !$player->spawned) return;
+			if (!$player->isConnected() || !$player->spawned) {
+				return;
+			}
 			$block = $world->getBlock($player->getLocation()->asVector3()->add(0, 0.75, 0));
 			$skip = [BlockTypeIds::SAND, BlockTypeIds::GRAVEL, BlockTypeIds::ANVIL, BlockTypeIds::AIR];
 			$skip2 = [BlockTypeIds::TORCH, BlockTypeIds::ACACIA_SIGN, BlockTypeIds::ACACIA_WALL_SIGN, BlockTypeIds::REDSTONE_TORCH, BlockTypeIds::REDSTONE_WIRE, BlockTypeIds::SEA_PICKLE, BlockTypeIds::REDSTONE_REPEATER, BlockTypeIds::LANTERN, BlockTypeIds::REDSTONE_COMPARATOR, BlockTypeIds::BIRCH_WALL_SIGN, BlockTypeIds::DARK_OAK_WALL_SIGN, BlockTypeIds::JUNGLE_WALL_SIGN, BlockTypeIds::OAK_WALL_SIGN, BlockTypeIds::SPRUCE_WALL_SIGN, BlockTypeIds::MANGROVE_WALL_SIGN, BlockTypeIds::CRIMSON_WALL_SIGN, BlockTypeIds::WARPED_WALL_SIGN, BlockTypeIds::CHERRY_WALL_SIGN, BlockTypeIds::ACACIA_SIGN, BlockTypeIds::ACACIA_WALL_SIGN, BlockTypeIds::BIRCH_SIGN, BlockTypeIds::BIRCH_WALL_SIGN, BlockTypeIds::DARK_OAK_SIGN, BlockTypeIds::DARK_OAK_WALL_SIGN, BlockTypeIds::JUNGLE_SIGN, BlockTypeIds::JUNGLE_WALL_SIGN, BlockTypeIds::OAK_SIGN, BlockTypeIds::OAK_WALL_SIGN, BlockTypeIds::SPRUCE_SIGN, BlockTypeIds::SPRUCE_WALL_SIGN, BlockTypeIds::MANGROVE_SIGN, BlockTypeIds::CRIMSON_SIGN, BlockTypeIds::WARPED_SIGN, BlockTypeIds::CHERRY_SIGN, BlockTypeIds::CHERRY_WALL_SIGN];

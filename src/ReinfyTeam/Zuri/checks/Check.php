@@ -96,17 +96,17 @@ abstract class Check extends ConfigManager {
 		if (!$this->enable()) {
 			return false;
 		}
-		
+
 		if ($byPass) {
 			return false;
 		}
-		
+
 		if ($notify && $reachedMaxViolations) {
 			$playerAPI->addRealViolation($this->getName());
 			APIProvider::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
 			foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
 				if ($p->hasPermission("zuri.admin")) {
-				$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
+					$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
 				}
 			}
 		}

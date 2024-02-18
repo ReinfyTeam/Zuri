@@ -28,8 +28,6 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerInteractEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\BlockUtil;
-use function abs;
 
 class BlockReach extends Check {
 	public function getName() : string {
