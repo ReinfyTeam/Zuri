@@ -477,7 +477,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 	
 	public function resetViolation(string $supplier) : void {
-		unset($this->violations[$name][$supplier]);
+		if (isset($this->violations[$name = $this->player->getName()][$supplier])) unset($this->violations[$name][$supplier]);
 	}
 
 	public function addViolation(string $supplier) : void {
