@@ -475,6 +475,10 @@ class PlayerAPI implements IPlayerAPI {
 	public function setViolation(string $supplier, int $amount) : void {
 		$this->violations[$this->player->getName()][$supplier]["vl"] = $amount;
 	}
+	
+	public function resetViolation(string $supplier) : void {
+		unset($this->violations[$name][$supplier]);
+	}
 
 	public function addViolation(string $supplier) : void {
 		if (isset($this->violations[$name = $this->player->getName()][$supplier])) {
