@@ -96,6 +96,9 @@ zuri:
         repeat:
             text: "{prefix} §cSo sorry! Don't go back to your chat last time!"
     check:
+        antibot:
+            enable: true
+            maxvl: 1
         autoclick:
             enable: true
             maxvl: 1
