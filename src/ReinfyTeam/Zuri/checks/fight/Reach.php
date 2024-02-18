@@ -87,7 +87,7 @@ class Reach extends Check {
 					$this->failed($playerAPI);
 					return;
 				}
-				if (!$damager->canInteract($entity->getLocation()->add(0.5, 0.5, 0.5), $damager->getPlayer()->isCreative() ? 7 : 13)) {
+				if (!$damager->canInteract($entity->getLocation()->add(0.5, 0.5, 0.5), $damager->isCreative() ? 7 : 13)) {
 					$this->failed($playerAPI);
 				}
 			}
