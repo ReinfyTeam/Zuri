@@ -48,12 +48,13 @@ class NetworkTickTask extends Task {
 					foreach ($this->network as $xuid => $data) {
 						if ($data["ip"] === $ipPlayer) {
 							if (!isset($this->count[$player->getXuid()])) {
+								$this->count[] = $player->getXuid();
 								$this->count[$player->getXuid()] = 0;
 							}
 							$this->count[$player->getXuid()] += 1;
 						}
 					}
-					if ($this->count[$player->getXuid()] > ConfigManager::getData(ConfigManager::NETWORK_LIMIT)) {
+					if ($this->count[$player->getXuid()] > ConfigManager::getData(ConfigManager::NETWORK_LIMIT)) { // this will let decide in how many count will able to connect to the server.
 						$player->kick(ConfigManager::getData(ConfigManager::NETWORK_MESSAGE), null, ConfigManager::getData(ConfigManager::NETWORK_MESSAGE));
 					}
 				}
