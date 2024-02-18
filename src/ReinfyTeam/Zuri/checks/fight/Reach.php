@@ -85,6 +85,10 @@ class Reach extends Check {
 				$distance = MathUtil::distance($locEntity, $locDamager) - $isPlayerTop;
 				if ($distance > 4.3) {
 					$this->failed($playerAPI);
+					return;
+				}
+				if (!$damager->canInteract($entity->getLocation()->add(0.5, 0.5, 0.5), $damager->getPlayer()->isCreative() ? 7 : 13)) {
+					$this->failed($playerAPI);
 				}
 			}
 		}

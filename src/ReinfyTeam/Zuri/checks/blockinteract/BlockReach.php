@@ -67,11 +67,7 @@ class BlockReach extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerInteractEvent) {
 			$block = $event->getBlock();
-			$posBlock = $block->getPosition();
-			$posPlayer = $playerAPI->getPlayer()->getPosition();
-			$isBlockTop = $posBlock->getY() > $posPlayer->getY() ? -1 : 0;
-			$distance = abs(BlockUtil::distance($posPlayer, $posBlock) + $isBlockTop);
-			if ($distance > 6.5) {
+			if (!$playerAPI->getPlayer()->canInteract($block->getPosition()->add(0.5, 0.5, 0.5), $playerAPI->getPlayer()->isCreative() ? 7 : 13)) {
 				$this->failed($playerAPI);
 			}
 		}

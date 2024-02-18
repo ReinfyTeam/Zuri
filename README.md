@@ -47,8 +47,10 @@ If you are interested with our projects, you may help us by:
 | Spam                        | CAPTCHA              | 100% detect                |
 | Tower                       | Ban Immediately      | 100% detect                |
 | Scaffold                    | Kick/Ban Immediately | 100% detect                |
-| Nuker, FastBreak, FillBlock | Ban Immediately      | 100% detect                |
-
+| Nuker                       | Ban Immediately      | 100% detect                |
+| FastBreak                       | Ban Immediately      | 100% detect                |
+| FillBlock                       | Ban Immediately      | 100% detect                |
+| WrongMining                       | Ban Immediately      | 100% detect                |
 **BadPackets Total:** 17
 
 # Plugin Developers

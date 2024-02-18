@@ -52,7 +52,7 @@ class InstaBreak extends Check {
 	}
 
 	public function kick() : bool {
-		return false;
+		return true;
 	}
 
 	public function flag() : bool {
@@ -64,7 +64,7 @@ class InstaBreak extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 1;
+		return 3;
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -95,6 +95,7 @@ class InstaBreak extends Check {
 				$expectedTime -= 1;
 				$actualTime = ceil(microtime(true) * 20) - $breakTimes;
 				if ($actualTime < $expectedTime) {
+					$this->failed($playerAPI);
 					$event->cancel();
 					return;
 				}

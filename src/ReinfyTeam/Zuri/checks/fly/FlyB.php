@@ -22,19 +22,20 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\blockbreak;
+namespace ReinfyTeam\Zuri\checks\fly;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function microtime;
 
-class WrongMining extends Check {
+class FlyB extends Check {
 	public function getName() : string {
-		return "WrongMining";
+		return "Fly";
 	}
 
 	public function getSubType() : string {
-		return "A";
+		return "B";
 	}
 
 	public function enable() : bool {
@@ -42,11 +43,11 @@ class WrongMining extends Check {
 	}
 
 	public function ban() : bool {
-		return true;
+		return false;
 	}
 
 	public function kick() : bool {
-		return false;
+		return true;
 	}
 
 	public function flag() : bool {
@@ -62,15 +63,25 @@ class WrongMining extends Check {
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$isCreative = $playerAPI->getPlayer()->isCreative() ? 10 : 0;
-		if ($playerAPI->actionBreakingSpecial() && (($playerAPI->getNumberBlocksAllowBreak() + $isCreative) < $playerAPI->getBlocksBrokeASec())) {
-			$this->failed($playerAPI);
-			if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
-				return;
+		if ($packet instanceof UpdateAdventureSettingsPacket) {
+			$player = $playerAPI->getPlayer();
+			if (!$player->isCreative() && !$player->isSpectator() && !$player->getAllowFlight()) {
+				switch ($packet->flags) {
+					case 614:
+					case 615:
+					case 103:
+					case 102:
+					case 38:
+					case 39:
+						$event->cancel();
+						$this->failed($playerAPI);
+						break;
+				}
+				if ((($packet->flags >> 9) & 0x01 === 1) || (($packet->flags >> 7) & 0x01 === 1) || (($packet->flags >> 6) & 0x01 === 1)) {
+					$this->failed($playerAPI);
+					$event->cancel();
+				}
 			}
-			$playerAPI->setActionBreakingSpecial(false);
-			$playerAPI->setBlocksBrokeASec(0);
-			$playerAPI->setFlagged(true);
 		}
 	}
 }
