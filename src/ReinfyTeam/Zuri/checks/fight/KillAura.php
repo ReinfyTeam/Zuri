@@ -76,6 +76,9 @@ class KillAura extends Check {
 			if ($damager instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
 				$player = $playerAPI->getPlayer();
+				if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
+					return;
+				}
 				if (!$player->spawned && !$player->isConnected()) {
 					return;
 				} // Effect::$effectInstance bug fix

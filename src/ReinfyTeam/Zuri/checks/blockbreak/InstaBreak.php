@@ -80,6 +80,9 @@ class InstaBreak extends Check {
 					$event->cancel();
 					return;
 				}
+				if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
+					return;
+				}
 				$target = $event->getBlock();
 				$item = $event->getItem();
 				$expectedTime = ceil($target->getBreakInfo()->getBreakTime($item) * 20);

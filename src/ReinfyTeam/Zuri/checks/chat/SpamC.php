@@ -73,6 +73,9 @@ class SpamC extends Check {
 			if (!$event->isCancelled()) {
 				$command = $event->getCommand();
 				$lastTicks = $playerAPI->getExternalData("lastTickSC");
+				if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
+					return;
+				}
 				if ($lastTicks !== null) {
 					$diff = microtime(true) - $lastTicks;
 					if ($diff < self::getData(self::CHAT_COMMAND_SPAM_DELAY)) {

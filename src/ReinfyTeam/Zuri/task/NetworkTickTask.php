@@ -43,23 +43,23 @@ class NetworkTickTask extends Task {
 		self::$instance = $this;
 		foreach (Server::getInstance()->getOnlinePlayers() as $player) {
 			$ipPlayer = $player->getNetworkSession()->getIp();
-			if (isset($this->network[$player->getXuid()]["ip"])) {
-				if ($this->network[$player->getXuid()]["ip"] !== $ipPlayer) {
+			if (isset($this->network[$player->getUniqueId()->__toString()]["ip"])) {
+				if ($this->network[$player->getUniqueId()->__toString()]["ip"] !== $ipPlayer) {
 					foreach ($this->network as $xuid => $data) {
 						if ($data["ip"] === $ipPlayer) {
-							if (!isset($this->count[$player->getXuid()])) {
-								$this->count[] = $player->getXuid();
-								$this->count[$player->getXuid()] = 0;
+							if (!isset($this->count[$player->getUniqueId()->__toString()])) {
+								$this->count[] = $player->getUniqueId()->__toString();
+								$this->count[$player->getUniqueId()->__toString()] = 0;
 							}
-							$this->count[$player->getXuid()] += 1;
+							$this->count[$player->getUniqueId()->__toString()] += 1;
 						}
 					}
-					if ($this->count[$player->getXuid()] > ConfigManager::getData(ConfigManager::NETWORK_LIMIT)) { // this will let decide in how many count will able to connect to the server.
+					if ($this->count[$player->getUniqueId()->__toString()] > ConfigManager::getData(ConfigManager::NETWORK_LIMIT)) { // this will let decide in how many count will able to connect to the server.
 						$player->kick(ConfigManager::getData(ConfigManager::NETWORK_MESSAGE), null, ConfigManager::getData(ConfigManager::NETWORK_MESSAGE));
 					}
 				}
 			} else {
-				$this->network[$player->getXuid()] = ["ip" => $ipPlayer, "player" => $player];
+				$this->network[$player->getUniqueId()->__toString()] = ["ip" => $ipPlayer, "player" => $player];
 			}
 		}
 		foreach ($this->network as $xuid => $data) {

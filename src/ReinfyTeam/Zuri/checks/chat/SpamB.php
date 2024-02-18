@@ -75,6 +75,9 @@ class SpamB extends Check {
 			if (!$event->isCancelled()) {
 				$message = $event->getMessage();
 				$lastMessage = $playerAPI->getExternalData("lastMessage");
+				if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
+					return;
+				}
 				if ($lastMessage !== null) {
 					$violation = false;
 					$explode = explode(" ", $message);

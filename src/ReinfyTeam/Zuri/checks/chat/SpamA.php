@@ -70,6 +70,9 @@ class SpamA extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerChatEvent) {
 			$chatTick = $playerAPI->getExternalData("SpamATick");
+			if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
+				return;
+			}
 			$violationChat = $playerAPI->getExternalData("ViolationSpamA");
 			if (!$event->isCancelled()) {
 				if ($chatTick !== null || $violationChat !== null) {
