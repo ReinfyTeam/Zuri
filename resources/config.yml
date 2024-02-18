@@ -46,9 +46,9 @@ zuri:
         kickmessage: "§fYou have been kicked from the server."
         message: "{prefix} §f{player} §chas been kicked from server for hacking or abuse."
         enable: true
-        # If this is enabled, this will be used.
+        # If this is enabled, this will be used. DISABLING THIS, THE FALL BACK KICK WHICH LEADS MANY BUGS, PLAYERS CANNOT BE KICKED ETC.. SO, PLEASE DO NOT DISABLE KICK COMMAND MODE FEATURE.
         commands:
-              enabled: false
+              enabled: true
               list:
                  - 'kick {player} "Unfair Advantage"'
         recentlogs:

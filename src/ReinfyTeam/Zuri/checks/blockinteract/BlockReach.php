@@ -39,7 +39,7 @@ class BlockReach extends Check {
 	}
 
 	public function enable() : bool {
-		return true;
+		return false;
 	}
 
 	public function ban() : bool {
@@ -47,7 +47,7 @@ class BlockReach extends Check {
 	}
 
 	public function kick() : bool {
-		return true;
+		return false;
 	}
 
 	public function flag() : bool {
