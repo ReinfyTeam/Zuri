@@ -36,7 +36,7 @@ use function pow;
 use function sqrt;
 
 class BlockUtil {
-	public function getSurroundingBlocks(Player $player) : array {
+	public static function getSurroundingBlocks(Player $player) : array {
 		$world = $player->getWorld();
 
 		$posX = $player->getLocation()->getX();
