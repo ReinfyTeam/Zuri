@@ -66,7 +66,7 @@ class FlyC extends Check {
 		return 1;
 	}
 
-	public function checkJustEvent(Event $event, PlayerAPI $playerAPI) : void {
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
 			$oldPos = $event->getFrom();
