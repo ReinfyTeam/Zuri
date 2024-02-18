@@ -101,7 +101,7 @@ abstract class Check extends ConfigManager {
 			if (self::getData(self::PERMISSION_BYPASS_ENABLE) === true) {
 				foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
 					if ($p->hasPermission(self::getData(self::PERMISSION_BYPASS_PERMISSION))) {
-						APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
+						$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
 					}
 				}
 			} else {
