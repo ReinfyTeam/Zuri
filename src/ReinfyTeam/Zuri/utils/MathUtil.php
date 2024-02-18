@@ -46,4 +46,8 @@ class MathUtil {
 	public static function pingFormula(float $ping) {
 		return (int) ceil($ping / 50);
 	}
+
+	public static function XZDistanceSquared(Vector3 $v1, Vector3 $v2) : float {
+		return ($v1->x - $v2->x) ** 2 + ($v1->z - $v2->z) ** 2;
+	}
 }

@@ -99,6 +99,9 @@ zuri:
         autoclick:
             enable: true
             maxvl: 1
+        antiimmobile:
+            enable: true
+            maxvl: 1
         killaura:
             enable: true
             maxvl: 1

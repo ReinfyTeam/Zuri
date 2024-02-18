@@ -62,7 +62,7 @@ class Phase extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 1;
+		return 8;
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -72,8 +72,10 @@ class Phase extends Check {
 			$block = $world->getBlock($player->getLocation()->asVector3()->add(0, 0.75, 0));
 			$skip = [BlockTypeIds::SAND, BlockTypeIds::GRAVEL, BlockTypeIds::ANVIL, BlockTypeIds::AIR];
 			$skip2 = [BlockTypeIds::TORCH, BlockTypeIds::ACACIA_SIGN, BlockTypeIds::ACACIA_WALL_SIGN, BlockTypeIds::REDSTONE_TORCH, BlockTypeIds::REDSTONE_WIRE, BlockTypeIds::SEA_PICKLE, BlockTypeIds::REDSTONE_REPEATER, BlockTypeIds::LANTERN, BlockTypeIds::REDSTONE_COMPARATOR, BlockTypeIds::BIRCH_WALL_SIGN, BlockTypeIds::DARK_OAK_WALL_SIGN, BlockTypeIds::JUNGLE_WALL_SIGN, BlockTypeIds::OAK_WALL_SIGN, BlockTypeIds::SPRUCE_WALL_SIGN, BlockTypeIds::MANGROVE_WALL_SIGN, BlockTypeIds::CRIMSON_WALL_SIGN, BlockTypeIds::WARPED_WALL_SIGN, BlockTypeIds::CHERRY_WALL_SIGN, BlockTypeIds::ACACIA_SIGN, BlockTypeIds::ACACIA_WALL_SIGN, BlockTypeIds::BIRCH_SIGN, BlockTypeIds::BIRCH_WALL_SIGN, BlockTypeIds::DARK_OAK_SIGN, BlockTypeIds::DARK_OAK_WALL_SIGN, BlockTypeIds::JUNGLE_SIGN, BlockTypeIds::JUNGLE_WALL_SIGN, BlockTypeIds::OAK_SIGN, BlockTypeIds::OAK_WALL_SIGN, BlockTypeIds::SPRUCE_SIGN, BlockTypeIds::SPRUCE_WALL_SIGN, BlockTypeIds::MANGROVE_SIGN, BlockTypeIds::CRIMSON_SIGN, BlockTypeIds::WARPED_SIGN, BlockTypeIds::CHERRY_SIGN, BlockTypeIds::CHERRY_WALL_SIGN];
-			if ($player->isSurvival() && !$playerAPI->isOnCarpet() && !$playerAPI->isOnPlate() && !$playerAPI->isOnDoor() && !$playerAPI->isOnSnow() && !$playerAPI->isOnPlant() && !$playerAPI->isOnAdhesion() && !$playerAPI->isOnStairs() && !$playerAPI->isInLiquid() && !$playerAPI->isInWeb() && !in_array($block->getTypeId(), $skip, true) && !BlockUtil::isUnderBlock($event->getTo(), $skip2, 0)) {
-				$event->cancel();
+			$skip3 = [BlockTypeIds::GLASS_PANE, BlockTypeIds::HARDENED_GLASS_PANE, BlockTypeIds::STAINED_GLASS_PANE, BlockTypeIds::STAINED_HARDENED_GLASS_PANE, BlockTypeIds::COBWEB, BlockTypeIds::BED, BlockTypeIds::BELL, BlockTypeIds::CACTUS, BlockTypeIds::CARPET, BlockTypeIds::COBBLESTONE_WALL, BlockTypeIds::ACACIA_FENCE, BlockTypeIds::OAK_FENCE, BlockTypeIds::BIRCH_FENCE, BlockTypeIds::DARK_OAK_FENCE, BlockTypeIds::JUNGLE_FENCE, BlockTypeIds::NETHER_BRICK_FENCE, BlockTypeIds::SPRUCE_FENCE, BlockTypeIds::WARPED_FENCE, BlockTypeIds::MANGROVE_FENCE, BlockTypeIds::CRIMSON_FENCE, BlockTypeIds::CHERRY_FENCE, BlockTypeIds::ACACIA_FENCE_GATE, BlockTypeIds::OAK_FENCE_GATE, BlockTypeIds::BIRCH_FENCE_GATE, BlockTypeIds::DARK_OAK_FENCE_GATE, BlockTypeIds::JUNGLE_FENCE_GATE, BlockTypeIds::SPRUCE_FENCE_GATE, BlockTypeIds::WARPED_FENCE_GATE, BlockTypeIds::MANGROVE_FENCE_GATE, BlockTypeIds::CRIMSON_FENCE_GATE, BlockTypeIds::CHERRY_FENCE_GATE];
+			if ($player->isSurvival() && !$playerAPI->isOnCarpet() && !$playerAPI->isOnPlate() && !$playerAPI->isOnDoor() && !$playerAPI->isOnSnow() && !$playerAPI->isOnPlant() && !$playerAPI->isOnAdhesion() && !$playerAPI->isOnStairs() && !$playerAPI->isInLiquid() && !$playerAPI->isInWeb() && !in_array($block->getTypeId(), $skip, true) && !BlockUtil::isUnderBlock($event->getTo(), $skip2, 0) && !in_array($block->getTypeId(), $skip3, true)) {
+				$this->failed($playerAPI);
+				//$event->cancel(); prevent mislocation
 			}
 		}
 	}
