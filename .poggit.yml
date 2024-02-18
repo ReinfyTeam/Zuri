@@ -5,4 +5,5 @@ branches:
 projects:
   Zuri-Rewrite:
     path: ""
+    lint: false
 ...
