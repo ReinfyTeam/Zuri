@@ -31,6 +31,7 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 
 class NetworkTickTask extends Task {
 	private array $network = [];
+	private array $count = [];
 	private static $instance = null;
 	protected APIProvider $plugin;
 
@@ -42,9 +43,19 @@ class NetworkTickTask extends Task {
 		self::$instance = $this;
 		foreach (Server::getInstance()->getOnlinePlayers() as $player) {
 			$ipPlayer = $player->getNetworkSession()->getIp();
-			if (isset($this->network[$player->getXuid()])) {
-				if ($this->network[$player->getXuid()]["ip"] != $ipPlayer) {
-					$player->kick(ConfigManager::getData(ConfigManager::NETWORK_MESSAGE), null, ConfigManager::getData(ConfigManager::NETWORK_MESSAGE));
+			if (isset($this->network[$player->getXuid()]["ip"])) {
+				if ($this->network[$player->getXuid()]["ip"] !== $ipPlayer) {
+					foreach ($this->network as $xuid => $data) {
+						if ($data["ip"] === $ipPlayer) {
+							if (!isset($this->count[$player->getXuid()])) {
+								$this->count[$player->getXuid()] = 0;
+							}
+							$this->count[$player->getXuid()] += 1;
+						}
+					}
+					if ($this->count[$player->getXuid()] > ConfigManager::getData(ConfigManager::NETWORK_LIMIT)) {
+						$player->kick(ConfigManager::getData(ConfigManager::NETWORK_MESSAGE), null, ConfigManager::getData(ConfigManager::NETWORK_MESSAGE));
+					}
 				}
 			} else {
 				$this->network[$player->getXuid()] = ["ip" => $ipPlayer, "player" => $player];
