@@ -52,6 +52,7 @@ use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 use pocketmine\player\Player;
+use ReinfyTeam\Zuri\APIProvider;
 use ReinfyTeam\Zuri\components\registry\Listener;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
