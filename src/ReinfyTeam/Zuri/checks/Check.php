@@ -119,9 +119,9 @@ abstract class Check extends ConfigManager {
 				$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
 				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
 			}
+			LogManager::sendLogger(ReplaceText::replace($playerAPI, self::getData(self::BAN_RECENT_LOGS_MESSAGE), $this->getName(), $this->getSubType()));
 			$playerAPI->resetViolation($this->getName());
 			$playerAPI->resetRealViolation($this->getName());
-			LogManager::sendLogger(ReplaceText::replace($playerAPI, self::getData(self::BAN_RECENT_LOGS_MESSAGE), $this->getName(), $this->getSubType()));
 			(new BanEvent($playerAPI, $this->getName()))->ban();
 			return true;
 		}
