@@ -133,7 +133,7 @@ abstract class Check extends ConfigManager {
 					$playerAPI->resetViolation($this->getName());
 					$playerAPI->resetRealViolation($this->getName());
 				}
-				return;
+				return true;
 			}
 			APIProvider::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 			LogManager::sendLogger(ReplaceText::replace($playerAPI, self::getData(self::KICK_RECENT_LOGS_MESSAGE), $this->getName(), $this->getSubType()));
