@@ -384,7 +384,7 @@ class PlayerListener extends Listener {
 	private function checkEvent(Event $event, PlayerAPI $player) {
 		foreach (APIProvider::Checks() as $class) {
 			if ($class->enable()) {
-				$class->checkEvent($event, $playerAPI);
+				$class->checkEvent($event, $player);
 			}
 		}
 	}
