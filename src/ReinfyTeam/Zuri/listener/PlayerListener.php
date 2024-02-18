@@ -55,7 +55,6 @@ use pocketmine\player\Player;
 use ReinfyTeam\Zuri\components\registry\Listener;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
-use ReinfyTeam\Zuri\utils\Utils;
 use function array_filter;
 use function count;
 use function in_array;
@@ -79,13 +78,10 @@ class PlayerListener extends Listener {
 				return;
 			}
 			$playerAPI = PlayerAPI::getAPIPlayer($player);
-			foreach (self::FILES as $file) {
-				Utils::callDirectory("checks/$file", function (string $namespace) use ($packet, $playerAPI) : void {
-					$class = new $namespace();
-					if ($class->enable()) {
-						$class->check($packet, $playerAPI);
-					}
-				});
+			foreach (APIProvider::Checks() as $class) {
+				if ($class->enable()) {
+					$class->check($packet, $playerAPI);
+				}
 			}
 			if ($packet instanceof LevelSoundEventPacket) {
 				if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
@@ -385,24 +381,18 @@ class PlayerListener extends Listener {
 	}
 
 	private function checkEvent(Event $event, PlayerAPI $player) {
-		foreach (self::FILES as $file) {
-			Utils::callDirectory("checks/$file", function (string $namespace) use ($event, $player) : void {
-				$class = new $namespace();
-				if ($class->enable()) {
-					$class->checkEvent($event, $player);
-				}
-			});
+		foreach (APIProvider::Checks() as $class) {
+			if ($class->enable()) {
+				$class->checkEvent($event, $playerAPI);
+			}
 		}
 	}
 
 	private function checkJustEvent(Event $event) {
-		foreach (self::FILES as $file) {
-			Utils::callDirectory("checks/$file", function (string $namespace) use ($event) : void {
-				$class = new $namespace();
-				if ($class->enable()) {
-					$class->checkJustEvent($event);
-				}
-			});
+		foreach (APIProvider::Checks() as $class) {
+			if ($class->enable()) {
+				$class->checkJustEvent($event);
+			}
 		}
 	}
 }

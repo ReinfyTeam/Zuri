@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\velocity;
+namespace ReinfyTeam\Zuri\checks\moving;
 
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
