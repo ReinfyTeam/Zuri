@@ -129,10 +129,10 @@ abstract class Check extends ConfigManager {
 			if (self::getData(self::KICK_COMMANDS_ENABLED) === true) {
 				foreach (self::getData(self::KICK_COMMANDS) as $command) {
 					$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
-					APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
-					$playerAPI->resetViolation($this->getName());
-					$playerAPI->resetRealViolation($this->getName());
 				}
+				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
+				$playerAPI->resetViolation($this->getName());
+				$playerAPI->resetRealViolation($this->getName());
 				return true;
 			}
 			APIProvider::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
