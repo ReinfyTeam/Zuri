@@ -475,9 +475,11 @@ class PlayerAPI implements IPlayerAPI {
 	public function setViolation(string $supplier, int $amount) : void {
 		$this->violations[$this->player->getName()][$supplier]["vl"] = $amount;
 	}
-	
+
 	public function resetViolation(string $supplier) : void {
-		if (isset($this->violations[$name = $this->player->getName()][$supplier])) unset($this->violations[$name][$supplier]);
+		if (isset($this->violations[$name = $this->player->getName()][$supplier])) {
+			unset($this->violations[$name][$supplier]);
+		}
 	}
 
 	public function addViolation(string $supplier) : void {
@@ -503,6 +505,12 @@ class PlayerAPI implements IPlayerAPI {
 
 	public function setRealViolation(string $supplier, int $amount) : void {
 		$this->realViolations[$this->player->getName()][$supplier]["vl"] = $amount;
+	}
+
+	public function resetRealViolation(string $supplier) : void {
+		if (isset($this->realViolations[$name = $this->player->getName()][$supplier])) {
+			unset($this->realViolations[$name][$supplier]);
+		}
 	}
 
 	public function addRealViolation(string $supplier) : void {
