@@ -30,6 +30,7 @@ abstract class ConfigPaths implements ComponentWithName {
 	public const PREFIX = "zuri.prefix";
 
 	public const ANTIBOT_MESSAGE = "zuri.antibot.message";
+	public const EDITIONFAKER_MESSAGE = "zuri.editionfaker.message";
 
 	public const NETWORK_LIMIT = "zuri.network.limit";
 	public const NETWORK_MESSAGE = "zuri.network.message";

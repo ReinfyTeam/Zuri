@@ -11,6 +11,8 @@ zuri:
     version: "0.0.1" #This config version
     antibot:
        message: "§cSorry! You are humman?"
+    editionfaker:
+       message: "§cInvalid client!"
     network:
         #This is to limit the player's access to the same address to the server.
         limit: 3
