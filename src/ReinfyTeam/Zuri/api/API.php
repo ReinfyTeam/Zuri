@@ -25,9 +25,86 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\api;
 
 use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\player\PlayerAPI;
 
-class API {
-	public function getVersion() : string {
+final class API {
+	
+	public static function getVersion() : string {
 		return APIProvider::VERSION_PLUGIN;
+	}
+	
+	public static function getPlayer(string|Player $player) : ?PlayerAPI {
+		if($player instanceof Player){
+			return PlayerAPI::getAPIPlayer($player);
+		}
+		
+		$player = Server::getInstance()->getPlayerExact($player);
+		return PlayerAPI::getAPIPlayer($player);
+	}
+	
+	public static function getModule(string $name, string $subType) : ?Check {
+		if(in_array($name, APIProvider::Check(), true)) return null;
+		
+		foreach(APIProvider::Check() as $module){
+			if($module->getName() === $name && $module->getSubType() === $subType){
+				$result = $module;
+			}
+			continue;
+		}
+		
+		return $module;
+	}
+	
+	public static function getAllModules() : array {
+		return APIProvider::Check();
+	}
+	
+	public static function getConfig() : ConfigManager {
+		if(self::$config === null){
+			self::$config = new ConfigManager();
+		}
+		
+		return self::$config;
+	}
+	
+	public static function allModulesInfo() : ?array {
+		foreach(APIProvider::Check() as $module) {
+			$result[$module->getName()] = ["name" => $module->getName(), "subType" => $module->getSubType(), "kick" => $module->kick(), "ban" => $module->ban(), "flag" => $module->flag(), "captcha" => $module->captcha(), "maxViolations" => $module->maxViolations()];
+		}
+		
+		return $result;
+	}
+	
+	public static function getModuleInfo(string $name, string $subType) : ?string {
+		if(in_array($name, APIProvider::Check(), true)) return null;
+		
+		return self::allModulesInfo()[$name];
+	}
+	
+	public static function getSubTypeByModule(string $name) : ?string {
+		if(in_array($name, APIProvider::Check(), true)) return null;
+		
+		return self::allModulesInfo()[$name]["subType"];
+	}
+	
+	public static function getMaxViolationByModule(string $name) : ?string {
+		if(in_array($name, APIProvider::Check(), true)) return null;
+		
+		return self::allModulesInfo()[$name]["maxViolations"];
+	}
+	
+	public function getPunishmentByModule(string $name) : ?array {
+		if(in_array($name, APIProvider::Check(), true)) return null;
+		
+		$result["kick"] = self::allModulesInfo()[$name]["kick"];
+		$result["ban"] = self::allModulesInfo()[$name]["ban"];
+		$result["flag"] = self::allModulesInfo()[$name]["flag"];
+		$result["captcha"] = self::allModulesInfo()[$name]["captcha"];
+		
+		return $result;
+	}
+	
+	public static function getPluginInstance() : ?APIProvider {
+		return APIProvider::getInstance();
 	}
 }
