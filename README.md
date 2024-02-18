@@ -9,6 +9,7 @@ If you are interested with our projects, you may help us by:
 # Checks
 | **Module Name**             | **Punishment Type**  | **Percentage of Accuracy** |
 |-----------------------------|----------------------|----------------------------|
+| AntiBot                       | Kick Immediately   | 100% detect                |
 | AntiImmobile                   | Kick                 | 100% detect                |
 | AutoClick                   | Kick                 | 100% detect                |
 | RapidHit                    | Kick                 | 100% detect                |
