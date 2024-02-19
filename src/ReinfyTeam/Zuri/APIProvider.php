@@ -85,22 +85,8 @@ class APIProvider extends PluginBase implements IAPI {
 
 		// Badpackets
 
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsB();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsC();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsD();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsE();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsF();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsG();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsH();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsI();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsJ();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsK();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsL();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsM();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsN();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsO();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsP();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsQ();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\Crasher();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastEat();
 
 		// Blockbreak
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\WrongMining();
@@ -117,10 +103,21 @@ class APIProvider extends PluginBase implements IAPI {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\chat\SpamB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\chat\SpamC();
 
-		// Fight
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\fight\killaura\KillauraA();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\fight\reach\ReachA();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\fight\reach\ReachB();
+		// Combat
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillauraA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\reach\ReachA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\reach\ReachB();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickB();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickC();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraB();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraC();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraD();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraE();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraF();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\velocity\VelocityA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\velocity\VelocityB();
 
 		// Fly
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\fly\FlyA();
@@ -131,6 +128,8 @@ class APIProvider extends PluginBase implements IAPI {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\AutoArmor();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\ChestAura();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\InventoryMove();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\ChestStealler();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\InventoryCleaner();
 
 		// Movements
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\WrongPitch();
@@ -138,7 +137,7 @@ class APIProvider extends PluginBase implements IAPI {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\AntiImmobile();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Phase();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Step();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Velocity();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Timer();
 
 		// Network related
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\AntiBot();

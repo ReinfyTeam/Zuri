@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\moving;
+namespace ReinfyTeam\Zuri\checks\combat\velocity;
 
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
@@ -31,13 +31,13 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\MathUtil;
 
-class Velocity extends Check {
+class VelocityB extends Check {
 	public function getName() : string {
 		return "Velocity";
 	}
 
 	public function getSubType() : string {
-		return "A";
+		return "B";
 	}
 
 	public function enable() : bool {
@@ -70,21 +70,36 @@ class Velocity extends Check {
 			if ($entity instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($entity);
 				$player = $playerAPI->getPlayer();
+				$loc = $player->getLocation();
+				$lastLoc = $playerAPI->getExternalData("lastVLocB");
 				if (!$player->spawned && !$player->isConnected()) {
 					return;
-				} // Effect::$effectInstance bug fix
-				$location = $entity->getLocation();
-				$lastLocation = $playerAPI->getExternalData("lastLocationV");
-				if ($lastLocation !== null) {
-					if (!$event->isCancelled() && $entity->isOnGround() && !$playerAPI->isInWeb() && !$playerAPI->isUnderBlock() && !$playerAPI->isInBoxBlock()) {
-						$velocity = MathUtil::distance($location->asVector3(), $lastLocation->asVector3());
-						if ($velocity < 0.6 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
-							$this->failed($playerAPI);
-						}
+				}
+
+				if ( // prevent false-positive
+					$playerAPI->getAttackTicks() > 40 ||
+					$playerAPI->getOnlineTime() <= 30 ||
+					$playerAPI->getJumpTicks() < 40 ||
+					$playerAPI->isInWeb() ||
+					$playerAPI->isOnGround() ||
+					$playerAPI->isOnAdhesion() ||
+					$playerAPI->isUnderBlock() ||
+					$entity->isOnGround() ||
+					$player->getAllowFlight() ||
+					$playerAPI->isInBoxBlock()
+				) {
+					return;
+				}
+
+				$velocity = MathUtil::distance($loc->asVector3(), $lastLoc->asVector3());
+
+				if ($lastLoc !== null) {
+					if ($velocity < 0.6 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
+						$this->failed($playerAPI);
 					}
-					$playerAPI->unsetExternalData("lastLocationV");
+					$playerAPI->unsetExternalData("lastVLocB");
 				} else {
-					$playerAPI->setExternalData("lastLocationV", $location);
+					$playerAPI->setExternalData("lastVLocB", $loc);
 				}
 			}
 		}

@@ -100,6 +100,11 @@ abstract class Check extends ConfigManager {
 		if ($byPass) {
 			return false;
 		}
+		$checkEvent = new CheckFailedEvent($playerAPI, $this->getName(), $this->getSubType());
+		$checkEvent->call();
+		if ($checkEvent->isCancelled()) {
+			return;
+		}
 
 		if ($notify && $reachedMaxViolations) {
 			$playerAPI->addRealViolation($this->getName());
