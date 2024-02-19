@@ -1,10 +1,28 @@
 # Zuri-Rewrite
 > Zuri-Rewrite is a new fork code improvement of original Zuri Anticheat.
+
 **Zuri** is an anticheat made to protect the server from any may unfair advantages from the players. A powerful anticheat made to destroy hackers from your server for PocketMine-MP.
 
 If you are interested with our projects, you may help us by:
 - [Donate via Ko-Fi](https://ko-fi.com/xqwtxon)
 - [Become a Patreon](https://patreon.com/xwertxy)
+
+Also, adding :star: a **Star** is also appreciated. ✨
+
+Do you struggling with **bugs and issues?** Don't hesitate to tell us about it by [creating an issue](https://github.com/ReinfyTeam/Zuri-Rewrite/issues) or you may join us on our official [discord server](https://discord.com/invite/7u7qKsvSxg)!
+
+# Plugin Developers
+This is module using a special method that requires an API: If the server you are using a method intended for the digging of special players.
+
+The full documentation can be found in the [wiki](https://github.com/ReinfyTeam/Zuri-Rewrite/wiki).
+
+Example:
+```php
+// $player must instance of Player from PMMP //
+$api = PlayerAPI::getInstance()->getAPIPlayer($player);
+$api->setAttackSpecial(< true or false >);
+$api->setBlocksBrokeASec(< it must is number >);
+```
 
 # Checks
 | **Module Name**             | **Punishment Type**  | **Percentage of Accuracy** |
@@ -52,17 +70,6 @@ If you are interested with our projects, you may help us by:
 | FillBlock                       | Ban Immediately      | 100% detect                |
 | WrongMining                       | Ban Immediately      | 100% detect                |
 **BadPackets Total:** 17
-
-# Plugin Developers
-This is module using a special method that requires an API: If the server you are using a method intended for the digging of special players.
-
-Example:
-```php
-// $player must instance of Player from PMMP //
-$api = PlayerAPI::getInstance()->getAPIPlayer($player);
-$api->setAttackSpecial(< true or false >);
-$api->setBlocksBrokeASec(< it must is number >);
-```
 
 
 <hr>
