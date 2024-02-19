@@ -16,6 +16,14 @@ This is module using a special method that requires an API: If the server you ar
 
 The full documentation can be found in the [wiki](https://github.com/ReinfyTeam/Zuri-Rewrite/wiki).
 
+Example:
+```php
+// $player must instance of Player from PMMP //
+$api = PlayerAPI::getInstance()->getAPIPlayer($player);
+$api->setAttackSpecial(< true or false >);
+$api->setBlocksBrokeASec(< it must is number >);
+```
+
 # Why?
 - This plugin has total of 40+ checks that can catch hacker more efficient and no more false-positive! 😏
 
@@ -31,14 +39,6 @@ The full documentation can be found in the [wiki](https://github.com/ReinfyTeam/
 - ❌ Limit players joining by their ip limit, you can change it how many players can join with same ip address.
 - 🌟 It also checks the player if they are using a **Proxy or VPN**
 - 💥 You can customize all **messages** and prefix easily with language manager!
-
-Example:
-```php
-// $player must instance of Player from PMMP //
-$api = PlayerAPI::getInstance()->getAPIPlayer($player);
-$api->setAttackSpecial(< true or false >);
-$api->setBlocksBrokeASec(< it must is number >);
-```
 
 # Checks
 | **Module Name**             | **Punishment Type**  | **Percentage of Accuracy** |
