@@ -22,15 +22,19 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets;
+namespace ReinfyTeam\Zuri\checks\combat\killaura;
 
+use pocketmine\math\Facing;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\PlayerActionPacket;
+use pocketmine\network\mcpe\protocol\types\PlayerAction;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function in_array;
 
-class BadPacketsJ extends Check {
+class KillAuraA extends Check {
 	public function getName() : string {
-		return "AntiVoid";
+		return "KillAura";
 	}
 
 	public function getSubType() : string {
@@ -58,28 +62,21 @@ class BadPacketsJ extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 3;
+		return 5;
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if (
-			$playerAPI->isOnAdhesion() ||
-			$playerAPI->isInLiquid() ||
-			$playerAPI->isInWeb() ||
-			$playerAPI->getDeathTicks() < 100 ||
-			$playerAPI->getJumpTicks() < 60 ||
-			$playerAPI->getTeleportTicks() < 100 ||
-			$playerAPI->isOnGround()
-		) {
-			return;
-		}
-		$lastY = $playerAPI->getExternalData("lastYB");
-		$playerAPI->setExternalData("lastYB", $playerAPI->getPlayer()->getLocation()->getY());
-		if ($lastY !== null && $playerAPI->isOnGround()) {
-			if ($lastY < $playerAPI->getPlayer()->getLocation()->getY()) {
-				$this->failed($playerAPI);
+		if ($packet instanceof PlayerActionPacket) {
+			if (in_array($packet->action, [PlayerAction::START_BREAK, PlayerAction::ABORT_BREAK, PlayerAction::CONTINUE_DESTROY_BLOCK, PlayerAction::INTERACT_BLOCK], true)) {
+				switch($packet->face) {
+					case Facing::UP:
+					case Facing::DOWN:
+					case Facing::EAST:
+					case Facing::NORTH:
+						$this->failed($playerAPI);
+						break;
+				}
 			}
-			$playerAPI->unsetExternalData("lastYB");
 		}
 	}
 }

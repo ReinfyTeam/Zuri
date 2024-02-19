@@ -22,17 +22,19 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets;
+namespace ReinfyTeam\Zuri\checks\combat\reach;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\Event;
+use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function microtime;
+use ReinfyTeam\Zuri\utils\MathUtil;
 
-class BadPacketsQ extends Check {
+class ReachA extends Check {
 	public function getName() : string {
-		return "Timer";
+		return "Reach";
 	}
 
 	public function getSubType() : string {
@@ -63,27 +65,28 @@ class BadPacketsQ extends Check {
 		return 3;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($packet instanceof PlayerAuthInputPacket) {
-			if ($playerAPI->getOnlineTime() < 10 || $playerAPI->getDeathTicks() < 40) {
+	public function checkJustEvent(Event $event) : void {
+		if ($event instanceof EntityDamageByEntityEvent) {
+			$cause = $event->getCause();
+			$entity = $event->getEntity();
+			$damager = $event->getDamager();
+			$locEntity = $entity->getLocation();
+			$locDamager = $damager->getLocation();
+			if ($damager === null) {
 				return;
 			}
-			$point = $playerAPI->getExternalData("pointQ");
-			$lastTime = $playerAPI->getExternalData("lastTimeQ");
-			if ($lastTime === null && $point === null) {
-				$playerAPI->setExternalData("lastTimeQ", microtime(true));
-				$playerAPI->setExternalData("pointQ", 1);
-				return;
-			}
-			$timeDiff = microtime(true) - $lastTime;
-			if ($timeDiff > 1) {
-				if ($point < 17) {
+			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player) {
+				$playerAPI = PlayerAPI::getAPIPlayer($damager);
+				$player = $playerAPI->getPlayer();
+				if (!$player->spawned && !$player->isConnected()) {
+					return;
+				} // Effect::$effectInstance bug fix
+				$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? ($locEntity->getY() - $locDamager->getY()) : 0;
+				$distance = MathUtil::distance($locEntity, $locDamager) - $isPlayerTop;
+				if ($distance > 4.3) {
 					$this->failed($playerAPI);
+					return;
 				}
-				$playerAPI->unsetExternalData("pointQ");
-				$playerAPI->unsetExternalData("lastTimeQ");
-			} else {
-				$playerAPI->setExternalData("pointQ", $point + 1);
 			}
 		}
 	}

@@ -34,7 +34,7 @@ use ReinfyTeam\Zuri\utils\BlockUtil;
 use function intval;
 use function pow;
 
-class BadPacketsL extends Check {
+class SpeedA extends Check {
 	public function getName() : string {
 		return "Speed";
 	}

@@ -22,21 +22,25 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets;
+namespace ReinfyTeam\Zuri\checks\combat\autoclick;
 
+use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\Event;
+use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function microtime;
 
-class BadPacketsN extends Check {
+class AutoClickC extends Check {
+	private bool $canDamagable = false;
+
 	public function getName() : string {
-		return "ChestStealler";
+		return "AutoClick";
 	}
 
 	public function getSubType() : string {
-		return "N";
+		return "C";
 	}
 
 	public function enable() : bool {
@@ -63,25 +67,40 @@ class BadPacketsN extends Check {
 		return 1;
 	}
 
+	public function checkJustEvent(Event $event) : void {
+		if ($event instanceof EntityDamageEvent) {
+			$this->canDamagable = $event->isCancelled();
+		}
+	}
+
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$ticks = $playerAPI->getExternalData("ticksN");
-		$lastTime = $playerAPI->getExternalData("lastTimeN");
-		if ($packet instanceof InventoryTransactionPacket) {
-			if ($packet->trData->getTypeId() === 0) {
-				if ($ticks !== null && $lastTime !== null) {
-					$diff = microtime(true) - $lastTime;
-					if ($diff > 0.1) {
-						if ($ticks > 1) {
+		if (
+			$playerAPI->isDigging() ||
+			$playerAPI->getPlacingTicks() < 100 ||
+			$playerAPI->getAttackTicks() < 40 ||
+			!$playerAPI->getPlayer()->isSurvival() ||
+			!$this->canDamagable
+		) {
+			return;
+		}
+		$ticks = $playerAPI->getExternalData("clicksTicks3");
+		$lastClick = $playerAPI->getExternalData("lastClick3");
+		if ($packet instanceof AnimatePacket) {
+			if ($packet->action === AnimatePacket::ACTION_SWING_ARM) {
+				if ($ticks !== null && $lastClick !== null) {
+					$diff = microtime(true) - $lastClick;
+					if ($diff > 2) {
+						if ($ticks > 15) {
 							$this->failed($playerAPI);
 						}
-						$playerAPI->unsetExternalData("ticksN");
-						$playerAPI->unsetExternalData("lastTimeN");
+						$playerAPI->unsetExternalData("clicksTicks3");
+						$playerAPI->unsetExternalData("lastClick3");
 					} else {
-						$playerAPI->setExternalData("ticksN", $ticks + 1);
+						$playerAPI->setExternalData("clicksTicks3", $ticks + 1);
 					}
 				} else {
-					$playerAPI->setExternalData("ticksN", 0);
-					$playerAPI->setExternalData("lastTimeN", microtime(true));
+					$playerAPI->setExternalData("clicksTicks3", 0);
+					$playerAPI->setExternalData("lastClick3", microtime(true));
 				}
 			}
 		}

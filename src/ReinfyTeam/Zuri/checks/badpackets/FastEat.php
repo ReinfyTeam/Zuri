@@ -24,20 +24,23 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
+use pocketmine\event\Event;
+use pocketmine\event\player\PlayerItemConsumeEvent;
+use pocketmine\item\ConsumableItem;
+use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
-use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
+use pocketmine\network\mcpe\protocol\types\ActorEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function microtime;
 
-class BadPacketsH extends Check {
+class FastEat extends Check {
 	public function getName() : string {
-		return "AutoClick";
+		return "FastEat";
 	}
 
 	public function getSubType() : string {
-		return "B";
+		return "A";
 	}
 
 	public function enable() : bool {
@@ -65,27 +68,26 @@ class BadPacketsH extends Check {
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($playerAPI->getPlacingTicks() < 100) {
-			return;
+		if ($packet instanceof ActorEventPacket) {
+			if ($packet->eventId === ActorEvent::EATING_ITEM) {
+				$lastTick = $playerAPI->getExternalData("lastTickP");
+				if ($lastTick === null) {
+					$playerAPI->setExternalData("lastTickP", microtime(true));
+				}
+			}
 		}
-		$ticks = $playerAPI->getExternalData("clicksTicks2");
-		$lastClick = $playerAPI->getExternalData("lastClick");
-		if ($packet instanceof LevelSoundEventPacket) {
-			if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
-				if ($ticks !== null && $lastClick !== null) {
-					$diff = microtime(true) - $lastClick;
-					if ($diff > 2) {
-						if ($ticks >= 25) {
-							$this->failed($playerAPI);
-						}
-						$playerAPI->unsetExternalData("clicksTicks2");
-						$playerAPI->unsetExternalData("lastClick");
-					} else {
-						$playerAPI->setExternalData("clicksTicks2", $ticks + 1);
+	}
+
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+		if ($event instanceof PlayerItemConsumeEvent) {
+			if ($event->getItem() instanceof ConsumableItem) {
+				$lastTick = $playerAPI->getExternalData("lastTickP");
+				if ($lastTick !== null) {
+					$diff = microtime(true) - $lastTick;
+					if ($diff < 1.5) {
+						$event->cancel();
+						$playerAPI->unsetExternalData("lastTickP");
 					}
-				} else {
-					$playerAPI->setExternalData("clicksTicks2", 0);
-					$playerAPI->setExternalData("lastClick", microtime(true));
 				}
 			}
 		}

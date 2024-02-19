@@ -22,23 +22,23 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\fight;
+namespace ReinfyTeam\Zuri\checks\combat\killaura;
 
 use pocketmine\event\entity\EntityDamageByEntityEvent;
-use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Event;
+use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\MathUtil;
 
-class Reach extends Check {
+class KillAuraF extends Check {
 	public function getName() : string {
-		return "Reach";
+		return "KillAura";
 	}
 
 	public function getSubType() : string {
-		return "A";
+		return "F";
 	}
 
 	public function enable() : bool {
@@ -67,27 +67,37 @@ class Reach extends Check {
 
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
-			$cause = $event->getCause();
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
-			$locEntity = $entity->getLocation();
 			$locDamager = $damager->getLocation();
 			if ($damager === null) {
 				return;
 			}
-			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player) {
+			if ($damager instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
 				$player = $playerAPI->getPlayer();
+				if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
+					return;
+				}
 				if (!$player->spawned && !$player->isConnected()) {
 					return;
 				} // Effect::$effectInstance bug fix
-				$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? ($locEntity->getY() - $locDamager->getY()) : 0;
-				$distance = MathUtil::distance($locEntity, $locDamager) - $isPlayerTop;
-				if ($distance > 4.3) {
-					$this->failed($playerAPI);
-					return;
+				$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
+				$from = new Vector3($locDamager->getX(), $locDamager->getY() + $damager->getEyeHeight(), $locDamager->getZ());
+				$to = $damager->getLocation()->add($delta->getX(), $delta->getY() + $damager->getEyeHeight(), $delta->getZ());
+				$distance = MathUtil::distance($from, $to);
+				$vector = $to->subtract($from->x, $from->y, $from->z)->normalize()->multiply(1);
+				$entities = [];
+				for ($i = 0; $i <= $distance; $i += 1) {
+					$from = $from->add($vector->x, $vector->y, $vector->z);
+					foreach ($damager->getWorld()->getEntities() as $target) {
+						$distanceA = new Vector3($from->x, $from->y, $from->z);
+						if ($target->getPosition()->distance($distanceA) <= 2.6) {
+							$entities[$target->getId()] = $target;
+						}
+					}
 				}
-				if (!$damager->canInteract($entity->getLocation()->add(0.5, 0.5, 0.5), $damager->isCreative() ? 7 : 13)) {
+				if (!isset($entities[$entity->getId()])) {
 					$this->failed($playerAPI);
 				}
 			}

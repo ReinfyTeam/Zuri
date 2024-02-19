@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets;
+namespace ReinfyTeam\Zuri\checks\combat\autoclick;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
@@ -31,7 +31,7 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function abs;
 
-class BadPacketsG extends Check {
+class AutoClickA extends Check {
 	public function getName() : string {
 		return "AutoClick";
 	}

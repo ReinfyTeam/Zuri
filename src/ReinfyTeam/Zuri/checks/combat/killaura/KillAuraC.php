@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets;
+namespace ReinfyTeam\Zuri\checks\combat\killaura;
 
 use pocketmine\block\BlockTypeIds;
 use pocketmine\event\Event;
@@ -36,7 +36,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function count;
 
-class BadPacketsE extends Check {
+class KillAuraC extends Check {
 	private bool $interact = false;
 
 	public function getName() : string {

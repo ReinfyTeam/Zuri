@@ -22,21 +22,19 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets;
+namespace ReinfyTeam\Zuri\checks\moving\speed;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function microtime;
 
-class BadPacketsI extends Check {
+class AntiVoid extends Check {
 	public function getName() : string {
-		return "InventoryCleaner";
+		return "AntiVoid";
 	}
 
 	public function getSubType() : string {
-		return "I";
+		return "A";
 	}
 
 	public function enable() : bool {
@@ -60,30 +58,28 @@ class BadPacketsI extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 1;
+		return 3;
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$ticks = $playerAPI->getExternalData("ticksTransaction");
-		$transaction = $playerAPI->getExternalData("transaction");
-		if ($packet instanceof InventoryTransactionPacket) {
-			if ($packet->trData->getTypeId() === 0) {
-				if ($ticks !== null && $transaction !== null) {
-					$diff = microtime(true) - $ticks;
-					if ($diff > 2) {
-						if ($transaction > 20) {
-							$this->failed($playerAPI);
-						}
-						$playerAPI->unsetExternalData("ticksTransaction");
-						$playerAPI->unsetExternalData("transaction");
-					} else {
-						$playerAPI->setExternalData("transaction", $transaction + 1);
-					}
-				} else {
-					$playerAPI->setExternalData("ticksTransaction", microtime(true));
-					$playerAPI->setExternalData("transaction", 0);
-				}
+		if (
+			$playerAPI->isOnAdhesion() ||
+			$playerAPI->isInLiquid() ||
+			$playerAPI->isInWeb() ||
+			$playerAPI->getDeathTicks() < 100 ||
+			$playerAPI->getJumpTicks() < 60 ||
+			$playerAPI->getTeleportTicks() < 100 ||
+			$playerAPI->isOnGround()
+		) {
+			return;
+		}
+		$lastY = $playerAPI->getExternalData("lastYB");
+		$playerAPI->setExternalData("lastYB", $playerAPI->getPlayer()->getLocation()->getY());
+		if ($lastY !== null && $playerAPI->isOnGround()) {
+			if ($lastY < $playerAPI->getPlayer()->getLocation()->getY()) {
+				$this->failed($playerAPI);
 			}
+			$playerAPI->unsetExternalData("lastYB");
 		}
 	}
 }

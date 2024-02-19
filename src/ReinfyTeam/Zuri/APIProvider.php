@@ -84,7 +84,7 @@ class APIProvider extends PluginBase implements IAPI {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\aimassist\AimAssistE();
 
 		// Badpackets
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsA();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsC();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\BadPacketsD();
@@ -118,8 +118,9 @@ class APIProvider extends PluginBase implements IAPI {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\chat\SpamC();
 
 		// Fight
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\fight\Killaura();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\fight\Reach();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\fight\killaura\KillauraA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\fight\reach\ReachA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\fight\reach\ReachB();
 
 		// Fly
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\fly\FlyA();
@@ -132,6 +133,7 @@ class APIProvider extends PluginBase implements IAPI {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\InventoryMove();
 
 		// Movements
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\WrongPitch();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\AirMovement();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\AntiImmobile();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Phase();

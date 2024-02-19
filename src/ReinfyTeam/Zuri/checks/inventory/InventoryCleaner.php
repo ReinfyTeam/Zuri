@@ -22,21 +22,21 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets;
+namespace ReinfyTeam\Zuri\checks\inventory;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
+use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function abs;
+use function microtime;
 
-class BadPacketsB extends Check {
+class InventoryCleaner extends Check {
 	public function getName() : string {
-		return "Crasher";
+		return "InventoryCleaner";
 	}
 
 	public function getSubType() : string {
-		return "B";
+		return "I";
 	}
 
 	public function enable() : bool {
@@ -60,13 +60,29 @@ class BadPacketsB extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 5;
+		return 1;
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($packet instanceof PlayerAuthInputPacket) {
-			if (abs($packet->getPosition()->getY()) > 500) {
-				$this->failed($playerAPI);
+		$ticks = $playerAPI->getExternalData("ticksTransaction");
+		$transaction = $playerAPI->getExternalData("transaction");
+		if ($packet instanceof InventoryTransactionPacket) {
+			if ($packet->trData->getTypeId() === 0) {
+				if ($ticks !== null && $transaction !== null) {
+					$diff = microtime(true) - $ticks;
+					if ($diff > 2) {
+						if ($transaction > 20) {
+							$this->failed($playerAPI);
+						}
+						$playerAPI->unsetExternalData("ticksTransaction");
+						$playerAPI->unsetExternalData("transaction");
+					} else {
+						$playerAPI->setExternalData("transaction", $transaction + 1);
+					}
+				} else {
+					$playerAPI->setExternalData("ticksTransaction", microtime(true));
+					$playerAPI->setExternalData("transaction", 0);
+				}
 			}
 		}
 	}

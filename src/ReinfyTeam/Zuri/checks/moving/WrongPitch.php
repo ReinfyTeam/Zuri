@@ -30,7 +30,7 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function abs;
 
-class BadPacketsA extends Check {
+class WrongPitch extends Check {
 	public function getName() : string {
 		return "WrongPitch";
 	}

@@ -51,6 +51,7 @@ If you are interested with our projects, you may help us by:
 | FastBreak                       | Ban Immediately      | 100% detect                |
 | FillBlock                       | Ban Immediately      | 100% detect                |
 | WrongMining                       | Ban Immediately      | 100% detect                |
+
 **BadPackets Total:** 17
 
 # Plugin Developers
@@ -58,10 +59,21 @@ This is module using a special method that requires an API: If the server you ar
 
 Example:
 ```php
-// $player must instance of Player from PMMP //
-$api = PlayerAPI::getInstance()->getAPIPlayer($player);
-$api->setAttackSpecial(< true or false >);
-$api->setBlocksBrokeASec(< it must is number >);
+// ...
+use ReinfyTeam\Zuri\API;
+use pocketmine\event\Listener;
+// ...
+
+class ExampleListener extends Listener {
+	public function onBreak(BlockBreakEvent $event){
+		$player = $event->getPlayer();
+		// ...
+		$api = API::getPlayer($player);
+		$api->setAttackSpecial(< bool >);
+		$api->setBlocksBrokeASec(< int >);
+		// ...
+	}
+// ...
 ```
 
 

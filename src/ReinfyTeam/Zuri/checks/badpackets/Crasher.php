@@ -28,15 +28,15 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function cos;
+use function abs;
 
-class BadPacketsD extends Check {
+class Crasher extends Check {
 	public function getName() : string {
-		return "KillAura";
+		return "Crasher";
 	}
 
 	public function getSubType() : string {
-		return "B";
+		return "A";
 	}
 
 	public function enable() : bool {
@@ -65,19 +65,7 @@ class BadPacketsD extends Check {
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
-			$player = $playerAPI->getPlayer();
-			if (
-				!$player->isFlying() ||
-				!$player->getAllowFlight() ||
-				$playerAPI->getAttackTicks() < 100 ||
-				$playerAPI->getTeleportTicks() < 100 ||
-				$player->isSurvival()
-			) {
-				return;
-			}
-			$deltaPitch = cos($packet->getPitch());
-			$deltaYaw = cos($packet->getYaw());
-			if ($deltaPitch === 0 and $deltaYaw === 0) {
+			if (abs($packet->getPosition()->getY()) > 500) {
 				$this->failed($playerAPI);
 			}
 		}

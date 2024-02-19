@@ -22,25 +22,21 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets;
+namespace ReinfyTeam\Zuri\checks\moving;
 
-use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\Event;
-use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function microtime;
 
-class BadPacketsK extends Check {
-	private bool $canDamagable = false;
-
+class Timer extends Check {
 	public function getName() : string {
-		return "AutoClick";
+		return "Timer";
 	}
 
 	public function getSubType() : string {
-		return "C";
+		return "A";
 	}
 
 	public function enable() : bool {
@@ -64,44 +60,30 @@ class BadPacketsK extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 1;
-	}
-
-	public function checkJustEvent(Event $event) : void {
-		if ($event instanceof EntityDamageEvent) {
-			$this->canDamagable = $event->isCancelled();
-		}
+		return 3;
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if (
-			$playerAPI->isDigging() ||
-			$playerAPI->getPlacingTicks() < 100 ||
-			$playerAPI->getAttackTicks() < 40 ||
-			!$playerAPI->getPlayer()->isSurvival() ||
-			!$this->canDamagable
-		) {
-			return;
-		}
-		$ticks = $playerAPI->getExternalData("clicksTicks3");
-		$lastClick = $playerAPI->getExternalData("lastClick3");
-		if ($packet instanceof AnimatePacket) {
-			if ($packet->action === AnimatePacket::ACTION_SWING_ARM) {
-				if ($ticks !== null && $lastClick !== null) {
-					$diff = microtime(true) - $lastClick;
-					if ($diff > 2) {
-						if ($ticks > 15) {
-							$this->failed($playerAPI);
-						}
-						$playerAPI->unsetExternalData("clicksTicks3");
-						$playerAPI->unsetExternalData("lastClick3");
-					} else {
-						$playerAPI->setExternalData("clicksTicks3", $ticks + 1);
-					}
-				} else {
-					$playerAPI->setExternalData("clicksTicks3", 0);
-					$playerAPI->setExternalData("lastClick3", microtime(true));
+		if ($packet instanceof PlayerAuthInputPacket) {
+			if ($playerAPI->getOnlineTime() < 10 || $playerAPI->getDeathTicks() < 40) {
+				return;
+			}
+			$point = $playerAPI->getExternalData("pointQ");
+			$lastTime = $playerAPI->getExternalData("lastTimeQ");
+			if ($lastTime === null && $point === null) {
+				$playerAPI->setExternalData("lastTimeQ", microtime(true));
+				$playerAPI->setExternalData("pointQ", 1);
+				return;
+			}
+			$timeDiff = microtime(true) - $lastTime;
+			if ($timeDiff > 1) {
+				if ($point < 17) {
+					$this->failed($playerAPI);
 				}
+				$playerAPI->unsetExternalData("pointQ");
+				$playerAPI->unsetExternalData("lastTimeQ");
+			} else {
+				$playerAPI->setExternalData("pointQ", $point + 1);
 			}
 		}
 	}

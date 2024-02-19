@@ -24,17 +24,13 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
-use pocketmine\math\Facing;
 use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\PlayerActionPacket;
-use pocketmine\network\mcpe\protocol\types\PlayerAction;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function in_array;
 
-class BadPacketsC extends Check {
+class SpeedA extends Check {
 	public function getName() : string {
-		return "KillAura";
+		return "Speed";
 	}
 
 	public function getSubType() : string {
@@ -62,20 +58,28 @@ class BadPacketsC extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 5;
+		return 8;
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($packet instanceof PlayerActionPacket) {
-			if (in_array($packet->action, [PlayerAction::START_BREAK, PlayerAction::ABORT_BREAK, PlayerAction::CONTINUE_DESTROY_BLOCK, PlayerAction::INTERACT_BLOCK], true)) {
-				switch($packet->face) {
-					case Facing::UP:
-					case Facing::DOWN:
-					case Facing::EAST:
-					case Facing::NORTH:
-						$this->failed($playerAPI);
-						break;
-				}
+		$player = $playerAPI->getPlayer();
+		if (!$player->spawned && !$player->isConnected()) {
+			return;
+		}
+		if ($playerAPI->getOnlineTime() > 10 && !empty($nLocation) && $player->isSurvival()) {
+			if (
+				$playerAPI->getAttackTicks() < 40 ||
+				$playerAPI->getJumpTicks() < 40 ||
+				!$playerAPI->isInWeb() ||
+				!$playerAPI->isOnGround() ||
+				!$playerAPI->isOnAdhesion() ||
+				$player->getAllowFlight() ||
+				!$player->isSurvival()
+			) {
+				return;
+			}
+			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9) && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
+				$this->failed($playerAPI);
 			}
 		}
 	}

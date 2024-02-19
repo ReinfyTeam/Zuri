@@ -22,25 +22,20 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets;
+namespace ReinfyTeam\Zuri\checks\combat\killaura;
 
-use pocketmine\event\Event;
-use pocketmine\event\player\PlayerItemConsumeEvent;
-use pocketmine\item\ConsumableItem;
-use pocketmine\network\mcpe\protocol\ActorEventPacket;
+use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\types\ActorEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function microtime;
 
-class BadPacketsP extends Check {
+class BadPacketsO extends Check {
 	public function getName() : string {
-		return "FastEat";
+		return "KillAura";
 	}
 
 	public function getSubType() : string {
-		return "A";
+		return "D";
 	}
 
 	public function enable() : bool {
@@ -68,27 +63,20 @@ class BadPacketsP extends Check {
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($packet instanceof ActorEventPacket) {
-			if ($packet->eventId === ActorEvent::EATING_ITEM) {
-				$lastTick = $playerAPI->getExternalData("lastTickP");
-				if ($lastTick === null) {
-					$playerAPI->setExternalData("lastTickP", microtime(true));
-				}
-			}
+		if (
+			$playerAPI->isDigging() ||
+			$playerAPI->getPlacingTicks() < 100 ||
+			$playerAPI->getAttackTicks() < 20 ||
+			!$playerAPI->getPlayer()->isSurvival()
+		) {
+			return;
 		}
-	}
-
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-		if ($event instanceof PlayerItemConsumeEvent) {
-			if ($event->getItem() instanceof ConsumableItem) {
-				$lastTick = $playerAPI->getExternalData("lastTickP");
-				if ($lastTick !== null) {
-					$diff = microtime(true) - $lastTick;
-					if ($diff < 1.5) {
-						$event->cancel();
-						$playerAPI->unsetExternalData("lastTickP");
-					}
-				}
+		if ($packet instanceof AnimatePacket) {
+			if (
+				$packet->action !== AnimatePacket::ACTION_SWING_ARM &&
+				$playerAPI->getAttackTicks() > 40
+			) {
+				$this->failed($playerAPI);
 			}
 		}
 	}
