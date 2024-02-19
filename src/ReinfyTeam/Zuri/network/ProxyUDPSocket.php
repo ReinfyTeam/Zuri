@@ -49,12 +49,14 @@ class ProxyUDPSocket {
 
 	public function bind(InternetAddress $address) {
 		
-		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . "--------------------------------------------------------------");
-		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . "Proxy is on development testing stage, which leads many bugs and issue you will encounter.");
-		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . "If you encountered any bugs or bleeding-edge, you can create an issue on github.");
-		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . "This feature has many performance impact. Your performance might be degraded.");
-		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . "USE IT AT YOUR OWN RISKS! IM NOT RESPONSIBLE FOR ANY DAMAGE COST.");
-		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . "--------------------------------------------------------------");
+		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " --------------------------------------------------------------");
+		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " YOU ARE RUNNING THIS PLUGIN WITH PROXY UDP SUPPORT!");
+		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " ProxyUDP is on development testing stage, which leads many bugs and issue you will encounter.");
+		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " If you encountered any bugs or issues, dont hesitate to create an issue on github.");
+		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " This feature has many performance impact. Your performance might be degraded.");
+		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " USE IT AT YOUR OWN RISKS! IM NOT RESPONSIBLE FOR ANY DAMAGE COST.");
+		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " To disable this feature, set 'zuri.proxy.enabled' value in the config to false.");
+		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " --------------------------------------------------------------");
 		
 		if (socket_bind($this->socket, $address->ip, $address->port)) {
 			APIProvider::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::GREEN . "Successfully bound to {$address->ip}:{$address->port}!");
