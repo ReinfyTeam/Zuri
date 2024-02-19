@@ -53,17 +53,6 @@ class APIProvider extends PluginBase implements IAPI {
 	}
 
 	public function onEnable() : void {
-		$this->proxyUDPSocket = new ProxyUDPSocket();
-		if (ConfigManager::getData(ConfigManager::PROXY_ENABLE)) {
-			$ip = ConfigManager::getData(ConfigManager::PROXY_IP);
-			$port = ConfigManager::getData(ConfigManager::PROXY_PORT);
-			try {
-				$this->proxyUDPSocket->bind(new InternetAddress($ip, $port));
-			} catch (\Exception $exception) {
-				$this->getLogger()->info("{$exception->getMessage()}, stopping proxy...");
-				return;
-			}
-		}
 		$this->loadChecks();
 		$this->saveDefaultConfig();
 		$this->saveResource("hash.txt");
@@ -73,6 +62,17 @@ class APIProvider extends PluginBase implements IAPI {
 		$this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
 		$this->getServer()->getPluginManager()->registerEvents(new ServerListener(), $this);
 		$this->getServer()->getCommandMap()->register("Zuri", new ZuriCommand());
+		$this->proxyUDPSocket = new ProxyUDPSocket();
+		if (ConfigManager::getData(ConfigManager::PROXY_ENABLE)) {
+			$ip = ConfigManager::getData(ConfigManager::PROXY_IP);
+			$port = ConfigManager::getData(ConfigManager::PROXY_PORT);
+			try {
+				$this->proxyUDPSocket->bind(new InternetAddress($ip, $port));
+			} catch (\Exception $exception) {
+				$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigManager::PREFIX) . " {$exception->getMessage()}, stopping proxy...");
+				return;
+			}
+		}
 	}
 
 	private function loadChecks() : void {
@@ -104,7 +104,6 @@ class APIProvider extends PluginBase implements IAPI {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\chat\SpamC();
 
 		// Combat
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillauraA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\reach\ReachA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\reach\ReachB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickA();
