@@ -32,13 +32,13 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\MathUtil;
 
-class KillAuraF extends Check {
+class KillAuraE extends Check {
 	public function getName() : string {
 		return "KillAura";
 	}
 
 	public function getSubType() : string {
-		return "F";
+		return "E";
 	}
 
 	public function enable() : bool {

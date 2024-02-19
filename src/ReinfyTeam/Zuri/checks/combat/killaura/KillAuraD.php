@@ -29,7 +29,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
-class BadPacketsO extends Check {
+class KillAuraD extends Check {
 	public function getName() : string {
 		return "KillAura";
 	}

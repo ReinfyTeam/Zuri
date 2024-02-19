@@ -115,7 +115,6 @@ class APIProvider extends PluginBase implements IAPI {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraC();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraD();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraE();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraF();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\velocity\VelocityA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\velocity\VelocityB();
 
