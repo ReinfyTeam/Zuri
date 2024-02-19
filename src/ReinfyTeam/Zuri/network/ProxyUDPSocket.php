@@ -24,10 +24,10 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\network;
 
-use ReinfyTeam\Zuri\APIProvider;
-use ReinfyTeam\Zuri\utils\InternetAddress;
-use ReinfyTeam\Zuri\config\ConfigManager;
 use pocketmine\utils\TextFormat;
+use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\utils\InternetAddress;
 use function socket_bind;
 use function socket_close;
 use function socket_connect;
@@ -48,7 +48,6 @@ class ProxyUDPSocket {
 	}
 
 	public function bind(InternetAddress $address) {
-		
 		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " --------------------------------------------------------------");
 		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " YOU ARE RUNNING THIS PLUGIN WITH PROXY UDP SUPPORT!");
 		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " ProxyUDP is on development testing stage, which leads many bugs and issue you will encounter.");
@@ -57,7 +56,7 @@ class ProxyUDPSocket {
 		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " USE IT AT YOUR OWN RISKS! IM NOT RESPONSIBLE FOR ANY DAMAGE COST.");
 		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " To disable this feature, set 'zuri.proxy.enabled' value in the config to false.");
 		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " --------------------------------------------------------------");
-		
+
 		if (socket_bind($this->socket, $address->ip, $address->port)) {
 			APIProvider::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::GREEN . "Successfully bound to {$address->ip}:{$address->port}!");
 			$result = socket_connect($this->socket, $address->ip, $address->port);

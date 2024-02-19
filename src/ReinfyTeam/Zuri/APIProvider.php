@@ -35,6 +35,7 @@ use ReinfyTeam\Zuri\task\CaptchaTask;
 use ReinfyTeam\Zuri\task\NetworkTickTask;
 use ReinfyTeam\Zuri\task\ServerTickTask;
 use ReinfyTeam\Zuri\utils\InternetAddress;
+use ReinfyTeam\Zuri\utils\PermissionManager;
 
 class APIProvider extends PluginBase implements IAPI {
 	private static APIProvider $instance;
@@ -59,6 +60,7 @@ class APIProvider extends PluginBase implements IAPI {
 		$this->getScheduler()->scheduleRepeatingTask(new ServerTickTask($this), 20);
 		$this->getScheduler()->scheduleRepeatingTask(new CaptchaTask($this), 20);
 		$this->getScheduler()->scheduleRepeatingTask(new NetworkTickTask($this), 100);
+		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigManager::PERMISSION_BYPASS_PERMISSION), PermissionManager::OPERATOR);
 		$this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
 		$this->getServer()->getPluginManager()->registerEvents(new ServerListener(), $this);
 		$this->getServer()->getCommandMap()->register("Zuri", new ZuriCommand());

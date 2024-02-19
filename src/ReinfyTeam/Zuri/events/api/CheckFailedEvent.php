@@ -22,6 +22,8 @@
 
 declare(strict_types=1);
 
+namespace ReinfyTeam\Zuri\events\api;
+
 use pocketmine\event\CancellableTrait;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 

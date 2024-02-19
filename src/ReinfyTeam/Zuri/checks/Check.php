@@ -29,6 +29,7 @@ use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\APIProvider;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\events\api\CheckFailedEvent;
 use ReinfyTeam\Zuri\events\BanEvent;
 use ReinfyTeam\Zuri\events\KickEvent;
 use ReinfyTeam\Zuri\events\ServerLagEvent;
