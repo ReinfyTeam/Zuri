@@ -5,6 +5,8 @@
 
 **Zuri** is an anticheat made to protect the server from any may unfair advantages from the players. A powerful anticheat made to destroy hackers from your server for PocketMine-MP.
 
+> ⚠️ **Spoon or Fork of Pocketmine-MP are not supported.** Do not try to create issue, they will closed automatically.
+
 😁 If you are interested with our projects, you may help us by:
 - [Donate via Ko-Fi](https://ko-fi.com/xqwtxon)
 - [Become a Patreon](https://patreon.com/xwertxy)
