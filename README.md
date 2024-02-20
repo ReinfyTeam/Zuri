@@ -16,14 +16,14 @@ Also, adding :star: a **Star** is also appreciated. ✨
 🤔 Do you struggling with **bugs and issues?** Don't hesitate to tell us about it by [creating an issue](https://github.com/ReinfyTeam/Zuri-Rewrite/issues) or you may join us on our official [discord server](https://discord.com/invite/7u7qKsvSxg)!
 
 # Plugin Developers
-This is module using a special method that requires an API: If the server you are using a method intended for the digging of special players.
+This is module using a special method that requires an API: If the server you are using a method intended for the digging of special players. ☢
 
 The full documentation can be found in the [wiki](https://github.com/ReinfyTeam/Zuri-Rewrite/wiki).
 
 Example:
 ```php
 // $player must instance of Player from PMMP //
-$api = PlayerAPI::getInstance()->getAPIPlayer($player);
+$api = PlayerAPI::getAPIPlayer($player);
 $api->setAttackSpecial(< true or false >);
 $api->setBlocksBrokeASec(< it must is number >);
 ```
