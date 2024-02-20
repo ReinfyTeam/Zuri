@@ -1,10 +1,46 @@
 # Zuri-Rewrite
+⚠️ This project is on early development stage, we wanted your feedback about the efficient of the project.
+
 > Zuri-Rewrite is a new fork code improvement of original Zuri Anticheat.
+
 **Zuri** is an anticheat made to protect the server from any may unfair advantages from the players. A powerful anticheat made to destroy hackers from your server for PocketMine-MP.
 
-If you are interested with our projects, you may help us by:
+😁 If you are interested with our projects, you may help us by:
 - [Donate via Ko-Fi](https://ko-fi.com/xqwtxon)
 - [Become a Patreon](https://patreon.com/xwertxy)
+
+Also, adding :star: a **Star** is also appreciated. ✨
+
+🤔 Do you struggling with **bugs and issues?** Don't hesitate to tell us about it by [creating an issue](https://github.com/ReinfyTeam/Zuri-Rewrite/issues) or you may join us on our official [discord server](https://discord.com/invite/7u7qKsvSxg)!
+
+# Plugin Developers
+This is module using a special method that requires an API: If the server you are using a method intended for the digging of special players.
+
+The full documentation can be found in the [wiki](https://github.com/ReinfyTeam/Zuri-Rewrite/wiki).
+
+Example:
+```php
+// $player must instance of Player from PMMP //
+$api = PlayerAPI::getInstance()->getAPIPlayer($player);
+$api->setAttackSpecial(< true or false >);
+$api->setBlocksBrokeASec(< it must is number >);
+```
+
+# Why?
+- This plugin has total of 40+ checks that can catch hacker more efficient and no more false-positive! 😏
+
+> ![Zuri Anticheat Meme](https://github.com/ReinfyTeam/Zuri-Rewrite/assets/143252455/223ce4ad-8dbe-4f87-9900-3af95135afe3)
+>
+> Zuri can catch hacker efficiently, with over **40+ check modules**. Unlike other **$100 Anticheat**, it is more systematic, lightweight, and easy to configure. It's too bad right? 🤦
+
+# Features
+- You can easily configure everything in the config. ✅
+  - Configure easily the max violations and checks and more! ⚙️
+- It is more **lightweight** compared to paid anticheat. You dont have to struggle about the performance, with this anticheat, it can possible block them all easily! 💰
+- ✨ It is easy to use when it comes at the game, you can easily debug things, manage them all at the game, and **disable checks** according to your wishes. 
+- ❌ Limit players joining by their ip limit, you can change it how many players can join with same ip address.
+- 🌟 It also checks the player if they are using a **Proxy or VPN**
+- 💥 You can customize all **messages** and prefix easily with language manager!
 
 # Checks
 | **Module Name**             | **Punishment Type**  | **Percentage of Accuracy** |
@@ -54,30 +90,7 @@ If you are interested with our projects, you may help us by:
 
 **BadPackets Total:** 17
 
-# Plugin Developers
-This is module using a special method that requires an API: If the server you are using a method intended for the digging of special players.
-
-Example:
-```php
-// ...
-use ReinfyTeam\Zuri\API;
-use pocketmine\event\Listener;
-// ...
-
-class ExampleListener extends Listener {
-	public function onBreak(BlockBreakEvent $event){
-		$player = $event->getPlayer();
-		// ...
-		$api = API::getPlayer($player);
-		$api->setAttackSpecial(< bool >);
-		$api->setBlocksBrokeASec(< int >);
-		// ...
-	}
-// ...
-```
-
-
 <hr>
 
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+> **This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser *General Public License* as published by the __Free Software Foundation__, either version 3 of the License, or (at your option) any later version.**
