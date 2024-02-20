@@ -26,7 +26,6 @@ namespace ReinfyTeam\Zuri;
 
 use pocketmine\plugin\PluginBase;
 use ReinfyTeam\Zuri\command\ZuriCommand;
-use ReinfyTeam\Zuri\components\IAPI;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\listener\PlayerListener;
 use ReinfyTeam\Zuri\listener\ServerListener;
@@ -37,7 +36,7 @@ use ReinfyTeam\Zuri\task\ServerTickTask;
 use ReinfyTeam\Zuri\utils\InternetAddress;
 use ReinfyTeam\Zuri\utils\PermissionManager;
 
-class APIProvider extends PluginBase implements IAPI {
+class APIProvider extends PluginBase {
 	private static APIProvider $instance;
 	private ProxyUDPSocket $proxyUDPSocket;
 
@@ -56,7 +55,6 @@ class APIProvider extends PluginBase implements IAPI {
 	public function onEnable() : void {
 		$this->loadChecks();
 		$this->saveDefaultConfig();
-		$this->saveResource("hash.txt");
 		$this->getScheduler()->scheduleRepeatingTask(new ServerTickTask($this), 20);
 		$this->getScheduler()->scheduleRepeatingTask(new CaptchaTask($this), 20);
 		$this->getScheduler()->scheduleRepeatingTask(new NetworkTickTask($this), 100);

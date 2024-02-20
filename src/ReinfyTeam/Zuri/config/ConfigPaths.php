@@ -22,11 +22,9 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\components\config;
+namespace ReinfyTeam\Zuri\config;
 
-use ReinfyTeam\Zuri\components\registry\ComponentWithName;
-
-abstract class ConfigPaths implements ComponentWithName {
+abstract class ConfigPaths {
 	public const PREFIX = "zuri.prefix";
 
 	public const ANTIBOT_MESSAGE = "zuri.antibot.message";
@@ -99,8 +97,4 @@ abstract class ConfigPaths implements ComponentWithName {
 	public const CHAT_REPEAT_TEXT = "zuri.chat.repeat.text";
 
 	public const CHECK = "zuri.check";
-
-	public function getComponentName() : string {
-		return "Zuri_ConfigPaths";
-	}
 }

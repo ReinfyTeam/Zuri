@@ -26,6 +26,7 @@ namespace ReinfyTeam\Zuri\listener;
 
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
@@ -33,16 +34,12 @@ use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\player\Player;
-use ReinfyTeam\Zuri\components\registry\Listener;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\Discord\Discord;
 
-class ServerListener extends Listener {
+class ServerListener implements Listener {
 	private array $ip = [];
-
-	public function __construct() {
-	}
 
 	public function onPlayerPreLogin(PlayerPreLoginEvent $event) {
 		$ip = $event->getIp();

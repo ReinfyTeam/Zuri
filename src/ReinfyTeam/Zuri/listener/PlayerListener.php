@@ -33,6 +33,7 @@ use pocketmine\event\Event;
 use pocketmine\event\inventory\InventoryCloseEvent;
 use pocketmine\event\inventory\InventoryOpenEvent;
 use pocketmine\event\inventory\InventoryTransactionEvent;
+use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerInteractEvent;
@@ -53,7 +54,6 @@ use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionD
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\APIProvider;
-use ReinfyTeam\Zuri\components\registry\Listener;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use function array_filter;
@@ -61,15 +61,11 @@ use function count;
 use function in_array;
 use function microtime;
 
-class PlayerListener extends Listener {
+class PlayerListener implements Listener {
 	private array $blockInteracted = [];
 	private array $clicksData = [];
 
 	const DELTAL_TIME_CLICK = 1;
-	const FILES = ["network", "fly", "payload", "chat", "scaffold", "aimassist", "badpackets", "blockbreak", "blockplace", "blockinteract", "fight", "inventory", "moving", "velocity"];
-
-	public function __construct() {
-	}
 
 	public function onDataPacketReceive(DataPacketReceiveEvent $event) : void {
 		$packet = $event->getPacket();

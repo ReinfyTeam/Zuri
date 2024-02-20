@@ -29,7 +29,6 @@ use pocketmine\entity\Location;
 use pocketmine\math\Facing;
 use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
-use ReinfyTeam\Zuri\components\player\IPlayerAPI;
 use function microtime;
 
 class PlayerAPI implements IPlayerAPI {

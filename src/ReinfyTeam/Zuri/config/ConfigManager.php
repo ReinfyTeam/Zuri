@@ -25,7 +25,6 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\config;
 
 use ReinfyTeam\Zuri\APIProvider;
-use ReinfyTeam\Zuri\components\config\ConfigPaths;
 
 class ConfigManager extends ConfigPaths {
 	public static function getData(string $path) {
