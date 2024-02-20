@@ -67,6 +67,7 @@ class WrongPitch extends Check {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			if ($playerAPI->getTeleportTicks() > 100 && abs($packet->getPitch()) > 90) {
 				$this->failed($playerAPI);
+				$this->debug($playerAPI, "pitch=" . abs($packet->getPitch()) . ", teleportTicks=" . $playerAPI->getTeleportTicks());
 			}
 		}
 	}

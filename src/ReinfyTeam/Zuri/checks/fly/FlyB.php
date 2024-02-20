@@ -80,6 +80,7 @@ class FlyB extends Check {
 					$this->failed($playerAPI);
 					$event->cancel();
 				}
+				$this->debug($playerAPI, "packetFlags=" . $packet->flags);
 			}
 		}
 	}

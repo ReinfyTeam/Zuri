@@ -31,6 +31,7 @@ use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\MathUtil;
+use function count;
 
 class KillAuraE extends Check {
 	public function getName() : string {
@@ -100,6 +101,7 @@ class KillAuraE extends Check {
 				if (!isset($entities[$entity->getId()])) {
 					$this->failed($playerAPI);
 				}
+				$this->debug($playerAPI, "delta=$delta, distance=$distance, entities=" . count($entities));
 			}
 		}
 	}

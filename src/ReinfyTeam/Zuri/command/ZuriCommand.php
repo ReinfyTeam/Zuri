@@ -31,6 +31,7 @@ use pocketmine\plugin\PluginOwned;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\APIProvider;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\player\PlayerAPI;
 
 class ZuriCommand extends Command implements PluginOwned {
 	public function __construct() {
@@ -45,6 +46,7 @@ class ZuriCommand extends Command implements PluginOwned {
 	public function execute(CommandSender $sender, string $label, array $args) : void {
 		$prefix = ConfigManager::getData(ConfigManager::PREFIX);
 		$namecmd = $this->getName();
+		$playerAPI = PlayerAPI::getAPIPlayer($sender);
 		if ($sender instanceof Player) {
 			if (isset($args[0])) {
 				switch($args[0]) {
@@ -135,7 +137,22 @@ class ZuriCommand extends Command implements PluginOwned {
 						$data = ConfigManager::getData(ConfigManager::PERMISSION_BYPASS_ENABLE) === true ? ConfigManager::setData(ConfigManager::PERMISSION_BYPASS_ENABLE, false) : ConfigManager::setData(ConfigManager::PERMISSION_BYPASS_ENABLE, true);
 						$sender->sendMessage($prefix . TextFormat::GRAY . " Bypass mode is " . (ConfigManager::getData(ConfigManager::PERMISSION_BYPASS_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 						break;
+					case "debug":
+						$data = $playerAPI->isDebug() === true ? $playerAPI->setDebug(false) : $playerAPI->setDebug(true);
+						$sender->sendMessage($prefix . TextFormat::GRAY . " Debug mode is " . ($playerAPI->isDebug() ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
+						break;
 					default:
+						$sender->sendMessage(TextFormat::RED . "----- Zuri Anticheat -----");
+						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " about" . TextFormat::GRAY . " - Show infomation the plugin.");
+						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify (toggle/admin)" . TextFormat::GRAY . " - Use to on/off notify.");
+						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " process (auto)" . TextFormat::GRAY . " - Use to on/off process.");
+						//$sender->sendMessage(TextFormat::RED."/".$namecmd.TextFormat::RESET." xray".TextFormat::GRAY." - Use to on/off check xray.");
+						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode (toggle/randomize)" . TextFormat::GRAY . " - Use to on/off ban mode.");
+						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha (toggle/message/tip/title/randomize)" . TextFormat::GRAY . " - Use to on/off mode for captcha.");
+						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " bypass" . TextFormat::GRAY . " - Use to on/off for bypass mode.");
+						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " debug" . TextFormat::GRAY . " - Use to on/off for debug mode.");
+						$sender->sendMessage(TextFormat::RED . "----------------------");
+						break;
 				}
 			} else {
 				$sender->sendMessage(TextFormat::RED . "----- Zuri Anticheat -----");
@@ -146,6 +163,7 @@ class ZuriCommand extends Command implements PluginOwned {
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode (toggle/randomize)" . TextFormat::GRAY . " - Use to on/off ban mode.");
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha (toggle/message/tip/title/randomize)" . TextFormat::GRAY . " - Use to on/off mode for captcha.");
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " bypass" . TextFormat::GRAY . " - Use to on/off for bypass mode.");
+				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " debug" . TextFormat::GRAY . " - Use to on/off for debug mode.");
 				$sender->sendMessage(TextFormat::RED . "----------------------");
 			}
 		} else {

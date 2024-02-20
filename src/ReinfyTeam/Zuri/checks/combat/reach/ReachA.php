@@ -87,6 +87,7 @@ class ReachA extends Check {
 					$this->failed($playerAPI);
 					return;
 				}
+				$this->debug($playerAPI, "isPlayerTop=$isPlayerTop, distance=$distance");
 			}
 		}
 	}

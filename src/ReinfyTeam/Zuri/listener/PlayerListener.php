@@ -267,7 +267,6 @@ class PlayerListener implements Listener {
 	}
 
 	public function onPlayerQuit(PlayerQuitEvent $event) {
-		PlayerAPI::getAPIPlayer($event->getPlayer());
 		PlayerAPI::removeAPIPlayer($event->getPlayer());
 	}
 

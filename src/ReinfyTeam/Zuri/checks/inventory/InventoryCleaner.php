@@ -83,6 +83,7 @@ class InventoryCleaner extends Check {
 					$playerAPI->setExternalData("ticksTransaction", microtime(true));
 					$playerAPI->setExternalData("transaction", 0);
 				}
+				$this->debug($playerAPI, "ticks=$ticks, transaction=$transaction");
 			}
 		}
 	}

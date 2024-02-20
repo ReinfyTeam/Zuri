@@ -82,10 +82,12 @@ class VelocityA extends Check {
 							$this->failed($playerAPI);
 						}
 					}
+					$this->debug($playerAPI, "velocity=$velocity");
 					$playerAPI->unsetExternalData("lastLocationV");
 				} else {
 					$playerAPI->setExternalData("lastLocationV", $location);
 				}
+				$this->debug($playerAPI, "isOnGround=" . $entity->isOnGround() . ", isInWeb=" . $playerAPI->isInWeb() . ", isUnderBlock=" . $playerAPI->isUnderBlock() . ", isInBoxBlock=" . $playerAPI->isInBoxBlock());
 			}
 		}
 	}

@@ -82,6 +82,7 @@ class AimAssistC extends Check {
 				if ($abs > 0 && $abs < 0.01 && $abs2 > 0.2) {
 					$this->failed($playerAPI);
 				}
+				$this->debug($playerAPI, "abs=$abs, abs2=$abs2");
 			}
 		}
 	}

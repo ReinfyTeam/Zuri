@@ -83,6 +83,7 @@ class ReachB extends Check {
 				if ($player->getLocation()->distanceSquared($locEntity) > 4.0) {
 					$this->failed($playerAPI);
 				}
+				$this->debug($playerAPI, "distance=" . $player->getLocation()->distanceSquared($locEntity));
 			}
 		}
 	}

@@ -98,6 +98,7 @@ class VelocityB extends Check {
 						$this->failed($playerAPI);
 					}
 					$playerAPI->unsetExternalData("lastVLocB");
+					$this->debug($playerAPI, "velocity=$velocity");
 				} else {
 					$playerAPI->setExternalData("lastVLocB", $loc);
 				}

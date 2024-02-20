@@ -94,6 +94,7 @@ class ChestAura extends Check {
 			if ($timeOpenChest === null && !($event->getInventory() instanceof PlayerCraftingInventory)) {
 				$playerAPI->setExternalData("timeOpenChest", microtime(true));
 			}
+			$this->debug($playerAPI, "countTransaction=$countTransaction, timeOpenChest=$timeOpenChest");
 		}
 		if ($event instanceof InventoryCloseEvent) {
 			if ($timeOpenChest !== null && $countTransaction !== null) {
@@ -104,6 +105,7 @@ class ChestAura extends Check {
 				$playerAPI->unsetExternalData("timeOpenChest");
 				$playerAPI->unsetExternalData("countTransaction");
 			}
+			$this->debug($playerAPI, "timediff=$timeDiff");
 		}
 		if ($event instanceof InventoryTransactionEvent) {
 			$transaction = $event->getTransaction();

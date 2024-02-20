@@ -87,6 +87,7 @@ class SpamC extends Check {
 					} else {
 						$playerAPI->unsetExternalData("lastTickSC");
 					}
+					$this->debug($playerAPI, "diff=$diff, lastTicks=$lastTicks");
 				} else {
 					$playerAPI->setExternalData("lastTickSC", microtime(true));
 				}

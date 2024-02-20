@@ -81,5 +81,7 @@ class AntiVoid extends Check {
 			}
 			$playerAPI->unsetExternalData("lastYB");
 		}
+
+		$this->debug($playerAPI, "lastY=$lastY, lastYB=$lastYB");
 	}
 }

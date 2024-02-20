@@ -71,6 +71,7 @@ class WrongMining extends Check {
 			$playerAPI->setActionBreakingSpecial(false);
 			$playerAPI->setBlocksBrokeASec(0);
 			$playerAPI->setFlagged(true);
+			$this->debug($playerAPI, "allowedBreak=" . $playerAPI->getNumberBlocksAllowBreak() . ", isCreative=$isCreative, blocksBrokeASec=" . $playerAPI->getBlocksBrokeASec());
 		}
 	}
 }

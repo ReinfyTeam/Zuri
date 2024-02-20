@@ -81,6 +81,7 @@ class ScaffoldC extends Check {
 			if ($distance < 1.25 && abs($posPlayer->getPitch()) > 40) {
 				$this->failed($playerAPI);
 			}
+			$this->debug($playerAPI, "distance=$distance, pitch=" . abs($posPlayer->getPitch()));
 		}
 	}
 }

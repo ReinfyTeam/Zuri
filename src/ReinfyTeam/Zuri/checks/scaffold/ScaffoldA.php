@@ -83,6 +83,7 @@ class ScaffoldA extends Check {
 				if ($x > 1.0 || $y > 1.0 || $z > 1.0) {
 					$this->failed($playerAPI);
 				}
+				$this->debug($playerAPI, "x=$x, y=$y, z=$z");
 			}
 		}
 	}

@@ -67,9 +67,10 @@ class AntiImmobile extends Check {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
 			if ($player->hasNoClientPredictions()) {
-				if (MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo()) > 0.01) {
+				if (($limit = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.01) {
 					$this->failed($playerAPI);
 				}
+				$this->debug($playerAPI, "limit=$limit");
 			}
 		}
 	}

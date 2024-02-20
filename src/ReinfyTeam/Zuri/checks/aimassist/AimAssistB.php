@@ -74,6 +74,7 @@ class AimAssistB extends Check {
 				if ($abs >= 1 && fmod($abs, 0.1) == 0) {
 					if (fmod($abs, 1.0) == 0 || fmod($abs, 10.0) == 0 || fmod($abs, 30.0) == 0) {
 						$this->failed($playerAPI);
+						$this->debug($playerAPI, "toYaw=$toYaw, fromYaw=$fromYaw, abs=$abs, toPitch=$toPitch, fromPitch=$fromPitch, abs2=$abs2");
 					}
 				}
 				$toPitch = $nLocation["to"]->getPitch();
@@ -82,6 +83,7 @@ class AimAssistB extends Check {
 				if ($abs2 >= 1 && fmod($abs2, 0.1) == 0) {
 					if (fmod($abs2, 1.0) == 0 || fmod($abs2, 10.0) == 0 || fmod($abs2, 30.0) == 0) {
 						$this->failed($playerAPI);
+						$this->debug($playerAPI, "toYaw=$toYaw, fromYaw=$fromYaw, abs=$abs, toPitch=$toPitch, fromPitch=$fromPitch, abs2=$abs2");
 					}
 				}
 			}

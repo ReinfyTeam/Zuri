@@ -24,40 +24,51 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
-use ReinfyTeam\Zuri\APIProvider;
-use function array_diff;
-use function array_key_last;
-use function basename;
-use function explode;
-use function implode;
-use function pathinfo;
-use function rtrim;
-use function scandir;
+use pocketmine\utils\TextFormat;
+use function array_keys;
+use function array_values;
 use function str_replace;
 
 class Utils {
-	public static function getResourceFile(string $file) : string {
-		return str_replace(["\\utils", "/utils"], DIRECTORY_SEPARATOR . "resources", __DIR__) . DIRECTORY_SEPARATOR . $file;
-	}
+	public static function ParseColors(string $text, bool $reverse = false) : string {
+		$colors = [
+			"{BLACK}" => TextFormat::BLACK,
+			"{DARK_BLUE}" => TextFormat::DARK_BLUE,
+			"{DARK_GREEN}" => TextFormat::DARK_GREEN,
+			"{DARK_AQUA}" => TextFormat::DARK_AQUA,
+			"{DARK_RED}" => TextFormat::DARK_RED,
+			"{DARK_PURPLE}" => TextFormat::DARK_PURPLE,
+			"{DARK_GRAY}" => TextFormat::DARK_GRAY,
+			"{LIGHT_PURPLE}" => TextFormat::LIGHT_PURPLE,
+			"{GOLD}" => TextFormat::GOLD,
+			"{GRAY}" => TextFormat::GRAY,
+			"{BLUE}" => TextFormat::BLUE,
+			"{GREEN}" => TextFormat::GREEN,
+			"{AQUA}" => TextFormat::AQUA,
+			"{RED}" => TextFormat::RED,
+			"{YELLOW}" => TextFormat::YELLOW,
+			"{WHITE}" => TextFormat::WHITE,
+			"{MINECOIN_GOLD}" => TextFormat::MINECOIN_GOLD,
+		];
 
-	public static function callDirectory(string $directory, callable $callable) : void {
-		$main = explode("\\", APIProvider::getInstance()->getDescription()->getMain());
-		unset($main[array_key_last($main)]);
-		$pathPlugin = APIProvider::getInstance()->getServer()->getPluginPath() . "/" . APIProvider::getInstance()->getDescription()->getName();
-		$main = implode("/", $main);
-		$directory = rtrim(str_replace(DIRECTORY_SEPARATOR, "/", $directory), "/");
-		$dir = rtrim($pathPlugin, "/" . DIRECTORY_SEPARATOR) . "/" . "src/$main/" . $directory;
-		foreach (array_diff(scandir($dir), [".", ".."]) as $file) {
-			$path = $dir . "/$file";
-			$extension = pathinfo($path)["extension"] ?? null;
-			if ($extension === null) {
-				self::callDirectory($directory . "/" . $file, $callable);
-			} elseif ($extension === "php") {
-				$namespaceDirectory = str_replace("/", "\\", $directory);
-				$namespaceMain = str_replace("/", "\\", $main);
-				$namespace = $namespaceMain . "\\$namespaceDirectory\\" . basename($file, ".php");
-				$callable($namespace);
-			}
+		$formats = [
+			"&" => TextFormat::ESCAPE,
+			"{ESCAPE}" => TextFormat::ESCAPE,
+			"{OBFUSCATED}" => TextFormat::OBFUSCATED,
+			"{BOLD}" => TextFormat::BOLD,
+			"{STRIKETHROUGH}" => TextFormat::STRIKETHROUGH,
+			"{UNDERLINE}" => TextFormat::UNDERLINE,
+			"{ITALIC}" => TextFormat::ITALIC,
+		];
+
+		if ($reverse) {
+			$text = str_replace(array_values($colors), array_keys($colors), $text);
+			$text = str_replace(array_values($formats), array_keys($formats), $text);
+		} else {
+			$text = str_replace(array_keys($colors), array_values($colors), $text);
+			$text = str_replace(array_keys($formats), array_values($formats), $text);
 		}
+
+		return $text;
 	}
 }

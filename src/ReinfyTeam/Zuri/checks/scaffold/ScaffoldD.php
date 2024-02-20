@@ -75,6 +75,7 @@ class ScaffoldD extends Check {
 			if ($playerAPI->getPlayer()->getInventory()->getItemInHand()->isNull()) {
 				$this->failed($playerAPI);
 			}
+			$this->debug($playerAPI, "isItemInHandNull=" . $playerAPI->getPlayer()->getInventory()->getItemInHand()->isNull());
 		}
 	}
 }

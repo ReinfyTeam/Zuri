@@ -105,6 +105,7 @@ class KillAuraC extends Check {
 						$this->failed($playerAPI);
 					}
 				}
+				$this->debug($playerAPI, "delta=$delta, distance=$distance, entities=" . count($entities));
 			}
 		}
 	}

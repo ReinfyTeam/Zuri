@@ -78,6 +78,7 @@ class KillAuraD extends Check {
 			) {
 				$this->failed($playerAPI);
 			}
+			$this->debug($playerAPI, "isDigging=" . $playerAPI->isDigging() . ", placingTicks=" . $playerAPI->getPlacingTicks() . ", attackTicks=" . $playerAPI->getAttackTicks() . ", isSurvival=" . $playerAPI->getPlayer()->isSurvival());
 		}
 	}
 }

@@ -83,6 +83,7 @@ class ChestStealler extends Check {
 					$playerAPI->setExternalData("ticksN", 0);
 					$playerAPI->setExternalData("lastTimeN", microtime(true));
 				}
+				$this->debug($playerAPI, "ticks=$ticks, lastTime=$lastTime");
 			}
 		}
 	}

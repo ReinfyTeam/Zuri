@@ -82,6 +82,7 @@ class BadPacketsF extends Check {
 			) {
 				$this->failed($playerAPI);
 			}
+			$this->debug($playerAPI, "place=" . $this->place . ", teleportTicks=" . $playerAPI->getTeleportTicks());
 		}
 	}
 }

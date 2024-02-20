@@ -96,6 +96,7 @@ class AirMovement extends Check {
 				if ($distance > $limit) {
 					$this->failed($playerAPI);
 				}
+				$this->debug($playerAPI, "distance=$distance, limit=$limit");
 			}
 		}
 	}

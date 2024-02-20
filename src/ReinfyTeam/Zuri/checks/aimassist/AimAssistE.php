@@ -82,6 +82,7 @@ class AimAssistE extends Check {
 				if ($abs > 0.0 && $abs < 0.8 && $abs2 > 0.279 && $abs2 < 0.28090858) {
 					$this->failed($playerAPI);
 				}
+				$this->debug($playerAPI, "abs=$abs, abs2=$abs2");
 			}
 		}
 	}

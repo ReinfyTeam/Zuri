@@ -93,6 +93,7 @@ class SpamA extends Check {
 						$playerAPI->setExternalData("SpamATick", microtime(true));
 						$playerAPI->setExternalData("ViolationSpamA", 0);
 					}
+					$this->debug($playerAPI, "diff=$diff, chatTick=$chatTick, violationChat=$violationChat");
 				} else {
 					$playerAPI->setExternalData("SpamATick", microtime(true));
 					$playerAPI->setExternalData("ViolationSpamA", 0);

@@ -74,6 +74,7 @@ class FastEat extends Check {
 				if ($lastTick === null) {
 					$playerAPI->setExternalData("lastTickP", microtime(true));
 				}
+				$this->debug($playerAPI, "lastTick=$lastTick");
 			}
 		}
 	}
@@ -88,6 +89,7 @@ class FastEat extends Check {
 						$event->cancel();
 						$playerAPI->unsetExternalData("lastTickP");
 					}
+					$this->debug($playerAPI, "lastTick=$lastTick, diff=$diff");
 				}
 			}
 		}

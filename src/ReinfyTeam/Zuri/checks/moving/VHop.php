@@ -29,9 +29,9 @@ use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
-class Step extends Check {
+class VHop extends Check {
 	public function getName() : string {
-		return "Step";
+		return "VHop";
 	}
 
 	public function getSubType() : string {
@@ -92,6 +92,7 @@ class Step extends Check {
 					$this->failed($playerAPI);
 				}
 				$playerAPI->unsetExternalData("lastY");
+				$this->debug($playerAPI, "lastY=$lastY, limit=$limit, diff=$diff");
 			} else {
 				$playerAPI->setExternalData("lastY", $locationPlayer->getY());
 			}

@@ -78,11 +78,13 @@ class AutoClickB extends Check {
 						if ($ticks >= 25) {
 							$this->failed($playerAPI);
 						}
+						$this->debug($playerAPI, "diff=$diff, lastClick=$lastClick, ticks=$ticks");
 						$playerAPI->unsetExternalData("clicksTicks2");
 						$playerAPI->unsetExternalData("lastClick");
 					} else {
 						$playerAPI->setExternalData("clicksTicks2", $ticks + 1);
 					}
+					$this->debug($playerAPI, "lastClick=$lastClick, ticks=$ticks");
 				} else {
 					$playerAPI->setExternalData("clicksTicks2", 0);
 					$playerAPI->setExternalData("lastClick", microtime(true));

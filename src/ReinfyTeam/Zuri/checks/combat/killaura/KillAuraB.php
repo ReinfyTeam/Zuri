@@ -80,6 +80,7 @@ class KillAuraB extends Check {
 			if ($deltaPitch === 0 and $deltaYaw === 0) {
 				$this->failed($playerAPI);
 			}
+			$this->debug($playerAPI, "deltaPitch=$deltaPitch, deltaYaw=$deltaYaw");
 		}
 	}
 }

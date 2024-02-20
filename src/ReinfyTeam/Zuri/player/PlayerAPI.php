@@ -60,6 +60,7 @@ class PlayerAPI implements IPlayerAPI {
 	private bool $inLiquid = false;
 	private bool $onStairs = false;
 	private bool $onIce = false;
+	private bool $debug = false;
 	private float $lastGroundY = 0.0;
 	private float $lastNoGroundY = 0.0;
 	private float $lastDelayedMovePacket = 0.0;
@@ -567,5 +568,13 @@ class PlayerAPI implements IPlayerAPI {
 
 	public function getLocation() {
 		return $this->player->getLocation();
+	}
+
+	public function setDebug(bool $value = true) : void {
+		$this->debug = $value;
+	}
+
+	public function isDebug() : bool {
+		return $this->debug;
 	}
 }

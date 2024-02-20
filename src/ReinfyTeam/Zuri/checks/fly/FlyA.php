@@ -92,6 +92,7 @@ class FlyA extends Check {
 				$playerAPI->unsetExternalData("lastYNoGroundF");
 				$playerAPI->unsetExternalData("lastTimeF");
 			}
+			$this->debug($playerAPI, "diff=$diff, lastTime=$lastTime, lastYNoGround=$lastYNoGround");
 		} else {
 			$playerAPI->setExternalData("lastYNoGroundF", (int) $player->getLocation()->getY());
 			$playerAPI->setExternalData("lastTimeF", microtime(true));

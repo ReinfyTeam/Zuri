@@ -81,6 +81,7 @@ class ScaffoldB extends Check {
 			) {
 				$this->failed($playerAPI);
 			}
+			$this->debug($playerAPI, "pitch=$pitch, ping=" . $playerAPI->getPing());
 		}
 	}
 }

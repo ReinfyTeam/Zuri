@@ -87,6 +87,7 @@ class AutoClickA extends Check {
 					if ($playerAPI->getExternalData("avgDeviation") < 5) {
 						$this->failed($playerAPI);
 					}
+					$this->debug($playerAPI, "avgDeviation=$avgDeviation, speed=$speed, deviation=$deviation, ticksClick=$ticks, avgSpeed=$avgSpeed");
 				} else {
 					$playerAPI->setExternalData("ticksClick", 0);
 					$playerAPI->setExternalData("avgSpeed", 0);

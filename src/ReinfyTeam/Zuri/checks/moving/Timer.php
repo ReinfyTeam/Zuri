@@ -79,6 +79,7 @@ class Timer extends Check {
 			if ($timeDiff > 1) {
 				if ($point < 17) {
 					$this->failed($playerAPI);
+					$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
 				}
 				$playerAPI->unsetExternalData("pointQ");
 				$playerAPI->unsetExternalData("lastTimeQ");

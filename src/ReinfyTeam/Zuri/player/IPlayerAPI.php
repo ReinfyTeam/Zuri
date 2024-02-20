@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\components\player;
+namespace ReinfyTeam\Zuri\player;
 
 use pocketmine\entity\Location;
 
@@ -198,4 +198,8 @@ interface IPlayerAPI {
 	public function getCaptchaCode() : string;
 
 	public function setCaptchaCode(string $data) : void;
+
+	public function setDebug(bool $value = false) : void;
+
+	public function isDebug() : bool;
 }

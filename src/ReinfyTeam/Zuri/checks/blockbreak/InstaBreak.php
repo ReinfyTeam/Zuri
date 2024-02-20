@@ -99,6 +99,7 @@ class InstaBreak extends Check {
 					$event->cancel();
 					return;
 				}
+				$this->debug($playerAPI, "expectedTime=$expectedTime, hasMiningFatugue=" . $playerAPI->getPlayer()->getEffects()->has(VanillaEffects::MINING_FATIGUE()) . ", expectedTime=$expectedTime, actualTime=$actualTime");
 				$playerAPI->unsetExternalData("breakTimes");
 			}
 		}

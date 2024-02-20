@@ -103,6 +103,7 @@ class AutoClickC extends Check {
 					$playerAPI->setExternalData("lastClick3", microtime(true));
 				}
 			}
+			$this->debug($playerAPI, "ticks=$ticks, lastClick=$lastClick");
 		}
 	}
 }

@@ -67,6 +67,7 @@ class Crasher extends Check {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			if (abs($packet->getPosition()->getY()) > 500) {
 				$this->failed($playerAPI);
+				$this->debug($playerAPI, "y=" . $packet->getPosition()->getY() . ", absY=" . abs($packet->getPosition()->getY()));
 			}
 		}
 	}

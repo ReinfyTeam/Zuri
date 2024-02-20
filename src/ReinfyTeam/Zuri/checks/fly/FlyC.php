@@ -30,6 +30,7 @@ use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use function count;
 use function in_array;
 use function intval;
 
@@ -119,6 +120,7 @@ class FlyC extends Check {
 								$this->failed($playerAPI);
 							}
 						}
+						$this->debug($playerAPI, "oldY=" . $oldPos->getY() . ", newY=" . $newPos->getY() . ", airTicks=" . $player->getInAirTicks() . ", surroundingBlocks=" . count($surroundingBlocks));
 					}
 				}
 			}

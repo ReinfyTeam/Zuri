@@ -72,6 +72,7 @@ class FillBlock extends Check {
 			$playerAPI->setActionPlacingSpecial(false);
 			$playerAPI->setBlocksPlacedASec(0);
 			$playerAPI->setFlagged(true);
+			$this->debug($playerAPI, "numberBlocksAllowPlace=" . $playerAPI->getNumberBlocksAllowPlace() . ", blocksPlacedASec=" . $playerAPI->getBlocksPlacedASec());
 		}
 	}
 }

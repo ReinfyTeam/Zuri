@@ -27,6 +27,7 @@ namespace ReinfyTeam\Zuri\checks;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\APIProvider;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\events\api\CheckFailedEvent;
@@ -88,7 +89,10 @@ abstract class Check extends ConfigManager {
 		$notify = self::getData(self::ALERTS_ENABLE) === true;
 		$bypass = self::getData(self::PERMISSION_BYPASS_ENABLE) === true && $player->hasPermission(self::getData(self::PERMISSION_BYPASS_PERMISSION));
 		$reachedMaxViolations = $playerAPI->getViolation($this->getName()) > $this->maxViolations();
+		$maxViolations = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".maxvl");
 		$playerAPI->addViolation($this->getName());
+		$reachedMaxRealViolations = $playerAPI->getRealViolation($this->getName()) > $maxViolations;
+		$server = APIProvider::getInstance()->getServer();
 
 		if ($bypass) {
 			return false;
@@ -110,12 +114,16 @@ abstract class Check extends ConfigManager {
 			}
 		}
 
+		if ($playerAPI->isDebug()) {
+			return false;
+		}
+
 		if ($this->flag()) {
 			$playerAPI->setFlagged(true);
 			return true;
 		}
 
-		if ($reachedMaxViolations && $this->ban() && self::getData(self::BAN_ENABLE) === true) {
+		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->ban() && self::getData(self::BAN_ENABLE) === true) {
 			foreach (self::getData(self::BAN_COMMANDS) as $command) {
 				$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
 				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
@@ -127,7 +135,7 @@ abstract class Check extends ConfigManager {
 			return true;
 		}
 
-		if ($reachedMaxViolations && $this->kick() && self::getData(self::KICK_ENABLE) === true) {
+		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->kick() && self::getData(self::KICK_ENABLE) === true) {
 			if (self::getData(self::KICK_COMMANDS_ENABLED) === true) {
 				foreach (self::getData(self::KICK_COMMANDS) as $command) {
 					$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
@@ -151,5 +159,24 @@ abstract class Check extends ConfigManager {
 
 
 		return false;
+	}
+
+	public function debug(PlayerAPI $playerAPI, string $text) : void {
+		$player = $playerAPI->getPlayer();
+
+		// WHY?? NOT CONNECTED BUG!
+		// Someone reported me about using NetherGames Fork of Pocketmine-MP
+		// and after flagged and kicked to the server, the checks wont run because the player is not connected.
+		// even they can play on the server, break blocks, walk, etc...
+		// If you encountered to bug, Pocketmine-MP cannot resolve this because you're running fork of NetherGames.
+		// !!! NO SUPPORT FOR NETHERGAMES FORK !!!
+		if (!$player->isConnected()) {
+			APIProvider::getInstance()->getServer()->getLogger()->warning(self::getData(self::PREFIX) . " " . TextFormat::YELLOW . $player->getName() . " is expieriencing not connected bug! Are you using a spoon/fork of Pocketmine-MP? Unable to check: Player is not connected.");
+			return;
+		}
+
+		if ($playerAPI->isDebug()) {
+			$player->sendMessage(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
+		}
 	}
 }
