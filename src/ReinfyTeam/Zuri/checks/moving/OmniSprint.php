@@ -24,14 +24,18 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
+use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
+use pocketmine\network\mcpe\protocol\StartGamePacket;
 use pocketmine\network\mcpe\protocol\types\InputMode;
 use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
+use pocketmine\network\mcpe\protocol\types\playerMovementSettings;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use function spl_object_id;
 
 class OmniSprint extends Check {
@@ -72,27 +76,35 @@ class OmniSprint extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		if ($packet instanceof PlayerAuthInputPacket) {
-			if ($packet->getInputMode() === InputMode::MOUSE_KEYBOARD || $packet->getInputMode() === InputMode::TOUCHSCREEN) {
-				if ($packet->getInputFlags() === PlayerAuthInputFlags::LEFT || $packet->getInputFlags() === PlayerAuthInputFlags::RIGHT || $packet->getInputFlags() === PlayerAuthInputFlags::DOWN) {
+			if ($packet->getInputMode() === InputMode::MOUSE_KEYBOARD || $packet->getInputMode() === InputMode::TOUCHSCREEN) { // for windows and mobile, ios only..
+				$left = ($packet->getInputFlags() & (1 << PlayerAuthInputFlags::LEFT)) !== 0;
+				$right = ($packet->getInputFlags() & (1 << PlayerAuthInputFlags::RIGHT)) !== 0;
+				$down = ($packet->getInputFlags() & (1 << PlayerAuthInputFlags::DOWN)) !== 0;
+				if ($down || $right || $left) {
 					if (!$player->isSprinting() && isset($this->check[spl_object_id($playerAPI)])) {
 						$this->failed($playerAPI);
 					}
 				}
+				$this->debug($playerAPI, "inputFlag=" . $packet->getInputFlags() . ", inputMode=" . $packet->getInputMode() . ", check=" . isset($this->check[spl_object_id($playerAPI)]));
 			}
-			$this->debug($playerAPI, "inputFlag=" . $packet->getInputFlags() . ", inputMode=" . $packet->getInputMode());
+		}
+
+		if ($packet instanceof StartGamePacket) {
+			$packet->playerMovementSettings = new PlayerMovementSettings($packet->playerMovementSettings->getMovementType(), $packet->playerMovementSettings->getRewindHistorySize(), true); // hack for PlayerMovementSettings->serverAuthoritativeBlockBreaking?
 		}
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
-			if (MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo()) > 0.8) {
+			$player = $playerAPI->getPlayer();
+			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.07 && !$player->getEffects()->has(VanillaEffects::SPEED())) {
 				$this->check[spl_object_id($playerAPI)] = true; // moving too fast?
 			} else {
 				if (isset($this->check[spl_object_id($playerAPI)])) {
 					unset($this->check[spl_object_id($playerAPI)]);
 				}
 			}
-			$this->debug($playerAPI, "speed=" . MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo()) . ", isSprinting=" . $player->isSprinting());
+			$this->debug($playerAPI, "speed=$d, isSprinting=" . $player->isSprinting());
 		}
 	}
 }
