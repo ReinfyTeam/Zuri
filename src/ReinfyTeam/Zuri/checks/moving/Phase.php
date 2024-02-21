@@ -145,12 +145,16 @@ class Phase extends Check {
 					BlockTypeIds::WARPED_FENCE_GATE,
 					BlockTypeIds::MANGROVE_FENCE_GATE,
 					BlockTypeIds::CRIMSON_FENCE_GATE,
-					BlockTypeIds::CHERRY_FENCE_GATE
+					BlockTypeIds::CHERRY_FENCE_GATE,
+					BlockTypeIds::BEETROOTS,
+					BlockTypeIds::CAKE,
+					BlockTypeIds::CARROTS,
+					BlockTypeIds::FIRE
 				];
 				if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.1) { // this will fix player when it get stuck at the bottom
 					if ($player->isSurvival() && !$playerAPI->isOnCarpet() && !$playerAPI->isOnPlate() && !$playerAPI->isOnDoor() && !$playerAPI->isOnSnow() && !$playerAPI->isOnPlant() && !$playerAPI->isOnAdhesion() && !$playerAPI->isOnStairs() && !$playerAPI->isInLiquid() && !$playerAPI->isInWeb() && !in_array($id, $skip, true) && !BlockUtil::isUnderBlock($event->getTo(), $skip, 0) && !in_array($id, $skip, true)) {
 						$this->failed($playerAPI);
-						if(($y = $player->getWorld()->getHighestBlockAt($x, $z)) < $player->getLocation()->getY()){
+						if (($y = $player->getWorld()->getHighestBlockAt($x, $z)) < $player->getLocation()->getY()) {
 							$x = $player->getLocation()->getX();
 							$z = $player->getLocation()->getZ();
 							$player->teleport(new Vector3($x, $y + 1, $z)); // Todo: Test player teleport to the top if he is stuck at the bottom.
