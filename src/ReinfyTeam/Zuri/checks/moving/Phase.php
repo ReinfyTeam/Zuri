@@ -157,9 +157,7 @@ class Phase extends Check {
 					$x = intval($player->getLocation()->getX());
 					$z = intval($player->getLocation()->getZ());
 					if (($y = intval($player->getWorld()->getHighestBlockAt($x, $z))) > intval($player->getLocation()->getY())) {
-						if (!$world->isChunkLoaded($x, $y + 1)) {
-							$world->loadChunk($x, $y + 1); // the best hack thing to do before player teleports at the bottom of the block.
-						}
+						$world->loadChunk($x, $y + 1); // the best hack thing to do before player teleports at the bottom of the block.
 						$player->teleport(new Vector3($x, $y + 1, $z));
 					}
 					$this->debug($playerAPI, "x=$x, y=" . intval($player->getLocation()->getY()) . ", z=$z, teleportY=$y");
