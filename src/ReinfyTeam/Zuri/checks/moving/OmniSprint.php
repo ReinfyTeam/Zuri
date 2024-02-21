@@ -84,8 +84,8 @@ class OmniSprint extends Check {
 					if (!$player->isSprinting() && isset($this->check[spl_object_id($playerAPI)])) {
 						$this->failed($playerAPI);
 					}
+					$this->debug($playerAPI, "inputFlag=" . $packet->getInputFlags() . ", inputMode=" . $packet->getInputMode() . ", check=" . isset($this->check[spl_object_id($playerAPI)]));
 				}
-				$this->debug($playerAPI, "inputFlag=" . $packet->getInputFlags() . ", inputMode=" . $packet->getInputMode() . ", check=" . isset($this->check[spl_object_id($playerAPI)]));
 			}
 		}
 
