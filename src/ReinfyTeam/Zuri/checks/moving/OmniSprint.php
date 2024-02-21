@@ -72,14 +72,14 @@ class OmniSprint extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		if ($packet instanceof PlayerAuthInputPacket) {
-			if ($packet->getInputMode() === InputMode::MOUSE_KEYBOARD) {
-				if ($packet->getInputFlag() === PlayerAuthInputFlags::LEFT || $packet->getInputFlag() === PlayerAuthInputFlags::RIGHT || $packet->getInputFlag() === PlayerAuthInputFlags::DOWN) {
+			if ($packet->getInputMode() === InputMode::MOUSE_KEYBOARD || $packet->getInputMode() === InputMode::TOUCHSCREEN) {
+				if ($packet->getInputFlags() === PlayerAuthInputFlags::LEFT || $packet->getInputFlags() === PlayerAuthInputFlags::RIGHT || $packet->getInputFlags() === PlayerAuthInputFlags::DOWN) {
 					if (!$player->isSprinting() && isset($this->check[spl_object_id($playerAPI)])) {
 						$this->failed($playerAPI);
 					}
 				}
 			}
-			$this->debug($playerAPI, "inputFlag=" . $packet->getInputFlag() . ", inputMode=" . $packet->getInputMode());
+			$this->debug($playerAPI, "inputFlag=" . $packet->getInputFlags() . ", inputMode=" . $packet->getInputMode());
 		}
 	}
 
