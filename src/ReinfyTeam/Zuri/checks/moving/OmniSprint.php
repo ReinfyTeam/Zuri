@@ -24,17 +24,17 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\types\InputMode;
-use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
-use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
+use pocketmine\network\mcpe\protocol\types\InputMode;
+use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function spl_object_id;
 
-class SpeedA extends Check {
+class OmniSprint extends Check {
 	public function getName() : string {
 		return "OmniSprint";
 	}
@@ -73,7 +73,7 @@ class SpeedA extends Check {
 		$player = $playerAPI->getPlayer();
 		if ($packet instanceof PlayerAuthInputPacket) {
 			if ($packet->getInputMode() === InputMode::MOUSE_KEYBOARD) {
-				if ($packet->getInputFlag() |= (1 << PlayerAuthInputFlags::LEFT) || $packet->getInputFlag() |= (1 << PlayerAuthInputFlags::RIGHT) || $packet->getInputFlag() |= (1 << PlayerAuthInputFlags::DOWN)) {
+				if ($packet->getInputFlag() === PlayerAuthInputFlags::LEFT || $packet->getInputFlag() === PlayerAuthInputFlags::RIGHT || $packet->getInputFlag() === PlayerAuthInputFlags::DOWN) {
 					if (!$player->isSprinting() && isset($this->check[spl_object_id($playerAPI)])) {
 						$this->failed($playerAPI);
 					}
