@@ -136,6 +136,7 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Phase();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\VHop();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Timer();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\OmniSprint();
 
 		// Network related
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\AntiBot();

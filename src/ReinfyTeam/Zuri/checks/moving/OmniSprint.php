@@ -25,6 +25,11 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\moving;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\types\InputMode;
+use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
+use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
+use pocketmine\event\Event;
+use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function spl_object_id;
