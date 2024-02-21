@@ -66,21 +66,21 @@ class SpeedA extends Check {
 		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
-		if ($playerAPI->getOnlineTime() > 10 && !empty($nLocation) && $player->isSurvival()) {
-			if (
-				$playerAPI->getAttackTicks() < 40 ||
-				$playerAPI->getJumpTicks() < 40 ||
-				!$playerAPI->isInWeb() ||
-				!$playerAPI->isOnGround() ||
-				!$playerAPI->isOnAdhesion() ||
-				$player->getAllowFlight() ||
-				!$player->isSurvival()
-			) {
-				return;
-			}
-			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9) && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
-				$this->failed($playerAPI);
-			}
+		if (
+			$playerAPI->getAttackTicks() < 40 ||
+			$playerAPI->getJumpTicks() < 40 ||
+			!$playerAPI->isInWeb() ||
+			!$playerAPI->getOnlineTime() > 10 ||
+			!$playerAPI->isOnGround() ||
+			!$playerAPI->isOnAdhesion() ||
+			$player->getAllowFlight() ||
+			$player->isFlying() ||
+			!$player->isSurvival()
+		) {
+			return;
+		}
+		if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9) && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
+			$this->failed($playerAPI);
 		}
 	}
 }
