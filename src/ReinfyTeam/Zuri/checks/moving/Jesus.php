@@ -79,7 +79,7 @@ class Jesus extends Check {
 			}
 			$bottomBlockId = $player->getWorld()->getBlock($player->getLocation()->add(0, -1, 0))->getTypeId();
 			$upperBlockId = $player->getWorld()->getBlock($player->getLocation())->getTypeId();
-			if(($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.05 && $blockTypeId === BlockTypeIds::WATER && !$upperBlock === BlockTypeIds::WATER){
+			if(($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.05 && $bottomBlockId === BlockTypeIds::WATER && !$upperBlockId === BlockTypeIds::WATER){
 				$this->failed($playerAPI);
 			}
 			$this->debug($playerAPI, "bottomId=$bottomBlockId, upperBlockId=$upperBlockId");
