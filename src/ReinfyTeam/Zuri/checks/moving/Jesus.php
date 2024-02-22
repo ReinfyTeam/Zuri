@@ -24,12 +24,12 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
+use pocketmine\block\BlockTypeIds;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
-use pocketmine\block\BlockTypeIds;
 use ReinfyTeam\Zuri\checks\Check;
-use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\MathUtil;
 
 class Jesus extends Check {
 	public function getName() : string {
@@ -65,10 +65,10 @@ class Jesus extends Check {
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-		if($event instanceof PlayerMoveEvent) {
+		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-			
-			if(
+
+			if (
 				!$playerAPI->isInLiquid() ||
 				$playerAPI->isInWeb() ||
 				$playerAPI->isOnGround() ||
@@ -78,12 +78,12 @@ class Jesus extends Check {
 				return;
 			}
 			$bottomBlockId = $player->getWorld()->getBlock($player->getLocation()->add(0, -1, 0))->getTypeId();
-			$upperBlockId = $player->getWorld()->getBlock($player->getLocation())->getTypeId();
-			if(($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.05 && $bottomBlockId === BlockTypeIds::WATER && !$upperBlockId === BlockTypeIds::WATER){
+			$halfBlockId = $player->getWorld()->getBlock($player->getLocation())->getTypeId();
+			$upperBlockId = $player->getWorld()->getBlock($player->getLocation()->add(0, 1, 0))->getTypeId();
+			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.07 && $bottomBlockId === BlockTypeIds::WATER && $upperBlockId !== BlockTypeIds::WATER && $halfBlockId !== BlockTypeIds::WATER) {
 				$this->failed($playerAPI);
 			}
-			$this->debug($playerAPI, "bottomId=$bottomBlockId, upperBlockId=$upperBlockId");
+			$this->debug($playerAPI, "bottomId=$bottomBlockId, upperBlockId=$upperBlockId, halfBlockId=$halfBlockId");
 		}
-		
 	}
 }

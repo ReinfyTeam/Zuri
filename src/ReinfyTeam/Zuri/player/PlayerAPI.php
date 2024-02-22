@@ -36,12 +36,13 @@ class PlayerAPI implements IPlayerAPI {
 	public static array $players = [];
 
 	public static function getAPIPlayer(Player $player) : PlayerAPI {
-		if(!isset(self::$players[$player->getName()])) self::$players[$player->getName()] = new PlayerAPI($player);
-		return self::$players[$player->getName()];
+		return self::$players[$player->getUniqueId()->__toString()] ??= new PlayerAPI($player);
 	}
 
 	public static function removeAPIPlayer(Player $player) : void {
-		unset(self::$players[$player->getName()]);
+		if (isset(self::$players[$player->getUniqueId()->__toString()])) {
+			unset(self::$players[$player->getUniqueId()->__toString()]);
+		}
 	}
 
 	private bool $isCaptcha = false;

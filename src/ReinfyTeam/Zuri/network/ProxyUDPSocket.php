@@ -58,10 +58,10 @@ class ProxyUDPSocket {
 		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " --------------------------------------------------------------");
 
 		if (socket_bind($this->socket, $address->ip, $address->port)) {
-			APIProvider::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::GREEN . "Successfully bound to {$address->ip}:{$address->port}!");
+			APIProvider::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::GREEN . " Successfully bound to {$address->ip}:{$address->port}!");
 			$result = socket_connect($this->socket, $address->ip, $address->port);
 			if ($result) {
-				APIProvider::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::GREEN . "Proxy has been binded successfully!");
+				APIProvider::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::GREEN . " Proxy has been binded successfully!");
 			}
 		} else {
 			APIProvider::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::RED . " We could'nt bind to {$address->ip}:{$address->port}! Is something running in that same ip?");
