@@ -22,16 +22,18 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\blockinteract;
+namespace ReinfyTeam\Zuri\checks\moving;
 
 use pocketmine\event\Event;
-use pocketmine\event\player\PlayerInteractEvent;
+use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\block\BlockTypeIds;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
-class BlockReach extends Check {
+class Jesus extends Check {
 	public function getName() : string {
-		return "BlockReach";
+		return "Jesus";
 	}
 
 	public function getSubType() : string {
@@ -59,15 +61,29 @@ class BlockReach extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 5;
+		return 3;
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-		if ($event instanceof PlayerInteractEvent) {
-			$block = $event->getBlock();
-			if (!$playerAPI->getPlayer()->canInteract($block->getPosition()->add(0.5, 0.5, 0.5), $playerAPI->getPlayer()->isCreative() ? 7 : 13)) {
+		if($event instanceof PlayerMoveEvent) {
+			$player = $playerAPI->getPlayer();
+			
+			if(
+				!$playerAPI->isInLiquid() ||
+				$playerAPI->isInWeb() ||
+				$playerAPI->isOnGround() ||
+				$playerAPI->getTeleportTicks() < 100 ||
+				$playerAPI->getDeathTicks() < 100
+			) {
+				return;
+			}
+			$bottomBlockId = $player->getWorld()->getBlock($player->getLocation()->add(0, -1, 0))->getTypeId();
+			$upperBlockId = $player->getWorld()->getBlock($player->getLocation())->getTypeId();
+			if(($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.05 && $blockTypeId === BlockTypeIds::WATER && !$upperBlock === BlockTypeIds::WATER){
 				$this->failed($playerAPI);
 			}
+			$this->debug($playerAPI, "bottomId=$bottomBlockId, upperBlockId=$upperBlockId");
 		}
+		
 	}
 }
