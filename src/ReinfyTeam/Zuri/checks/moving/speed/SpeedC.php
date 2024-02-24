@@ -34,7 +34,7 @@ class SpeedA extends Check {
 	}
 
 	public function getSubType() : string {
-		return "A";
+		return "C";
 	}
 
 	public function enable() : bool {
@@ -63,14 +63,11 @@ class SpeedA extends Check {
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
-		if (!$player->spawned && !$player->isConnected()) {
-			return;
-		}
 		if (
 			$playerAPI->getAttackTicks() < 40 ||
 			$playerAPI->getJumpTicks() < 40 ||
-			!$playerAPI->isInWeb() ||
-			!$playerAPI->getOnlineTime() > 10 ||
+			$playerAPI->isInWeb() ||
+			$playerAPI->getOnlineTime() < 40 ||
 			!$playerAPI->isOnGround() ||
 			!$playerAPI->isOnAdhesion() ||
 			$player->getAllowFlight() ||
