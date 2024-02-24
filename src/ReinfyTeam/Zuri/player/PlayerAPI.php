@@ -219,10 +219,12 @@ class PlayerAPI implements IPlayerAPI {
 
 	//On ground
 	public function isOnGround() : bool {
+		if($this->getPlayer() === null) return false;
 		return $this->getPlayer()->onGround;
 	}
 
 	public function setOnGround(bool $data) : void {
+		if($this->getPlayer() === null) return;
 		$this->getPlayer()->onGround = $data;
 	}
 
@@ -272,6 +274,7 @@ class PlayerAPI implements IPlayerAPI {
 
 	private function getBlockBreakHandler() : ?SurvivalBlockBreakHandler {
 		static $ref = null;
+		if($this->getPlayer() === null) return null;
 		if ($ref === null) {
 			$ref = new \ReflectionProperty(Player::class, "blockBreakHandler");
 			$ref->setAccessible(true);
@@ -468,7 +471,7 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Violation
 	public function getViolation(string $supplier) : int {
-		if (isset($this->violations[$name = $this->getPlayer()->getName()][$supplier])) {
+		if (isset($this->violations[$name = $this->player][$supplier])) {
 			return $this->violations[$name][$supplier]["vl"];
 		}
 		return 1;
@@ -479,13 +482,13 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function resetViolation(string $supplier) : void {
-		if (isset($this->violations[$name = $this->getPlayer()->getName()][$supplier])) {
+		if (isset($this->violations[$name = $this->player][$supplier])) {
 			unset($this->violations[$name][$supplier]);
 		}
 	}
 
 	public function addViolation(string $supplier) : void {
-		if (isset($this->violations[$name = $this->getPlayer()->getName()][$supplier])) {
+		if (isset($this->violations[$name = $this->player][$supplier])) {
 			$delayTime = microtime(true) - $this->violations[$name][$supplier]["time"];
 			if ($delayTime < 2) {
 				$this->violations[$name][$supplier]["vl"] += 1;
@@ -499,24 +502,24 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Real violation
 	public function getRealViolation(string $supplier) : int {
-		if (isset($this->realViolations[$name = $this->getPlayer()->getName()][$supplier])) {
+		if (isset($this->realViolations[$name = $this->player][$supplier])) {
 			return $this->realViolations[$name][$supplier]["vl"];
 		}
 		return 0;
 	}
 
 	public function setRealViolation(string $supplier, int $amount) : void {
-		$this->realViolations[$this->getPlayer()->getName()][$supplier]["vl"] = $amount;
+		$this->realViolations[$this->player][$supplier]["vl"] = $amount;
 	}
 
 	public function resetRealViolation(string $supplier) : void {
-		if (isset($this->realViolations[$name = $this->getPlayer()->getName()][$supplier])) {
+		if (isset($this->realViolations[$name = $this->player][$supplier])) {
 			unset($this->realViolations[$name][$supplier]);
 		}
 	}
 
 	public function addRealViolation(string $supplier) : void {
-		if (isset($this->realViolations[$name = $this->getPlayer()->getName()][$supplier])) {
+		if (isset($this->realViolations[$name = $this->player][$supplier])) {
 			$delayTime = microtime(true) - $this->realViolations[$name][$supplier]["time"];
 			if ($delayTime < 600) {
 				$this->realViolations[$name][$supplier]["vl"] += 1;
@@ -539,7 +542,7 @@ class PlayerAPI implements IPlayerAPI {
 
 	//External Data
 	public function getExternalData(string $dataName) {
-		if (isset($this->externalData[$name = $this->getPlayer()->getName()][$dataName])) {
+		if (isset($this->externalData[$name = $this->player][$dataName])) {
 			return $this->externalData[$name][$dataName];
 		}
 		return null;
@@ -550,7 +553,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function unsetExternalData(string $dataName) : void {
-		if (isset($this->externalData[$name = $this->getPlayer()->getName()][$dataName])) {
+		if (isset($this->externalData[$name = $this->player][$dataName])) {
 			unset($this->externalData[$name][$dataName]);
 		}
 	}

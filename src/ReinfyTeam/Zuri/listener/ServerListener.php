@@ -34,9 +34,11 @@ use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\player\Player;
+use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\Discord\Discord;
+use ReinfyTeam\Zuri\events\CaptchaEvent;
 
 class ServerListener implements Listener {
 	private array $ip = [];
@@ -79,7 +81,9 @@ class ServerListener implements Listener {
 			if ($message === $playerAPI->getCaptchaCode()) {
 				$playerAPI->setCaptcha(false);
 				$playerAPI->setCaptchaCode("nocode");
+				$playerAPI->getPlayer()->sendMessage(TextFormat::GREEN . "Successfully completed the captcha!");
 			}
+			(new CaptchaEvent($playerAPI))->sendCaptcha();
 			$event->cancel();
 		}
 	}
@@ -91,6 +95,7 @@ class ServerListener implements Listener {
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($damager);
 		if ($playerAPI->isCaptcha()) {
+			(new CaptchaEvent($playerAPI))->sendCaptcha();
 			$event->cancel();
 		}
 	}
@@ -99,6 +104,7 @@ class ServerListener implements Listener {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->isCaptcha()) {
+			(new CaptchaEvent($playerAPI))->sendCaptcha();
 			$event->cancel();
 		}
 	}
@@ -107,6 +113,7 @@ class ServerListener implements Listener {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->isCaptcha()) {
+			(new CaptchaEvent($playerAPI))->sendCaptcha();
 			$event->cancel();
 		}
 	}
@@ -115,6 +122,7 @@ class ServerListener implements Listener {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->isCaptcha()) {
+			(new CaptchaEvent($playerAPI))->sendCaptcha();
 			$event->cancel();
 		}
 	}

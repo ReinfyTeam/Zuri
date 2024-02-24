@@ -46,16 +46,16 @@ class ZuriCommand extends Command implements PluginOwned {
 	public function execute(CommandSender $sender, string $label, array $args) : void {
 		$prefix = ConfigManager::getData(ConfigManager::PREFIX);
 		$namecmd = $this->getName();
-		$playerAPI = PlayerAPI::getAPIPlayer($sender);
 		if ($sender instanceof Player) {
+			$playerAPI = PlayerAPI::getAPIPlayer($sender);
 			if (isset($args[0])) {
-				switch($args[0]) {
+				switch(strtolower($args[0])) {
 					case "about":
 						$sender->sendMessage(TextFormat::AQUA . "Build: " . TextFormat::GRAY . APIProvider::VERSION_PLUGIN . TextFormat::AQUA . " Author: " . TextFormat::GRAY . "ReinfyTeam");
 						break;
 					case "notify":
 						if (isset($args[1])) {
-							switch($args[1]) {
+							switch(strtolower($args[1])) {
 								case "toggle":
 									$data = ConfigManager::getData(ConfigManager::ALERTS_ENABLE) === true ? ConfigManager::setData(ConfigManager::ALERTS_ENABLE, false) : ConfigManager::setData(ConfigManager::ALERTS_ENABLE, true);
 									$sender->sendMessage($prefix . TextFormat::GRAY . " Notify toggle is " . (ConfigManager::getData(ConfigManager::ALERTS_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
@@ -64,28 +64,13 @@ class ZuriCommand extends Command implements PluginOwned {
 									$data = ConfigManager::getData(ConfigManager::ALERTS_ADMIN) === true ? ConfigManager::setData(ConfigManager::ALERTS_ADMIN, false) : ConfigManager::setData(ConfigManager::ALERTS_ADMIN, true);
 									$sender->sendMessage($prefix . TextFormat::GRAY . " Notify admin mode is " . (ConfigManager::getData(ConfigManager::ALERTS_ADMIN) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 									break;
-								default: $sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify (toggle/admin) - Use to on/off notify.");
-							}
-						} else {
-							$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify (toggle/admin) - Use to on/off notify.");
-						}
-						break;
-					case "process":
-						if (isset($args[1])) {
-							switch($args[1]) {
-								case "auto":
-									$data = ConfigManager::getData(ConfigManager::PROCESS_AUTO) === true ? ConfigManager::setData(ConfigManager::PROCESS_AUTO, false) : ConfigManager::setData(ConfigManager::PROCESS_AUTO, true);
-									$sender->sendMessage($prefix . TextFormat::GRAY . " Automatic processing is " . (ConfigManager::getData(ConfigManager::PROCESS_AUTO) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
+								default: 
+									$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify (toggle/admin) - Use to on/off notify.");
 									break;
-								default: $sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " process (auto/immediately) - Use to on/off process.");
 							}
 						} else {
-							$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " process (auto/immediately) - Use to on/off process.");
+							$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify" . TextFormat::RED . " (toggle/admin) - Use to on/off notify.");
 						}
-						break;
-					case "xray":
-						$data = ConfigManager::getData(ConfigManager::XRAY_ENABLE) === true ? ConfigManager::setData(ConfigManager::XRAY_ENABLE, false) : ConfigManager::setData(ConfigManager::XRAY_ENABLE, true);
-						$sender->sendMessage($prefix . TextFormat::GRAY . " AntiXray is " . (ConfigManager::getData(ConfigManager::XRAY_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 						break;
 					case "banmode":
 						if (isset($args[1])) {
@@ -101,7 +86,7 @@ class ZuriCommand extends Command implements PluginOwned {
 								default: $sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode (toggle/randomize) - Use to on/off ban mode.");
 							}
 						} else {
-							$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode (toggle/randomize) - Use to on/off ban mode.");
+							$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode " . TextFormat::RED . " (toggle/randomize) - Use to on/off ban mode.");
 						}
 						break;
 					case "captcha":
@@ -130,7 +115,7 @@ class ZuriCommand extends Command implements PluginOwned {
 								default: $sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha (toggle/message/tip/title/randomize/length) - Use to on/off and set length code for captcha.");
 							}
 						} else {
-							$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha (toggle/message/tip/title/randomize/length) - Use to on/off and set length code for captcha.");
+							$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha" . TextFormat::RED . " (toggle/message/tip/title/randomize/length) - Use to on/off and set length code for captcha.");
 						}
 						break;
 					case "bypass":
@@ -144,14 +129,12 @@ class ZuriCommand extends Command implements PluginOwned {
 					case "list":
 					case "modules":
 					case "checks":
-						foreach(APIProvider::Check() as $check){
-							$sender->sendMessage($prefix . TextFormat::GRAY . "-------------------------------");
-							$sender->sendMessage($prefix . TextFormat::GRAY . "Zuri Modules/Check List:");
-							foreach(APIProvider::Check() as $check) {
-								$sender->sendMessage($prefix . TextFormat::GRAY . "- " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . "| " . TextFormat::AQUA . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolation());
-							}
-							$sender->sendMessage($prefix . TextFormat::GRAY . "-------------------------------");
+						$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
+						$sender->sendMessage($prefix . TextFormat::GRAY . "Zuri Modules/Check Information List:");
+						foreach(APIProvider::Checks() as $check) {
+							$sender->sendMessage($prefix . TextFormat::RESET . " " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolations());
 						}
+						$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
 						break;
 					default:
 						$sender->sendMessage($prefix . TextFormat::DARK_RED . " Invalid sub-command: " . TextFormat::YELLOW . strtolower($args[0]) . TextFormat::DARK_RED . ", please use " . TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " help" . TextFormat::DARK_RED . " for list of sub-commands.");
@@ -162,7 +145,6 @@ class ZuriCommand extends Command implements PluginOwned {
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " about" . TextFormat::GRAY . " - Show infomation the plugin.");
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify (toggle/admin)" . TextFormat::GRAY . " - Use to on/off notify.");
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " process (auto)" . TextFormat::GRAY . " - Use to on/off process.");
-				//$sender->sendMessage(TextFormat::RED."/".$namecmd.TextFormat::RESET." xray".TextFormat::GRAY." - Use to on/off check xray.");
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode (toggle/randomize)" . TextFormat::GRAY . " - Use to on/off ban mode.");
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha (toggle/message/tip/title/randomize)" . TextFormat::GRAY . " - Use to on/off mode for captcha.");
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " bypass" . TextFormat::GRAY . " - Use to on/off for bypass mode.");
