@@ -154,16 +154,7 @@ class ZuriCommand extends Command implements PluginOwned {
 						}
 						break;
 					default:
-						$sender->sendMessage(TextFormat::RED . "----- Zuri Anticheat -----");
-						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " about" . TextFormat::GRAY . " - Show infomation the plugin.");
-						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify (toggle/admin)" . TextFormat::GRAY . " - Use to on/off notify.");
-						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " process (auto)" . TextFormat::GRAY . " - Use to on/off process.");
-						//$sender->sendMessage(TextFormat::RED."/".$namecmd.TextFormat::RESET." xray".TextFormat::GRAY." - Use to on/off check xray.");
-						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode (toggle/randomize)" . TextFormat::GRAY . " - Use to on/off ban mode.");
-						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha (toggle/message/tip/title/randomize)" . TextFormat::GRAY . " - Use to on/off mode for captcha.");
-						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " bypass" . TextFormat::GRAY . " - Use to on/off for bypass mode.");
-						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " debug" . TextFormat::GRAY . " - Use to on/off for debug mode.");
-						$sender->sendMessage(TextFormat::RED . "----------------------");
+						$sender->sendMessage($prefix . TextFormat::DARK_RED . " Invalid sub-command: " . TextFormat::YELLOW . strtolower($args[0]) . TextFormat::DARK_RED . ", please use " . TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " help" . TextFormat::DARK_RED . " for list of sub-commands.");
 						break;
 				}
 			} else {
@@ -176,6 +167,7 @@ class ZuriCommand extends Command implements PluginOwned {
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha (toggle/message/tip/title/randomize)" . TextFormat::GRAY . " - Use to on/off mode for captcha.");
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " bypass" . TextFormat::GRAY . " - Use to on/off for bypass mode.");
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " debug" . TextFormat::GRAY . " - Use to on/off for debug mode.");
+				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " list" . TextFormat::GRAY . " - List of modules in Zuri.");
 				$sender->sendMessage(TextFormat::RED . "----------------------");
 			}
 		} else {
