@@ -141,6 +141,18 @@ class ZuriCommand extends Command implements PluginOwned {
 						$data = $playerAPI->isDebug() === true ? $playerAPI->setDebug(false) : $playerAPI->setDebug(true);
 						$sender->sendMessage($prefix . TextFormat::GRAY . " Debug mode is " . ($playerAPI->isDebug() ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 						break;
+					case "list":
+					case "modules":
+					case "checks":
+						foreach(APIProvider::Check() as $check){
+							$sender->sendMessage($prefix . TextFormat::GRAY . "-------------------------------");
+							$sender->sendMessage($prefix . TextFormat::GRAY . "Zuri Modules/Check List:");
+							foreach(APIProvider::Check() as $check) {
+								$sender->sendMessage($prefix . TextFormat::GRAY . "- " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . "| " . TextFormat::AQUA . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolation());
+							}
+							$sender->sendMessage($prefix . TextFormat::GRAY . "-------------------------------");
+						}
+						break;
 					default:
 						$sender->sendMessage(TextFormat::RED . "----- Zuri Anticheat -----");
 						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " about" . TextFormat::GRAY . " - Show infomation the plugin.");
