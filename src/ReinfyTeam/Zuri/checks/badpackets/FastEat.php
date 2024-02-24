@@ -64,7 +64,7 @@ class FastEat extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 1;
+		return 5;
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -85,12 +85,13 @@ class FastEat extends Check {
 				$lastTick = $playerAPI->getExternalData("lastTickP");
 				if ($lastTick !== null) {
 					$diff = microtime(true) - $lastTick;
-					if ($diff < 1.5 && ($ping = $playerAPI->getPing()) < self::getData(self::PING_LAGGING)) {
+					$ping = $playerAPI->getPing();
+					if ($diff < 1.5 && $ping < self::getData(self::PING_LAGGING)) {
 						$event->cancel();
 						$this->failed($playerAPI);
 						$playerAPI->unsetExternalData("lastTickP");
 					}
-					$this->debug($playerAPI, "lastTick=$lastTick, diff=$diff, ping=$ping");
+					$this->debug($playerAPI, "lastTick=$lastTick, diff=$diff");
 				}
 			}
 		}

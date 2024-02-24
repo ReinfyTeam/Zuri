@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\entity\effects\VanillaEffects;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
@@ -67,7 +68,7 @@ class SpeedA extends Check {
 			$playerAPI->getAttackTicks() < 40 ||
 			$playerAPI->getJumpTicks() < 40 ||
 			$playerAPI->isInWeb() ||
-			$playerAPI->getOnlineTime() < 40 ||
+			$playerAPI->getOnlineTime() < 10 ||
 			!$playerAPI->isOnGround() ||
 			!$playerAPI->isOnAdhesion() ||
 			$player->getAllowFlight() ||

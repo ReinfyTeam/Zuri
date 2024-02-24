@@ -76,11 +76,16 @@ class Timer extends Check {
 				return;
 			}
 			$timeDiff = microtime(true) - $lastTime;
-			if ($timeDiff > 1) {
-				if ($point < 17) {
+			if ($timeDiff < 0.6) { // ticks < 0.7 sec too slow
+				if($point > 6){
 					$this->failed($playerAPI);
-					$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
 				}
+				$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
+				$playerAPI->unsetExternalData("pointQ");
+				$playerAPI->unsetExternalData("lastTimeQ");
+			} elseif($timeDiff <= 0.001){ // ticks > 1 too fast
+				$this->failed($playerAPI);
+				$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
 				$playerAPI->unsetExternalData("pointQ");
 				$playerAPI->unsetExternalData("lastTimeQ");
 			} else {
