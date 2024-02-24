@@ -164,17 +164,6 @@ abstract class Check extends ConfigManager {
 	public function debug(PlayerAPI $playerAPI, string $text) : void {
 		$player = $playerAPI->getPlayer();
 
-		// WHY?? NOT CONNECTED BUG!
-		// Someone reported me about using NetherGames Fork of Pocketmine-MP
-		// and after flagged and kicked to the server, the checks wont run because the player is not connected.
-		// even they can play on the server, break blocks, walk, etc...
-		// If you encountered to bug, Pocketmine-MP cannot resolve this because you're running fork of NetherGames.
-		// !!! NO SUPPORT FOR NETHERGAMES FORK !!!
-		if (!$player->isConnected()) {
-			APIProvider::getInstance()->getServer()->getLogger()->warning(self::getData(self::PREFIX) . " " . TextFormat::YELLOW . $player->getName() . " is expieriencing not connected bug! Are you using a spoon/fork of Pocketmine-MP? Unable to check: Player is not connected.");
-			return;
-		}
-
 		if ($playerAPI->isDebug()) {
 			$player->sendMessage(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
 		}
