@@ -77,7 +77,7 @@ class Timer extends Check {
 			}
 			$timeDiff = microtime(true) - $lastTime;
 			if ($timeDiff < 0.6) { // ticks < 0.7 sec too slow
-				if($point > 6){
+				if($point > 1){
 					$this->failed($playerAPI);
 				}
 				$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");

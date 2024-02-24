@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets;
+namespace ReinfyTeam\Zuri\checks\moving\speed;
 
 use pocketmine\block\BlockTypeIds;
 use pocketmine\network\mcpe\protocol\DataPacket;
@@ -98,7 +98,7 @@ class SpeedA extends Check {
 				$limit -= $playerAPI->isInWeb() ? ($limit / 1.1) : 0;
 				$limit -= BlockUtil::isUnderBlock($nLocation["to"], [BlockTypeIds::SOUL_SAND], 1) ? ($limit / 1.3) : 0;
 				if ($playerAPI->isOnGround() && !$playerAPI->isOnAdhesion() && !$playerAPI->isOnIce() && $playerAPI->getAttackTicks() > 100 && $player->isSurvival() && !$recived && !$isFalling && $idBlockDown !== 0) {
-					if ($scaledEqualness > $limit and $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
+					if ($scaledEqualness > $limit) {
 						$this->failed($playerAPI);
 					}
 				}

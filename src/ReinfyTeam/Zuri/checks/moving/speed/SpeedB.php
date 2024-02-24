@@ -85,7 +85,7 @@ class SpeedB extends Check {
 				$isFalling = $playerAPI->getLastGroundY() > $player->getLocation()->getY();
 				$limit += $playerAPI->getJumpTicks() < 40 ? $limit : 0;
 				if ($playerAPI->isOnAdhesion() && !$playerAPI->isOnIce() && $playerAPI->getAttackTicks() > 100 && $player->isSurvival() && !$recived && !$isFalling && $idBlockDown !== 0) {
-					if ($scaledEqualness > $limit and $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
+					if ($scaledEqualness > $limit) {
 						$this->failed($playerAPI);
 					}
 				}

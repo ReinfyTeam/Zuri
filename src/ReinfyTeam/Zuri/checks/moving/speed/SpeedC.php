@@ -22,14 +22,14 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets;
+namespace ReinfyTeam\Zuri\checks\moving\speed;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\entity\effects\VanillaEffects;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
-class SpeedA extends Check {
+class SpeedC extends Check {
 	public function getName() : string {
 		return "Speed";
 	}
@@ -66,19 +66,17 @@ class SpeedA extends Check {
 		$player = $playerAPI->getPlayer();
 		if (
 			$playerAPI->getAttackTicks() < 40 ||
-			$playerAPI->getJumpTicks() < 40 ||
 			$playerAPI->isInWeb() ||
-			$playerAPI->getOnlineTime() < 10 ||
 			!$playerAPI->isOnGround() ||
-			!$playerAPI->isOnAdhesion() ||
 			$player->getAllowFlight() ||
 			$player->isFlying() ||
 			!$player->isSurvival()
 		) {
 			return;
 		}
-		if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9) && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
+		if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9)) {
 			$this->failed($playerAPI);
 		}
+		$this->debug($playerAPI, "distance=" . $d . ", limit=" . ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9));
 	}
 }
