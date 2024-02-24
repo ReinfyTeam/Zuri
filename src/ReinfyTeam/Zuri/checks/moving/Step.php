@@ -29,9 +29,9 @@ use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
-class VHop extends Check {
+class Step extends Check {
 	public function getName() : string {
-		return "VHop";
+		return "Step";
 	}
 
 	public function getSubType() : string {

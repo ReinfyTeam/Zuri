@@ -24,10 +24,12 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving\speed;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\entity\effects\VanillaEffects;
+use pocketmine\entity\effect\VanillaEffects;
+use pocketmine\event\Event;
+use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\MathUtil;
 
 class SpeedC extends Check {
 	public function getName() : string {
@@ -62,21 +64,23 @@ class SpeedC extends Check {
 		return 8;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$player = $playerAPI->getPlayer();
-		if (
-			$playerAPI->getAttackTicks() < 40 ||
-			$playerAPI->isInWeb() ||
-			!$playerAPI->isOnGround() ||
-			$player->getAllowFlight() ||
-			$player->isFlying() ||
-			!$player->isSurvival()
-		) {
-			return;
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+		if ($event instanceof PlayerMoveEvent) {
+			$player = $playerAPI->getPlayer();
+			if (
+				$playerAPI->getAttackTicks() < 40 ||
+				$playerAPI->isInWeb() ||
+				!$playerAPI->isOnGround() ||
+				$player->getAllowFlight() ||
+				$player->isFlying() ||
+				!$player->isSurvival()
+			) {
+				return;
+			}
+			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9)) {
+				$this->failed($playerAPI);
+			}
+			$this->debug($playerAPI, "distance=" . $d . ", limit=" . ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9));
 		}
-		if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9)) {
-			$this->failed($playerAPI);
-		}
-		$this->debug($playerAPI, "distance=" . $d . ", limit=" . ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9));
 	}
 }

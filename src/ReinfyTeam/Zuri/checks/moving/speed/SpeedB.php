@@ -87,6 +87,7 @@ class SpeedB extends Check {
 				if ($playerAPI->isOnAdhesion() && !$playerAPI->isOnIce() && $playerAPI->getAttackTicks() > 100 && $player->isSurvival() && !$recived && !$isFalling && $idBlockDown !== 0) {
 					if ($scaledEqualness > $limit) {
 						$this->failed($playerAPI);
+						$this->debug($playerAPI, "limit=$limit, distX=$distX, distZ=$distZ, dist=$dist, lastDist=$dist, shiftedLastDist=$shiftedLastDist, equalness=$equalness, scaledEqualness=$scaledEqualness");
 					}
 				}
 			}

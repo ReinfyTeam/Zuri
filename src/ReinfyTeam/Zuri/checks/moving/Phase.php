@@ -160,7 +160,7 @@ class Phase extends Check {
 					$oldX = $event->getFrom()->getX();
 					$newZ = $event->getTo()->getZ();
 					$newX = $event->getTo()->getX();
-					if (($y = intval($player->getWorld()->getHighestBlockAt($x, $z))) > intval($player->getLocation()->getY()) && $oldZ === $newZ && $oldX === $newX) {	
+					if (($y = intval($player->getWorld()->getHighestBlockAt($x, $z))) > intval($player->getLocation()->getY()) && $oldZ === $newZ && $oldX === $newX) {
 						$world->loadChunk(intval($newX), intval($newZ)); // the best hack thing to do before player teleports at the bottom of the block.
 						$world->loadChunk(intval($oldX), intval($oldZ)); // the best hack thing to do before player teleports at the bottom of the block.
 						$player->teleport(new Vector3($x, $y + 1, $z));
