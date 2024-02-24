@@ -85,11 +85,12 @@ class FastEat extends Check {
 				$lastTick = $playerAPI->getExternalData("lastTickP");
 				if ($lastTick !== null) {
 					$diff = microtime(true) - $lastTick;
-					if ($diff < 1.5) {
+					if ($diff < 1.5 && ($ping = $playerAPI->getPing()) < self::getData(self::PING_LAGGING)) {
 						$event->cancel();
+						$this->failed($playerAPI);
 						$playerAPI->unsetExternalData("lastTickP");
 					}
-					$this->debug($playerAPI, "lastTick=$lastTick, diff=$diff");
+					$this->debug($playerAPI, "lastTick=$lastTick, diff=$diff, ping=$ping");
 				}
 			}
 		}
