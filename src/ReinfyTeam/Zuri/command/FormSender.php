@@ -201,7 +201,7 @@ final class FormSender extends ConfigManager {
 		$form->setTitle("Toggle Modules");
 		$form->setContent("Choose what do you want to toggle..");
 		foreach (APIProvider::Checks() as $check) {
-			$form->addButton(TextFormat::AQUA . $check->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::GRAY . ")" . "\n" . TextFormat::GRAY . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled"), 0, "", $check->getName() . ":" . $check->getSubType());
+			$form->addButton(TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ")" . "\n" . TextFormat::DARK_GRAY . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled"), 0, "", $check->getName() . ":" . $check->getSubType());
 		}
 		$player->sendForm($form);
 	}
@@ -225,7 +225,7 @@ final class FormSender extends ConfigManager {
 		$form->setTitle("Pick a Module");
 		$form->setContent("Choose what do you want to pick..");
 		foreach (APIProvider::Checks() as $check) {
-			$form->addButton(TextFormat::AQUA . $check->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::GRAY . ")" . "\nClick to view information.", 0, "", $check->getName() . ":" . $check->getSubType());
+			$form->addButton(TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ")" . "\nClick to view information.", 0, "", $check->getName() . ":" . $check->getSubType());
 		}
 		$player->sendForm($form);
 	}

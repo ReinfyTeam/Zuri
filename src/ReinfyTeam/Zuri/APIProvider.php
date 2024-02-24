@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri;
 
 use pocketmine\plugin\PluginBase;
+use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\command\ZuriCommand;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\listener\PlayerListener;
@@ -71,7 +72,7 @@ class APIProvider extends PluginBase {
 			try {
 				$this->proxyUDPSocket->bind(new InternetAddress($ip, $port));
 			} catch (\Exception $exception) {
-				$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigManager::PREFIX) . " {$exception->getMessage()}, stopping proxy...");
+				$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::RED . " {$exception->getMessage()}, stopping proxy...");
 				return;
 			}
 		}

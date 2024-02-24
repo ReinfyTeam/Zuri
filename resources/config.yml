@@ -155,7 +155,13 @@ zuri:
         fly:
             enable: true
             maxvl: 1
+        jesus:
+            enable: true
+            maxvl: 1
         autoarmor:
+            enable: true
+            maxvl: 1
+        omnisprint:
             enable: true
             maxvl: 1
         chestaura:
@@ -183,6 +189,9 @@ zuri:
             enable: true
             maxvl: 1
         timer:
+            enable: true
+            maxvl: 1
+        fasteat:
             enable: true
             maxvl: 1
 ...
