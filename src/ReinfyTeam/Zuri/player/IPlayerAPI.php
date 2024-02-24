@@ -79,9 +79,9 @@ interface IPlayerAPI {
 
 	public function setOnSnow(bool $data) : void;
 
-	public function isRCSprinting() : bool;
+	public function isSprinting() : bool;
 
-	public function setRCSprinting(bool $data) : void;
+	public function setSprinting(bool $data) : void;
 
 	public function isOnGround() : bool;
 

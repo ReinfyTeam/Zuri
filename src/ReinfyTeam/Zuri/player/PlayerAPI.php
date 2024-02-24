@@ -29,6 +29,7 @@ use pocketmine\entity\Location;
 use pocketmine\math\Facing;
 use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
+use ReinfyTeam\Zuri\APIProvider;
 use function microtime;
 
 class PlayerAPI implements IPlayerAPI {
@@ -36,13 +37,11 @@ class PlayerAPI implements IPlayerAPI {
 	public static array $players = [];
 
 	public static function getAPIPlayer(Player $player) : PlayerAPI {
-		return self::$players[$player->getUniqueId()->__toString()] ??= new PlayerAPI($player);
+		return self::$players[$player->getUniqueId()->__toString()] ??= new PlayerAPI($player->getName());
 	}
 
 	public static function removeAPIPlayer(Player $player) : void {
-		if (isset(self::$players[$player->getUniqueId()->__toString()])) {
-			unset(self::$players[$player->getUniqueId()->__toString()]);
-		}
+		unset(self::$players[$player->getUniqueId()->__toString()]);
 	}
 
 	private bool $isCaptcha = false;
@@ -84,11 +83,12 @@ class PlayerAPI implements IPlayerAPI {
 	private array $externalData = [];
 	private string $captchaCode = "nocode";
 
-	public function __construct(private Player $player) {
+	public function __construct(private string $player) {
+		// no-op
 	}
 
-	public function getPlayer() : Player {
-		return $this->player;
+	public function getPlayer() : ?Player {
+		return APIProvider::getInstance()->getServer()->getPlayerExact($this->player);
 	}
 
 	//Captcha
@@ -209,21 +209,21 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	//Sprinting
-	public function isRCSprinting() : bool {
-		return $this->player->isSprinting();
+	public function isSprinting() : bool {
+		return $this->getPlayer()->isSprinting();
 	}
 
-	public function setRCSprinting(bool $data) : void {
-		$this->player->setSprinting($data);
+	public function setSprinting(bool $data) : void {
+		$this->getPlayer()->setSprinting($data);
 	}
 
 	//On ground
 	public function isOnGround() : bool {
-		return $this->player->onGround;
+		return $this->getPlayer()->onGround;
 	}
 
 	public function setOnGround(bool $data) : void {
-		$this->player->onGround = $data;
+		$this->getPlayer()->onGround = $data;
 	}
 
 	//Sniffing
@@ -276,13 +276,13 @@ class PlayerAPI implements IPlayerAPI {
 			$ref = new \ReflectionProperty(Player::class, "blockBreakHandler");
 			$ref->setAccessible(true);
 		}
-		return $ref->getValue($this->player);
+		return $ref->getValue($this->getPlayer());
 	}
 
 	//In Web
 	public function isInWeb() : bool {
-		$world = $this->player->getWorld();
-		$location = $this->player->getLocation();
+		$world = $this->getPlayer()->getWorld();
+		$location = $this->getPlayer()->getLocation();
 		$blocksAround = [
 			$world->getBlock($location),
 			$world->getBlock($location->add(0, 1, 0)),
@@ -300,8 +300,8 @@ class PlayerAPI implements IPlayerAPI {
 
 	//In Box Block
 	public function isInBoxBlock() : bool {
-		$world = $this->player->getWorld();
-		$location = $this->player->getLocation();
+		$world = $this->getPlayer()->getWorld();
+		$location = $this->getPlayer()->getLocation();
 		$blocksAround = [
 			$world->getBlock($location->getSide(Facing::NORTH)->add(0, 1, 0)),
 			$world->getBlock($location->getSide(Facing::WEST)->add(0, 1, 0)),
@@ -344,11 +344,11 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Ping
 	public function getPing() : float {
-		if (!$this->player->isConnected() && !$this->player->spawned) {
+		if (!$this->getPlayer()->isConnected() && !$this->getPlayer()->spawned) {
 			return 0.0;
 		} // always check first if player is currently connected before initilizing the main ping. This fixes the player if it is currently connected and ping has been initilized as well. Also, checking first player if its spawn is necessary to do checking after player is spawned as well.
 
-		return $this->player->getNetworkSession()->getPing() === null ? 0.0 : $this->player->getNetworkSession()->getPing(); // TODO: 0.0 frrr ping?
+		return $this->getPlayer()->getNetworkSession()->getPing() === null ? 0.0 : $this->getPlayer()->getNetworkSession()->getPing(); // TODO: 0.0 frrr ping?
 	}
 
 	//CPS
@@ -468,7 +468,7 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Violation
 	public function getViolation(string $supplier) : int {
-		if (isset($this->violations[$name = $this->player->getName()][$supplier])) {
+		if (isset($this->violations[$name = $this->getPlayer()->getName()][$supplier])) {
 			return $this->violations[$name][$supplier]["vl"];
 		}
 		return 1;
@@ -479,13 +479,13 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function resetViolation(string $supplier) : void {
-		if (isset($this->violations[$name = $this->player->getName()][$supplier])) {
+		if (isset($this->violations[$name = $this->getPlayer()->getName()][$supplier])) {
 			unset($this->violations[$name][$supplier]);
 		}
 	}
 
 	public function addViolation(string $supplier) : void {
-		if (isset($this->violations[$name = $this->player->getName()][$supplier])) {
+		if (isset($this->violations[$name = $this->getPlayer()->getName()][$supplier])) {
 			$delayTime = microtime(true) - $this->violations[$name][$supplier]["time"];
 			if ($delayTime < 2) {
 				$this->violations[$name][$supplier]["vl"] += 1;
@@ -499,24 +499,24 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Real violation
 	public function getRealViolation(string $supplier) : int {
-		if (isset($this->realViolations[$name = $this->player->getName()][$supplier])) {
+		if (isset($this->realViolations[$name = $this->getPlayer()->getName()][$supplier])) {
 			return $this->realViolations[$name][$supplier]["vl"];
 		}
 		return 0;
 	}
 
 	public function setRealViolation(string $supplier, int $amount) : void {
-		$this->realViolations[$this->player->getName()][$supplier]["vl"] = $amount;
+		$this->realViolations[$this->getPlayer()->getName()][$supplier]["vl"] = $amount;
 	}
 
 	public function resetRealViolation(string $supplier) : void {
-		if (isset($this->realViolations[$name = $this->player->getName()][$supplier])) {
+		if (isset($this->realViolations[$name = $this->getPlayer()->getName()][$supplier])) {
 			unset($this->realViolations[$name][$supplier]);
 		}
 	}
 
 	public function addRealViolation(string $supplier) : void {
-		if (isset($this->realViolations[$name = $this->player->getName()][$supplier])) {
+		if (isset($this->realViolations[$name = $this->getPlayer()->getName()][$supplier])) {
 			$delayTime = microtime(true) - $this->realViolations[$name][$supplier]["time"];
 			if ($delayTime < 600) {
 				$this->realViolations[$name][$supplier]["vl"] += 1;
@@ -539,18 +539,18 @@ class PlayerAPI implements IPlayerAPI {
 
 	//External Data
 	public function getExternalData(string $dataName) {
-		if (isset($this->externalData[$name = $this->player->getName()][$dataName])) {
+		if (isset($this->externalData[$name = $this->getPlayer()->getName()][$dataName])) {
 			return $this->externalData[$name][$dataName];
 		}
 		return null;
 	}
 
 	public function setExternalData(string $dataName, mixed $amount) : void {
-		$this->externalData[$this->player->getName()][$dataName] = $amount;
+		$this->externalData[$this->player][$dataName] = $amount;
 	}
 
 	public function unsetExternalData(string $dataName) : void {
-		if (isset($this->externalData[$name = $this->player->getName()][$dataName])) {
+		if (isset($this->externalData[$name = $this->getPlayer()->getName()][$dataName])) {
 			unset($this->externalData[$name][$dataName]);
 		}
 	}
