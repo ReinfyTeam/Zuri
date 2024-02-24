@@ -47,10 +47,6 @@ class OmniSprint extends Check {
 		return "A";
 	}
 
-	public function enable() : bool {
-		return true;
-	}
-
 	public function ban() : bool {
 		return false;
 	}

@@ -36,11 +36,7 @@ class ChestStealler extends Check {
 	}
 
 	public function getSubType() : string {
-		return "N";
-	}
-
-	public function enable() : bool {
-		return true;
+		return "A";
 	}
 
 	public function ban() : bool {

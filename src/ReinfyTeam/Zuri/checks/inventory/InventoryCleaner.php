@@ -36,11 +36,7 @@ class InventoryCleaner extends Check {
 	}
 
 	public function getSubType() : string {
-		return "I";
-	}
-
-	public function enable() : bool {
-		return true;
+		return "A";
 	}
 
 	public function ban() : bool {

@@ -38,10 +38,6 @@ class KillAuraD extends Check {
 		return "D";
 	}
 
-	public function enable() : bool {
-		return true;
-	}
-
 	public function ban() : bool {
 		return false;
 	}

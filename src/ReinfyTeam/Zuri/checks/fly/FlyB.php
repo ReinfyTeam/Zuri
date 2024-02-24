@@ -37,10 +37,6 @@ class FlyB extends Check {
 		return "B";
 	}
 
-	public function enable() : bool {
-		return true;
-	}
-
 	public function ban() : bool {
 		return false;
 	}

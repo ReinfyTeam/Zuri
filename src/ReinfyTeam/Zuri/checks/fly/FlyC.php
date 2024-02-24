@@ -43,10 +43,6 @@ class FlyC extends Check {
 		return "C";
 	}
 
-	public function enable() : bool {
-		return true;
-	}
-
 	public function ban() : bool {
 		return false;
 	}

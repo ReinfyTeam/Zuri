@@ -137,6 +137,9 @@ class ZuriCommand extends Command implements PluginOwned {
 						}
 						$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
 						break;
+					case "ui":
+						FormSender::MainUI($sender);
+						break;
 					default:
 						$sender->sendMessage($prefix . TextFormat::DARK_RED . " Invalid sub-command: " . TextFormat::YELLOW . strtolower($args[0]) . TextFormat::DARK_RED . ", please use " . TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " help" . TextFormat::DARK_RED . " for list of sub-commands.");
 						break;
@@ -151,6 +154,7 @@ class ZuriCommand extends Command implements PluginOwned {
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " bypass" . TextFormat::GRAY . " - Use to on/off for bypass mode.");
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " debug" . TextFormat::GRAY . " - Use to on/off for debug mode.");
 				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " list" . TextFormat::GRAY . " - List of modules in Zuri.");
+				$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " ui" . TextFormat::GRAY . " - Sends the Admin Management UI");
 				$sender->sendMessage(TextFormat::RED . "----------------------");
 			}
 		} else {

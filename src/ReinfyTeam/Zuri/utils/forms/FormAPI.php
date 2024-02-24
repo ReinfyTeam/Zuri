@@ -20,25 +20,11 @@
  *
  */
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
-namespace ReinfyTeam\Zuri\events;
+namespace ReinfyTeam\Zuri\utils\forms;
 
-use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\discord\Discord;
+use pocketmine\plugin\PluginBase;
 
-class ServerLagEvent {
-	private PlayerAPI $player;
-
-	public function __construct(PlayerAPI $player) {
-		$this->player = $player;
-	}
-
-	public function getPlayer() : PlayerAPI {
-		return $this->player;
-	}
-
-	public function isLagging() {
-		Discord::onLagging($this->player);
-	}
+class FormAPI extends PluginBase {
 }

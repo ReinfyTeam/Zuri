@@ -55,7 +55,6 @@ abstract class ConfigPaths {
 	public const BAN_COMMANDS = "zuri.ban.commands";
 	public const BAN_MESSAGE = "zuri.ban.message";
 	public const BAN_ENABLE = "zuri.ban.enable";
-	public const BAN_RANDOMIZE = "zuri.ban.randomize";
 	public const BAN_RECENT_LOGS_MESSAGE = "zuri.ban.recentlogs.message";
 
 	public const KICK_ENABLE = "zuri.kick.enable";

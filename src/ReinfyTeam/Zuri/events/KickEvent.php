@@ -25,7 +25,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\events;
 
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\Discord\Discord;
+use ReinfyTeam\Zuri\utils\discord\Discord;
 
 class KickEvent {
 	private PlayerAPI $player;

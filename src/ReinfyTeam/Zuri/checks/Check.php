@@ -40,11 +40,15 @@ use function microtime;
 use function strtolower;
 
 abstract class Check extends ConfigManager {
+	public bool $enabled = true;
+
 	public abstract function getName() : string;
 
 	public abstract function getSubType() : string;
 
-	public abstract function enable() : bool;
+	public function enable() : bool {
+		return $this->enabled;
+	}
 
 	public abstract function ban() : bool;
 

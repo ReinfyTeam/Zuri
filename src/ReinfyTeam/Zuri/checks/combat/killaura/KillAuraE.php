@@ -42,10 +42,6 @@ class KillAuraE extends Check {
 		return "E";
 	}
 
-	public function enable() : bool {
-		return true;
-	}
-
 	public function ban() : bool {
 		return false;
 	}
