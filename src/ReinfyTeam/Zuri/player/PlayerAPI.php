@@ -565,11 +565,11 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getInventory() {
-		return $this->player->getInventory();
+		return $this->getPlayer()->getInventory();
 	}
 
 	public function getLocation() {
-		return $this->player->getLocation();
+		return $this->getPlayer()->getLocation();
 	}
 
 	public function setDebug(bool $value = true) : void {
