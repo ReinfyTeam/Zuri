@@ -81,7 +81,7 @@ class ServerListener implements Listener {
 			if ($message === $playerAPI->getCaptchaCode()) {
 				$playerAPI->setCaptcha(false);
 				$playerAPI->setCaptchaCode("nocode");
-				$playerAPI->getPlayer()->sendMessage(TextFormat::GREEN . "Successfully completed the captcha!");
+				$playerAPI->getPlayer()->sendMessage(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::GREEN . " Successfully completed the captcha!");
 			}
 			(new CaptchaEvent($playerAPI))->sendCaptcha();
 			$event->cancel();
