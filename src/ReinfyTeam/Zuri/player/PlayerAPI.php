@@ -219,12 +219,16 @@ class PlayerAPI implements IPlayerAPI {
 
 	//On ground
 	public function isOnGround() : bool {
-		if($this->getPlayer() === null) return false;
+		if ($this->getPlayer() === null) {
+			return false;
+		}
 		return $this->getPlayer()->onGround;
 	}
 
 	public function setOnGround(bool $data) : void {
-		if($this->getPlayer() === null) return;
+		if ($this->getPlayer() === null) {
+			return;
+		}
 		$this->getPlayer()->onGround = $data;
 	}
 
@@ -274,7 +278,9 @@ class PlayerAPI implements IPlayerAPI {
 
 	private function getBlockBreakHandler() : ?SurvivalBlockBreakHandler {
 		static $ref = null;
-		if($this->getPlayer() === null) return null;
+		if ($this->getPlayer() === null) {
+			return null;
+		}
 		if ($ref === null) {
 			$ref = new \ReflectionProperty(Player::class, "blockBreakHandler");
 			$ref->setAccessible(true);

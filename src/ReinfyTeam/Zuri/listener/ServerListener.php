@@ -36,9 +36,9 @@ use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\events\CaptchaEvent;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\Discord\Discord;
-use ReinfyTeam\Zuri\events\CaptchaEvent;
 
 class ServerListener implements Listener {
 	private array $ip = [];

@@ -32,6 +32,7 @@ use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\APIProvider;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function strtolower;
 
 class ZuriCommand extends Command implements PluginOwned {
 	public function __construct() {
@@ -64,7 +65,7 @@ class ZuriCommand extends Command implements PluginOwned {
 									$data = ConfigManager::getData(ConfigManager::ALERTS_ADMIN) === true ? ConfigManager::setData(ConfigManager::ALERTS_ADMIN, false) : ConfigManager::setData(ConfigManager::ALERTS_ADMIN, true);
 									$sender->sendMessage($prefix . TextFormat::GRAY . " Notify admin mode is " . (ConfigManager::getData(ConfigManager::ALERTS_ADMIN) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 									break;
-								default: 
+								default:
 									$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify (toggle/admin) - Use to on/off notify.");
 									break;
 							}
@@ -131,7 +132,7 @@ class ZuriCommand extends Command implements PluginOwned {
 					case "checks":
 						$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
 						$sender->sendMessage($prefix . TextFormat::GRAY . "Zuri Modules/Check Information List:");
-						foreach(APIProvider::Checks() as $check) {
+						foreach (APIProvider::Checks() as $check) {
 							$sender->sendMessage($prefix . TextFormat::RESET . " " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolations());
 						}
 						$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
