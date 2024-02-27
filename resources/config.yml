@@ -33,7 +33,7 @@ zuri:
         message: "{prefix} §f{player} §7failed §f{module} §7(§c{subtype}§7) §7VL §2{violation}"
         enable: true
         admin: false #This will cause the in-game cheat detector to send it to the person with the permissions below
-        permission: "reallycheat.notify"
+        permission: "zuri.admin"
     ban:
         commands:
             - 'ban {player} "Unfair Advantage"'
