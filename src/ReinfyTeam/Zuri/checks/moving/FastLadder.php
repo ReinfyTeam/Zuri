@@ -54,13 +54,11 @@ class FastLadder extends Check {
 			if($checkLadderLastX || $checkLadderNewY) {
 				
 				if($lastY > $newY) {
-					if($diff > 0.4){ // player cannot climb up over YDiff: 0.4~
+					if(!$diff <= 0.2){ // player cannot climb up over YDiff: 0.4~
 						$this->failed($playerAPI);
 					}
-				}
-				
-				if($lastY < $newY) {
-					if($diff > -0.4){ // player cannot climb down over YDiff: 0.4~
+				} else {
+					if(!$diff <= -0.2){ // player cannot climb down over YDiff: 0.4~
 						$this->failed($playerAPI);
 					}
 				}
