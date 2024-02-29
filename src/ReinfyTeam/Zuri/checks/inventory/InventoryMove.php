@@ -27,6 +27,7 @@ namespace ReinfyTeam\Zuri\checks\inventory;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
 class InventoryMove extends Check {
@@ -55,12 +56,12 @@ class InventoryMove extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 2;
+		return 10;
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
-			if ($playerAPI->isOnGround() && !$playerAPI->isInLiquid() && !$playerAPI->isInWeb() && $playerAPI->isInventoryOpen()) {
+			if ($playerAPI->isOnGround() && !$playerAPI->isInLiquid() && !$playerAPI->isInWeb() && $playerAPI->isInventoryOpen() && MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo()) > 0.2) {
 				$this->failed($playerAPI);
 			}
 			$this->debug($playerAPI, "isOpen=" . $playerAPI->isInventoryOpen());

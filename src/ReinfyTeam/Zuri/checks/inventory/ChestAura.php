@@ -80,8 +80,8 @@ class ChestAura extends Check {
 				}
 				$playerAPI->unsetExternalData("timeOpenChest");
 				$playerAPI->unsetExternalData("countTransaction");
+				$this->debug($playerAPI, "timediff=$timeDiff");
 			}
-			$this->debug($playerAPI, "timediff=$timeDiff");
 		}
 		if ($event instanceof InventoryTransactionEvent) {
 			$transaction = $event->getTransaction();
