@@ -57,7 +57,7 @@ class EditionFaker extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 1;
+		return 0;
 	}
 
 	public const NULL_MODELS = [

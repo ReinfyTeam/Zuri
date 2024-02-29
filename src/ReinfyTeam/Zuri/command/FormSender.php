@@ -241,7 +241,9 @@ final class FormSender extends ConfigManager {
 
 		$form->setTitle($check->getName() . " (" . $check->getSubType() . ") Information");
 		$form->setContent(TextFormat::RESET . "Name: " . TextFormat::YELLOW . $check->getName() . "\n" . TextFormat::RESET . "Sub Type: " . TextFormat::YELLOW . $check->getSubType() . "\n" . TextFormat::RESET . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . "\n" . TextFormat::RESET . "Ban: " . ($check->ban() ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Kick: " . ($check->kick() ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Captcha: " . ($check->captcha() ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Flag: " . ($check->flag() ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolations() . "\n" . TextFormat::RESET . "Max Violation: " . TextFormat::YELLOW . self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
-		$form->addButton("Change MaxVL");
+		if ($check->maxViolations() !== 0) {
+			$form->addButton("Change MaxVL");
+		}
 		$player->sendForm($form);
 	}
 

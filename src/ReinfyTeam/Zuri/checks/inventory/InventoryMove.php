@@ -27,8 +27,8 @@ namespace ReinfyTeam\Zuri\checks\inventory;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
-use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\MathUtil;
 
 class InventoryMove extends Check {
 	public function getName() : string {
@@ -61,10 +61,10 @@ class InventoryMove extends Check {
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
-			if ($playerAPI->isOnGround() && !$playerAPI->isInLiquid() && !$playerAPI->isInWeb() && $playerAPI->isInventoryOpen() && MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo()) > 0.2) {
+			if ($playerAPI->isInventoryOpen() && ($distance = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.2) {
 				$this->failed($playerAPI);
+				$this->debug($playerAPI, "isOpen=" . $playerAPI->isInventoryOpen() . ", distance=$distance");
 			}
-			$this->debug($playerAPI, "isOpen=" . $playerAPI->isInventoryOpen());
 		}
 	}
 }

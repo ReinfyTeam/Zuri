@@ -32,7 +32,6 @@ use pocketmine\network\mcpe\protocol\types\ActorEvent;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\MathUtil;
 
 class ImposibleHit extends Check {
 	public function getName() : string {

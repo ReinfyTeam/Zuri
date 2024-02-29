@@ -59,7 +59,7 @@ class CustomPayloadA extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 1;
+		return 0;
 	}
 
 	public function checkJustEvent(Event $event) : void {
