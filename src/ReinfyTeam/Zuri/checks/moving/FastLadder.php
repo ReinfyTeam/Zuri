@@ -49,20 +49,12 @@ class FastLadder extends Check {
 			$checkLadderLastX = $player->getWorld()->getBlockAt($x, intval($lastY), $z)->getTypeId() === BlockTypeIds::LADDER;
 			$checkLadderNewY = $player->getWorld()->getBlockAt($x, intval($newY), $z)->getTypeId() === BlockTypeIds::LADDER;
 			
-			$diff = $newY - $lastY;
+			$diff = abs($newY - $lastY);
 			
 			if($checkLadderLastX || $checkLadderNewY) {
-				
-				if($lastY > $newY) {
-					if(!$diff <= 0.2){ // player cannot climb up over YDiff: 0.4~
-						$this->failed($playerAPI);
-					}
-				} else {
-					if(!$diff <= -0.2){ // player cannot climb down over YDiff: 0.4~
-						$this->failed($playerAPI);
-					}
+				if($diff > 0.5){ // impossible 0.6~
+					$this->failed($playerAPI);
 				}
-				
 				$this->debug($playerAPI, "lastY=$lastY, newY=$newY, diffY=$diff");
 			}
 		}
