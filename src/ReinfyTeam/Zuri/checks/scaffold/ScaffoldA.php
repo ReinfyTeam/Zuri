@@ -60,9 +60,6 @@ class ScaffoldA extends Check {
 		return 2;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-	}
-
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
 			$block = $event->getBlockAgainst();
