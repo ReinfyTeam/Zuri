@@ -90,6 +90,7 @@ class APIProvider extends PluginBase {
 
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\Crasher();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastEat();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\SelfHit();
 
 		// Blockbreak
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\WrongMining();
@@ -119,6 +120,7 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraE();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\velocity\VelocityA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\velocity\VelocityB();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\ImposibleHit();
 
 		// Fly
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\fly\FlyA();

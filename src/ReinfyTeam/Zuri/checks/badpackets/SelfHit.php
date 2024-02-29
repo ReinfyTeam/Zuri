@@ -22,19 +22,17 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\moving;
+namespace ReinfyTeam\Zuri\checks\badpackets;
 
-use pocketmine\block\BlockTypeIds;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
-use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function abs;
-use function intval;
 
-class FastLadder extends Check {
+class SelfHit extends Check {
 	public function getName() : string {
-		return "FastLadder";
+		return "SelfHit";
 	}
 
 	public function getSubType() : string {
@@ -42,11 +40,11 @@ class FastLadder extends Check {
 	}
 
 	public function ban() : bool {
-		return false;
+		return true;
 	}
 
 	public function kick() : bool {
-		return true;
+		return false;
 	}
 
 	public function flag() : bool {
@@ -62,24 +60,13 @@ class FastLadder extends Check {
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-		if ($event instanceof PlayerMoveEvent) {
-			$lastY = $event->getFrom()->getY();
-			$newY = $event->getTo()->getY();
-			$player = $playerAPI->getPlayer();
-
-			$x = intval($player->getLocation()->getX());
-			$z = intval($player->getLocation()->getZ());
-
-			$checkLadderLastX = $player->getWorld()->getBlockAt($x, intval($lastY), $z)->getTypeId() === BlockTypeIds::LADDER;
-			$checkLadderNewY = $player->getWorld()->getBlockAt($x, intval($newY), $z)->getTypeId() === BlockTypeIds::LADDER;
-
-			$diff = abs($newY - $lastY);
-
-			if ($checkLadderLastX || $checkLadderNewY) {
-				if ($diff > 0.5) { // impossible 0.6~
+		if ($event instanceof EntityDamageByEntityEvent) {
+			if (($entity = $event->getEntity()) instanceof Player && ($damager = $event->getDamager()) instanceof Player) {
+				if ($entity->getId() === $damager->getId()) {
 					$this->failed($playerAPI);
 				}
-				$this->debug($playerAPI, "lastY=$lastY, newY=$newY, diffY=$diff");
+
+				$this->debug($playerAPI, "damagerId=" . $damager->getId() . ", entityId=" . $entity->getId());
 			}
 		}
 	}

@@ -22,19 +22,20 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\moving;
+namespace ReinfyTeam\Zuri\checks\combat;
 
-use pocketmine\block\BlockTypeIds;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
-use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\network\mcpe\protocol\ActorEventPacket;
+use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\types\ActorEvent;
+use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function abs;
-use function intval;
 
-class FastLadder extends Check {
+class ImposibleHit extends Check {
 	public function getName() : string {
-		return "FastLadder";
+		return "InventoryMove";
 	}
 
 	public function getSubType() : string {
@@ -62,25 +63,24 @@ class FastLadder extends Check {
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-		if ($event instanceof PlayerMoveEvent) {
-			$lastY = $event->getFrom()->getY();
-			$newY = $event->getTo()->getY();
-			$player = $playerAPI->getPlayer();
-
-			$x = intval($player->getLocation()->getX());
-			$z = intval($player->getLocation()->getZ());
-
-			$checkLadderLastX = $player->getWorld()->getBlockAt($x, intval($lastY), $z)->getTypeId() === BlockTypeIds::LADDER;
-			$checkLadderNewY = $player->getWorld()->getBlockAt($x, intval($newY), $z)->getTypeId() === BlockTypeIds::LADDER;
-
-			$diff = abs($newY - $lastY);
-
-			if ($checkLadderLastX || $checkLadderNewY) {
-				if ($diff > 0.5) { // impossible 0.6~
-					$this->failed($playerAPI);
+		if ($event instanceof EntityDamageByEntityEvent) {
+			if (($entity = $event->getEntity()) instanceof Player && ($damager = $event->getDamager()) instanceof Player) {
+				if ($playerAPI->isInventoryOpen() || isset($this->eating[$playerAPI->getPlayer()->getName()])) {
+					$this->failed($playerAPI); // impossible to hit player while opened an inventory :(
 				}
-				$this->debug($playerAPI, "lastY=$lastY, newY=$newY, diffY=$diff");
+				$this->debug($playerAPI, "isInventoryOpen=" . $playerAPI->isInventoryOpen() . ", isEating=" . isset($this->eating[$playerAPI->getPlayer()->getName()]));
 			}
+		}
+	}
+
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+		if ($packet instanceof ActorEventPacket) {
+			if ($packet->eventId === ActorEvent::EATING_ITEM) {
+				$this->eating[$playerAPI->getPlayer()->getName()] = true;
+			} else {
+				unset($this->eating[$playerAPI->getPlayer()->getName()]);
+			}
+			$this->debug($playerAPI, "isInventoryOpen=" . $playerAPI->isInventoryOpen() . ", isEating=" . isset($this->eating[$playerAPI->getPlayer()->getName()]));
 		}
 	}
 }

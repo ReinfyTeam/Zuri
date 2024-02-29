@@ -27,7 +27,6 @@ namespace ReinfyTeam\Zuri\checks\scaffold;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
-use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 

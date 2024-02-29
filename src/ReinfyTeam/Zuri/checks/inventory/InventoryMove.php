@@ -55,7 +55,7 @@ class InventoryMove extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 30;
+		return 2;
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -63,6 +63,7 @@ class InventoryMove extends Check {
 			if ($playerAPI->isOnGround() && !$playerAPI->isInLiquid() && !$playerAPI->isInWeb() && $playerAPI->isInventoryOpen()) {
 				$this->failed($playerAPI);
 			}
+			$this->debug($playerAPI, "isOpen=" . $playerAPI->isInventoryOpen());
 		}
 	}
 }
