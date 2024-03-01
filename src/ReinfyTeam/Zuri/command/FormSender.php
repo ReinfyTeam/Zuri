@@ -288,7 +288,7 @@ final class FormSender extends ConfigManager {
 			if ($data === null) {
 				return;
 			}
-			if(self::getData(self::CAPTCHA_RANDOMIZE)){
+			if (self::getData(self::CAPTCHA_RANDOMIZE)) {
 				if ($data[2] !== null) {
 					self::setData(self::CAPTCHA_RANDOMIZE, $data[2]);
 				}
@@ -304,7 +304,7 @@ final class FormSender extends ConfigManager {
 				if ($data[3] !== null) {
 					self::setData(self::CAPTCHA_TITLE, $data[3]);
 				}
-				
+
 				if ($data[4] !== null) {
 					self::setData(self::CAPTCHA_RANDOMIZE, $data[4]);
 				}
@@ -315,10 +315,18 @@ final class FormSender extends ConfigManager {
 
 		$form->setTitle("Modify Send Type");
 		$form->addLabel("Modify the what do you want to set..");
-		if(!self::getData(self::CAPTCHA_RANDOMIZE)) $form->addToggle("Send Tip", self::getData(self::CAPTCHA_TIP));
-		if(!self::getData(self::CAPTCHA_RANDOMIZE)) $form->addToggle("Send Message", self::getData(self::CAPTCHA_MESSAGE));
-		if(!self::getData(self::CAPTCHA_RANDOMIZE)) $form->addToggle("Send Title", self::getData(self::CAPTCHA_TITLE));
-		if(self::getData(self::CAPTCHA_RANDOMIZE)) $form->addLabel(TextFormat::RED . "When Random Send Type is on, to choose send type, please turn off first the random send type!");
+		if (!self::getData(self::CAPTCHA_RANDOMIZE)) {
+			$form->addToggle("Send Tip", self::getData(self::CAPTCHA_TIP));
+		}
+		if (!self::getData(self::CAPTCHA_RANDOMIZE)) {
+			$form->addToggle("Send Message", self::getData(self::CAPTCHA_MESSAGE));
+		}
+		if (!self::getData(self::CAPTCHA_RANDOMIZE)) {
+			$form->addToggle("Send Title", self::getData(self::CAPTCHA_TITLE));
+		}
+		if (self::getData(self::CAPTCHA_RANDOMIZE)) {
+			$form->addLabel(TextFormat::RED . "When Random Send Type is on, to choose send type, please turn off first the random send type!");
+		}
 		$form->addToggle("Randomize Send Type", self::getData(self::CAPTCHA_RANDOMIZE));
 		$player->sendForm($form);
 	}
