@@ -64,7 +64,7 @@ class OmniSprint extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 8;
+		return 10;
 	}
 
 	private array $check = [];
@@ -84,16 +84,12 @@ class OmniSprint extends Check {
 				}
 			}
 		}
-
-		if ($packet instanceof StartGamePacket) {
-			$packet->playerMovementSettings = new PlayerMovementSettings($packet->playerMovementSettings->getMovementType(), $packet->playerMovementSettings->getRewindHistorySize(), true); // hack for PlayerMovementSettings->serverAuthoritativeBlockBreaking?
-		}
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) >= 0.07 && !$player->getEffects()->has(VanillaEffects::SPEED())) {
+			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.07 && !$player->getEffects()->has(VanillaEffects::SPEED())) {
 				$this->check[spl_object_id($playerAPI)] = true; // moving too fast?
 			} else {
 				if (isset($this->check[spl_object_id($playerAPI)])) {
