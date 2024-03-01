@@ -310,10 +310,11 @@ final class FormSender extends ConfigManager {
 
 		$form->setTitle("Modify Send Type");
 		$form->addLabel("Modify the what do you want to set..");
-		$form->addToggle("Send Tip", self::getData(self::CAPTCHA_TIP));
-		$form->addToggle("Send Message", self::getData(self::CAPTCHA_MESSAGE));
-		$form->addToggle("Send Title", self::getData(self::CAPTCHA_TITLE));
-		$form->addToggle("Randomize", self::getData(self::CAPTCHA_RANDOMIZE));
+		if(!self::getData(self::CAPTCHA_RANDOMIZE)) $form->addToggle("Send Tip", self::getData(self::CAPTCHA_TIP));
+		if(!self::getData(self::CAPTCHA_RANDOMIZE)) $form->addToggle("Send Message", self::getData(self::CAPTCHA_MESSAGE));
+		if(!self::getData(self::CAPTCHA_RANDOMIZE)) $form->addToggle("Send Title", self::getData(self::CAPTCHA_TITLE));
+		$form->addToggle("Randomize Send Type", self::getData(self::CAPTCHA_RANDOMIZE));
+		if(self::getData(self::CAPTCHA_RANDOMIZE)) $form->addLabel(TextFormat::RED . "When Random Send Type is on, to choose send type, please turn off first the random send type!");
 		$player->sendForm($form);
 	}
 }
