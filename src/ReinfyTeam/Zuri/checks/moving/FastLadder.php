@@ -58,7 +58,7 @@ class FastLadder extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 2;
+		return 5;
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

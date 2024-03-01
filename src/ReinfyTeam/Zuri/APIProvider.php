@@ -42,7 +42,7 @@ class APIProvider extends PluginBase {
 	private static APIProvider $instance;
 	private ProxyUDPSocket $proxyUDPSocket;
 
-	public const VERSION_PLUGIN = "1.1.0-BETA";
+	public const VERSION_PLUGIN = "1.1.0";
 
 	private array $checks = [];
 
@@ -78,6 +78,9 @@ class APIProvider extends PluginBase {
 		}
 	}
 
+	/**
+	 * Do not call internally.
+	 */
 	private function loadChecks() : void {
 		// Aim Assist
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\aimassist\AimAssistA();
@@ -87,7 +90,6 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\aimassist\AimAssistE();
 
 		// Badpackets
-
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\Crasher();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastEat();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\SelfHit();
@@ -143,6 +145,7 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Timer();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\OmniSprint();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Jesus();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Spider();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\FastLadder();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\speed\SpeedA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\speed\SpeedB();
@@ -157,6 +160,7 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\payload\CustomPayloadA();
 
 		// Scaffold
+		// Todo: Improve and add more checks in next release..
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldC();
