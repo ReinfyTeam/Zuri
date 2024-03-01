@@ -48,6 +48,7 @@ class APIProvider extends PluginBase {
 
 	public function onLoad() : void {
 		self::$instance = $this;
+		ConfigManager::checkConfig();
 	}
 
 	public static function getInstance() : APIProvider {
@@ -56,7 +57,6 @@ class APIProvider extends PluginBase {
 
 	public function onEnable() : void {
 		$this->loadChecks();
-		$this->saveDefaultConfig();
 		$this->getScheduler()->scheduleRepeatingTask(new ServerTickTask($this), 20);
 		$this->getScheduler()->scheduleRepeatingTask(new CaptchaTask($this), 20);
 		$this->getScheduler()->scheduleRepeatingTask(new NetworkTickTask($this), 100);
