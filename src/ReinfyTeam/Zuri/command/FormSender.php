@@ -254,7 +254,7 @@ final class FormSender extends ConfigManager {
 			}
 
 			if ($data[1] !== null) {
-				self::setData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl", $data[1]);
+				self::setData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl", intval($data[1]));
 				self::ModuleInformation($player, $check);
 			}
 		});
@@ -272,7 +272,7 @@ final class FormSender extends ConfigManager {
 			}
 
 			if ($data[1] !== null) {
-				self::setData(self::CAPTCHA_CODE_LENGTH, $data[1]);
+				self::setData(self::CAPTCHA_CODE_LENGTH, intval($data[1]));
 				self::ModifyCaptcha($player);
 			}
 		});
