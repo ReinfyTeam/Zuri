@@ -288,7 +288,11 @@ final class FormSender extends ConfigManager {
 			if ($data === null) {
 				return;
 			}
-			if(!self::getData(self::CAPTCHA_RANDOMIZE)){
+			if(self::getData(self::CAPTCHA_RANDOMIZE)){
+				if ($data[2] !== null) {
+					self::setData(self::CAPTCHA_RANDOMIZE, $data[2]);
+				}
+			} else {
 				if ($data[1] !== null) {
 					self::setData(self::CAPTCHA_TIP, $data[1]);
 				}
@@ -302,10 +306,6 @@ final class FormSender extends ConfigManager {
 				}
 				
 				if ($data[4] !== null) {
-					self::setData(self::CAPTCHA_RANDOMIZE, $data[4]);
-				}
-			} else {
-				if ($data[2] !== null) {
 					self::setData(self::CAPTCHA_RANDOMIZE, $data[4]);
 				}
 			}
