@@ -42,13 +42,15 @@ class APIProvider extends PluginBase {
 	private static APIProvider $instance;
 	private ProxyUDPSocket $proxyUDPSocket;
 
-	public const VERSION_PLUGIN = "1.1.0";
-
 	private array $checks = [];
 
 	public function onLoad() : void {
 		self::$instance = $this;
 		ConfigManager::checkConfig();
+
+		if (!\Phar::running(true)) {
+			$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade Zuri checking performance. We recommended to download phar plugin from poggit builds or github. Instead of using source-code from github.");
+		}
 	}
 
 	public static function getInstance() : APIProvider {

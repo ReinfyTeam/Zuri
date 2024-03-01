@@ -24,8 +24,13 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\config;
 
-use ReinfyTeam\Zuri\APIProvider;
 use pocketmine\utils\TextFormat;
+use ReinfyTeam\Zuri\APIProvider;
+use function fclose;
+use function file_exists;
+use function rename;
+use function stream_get_contents;
+use function yaml_parse;
 
 class ConfigManager extends ConfigPaths {
 	public static function getData(string $path) {
@@ -36,14 +41,13 @@ class ConfigManager extends ConfigPaths {
 		APIProvider::getInstance()->getConfig()->setNested($path, $data);
 		APIProvider::getInstance()->getConfig()->save();
 	}
-	
+
 	public static function checkConfig() : void {
-		
-		if(!file_exists(APIProvider::getInstance()->getDataFolder() . "config.yml")) {
+		if (!file_exists(APIProvider::getInstance()->getDataFolder() . "config.yml")) {
 			APIProvider::getInstance()->saveResource("config.yml");
 			return;
 		}
-		
+
 		$pluginConfigResource = APIProvider::getInstance()->getResource("config.yml");
 		$pluginConfig = yaml_parse(stream_get_contents($pluginConfigResource));
 		fclose($pluginConfigResource);
