@@ -191,7 +191,7 @@ class ZuriCommand extends Command implements PluginOwned {
 		} else {
 			help:
 			$sender->sendMessage(TextFormat::RED . "----- Zuri Anticheat -----");
-			$sender->sendMessage(TextFormat::AQUA . "Build: " . TextFormat::GRAY . APIProvider::VERSION_PLUGIN . TextFormat::AQUA . " Author: " . TextFormat::GRAY . APIProvider::getInstance()->getDescription()->getAuthors()[0]);
+			$sender->sendMessage(TextFormat::AQUA . "Build: " . TextFormat::GRAY . APIProvider::getInstance()->getDescription()->getVersion() . TextFormat::AQUA . " Author: " . TextFormat::GRAY . APIProvider::getInstance()->getDescription()->getAuthors()[0]);
 			$sender->sendMessage("");
 			$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " about" . TextFormat::GRAY . " - Show infomation the plugin.");
 			$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify (toggle/admin)" . TextFormat::GRAY . " - Use to on/off notify.");
