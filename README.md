@@ -83,8 +83,8 @@ $api->setBlocksBrokeASec(< it must is number >);
 | VClip                       | Flag                 | 100% detect                |
 | InstaBreak                  | Flag/Kick            | 100% detect                |
 | Spam                        | CAPTCHA              | 100% detect                |
-| Tower                       | Ban Immediately      | 100% detect                |
-| Scaffold                    | Kick/Ban Immediately | 100% detect                |
+| Tower                       | Ban Immediately      | 74% detect                |
+| Scaffold                    | Kick/Ban Immediately | 70% detect                |
 | Nuker                       | Ban Immediately      | 100% detect                |
 | FastBreak                       | Ban Immediately      | 100% detect                |
 | FillBlock                       | Ban Immediately      | 100% detect                |
