@@ -22,7 +22,7 @@ The full documentation can be found in the [wiki](https://github.com/ReinfyTeam/
 Example:
 ```php
 // $player must instance of Player from PMMP //
-$api = PlayerAPI::getAPIPlayer($player);
+$player = API::getPlayer($player);
 $api->setAttackSpecial(< true or false >);
 $api->setBlocksBrokeASec(< it must is number >);
 ```

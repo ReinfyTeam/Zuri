@@ -43,7 +43,7 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 
 	public function onRun() : void {
 		$result = Internet::getURL("https://api.github.com/repos/ReinfyTeam/Zuri-Rewrite/releases/latest", 10, [], $err);
-		$this->setResult([$result->getBody(), $err]);
+		$this->setResult([$result ?? null, $err]);
 	}
 
 	public function onCompletion() : void {
@@ -53,8 +53,8 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 		$ver = "";
 		$download_url = "";
 		$noUpdates = false;
-		if ($result[1] === null) {
-			$json = json_decode($result[0], true);
+		if ($result[1] === null && $result[0] !== null) {
+			$json = json_decode($result[0]->getBody(), true);
 			if ($json !== false && $json !== null) {
 				if (($ver = $json["tag_name"]) !== "v" . $this->currentVersion) {
 					$name = $json["name"];
