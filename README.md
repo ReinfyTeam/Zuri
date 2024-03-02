@@ -1,5 +1,4 @@
 # Zuri-Rewrite
-⚠️ This project is on early development stage, we wanted your feedback about the efficient of the project.
 
 > Zuri-Rewrite is a new fork code improvement of original Zuri Anticheat.
 
