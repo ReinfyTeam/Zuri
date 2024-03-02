@@ -27,6 +27,7 @@ namespace ReinfyTeam\Zuri\task;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
+use pocketmine\utils\Internet;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
 use function curl_exec;
@@ -43,9 +44,8 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 	}
 
 	public function onRun() : void {
-		$ch = curl_init("https://api.github.com/repos/ReinfyTeam/Zuri-Rewrite/releases/latest");
-		curl_setopt($ch, CURLOPT_HTTPHEADER, ["Accept: application/vnd.github+json"]);
-		$this->setResult([curl_exec($ch), curl_getinfo($ch, CURLINFO_RESPONSE_CODE)]);
+		$body = Internet::getURL("https://api.github.com/repos/ReinfyTeam/Zuri-Rewrite/releases/latest", 10, [], $err);
+		$this->setResult([$body, $err]);
 	}
 
 	public function onCompletion() : void {
@@ -55,7 +55,8 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 		$ver = "";
 		$download_url = "";
 		$noUpdates = false;
-		if ($result[1] === 200) {
+		var_dump($result[0]);
+		if ($result[1] === null) {
 			$json = json_decode($result[0]);
 			if ($json !== false && $json !== null) {
 				if (($ver = $json["tag_name"]) !== "v" . $currentVersion) {
