@@ -26,15 +26,13 @@ namespace ReinfyTeam\Zuri\task;
 
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
-use pocketmine\utils\TextFormat;
 use pocketmine\utils\Internet;
+use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
-use function curl_exec;
-use function curl_getinfo;
-use function curl_init;
-use function curl_setopt;
+use function date;
 use function json_decode;
+use function strtotime;
 
 class UpdateCheckerAsyncTask extends AsyncTask {
 	private $currentVersion;
@@ -44,8 +42,8 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 	}
 
 	public function onRun() : void {
-		$body = Internet::getURL("https://api.github.com/repos/ReinfyTeam/Zuri-Rewrite/releases/latest", 10, [], $err);
-		$this->setResult([$body, $err]);
+		$result = Internet::getURL("https://api.github.com/repos/ReinfyTeam/Zuri-Rewrite/releases/latest", 10, [], $err);
+		$this->setResult([$result->getBody(), $err]);
 	}
 
 	public function onCompletion() : void {
@@ -55,16 +53,19 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 		$ver = "";
 		$download_url = "";
 		$noUpdates = false;
-		var_dump($result[0]);
 		if ($result[1] === null) {
-			$json = json_decode($result[0]);
+			$json = json_decode($result[0], true);
 			if ($json !== false && $json !== null) {
-				if (($ver = $json["tag_name"]) !== "v" . $currentVersion) {
+				if (($ver = $json["tag_name"]) !== "v" . $this->currentVersion) {
 					$name = $json["name"];
 					if ($json["prerelease"]) {
 						$ver = $ver . "-PRERELEASE";
 					}
-					$download_url = $json["assets"]["browser_download_url"];
+					$download_url = $json["assets"][0]["browser_download_url"];
+					$file_size = $json["assets"][0]["size"] / 1000;
+					$dlcount = $json["assets"][0]["download_count"];
+					$branch = $json["target_commitish"];
+					$publishTime = date('F j, o', strtotime($json["published_at"]));
 					$noUpdates = false;
 				} else {
 					$noUpdates = true;
@@ -78,10 +79,11 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 		if ($noUpdates) {
 			$server->getLogger()->notice(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::GREEN . "No updates found. Enjoy!");
 		} else {
-			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "A new version of Zuri is released!");
-			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "Current Version: " . $this->currentVersion);
-			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "Latest Version: " . $ver);
-			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "Download: " . $download_url);
+			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "A new latest version of Zuri is released! (" . $publishTime . ")");
+			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "Current Version: v" . $this->currentVersion);
+			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "Latest Version: " . $ver . " (" . $branch . ")");
+			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "Download Count: " . $dlcount);
+			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "Download: " . $download_url . " (" . $file_size . " KB)");
 		}
 	}
 }
