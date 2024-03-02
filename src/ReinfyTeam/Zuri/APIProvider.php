@@ -167,6 +167,7 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldC();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldD();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldE();
 	}
 
 	public static function Checks() : array {

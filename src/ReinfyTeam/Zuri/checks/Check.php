@@ -138,18 +138,18 @@ abstract class Check extends ConfigManager {
 		}
 
 		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->ban() && self::getData(self::BAN_ENABLE) === true) {
-			foreach (self::getData(self::BAN_COMMANDS) as $command) {
-				$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
-				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
-			}
-
-			$playerAPI->resetViolation($this->getName());
-			$playerAPI->resetRealViolation($this->getName());
+			APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
 			foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
 				if ($p->hasPermission("zuri.admin")) {
 					$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
 				}
 			}
+			foreach (self::getData(self::BAN_COMMANDS) as $command) {
+				$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
+			}
+
+			$playerAPI->resetViolation($this->getName());
+			$playerAPI->resetRealViolation($this->getName());
 			(new BanEvent($playerAPI, $this->getName()))->ban();
 			return true;
 		}

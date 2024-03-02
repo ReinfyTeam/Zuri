@@ -29,6 +29,7 @@ use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function abs;
 
 class ScaffoldA extends Check {
 	public function getName() : string {
@@ -64,14 +65,15 @@ class ScaffoldA extends Check {
 			$block = $event->getBlockAgainst();
 			$posBlock = $block->getPosition();
 			$player = $playerAPI->getPlayer();
+			$loc = $player->getLocation();
 			if (!$player->spawned && !$player->isConnected()) {
 				return;
 			} // bug fix
 			$itemHand = $playerAPI->getInventory()->getItemInHand();
 			if ($itemHand->getTypeId() === BlockTypeIds::AIR) {
-				$x = $posBlock->getX();
-				$y = $posBlock->getY();
-				$z = $posBlock->getZ();
+				$x = abs($posBlock->getX() - $loc->getX());
+				$y = abs($posBlock->getY() - $loc->getY());
+				$z = abs($posBlock->getZ() - $loc->getZ());
 				if ($x > 1.0 || $y > 1.0 || $z > 1.0) {
 					$this->failed($playerAPI);
 				}

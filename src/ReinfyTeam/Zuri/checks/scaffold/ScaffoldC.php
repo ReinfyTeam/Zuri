@@ -74,7 +74,7 @@ class ScaffoldC extends Check {
 				return;
 			} // Effect::$effectInstance bug fix
 			$distance = MathUtil::distance($posPlayer->asVector3(), $posBlock->asVector3());
-			if ($distance < 1.25 && abs($posPlayer->getPitch()) > 40) {
+			if ($distance < 1.25 && abs($posPlayer->getPitch()) > 90) {
 				$this->failed($playerAPI);
 			}
 			$this->debug($playerAPI, "distance=$distance, pitch=" . abs($posPlayer->getPitch()));

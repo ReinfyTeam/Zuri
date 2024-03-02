@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets;
+namespace ReinfyTeam\Zuri\checks\scaffold;
 
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
@@ -32,7 +32,7 @@ use pocketmine\network\mcpe\protocol\types\inventory\ReleaseItemTransactionData;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
-class BadPacketsF extends Check {
+class ScaffoldE extends Check {
 	private bool $place = false;
 
 	public function getName() : string {
@@ -40,7 +40,7 @@ class BadPacketsF extends Check {
 	}
 
 	public function getSubType() : string {
-		return "F";
+		return "E";
 	}
 
 	public function ban() : bool {
