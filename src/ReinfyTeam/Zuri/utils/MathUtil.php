@@ -36,7 +36,7 @@ class MathUtil {
 	}
 
 	public static function getDeltaDirectionVector(PlayerAPI $playerAPI, float $distance) : Vector3 {
-		return $playerAPI->getPlayer()->getDirectionVector()->multiply($distance);
+		return ($playerAPI->getPlayer()->getDirectionVector() ?? $playerAPI->getPlayer()->getLocation())->multiply($distance);
 	}
 
 	public static function distance(Vector3 $from, Vector3 $to) {

@@ -77,7 +77,7 @@ class AimAssistA extends Check {
 				if ($nLocation["from"]->getPitch() == $nLocation["to"]->getPitch() && $abs >= 3 && $nLocation["from"]->getPitch() != 90 && $nLocation["to"]->getPitch() != 90) {
 					$this->failed($playerAPI);
 				}
-				$this->debug($playerAPI, "nLocation=$nLocation, abs=$abs");
+				$this->debug($playerAPI, "abs=$abs");
 			}
 		}
 	}

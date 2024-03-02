@@ -91,16 +91,13 @@ abstract class Check extends ConfigManager {
 
 		$player = $playerAPI->getPlayer();
 		$notify = self::getData(self::ALERTS_ENABLE) === true;
+		$detectionsAllowedToSend = self::getData(self::DETECTION_ENABLE) === true;
 		$bypass = self::getData(self::PERMISSION_BYPASS_ENABLE) === true && $player->hasPermission(self::getData(self::PERMISSION_BYPASS_PERMISSION));
 		$reachedMaxViolations = $playerAPI->getViolation($this->getName()) > $this->maxViolations();
 		$maxViolations = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".maxvl");
 		$playerAPI->addViolation($this->getName());
 		$reachedMaxRealViolations = $playerAPI->getRealViolation($this->getName()) > $maxViolations;
 		$server = APIProvider::getInstance()->getServer();
-
-		if ($bypass) {
-			return false;
-		}
 
 		$checkEvent = new CheckFailedEvent($playerAPI, $this->getName(), $this->getSubType());
 		$checkEvent->call();
@@ -116,6 +113,19 @@ abstract class Check extends ConfigManager {
 					$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
 				}
 			}
+		} else {
+			if ($detectionsAllowedToSend) {
+				APIProvider::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, self::getData(self::DETECTION_MESSAGE), $this->getName(), $this->getSubType()));
+				foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+					if ($p->hasPermission("zuri.admin")) {
+						$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::DETECTION_MESSAGE), $this->getName(), $this->getSubType()));
+					}
+				}
+			}
+		}
+
+		if ($bypass) {
+			return false;
 		}
 
 		if ($playerAPI->isDebug()) {
@@ -135,6 +145,11 @@ abstract class Check extends ConfigManager {
 
 			$playerAPI->resetViolation($this->getName());
 			$playerAPI->resetRealViolation($this->getName());
+			foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+				if ($p->hasPermission("zuri.admin")) {
+					$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
+				}
+			}
 			(new BanEvent($playerAPI, $this->getName()))->ban();
 			return true;
 		}
@@ -144,11 +159,21 @@ abstract class Check extends ConfigManager {
 				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 				$playerAPI->resetViolation($this->getName());
 				$playerAPI->resetRealViolation($this->getName());
+				foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+					if ($p->hasPermission("zuri.admin")) {
+						$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
+					}
+				}
 				foreach (self::getData(self::KICK_COMMANDS) as $command) {
 					$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
 				}
 			} else {
 				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
+				foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+					if ($p->hasPermission("zuri.admin")) {
+						$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
+					}
+				}
 				$playerAPI->resetViolation($this->getName());
 				$playerAPI->resetRealViolation($this->getName());
 				$player->kick("Unfair Advantage: Zuri Anticheat", null, ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE_UI), $this->getName(), $this->getSubType()));

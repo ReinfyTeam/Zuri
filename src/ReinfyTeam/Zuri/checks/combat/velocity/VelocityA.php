@@ -69,16 +69,16 @@ class VelocityA extends Check {
 				if (!$player->spawned && !$player->isConnected()) {
 					return;
 				} // Effect::$effectInstance bug fix
-				$location = $entity->getLocation();
+				$location = $player->getLocation();
 				$lastLocation = $playerAPI->getExternalData("lastLocationV");
 				if ($lastLocation !== null) {
-					if (!$event->isCancelled() && $entity->isOnGround() && !$playerAPI->isInWeb() && !$playerAPI->isUnderBlock() && !$playerAPI->isInBoxBlock()) {
-						$velocity = MathUtil::distance($location->asVector3(), $lastLocation->asVector3());
+					if (!$event->isCancelled() && $entity->isOnGround() && !$playerAPI->isInWeb()) {
+						$velocity = MathUtil::XZDistanceSquared($location->asVector3(), $lastLocation->asVector3());
 						if ($velocity < 0.6 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
 							$this->failed($playerAPI);
 						}
+						$this->debug($playerAPI, "velocity=$velocity");
 					}
-					$this->debug($playerAPI, "velocity=$velocity");
 					$playerAPI->unsetExternalData("lastLocationV");
 				} else {
 					$playerAPI->setExternalData("lastLocationV", $location);

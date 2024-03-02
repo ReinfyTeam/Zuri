@@ -30,6 +30,7 @@ use pocketmine\event\Event;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\MathUtil;
 
 class ReachB extends Check {
 	public function getName() : string {
@@ -60,7 +61,7 @@ class ReachB extends Check {
 		return 3;
 	}
 
-	public function checkJustEvent(Event $event) : void {
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			$cause = $event->getCause();
 			$entity = $event->getEntity();
@@ -71,15 +72,14 @@ class ReachB extends Check {
 				return;
 			}
 			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player) {
-				$playerAPI = PlayerAPI::getAPIPlayer($damager);
-				$player = $playerAPI->getPlayer();
-				if (!$player->spawned && !$player->isConnected()) {
-					return;
-				} // Effect::$effectInstance bug fix
-				if ($player->getLocation()->distanceSquared($locEntity) > 4.0) {
-					$this->failed($playerAPI);
+				$entityAPI = PlayerAPI::getAPIPlayer($entity);
+				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
+				$player = $entityAPI->getPlayer();
+				$damager = $damagerAPI->getPlayer();
+				if (MathUtil::XZDistanceSquared($entityAPI->getLocation()->asVector3(), $damager->getLocation()->asVector3()) > ($damager->isSurvival() ? 4.0 : 8.3)) {
+					$this->failed($damagerAPI);
 				}
-				$this->debug($playerAPI, "distance=" . $player->getLocation()->distanceSquared($locEntity));
+				$this->debug($damagerAPI, "distance=" . MathUtil::XZDistanceSquared($player->getLocation()->asVector3(), $damager->getLocation()->asVector3()));
 			}
 		}
 	}

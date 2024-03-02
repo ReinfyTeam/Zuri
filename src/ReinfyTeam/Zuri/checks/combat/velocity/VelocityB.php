@@ -68,33 +68,25 @@ class VelocityB extends Check {
 				$player = $playerAPI->getPlayer();
 				$loc = $player->getLocation();
 				$lastLoc = $playerAPI->getExternalData("lastVLocB");
-				if (!$player->spawned && !$player->isConnected()) {
-					return;
-				}
 
 				if ( // prevent false-positive
-					$playerAPI->getAttackTicks() > 40 ||
-					$playerAPI->getOnlineTime() <= 30 ||
-					$playerAPI->getJumpTicks() < 40 ||
 					$playerAPI->isInWeb() ||
-					$playerAPI->isOnGround() ||
+					!$playerAPI->isOnGround() ||
 					$playerAPI->isOnAdhesion() ||
-					$playerAPI->isUnderBlock() ||
-					$entity->isOnGround() ||
+					!$entity->isOnGround() ||
 					$player->getAllowFlight() ||
-					$playerAPI->isInBoxBlock()
+					$player->isFlying()
 				) {
 					return;
 				}
 
-				$velocity = MathUtil::distance($loc->asVector3(), $lastLoc->asVector3());
-
 				if ($lastLoc !== null) {
+					$velocity = MathUtil::distance($loc->asVector3(), $lastLoc->asVector3());
 					if ($velocity < 0.6 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
 						$this->failed($playerAPI);
 					}
-					$playerAPI->unsetExternalData("lastVLocB");
 					$this->debug($playerAPI, "velocity=$velocity");
+					$playerAPI->unsetExternalData("lastVLocB");
 				} else {
 					$playerAPI->setExternalData("lastVLocB", $loc);
 				}

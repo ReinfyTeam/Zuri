@@ -96,4 +96,7 @@ abstract class ConfigPaths {
 	public const CHAT_REPEAT_TEXT = "zuri.chat.repeat.text";
 
 	public const CHECK = "zuri.check";
+
+	public const DETECTION_ENABLE = "zuri.detection.enable";
+	public const DETECTION_MESSAGE = "zuri.detection.message";
 }

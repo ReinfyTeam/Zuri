@@ -132,20 +132,20 @@ class ZuriCommand extends Command implements PluginOwned {
 								break;
 							case "length":
 								if (!isset($args[2])) {
-									$sender->sendMessage($prefix . TextFormat::RED . "Invalid usage! " . TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha length <int: 1-15>");
+									$sender->sendMessage($prefix . TextFormat::RED . " Invalid usage! " . TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha length <int: 1-15>");
 									return;
 								}
 								if (is_float($args[2])) {
-									$sender->sendMessage($prefix . TextFormat::RED . "Invalid usage! The value must be integer! Must range to 1-15");
+									$sender->sendMessage($prefix . TextFormat::RED . " Invalid usage! The value must be integer! Must range to 1-15");
 									return;
 								}
 
 								if ($args[2] < 1 || $args[2] > 15) {
-									$sender->sendMessage($prefix . TextFormat::RED . "Invalid usage! Too big or too low! Must range to 1-15!");
+									$sender->sendMessage($prefix . TextFormat::RED . " Invalid usage! Too big or too low! Must range to 1-15!");
 									return;
 								}
 
-								$sender->sendMessage($prefix . TextFormat::GREEN . "Changed the code length to " . $args[2] . "!");
+								$sender->sendMessage($prefix . TextFormat::GREEN . " Changed the code length to " . $args[2] . "!");
 								ConfigManager::setData(ConfigManager::CAPTCHA_CODE_LENGTH, intval($args[2])); // incase of using ""
 								break;
 							default: $sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha (toggle/message/tip/title/randomize/length) - Use to on/off and set length code for captcha.");
@@ -170,7 +170,7 @@ class ZuriCommand extends Command implements PluginOwned {
 				case "modules":
 				case "checks":
 					$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
-					$sender->sendMessage($prefix . TextFormat::GRAY . "Zuri Modules/Check Information List:");
+					$sender->sendMessage($prefix . TextFormat::GRAY . " Zuri Modules/Check Information List:");
 					foreach (APIProvider::Checks() as $check) {
 						$sender->sendMessage($prefix . TextFormat::RESET . " " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolations());
 					}

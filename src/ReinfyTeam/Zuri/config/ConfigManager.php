@@ -63,6 +63,6 @@ class ConfigManager extends ConfigPaths {
 		}
 		@rename(APIProvider::getInstance()->getDataFolder() . "config.yml", APIProvider::getInstance()->getDataFolder() . "old-config.yml");
 		APIProvider::getInstance()->saveResource("config.yml");
-		$log->notice(self::getData(self::PREFIX) . TextFormat::RED . "Outdated configuration! Your config will be renamed as old-config.yml to backup your data.");
+		$log->notice(self::getData(self::PREFIX) . TextFormat::RED . " Outdated configuration! Your config will be renamed as old-config.yml to backup your data.");
 	}
 }

@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.0.2" #This config version
+    version: "0.0.3" #This config version
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -40,8 +40,10 @@ zuri:
         message: "{prefix} §f{player} §chas been banned from server for hacking or abuse."
         enable: true
         randomize: false
-        recentlogs:
-            message: "{time} > {player} failed {module} ({subtype}) VL {violation} | penalty: BAN"
+    detection:
+        # Detections when suddenly triggered any checks that detects any kind of hack. This might spam your console or chat. NOT RECOMMENDED.
+        enable: false
+        message: "{prefix} §f{player} §7suspected using §f{module} §7(§c{subtype}§7)"
     kick:
         kickmessage: "§fYou have been kicked from the server."
         message: "{prefix} §f{player} §chas been kicked from server for hacking or abuse."
