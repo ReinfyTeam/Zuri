@@ -26,6 +26,8 @@ namespace ReinfyTeam\Zuri\utils;
 
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\Utils;
+use pocketmine\Server;
 use function date;
 use function microtime;
 use function str_replace;
@@ -42,7 +44,7 @@ class ReplaceText extends ConfigManager {
 			"{violation}",
 			"{timechat}",
 			"{code}",
-			"{tick}"
+			"{tps}"
 		];
 		$replace = [
 			self::getData(self::PREFIX),
@@ -53,8 +55,11 @@ class ReplaceText extends ConfigManager {
 			$player->getRealViolation($module),
 			self::getData(self::CHAT_SPAM_DELAY),
 			$player->getCaptchaCode(),
-			microtime()
+			Server::getInstance()->getTicksPerSecond()
 		];
-		return str_replace($keys, $replace, $text);
+		
+		$text = str_replace($keys, $replace, $text);
+		
+		return Utils::ParseColors($text);
 	}
 }

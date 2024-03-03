@@ -73,7 +73,7 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
-	public static function ManageModules(Player $player) : void {
+	public static function ManageModules(Player $player, bool $reloaded = false) : void {
 		$form = new SimpleForm(function(Player $player, $data) {
 			if ($data === null) {
 				self::MainUI($player);
@@ -87,13 +87,18 @@ final class FormSender extends ConfigManager {
 				case 1:
 					self::PickAModule($player);
 					break;
+				case 2:
+					self::ManageModules($player, true);
+					APIProvider::getInstance()->loadChecks();
+					break;
 			}
 		});
 
 		$form->setTitle("Manage Modules");
-		$form->setContent("Choose what do you want to manage..");
+		$form->setContent(($reloaded ? TextFormat::GREEN . "Successfully reloaded all of the modules!" : "Choose what do you want to manage.."));
 		$form->addButton("Enable/Disable Modules");
 		$form->addButton("Module Information");
+		$form->addButton("Reload all modules");
 		$player->sendForm($form);
 	}
 

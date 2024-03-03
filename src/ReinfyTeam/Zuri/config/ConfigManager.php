@@ -26,7 +26,6 @@ namespace ReinfyTeam\Zuri\config;
 
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\APIProvider;
-use ReinfyTeam\Zuri\utils\Utils;
 use function fclose;
 use function file_exists;
 use function rename;
@@ -35,11 +34,11 @@ use function yaml_parse;
 
 class ConfigManager extends ConfigPaths {
 	public static function getData(string $path) {
-		return Utils::ParseColors(APIProvider::getInstance()->getConfig()->getNested($path));
+		return APIProvider::getInstance()->getConfig()->getNested($path);
 	}
 
 	public static function setData(string $path, $data, bool $reverseColors = false) {
-		APIProvider::getInstance()->getConfig()->setNested($path, Utils::ParseColors($data, $reverseColors));
+		APIProvider::getInstance()->getConfig()->setNested($path, $data);
 		APIProvider::getInstance()->getConfig()->save();
 	}
 
