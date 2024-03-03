@@ -31,9 +31,9 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\MathUtil;
 
-class Jesus extends Check {
+class FastSwim extends Check {
 	public function getName() : string {
-		return "Jesus";
+		return "FastSwim";
 	}
 
 	public function getSubType() : string {
@@ -75,13 +75,13 @@ class Jesus extends Check {
 			) {
 				return;
 			}
-			$bottomBlockId = $player->getWorld()->getBlock($player->getLocation()->add(0, -1, 0))->getTypeId();
-			$halfBlockId = $player->getWorld()->getBlock($player->getLocation())->getTypeId();
+			$bottomBlockId = $player->getWorld()->getBlock($player->getLocation())->getTypeId();
 			$upperBlockId = $player->getWorld()->getBlock($player->getLocation()->add(0, 1, 0))->getTypeId();
-			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.07 && $bottomBlockId === BlockTypeIds::WATER && $upperBlockId !== BlockTypeIds::WATER && $halfBlockId !== BlockTypeIds::WATER) { // i think this is weak type of checking..
+			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.04 && $bottomBlockId === BlockTypeIds::WATER && $upperBlockId !== BlockTypeIds::WATER) { // weak :(
+			// i tested with these, the player is about to swim in ~0.3 blocks per movement, and it doesn't affect swim speed, even the player has effect of Speed.
 				$this->failed($playerAPI);
 			}
-			$this->debug($playerAPI, "bottomId=$bottomBlockId, upperBlockId=$upperBlockId, halfBlockId=$halfBlockId");
+			$this->debug($playerAPI, "speedPerBlock=$d, bottomBlockId=$bottomBlockId, upperBlockId=$upperBlockId");
 		}
 	}
 }

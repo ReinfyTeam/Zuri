@@ -496,7 +496,7 @@ class PlayerAPI implements IPlayerAPI {
 	public function addViolation(string $supplier) : void {
 		if (isset($this->violations[$name = $this->player][$supplier])) {
 			$delayTime = microtime(true) - $this->violations[$name][$supplier]["time"];
-			if ($delayTime < 2) {
+			if ($delayTime < 0.5) {
 				$this->violations[$name][$supplier]["vl"] += 1;
 			} else {
 				unset($this->violations[$name][$supplier]);
