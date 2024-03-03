@@ -26,6 +26,7 @@ namespace ReinfyTeam\Zuri\config;
 
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\utils\Utils;
 use function fclose;
 use function file_exists;
 use function rename;
