@@ -77,7 +77,7 @@ class FastSwim extends Check {
 			}
 			$bottomBlockId = $player->getWorld()->getBlock($player->getLocation())->getTypeId();
 			$upperBlockId = $player->getWorld()->getBlock($player->getLocation()->add(0, 1, 0))->getTypeId();
-			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.04 && $bottomBlockId === BlockTypeIds::WATER && $upperBlockId !== BlockTypeIds::WATER) { // weak :(
+			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.3 && $bottomBlockId === BlockTypeIds::WATER && $upperBlockId !== BlockTypeIds::WATER) { // weak :(
 			// i tested with these, the player is about to swim in ~0.3 blocks per movement, and it doesn't affect swim speed, even the player has effect of Speed.
 				$this->failed($playerAPI);
 			}
