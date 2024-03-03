@@ -81,7 +81,7 @@ class APIProvider extends PluginBase {
 	}
 
 	/**
-	 * Do not call internally.
+	 * Do not call internally, or do not call double.
 	 */
 	private function loadChecks() : void {
 		// Aim Assist
