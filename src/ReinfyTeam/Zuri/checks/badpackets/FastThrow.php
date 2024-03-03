@@ -72,7 +72,7 @@ class FastThrow extends Check {
 					if ($lastUse !== null) {
 						$diff = microtime(true) - $lastUse; // by ticks
 						$this->debug($playerAPI, "diff=$diff");
-						if ($diff < 0.2 && $ping < self::getData(self::PING_LAGGING)) { // < ~0.5 sec
+						if ($diff < 0.2 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) { // < ~0.5 sec
 							$event->cancel(); // cancel the event for safety
 							$this->failed($playerAPI);
 						}
