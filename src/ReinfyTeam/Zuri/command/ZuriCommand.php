@@ -56,10 +56,12 @@ class ZuriCommand extends Command implements PluginOwned {
 		if (isset($args[0])) {
 			switch(strtolower($args[0])) {
 				case "about":
+				case "info":
 					$sender->sendMessage(TextFormat::AQUA . "Build: " . TextFormat::GRAY . APIProvider::getInstance()->getDescription()->getVersion() . TextFormat::AQUA . " Author: " . TextFormat::GRAY . APIProvider::getInstance()->getDescription()->getAuthors()[0]);
 					$sender->sendMessage(TextFormat::AQUA . "Total Checks: " . TextFormat::GRAY . count(APIProvider::Checks()));
 					break;
 				case "notify":
+				case "notification":
 					if (isset($args[1])) {
 						switch(strtolower($args[1])) {
 							case "toggle":
@@ -79,23 +81,22 @@ class ZuriCommand extends Command implements PluginOwned {
 					}
 					break;
 				case "banmode":
+				case "ban":
 					if (isset($args[1])) {
 						switch($args[1]) {
 							case "toggle":
 								$data = ConfigManager::getData(ConfigManager::BAN_ENABLE) === true ? ConfigManager::setData(ConfigManager::BAN_ENABLE, false) : ConfigManager::setData(ConfigManager::BAN_ENABLE, true);
 								$sender->sendMessage($prefix . TextFormat::GRAY . " Ban Mode is " . (ConfigManager::getData(ConfigManager::BAN_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 								break;
-							case "randomize":
-								$data = ConfigManager::getData(ConfigManager::BAN_RANDOMIZE) === true ? ConfigManager::setData(ConfigManager::BAN_RANDOMIZE, false) : ConfigManager::setData(ConfigManager::BAN_RANDOMIZE, true);
-								$sender->sendMessage($prefix . TextFormat::GRAY . " Ban Randomize mode is " . (ConfigManager::getData(ConfigManager::BAN_RANDOMIZE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
-								break;
 							default: $sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode (toggle/randomize) - Use to on/off ban mode.");
 						}
 					} else {
-						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode " . TextFormat::RED . " (toggle/randomize) - Use to on/off ban mode.");
+						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode " . TextFormat::RED . " (toggle) - Use to on/off ban mode.");
 					}
 					break;
 				case "captcha":
+				case "verification":
+				case "verify":
 					if (isset($args[1])) {
 						switch($args[1]) {
 							case "toggle":
@@ -148,7 +149,7 @@ class ZuriCommand extends Command implements PluginOwned {
 								$sender->sendMessage($prefix . TextFormat::GREEN . " Changed the code length to " . $args[2] . "!");
 								ConfigManager::setData(ConfigManager::CAPTCHA_CODE_LENGTH, intval($args[2])); // incase of using ""
 								break;
-							default: $sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha (toggle/message/tip/title/randomize/length) - Use to on/off and set length code for captcha.");
+							default: $sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha " . TextFormat::RED . "(toggle/message/tip/title/randomize/length) - Use to on/off and set length code for captcha.");
 						}
 					} else {
 						$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha" . TextFormat::RED . " (toggle/message/tip/title/randomize/length) - Use to on/off and set length code for captcha.");
@@ -159,6 +160,7 @@ class ZuriCommand extends Command implements PluginOwned {
 					$sender->sendMessage($prefix . TextFormat::GRAY . " Bypass mode is " . (ConfigManager::getData(ConfigManager::PERMISSION_BYPASS_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 					break;
 				case "debug":
+				case "analyze":
 					if ($sender instanceof Player) {
 						$data = $playerAPI->isDebug() === true ? $playerAPI->setDebug(false) : $playerAPI->setDebug(true);
 						$sender->sendMessage($prefix . TextFormat::GRAY . " Debug mode is " . ($playerAPI->isDebug() ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
@@ -195,8 +197,7 @@ class ZuriCommand extends Command implements PluginOwned {
 			$sender->sendMessage("");
 			$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " about" . TextFormat::GRAY . " - Show infomation the plugin.");
 			$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify (toggle/admin)" . TextFormat::GRAY . " - Use to on/off notify.");
-			$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " process (auto)" . TextFormat::GRAY . " - Use to on/off process.");
-			$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode (toggle/randomize)" . TextFormat::GRAY . " - Use to on/off ban mode.");
+			$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode (toggle)" . TextFormat::GRAY . " - Use to on/off ban mode.");
 			$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha (toggle/message/tip/title/randomize)" . TextFormat::GRAY . " - Use to on/off mode for captcha.");
 			$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " bypass" . TextFormat::GRAY . " - Use to on/off for bypass mode.");
 			$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " debug" . TextFormat::GRAY . " - Use to on/off for debug mode.");

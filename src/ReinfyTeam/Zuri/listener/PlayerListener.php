@@ -29,6 +29,7 @@ use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityTeleportEvent;
+use pocketmine\event\entity\ProjectileLaunchEvent;
 use pocketmine\event\Event;
 use pocketmine\event\inventory\InventoryCloseEvent;
 use pocketmine\event\inventory\InventoryOpenEvent;
@@ -501,5 +502,9 @@ class PlayerListener implements Listener {
 				$class->checkJustEvent($event);
 			}
 		}
+	}
+
+	public function onProjectileLaunch(ProjectileLaunchEvent $event) : void {
+		$this->checkJustEvent($event);
 	}
 }

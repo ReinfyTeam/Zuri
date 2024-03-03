@@ -95,6 +95,7 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\Crasher();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastEat();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\SelfHit();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastThrow();
 
 		// Blockbreak
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\WrongMining();
