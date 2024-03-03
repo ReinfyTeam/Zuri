@@ -34,11 +34,11 @@ use function yaml_parse;
 
 class ConfigManager extends ConfigPaths {
 	public static function getData(string $path) {
-		return APIProvider::getInstance()->getConfig()->getNested($path);
+		return Utils::ParseColors(APIProvider::getInstance()->getConfig()->getNested($path));
 	}
 
-	public static function setData(string $path, $data) {
-		APIProvider::getInstance()->getConfig()->setNested($path, $data);
+	public static function setData(string $path, $data, bool $reverseColors = false) {
+		APIProvider::getInstance()->getConfig()->setNested($path, Utils::ParseColors($data, $reverseColors));
 		APIProvider::getInstance()->getConfig()->save();
 	}
 
