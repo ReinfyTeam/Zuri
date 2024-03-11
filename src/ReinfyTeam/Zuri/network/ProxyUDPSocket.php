@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\network;
 
+use Exception;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\APIProvider;
 use ReinfyTeam\Zuri\config\ConfigManager;
@@ -47,7 +48,11 @@ class ProxyUDPSocket {
 		socket_set_option($this->socket, SOL_SOCKET, SO_RCVBUF, 1024 * 1024 * 8);
 	}
 
-	public function bind(InternetAddress $address) {
+    /**
+     * @throws Exception
+     */
+    public function bind(InternetAddress $address): void
+    {
 		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " --------------------------------------------------------------");
 		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " YOU ARE RUNNING THIS PLUGIN WITH PROXY UDP SUPPORT!");
 		APIProvider::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " ProxyUDP is on development testing stage, which leads many bugs and issue you will encounter.");
@@ -69,15 +74,18 @@ class ProxyUDPSocket {
 		}
 	}
 
-	public function receive(?string &$buffer, ?string &$ip, ?int &$port) {
+	public function receive(?string &$buffer, ?string &$ip, ?int &$port): void
+    {
 		socket_recvfrom($this->socket, $buffer, 65535, 0, $ip, $port);
 	}
 
-	public function send(string $buffer, string $ip, int $port) {
+	public function send(string $buffer, string $ip, int $port): void
+    {
 		socket_sendto($this->socket, $buffer, strlen($buffer), 0, $ip, $port);
 	}
 
-	public function close() {
+	public function close(): void
+    {
 		socket_close($this->socket);
 	}
 }
