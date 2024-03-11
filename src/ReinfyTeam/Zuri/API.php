@@ -32,9 +32,9 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use function in_array;
 
 final class API {
-    private static ConfigManager $config;
+	private static ConfigManager $config;
 
-    public static function getVersion() : string {
+	public static function getVersion() : string {
 		return APIProvider::VERSION_PLUGIN;
 	}
 

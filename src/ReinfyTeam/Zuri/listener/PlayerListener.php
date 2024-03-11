@@ -487,9 +487,6 @@ class PlayerListener implements Listener {
 
 		foreach (APIProvider::Checks() as $class) {
 			if ($class->enable()) {
-				if ($player->getPlayer() === null) {
-					return;
-				}
 				$class->checkEvent($event, $player);
 			}
 		}
@@ -502,9 +499,6 @@ class PlayerListener implements Listener {
 
 		foreach (APIProvider::Checks() as $class) {
 			if ($class->enable()) {
-				if ($playerAPI->getPlayer() === null) {
-					return;
-				}
 				$class->check($packet, $playerAPI);
 			}
 		}
