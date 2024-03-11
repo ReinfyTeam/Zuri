@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\moving\speed;
+namespace ReinfyTeam\Zuri\checks\moving;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
@@ -69,7 +69,8 @@ class AntiVoid extends Check {
 		) {
 			return;
 		}
-		$lastY = $playerAPI->getExternalData("lastYB");
+		$lastY = $playerAPI->getExternalData("lastY");
+        $lastYB = $playerAPI->getExternalData("lastYB");
 		$playerAPI->setExternalData("lastYB", $playerAPI->getPlayer()->getLocation()->getY());
 		if ($lastY !== null && $playerAPI->isOnGround()) {
 			if ($lastY < $playerAPI->getPlayer()->getLocation()->getY()) {
@@ -78,6 +79,6 @@ class AntiVoid extends Check {
 			$playerAPI->unsetExternalData("lastYB");
 		}
 
-		$this->debug($playerAPI, "lastY=$lastY, lastYB=$lastYB");
+        $this->debug($playerAPI, "lastY=$lastY, lastYB=$lastYB");
 	}
 }
