@@ -63,7 +63,7 @@ class SpeedC extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-			if(
+			if (
 				$playerAPI->isOnStairs() ||
 				$playerAPI->isOnIce() ||
 				$playerAPI->getTeleportTicks() < 40 ||
@@ -72,8 +72,8 @@ class SpeedC extends Check {
 				$playerAPI->getAttackTicks() < 40 ||
 				!$playerAPI->isOnAdhesion() ||
 				$player->getAllowFlight() ||
-				$player->isCreative() ||
-			){
+				$player->isCreative()
+			) {
 				return;
 			}
 			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9)) {

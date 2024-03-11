@@ -148,7 +148,7 @@ class BlockUtil {
 		$blockY = $location->getY() - $down;
 		$blockZ = $location->getZ();
 		$world = $location->getWorld();
-		
+
 		if (in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ))->getTypeId(), $id, true)) {
 			return true;
 		}
