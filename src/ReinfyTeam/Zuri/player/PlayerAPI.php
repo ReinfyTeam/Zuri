@@ -284,7 +284,7 @@ class PlayerAPI implements IPlayerAPI {
 		}
 		if ($ref === null) {
 			$ref = new ReflectionProperty(Player::class, "blockBreakHandler");
-        }
+		}
 		return $ref->getValue($this->getPlayer());
 	}
 
