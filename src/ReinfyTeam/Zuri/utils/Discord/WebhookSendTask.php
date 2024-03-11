@@ -36,8 +36,8 @@ use function in_array;
 use function json_encode;
 
 class WebhookSendTask extends AsyncTask {
-	protected NonThreadSafeValue $webhook;
-	protected NonThreadSafeValue $message;
+	protected Webhook $webhook;
+	protected Message $message;
 
 	public function __construct(Webhook $webhook, Message $message) {
 		$this->webhook = $webhook;
