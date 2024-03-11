@@ -24,12 +24,10 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
+use pocketmine\Server;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\Utils;
-use pocketmine\Server;
 use function date;
-use function microtime;
 use function str_replace;
 use function time;
 
@@ -57,9 +55,9 @@ class ReplaceText extends ConfigManager {
 			$player->getCaptchaCode(),
 			Server::getInstance()->getTicksPerSecond()
 		];
-		
+
 		$text = str_replace($keys, $replace, $text);
-		
+
 		return Utils::ParseColors($text);
 	}
 }

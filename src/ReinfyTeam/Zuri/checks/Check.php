@@ -36,6 +36,7 @@ use ReinfyTeam\Zuri\events\ServerLagEvent;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\task\ServerTickTask;
 use ReinfyTeam\Zuri\utils\ReplaceText;
+use function in_array;
 use function microtime;
 use function strtolower;
 
@@ -98,6 +99,19 @@ abstract class Check extends ConfigManager {
 		$playerAPI->addViolation($this->getName());
 		$reachedMaxRealViolations = $playerAPI->getRealViolation($this->getName()) > $maxViolations;
 		$server = APIProvider::getInstance()->getServer();
+
+		if (self::getData(self::WORLD_BYPASS_ENABLE) === true) {
+			if (strtolower(self::getData(self::WORLD_BYPASS_MODE)) === "blacklist") {
+				if (in_array($player->getWorld()->getFolderName(), self::getData(self::WORLD_BYPASS_LIST), true)) {
+					return false;
+				}
+			} else {
+				if (!in_array($player->getWorld()->getFolderName(), self::getData(self::WORLD_BYPASS_LIST), true)) {
+					return false;
+				}
+			}
+		}
+
 
 		$checkEvent = new CheckFailedEvent($playerAPI, $this->getName(), $this->getSubType());
 		$checkEvent->call();

@@ -84,11 +84,10 @@ class APIProvider extends PluginBase {
 	 * Do not call internally, or do not call double.
 	 */
 	public function loadChecks() : void {
-		
-		if(!empty($this->checks)){
+		if (!empty($this->checks)) {
 			$this->checks = [];
 		}
-		
+
 		// Aim Assist
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\aimassist\AimAssistA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\aimassist\AimAssistB();

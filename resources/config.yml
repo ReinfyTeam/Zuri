@@ -22,6 +22,15 @@ zuri:
         #This is the buyer's discretion if you have custom errors with your server we will not be responsible.
         normal: 20
         lagging: 200
+    #Bypass a world according to list.
+    world_bypass:
+        enable: true
+        #You can use "whitelist" or "blacklist", the fallback is blacklist.
+        mode: blacklist
+        list:
+          - "Lobby"
+          - "Hub"
+          - "world"
     proxy:
         ##This is a feature that is still in the development stage. DON'T ENABLE
         enable: false #Enabling this feature will help every server you're running on your computer be protected by Zuri.

@@ -66,6 +66,9 @@ abstract class ConfigPaths {
 
 	public const PERMISSION_BYPASS_ENABLE = "zuri.permissions.bypass.enable";
 	public const PERMISSION_BYPASS_PERMISSION = "zuri.permissions.bypass.permission";
+	public const WORLD_BYPASS_ENABLE = "zuri.world_bypass.enable";
+	public const WORLD_BYPASS_MODE = "zuri.world_bypass.mode";
+	public const WORLD_BYPASS_LIST = "zuri.world_bypass.list";
 
 	public const DISCORD_ENABLE = "zuri.discord.enable";
 	public const DISCORD_WEBHOOK = "zuri.discord.webhook";
