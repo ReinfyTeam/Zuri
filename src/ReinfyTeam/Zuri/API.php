@@ -32,7 +32,9 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use function in_array;
 
 final class API {
-	public static function getVersion() : string {
+    private static ConfigManager $config;
+
+    public static function getVersion() : string {
 		return APIProvider::VERSION_PLUGIN;
 	}
 
@@ -46,11 +48,11 @@ final class API {
 	}
 
 	public static function getModule(string $name, string $subType) : ?Check {
-		if (in_array($name, APIProvider::Check(), true)) {
+		if (in_array($name, APIProvider::Checks(), true)) {
 			return null;
 		}
 
-		foreach (APIProvider::Check() as $module) {
+		foreach (APIProvider::Checks() as $module) {
 			if ($module->getName() === $name && $module->getSubType() === $subType) {
 				$result = $module;
 			}
@@ -61,7 +63,7 @@ final class API {
 	}
 
 	public static function getAllModules() : array {
-		return APIProvider::Check();
+		return APIProvider::Checks();
 	}
 
 	public static function getConfig() : ConfigManager {
@@ -73,7 +75,7 @@ final class API {
 	}
 
 	public static function allModulesInfo() : ?array {
-		foreach (APIProvider::Check() as $module) {
+		foreach (APIProvider::Checks() as $module) {
 			$result[$module->getName()] = ["name" => $module->getName(), "subType" => $module->getSubType(), "kick" => $module->kick(), "ban" => $module->ban(), "flag" => $module->flag(), "captcha" => $module->captcha(), "maxViolations" => $module->maxViolations()];
 		}
 
@@ -81,7 +83,7 @@ final class API {
 	}
 
 	public static function getModuleInfo(string $name, string $subType) : ?string {
-		if (in_array($name, APIProvider::Check(), true)) {
+		if (in_array($name, APIProvider::Checks(), true)) {
 			return null;
 		}
 
@@ -89,7 +91,7 @@ final class API {
 	}
 
 	public static function getSubTypeByModule(string $name) : ?string {
-		if (in_array($name, APIProvider::Check(), true)) {
+		if (in_array($name, APIProvider::Checks(), true)) {
 			return null;
 		}
 
@@ -97,7 +99,7 @@ final class API {
 	}
 
 	public static function getMaxViolationByModule(string $name) : ?string {
-		if (in_array($name, APIProvider::Check(), true)) {
+		if (in_array($name, APIProvider::Checks(), true)) {
 			return null;
 		}
 
@@ -105,7 +107,7 @@ final class API {
 	}
 
 	public function getPunishmentByModule(string $name) : ?array {
-		if (in_array($name, APIProvider::Check(), true)) {
+		if (in_array($name, APIProvider::Checks(), true)) {
 			return null;
 		}
 
