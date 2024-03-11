@@ -39,6 +39,9 @@ use ReinfyTeam\Zuri\utils\InternetAddress;
 use ReinfyTeam\Zuri\utils\PermissionManager;
 
 class APIProvider extends PluginBase {
+
+	const VERSION_PLUGIN = "1.1.2";
+	
 	private static APIProvider $instance;
 	private ProxyUDPSocket $proxyUDPSocket;
 
