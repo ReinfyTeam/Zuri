@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.0.5" #This config version
+    version: "0.0.6" #This config version
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -36,8 +36,6 @@ zuri:
         enable: false #Enabling this feature will help every server you're running on your computer be protected by Zuri.
         ip: 127.0.0.1
         port: 19132
-    process:
-        auto: true #Enabling this mode will allow Zuri to automatically handle the behavior and issue penalties to the player.
     alerts:
         message: "{prefix} §f{player} §7failed §f{module} §7(§c{subtype}§7) §7VL §2{violation}"
         enable: true
@@ -62,8 +60,6 @@ zuri:
               enabled: true
               list:
                  - 'kick {player} "Unfair Advantage"'
-        recentlogs:
-            message: "{time} > {player} failed {module} ({subtype}) VL {violation} | penalty: KICK"
     captcha:
         enable: true
         text: "{prefix} §cType §b{code} §cto get rid of mute!"
@@ -73,9 +69,10 @@ zuri:
         randomize: false #If it enable <message, tip, title> must disable
         code:
             length: 5
+    #Custom permissions
     permissions:
         bypass:
-            enable: false
+            enable: true
             permission: "zuri.bypass"
     discord:
         enable: false
