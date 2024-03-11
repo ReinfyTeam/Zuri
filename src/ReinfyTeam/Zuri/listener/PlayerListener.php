@@ -49,6 +49,7 @@ use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\server\CommandEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\inventory\ArmorInventory;
+use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
@@ -79,14 +80,8 @@ class PlayerListener implements Listener {
 				return;
 			}
 			$playerAPI = PlayerAPI::getAPIPlayer($player);
-			foreach (APIProvider::Checks() as $class) {
-				if ($class->enable()) {
-					if ($playerAPI->getPlayer() === null) {
-						return;
-					}
-					$class->check($packet, $playerAPI);
-				}
-			}
+			$this->check($packet, $playerAPI);
+
 			if ($packet instanceof LevelSoundEventPacket) {
 				if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
 					$this->addCPS($playerAPI);
@@ -486,12 +481,31 @@ class PlayerListener implements Listener {
 	}
 
 	private function checkEvent(Event $event, PlayerAPI $player) {
+		if (($player = $playerAPI->getPlayer()) === null || !$player->isOnline() || !$player->spawned) {
+			return;
+		}
+
 		foreach (APIProvider::Checks() as $class) {
 			if ($class->enable()) {
 				if ($player->getPlayer() === null) {
 					return;
 				}
 				$class->checkEvent($event, $player);
+			}
+		}
+	}
+
+	private function check(DataPacket $packet, PlayerAPI $player) {
+		if (($player = $playerAPI->getPlayer()) === null || !$player->isOnline() || !$player->spawned) {
+			return;
+		}
+
+		foreach (APIProvider::Checks() as $class) {
+			if ($class->enable()) {
+				if ($playerAPI->getPlayer() === null) {
+					return;
+				}
+				$class->check($packet, $playerAPI);
 			}
 		}
 	}
