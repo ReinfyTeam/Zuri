@@ -24,6 +24,10 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri;
 
+use pocketmine\player\Player;
+use pocketmine\Server;
+use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function in_array;
 
