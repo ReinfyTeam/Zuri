@@ -66,6 +66,21 @@ class SpeedA extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$nLocation = $playerAPI->getNLocation();
 		$player = $playerAPI->getPlayer();
+		
+		if(
+			$playerAPI->isOnStairs() ||
+			$playerAPI->isOnIce() ||
+			$playerAPI->getTeleportTicks() < 40 ||
+			$player->isFlying() ||
+			!$playerAPI->isOnGround() ||
+			$playerAPI->getAttackTicks() < 40 ||
+			!$playerAPI->isOnAdhesion() ||
+			$player->getAllowFlight() ||
+			$player->isCreative() ||
+		){
+			return;
+		}
+		
 		if ($playerAPI->getOnlineTime() > 10 && !empty($nLocation) && $player->isSurvival()) {
 			$recived = false;
 			if ($packet instanceof MovePlayerPacket) {
