@@ -76,10 +76,10 @@ class SpeedC extends Check {
 			) {
 				return;
 			}
-			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9)) {
+			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.95 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() * 0.95) : 0.95)) {
 				$this->failed($playerAPI);
 			}
-			$this->debug($playerAPI, "distance=" . $d . ", limit=" . ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.9 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() + 1) : 0.9));
+			$this->debug($playerAPI, "distance=" . $d . ", limit=" . ($player->getEffects()->has(VanillaEffects::SPEED()) ? 0.95 * ($player->getEffects()->get(VanillaEffects::SPEED())->getAmplifier() * 0.95) : 0.95));
 		}
 	}
 }
