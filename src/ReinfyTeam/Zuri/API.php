@@ -35,7 +35,7 @@ final class API {
 	private static ConfigManager $config;
 
 	public static function getVersion() : string {
-		return APIProvider::VERSION_PLUGIN;
+		return $this->getPluginInstance()->getDescription()->getVersion();
 	}
 
 	public static function getPlayer(string|Player $player) : ?PlayerAPI {
