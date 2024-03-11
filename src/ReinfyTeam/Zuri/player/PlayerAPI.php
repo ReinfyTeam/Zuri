@@ -29,6 +29,7 @@ use pocketmine\entity\Location;
 use pocketmine\math\Facing;
 use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
+use ReflectionProperty;
 use ReinfyTeam\Zuri\APIProvider;
 use function microtime;
 
@@ -282,9 +283,8 @@ class PlayerAPI implements IPlayerAPI {
 			return null;
 		}
 		if ($ref === null) {
-			$ref = new \ReflectionProperty(Player::class, "blockBreakHandler");
-			$ref->setAccessible(true);
-		}
+			$ref = new ReflectionProperty(Player::class, "blockBreakHandler");
+        }
 		return $ref->getValue($this->getPlayer());
 	}
 
@@ -484,7 +484,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function setViolation(string $supplier, int $amount) : void {
-		$this->violations[$this->player->getName()][$supplier]["vl"] = $amount;
+		$this->violations[$this->player][$supplier]["vl"] = $amount;
 	}
 
 	public function resetViolation(string $supplier) : void {
