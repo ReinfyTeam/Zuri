@@ -36,8 +36,11 @@ use function in_array;
 use function json_encode;
 
 class WebhookSendTask extends AsyncTask {
-	protected Webhook $webhook;
-	protected Message $message;
+	
+	/** @var Webhook */
+	protected NonThreadSafeValue $webhook;
+	/** @var Message */
+	protected NonThreadSafeValue $message;
 
 	public function __construct(Webhook $webhook, Message $message) {
 		$this->webhook = $webhook;
@@ -45,8 +48,8 @@ class WebhookSendTask extends AsyncTask {
 	}
 
 	public function onRun() : void {
-		$ch = curl_init($this->webhook->getURL());
-		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($this->message));
+		$ch = curl_init($this->webhook->deserialize()->getURL());
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($this->message->deserialize()));
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
