@@ -30,6 +30,9 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 class CheckFailedEvent extends APIEvent {
 	use CancellableTrait;
 
+	private string $supplier;
+	private string $subType;
+	
 	public function __construct(PlayerAPI $playerAPI, string $supplier, string $subType) {
 		$this->supplier = $supplier;
 		$this->subType = $subType;
