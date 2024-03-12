@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\fly;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
@@ -68,13 +69,13 @@ class FlyB extends Check {
 					case 102:
 					case 38:
 					case 39:
-						$event->cancel();
+//						$event->cancel(); //There is no event here...
 						$this->failed($playerAPI);
 						break;
 				}
 				if ((($packet->flags >> 9) & 0x01 === 1) || (($packet->flags >> 7) & 0x01 === 1) || (($packet->flags >> 6) & 0x01 === 1)) {
 					$this->failed($playerAPI);
-					$event->cancel();
+//					$event->cancel(); //There is no event here...
 				}
 				$this->debug($playerAPI, "packetFlags=" . $packet->flags);
 			}
