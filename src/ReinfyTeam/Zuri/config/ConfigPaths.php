@@ -102,4 +102,7 @@ abstract class ConfigPaths {
 
 	public const DETECTION_ENABLE = "zuri.detection.enable";
 	public const DETECTION_MESSAGE = "zuri.detection.message";
+	
+	public const WARNING_ENABLE = "zuri.warning.enable";
+	public const WARNING_MESSAGE = "zuri.warning.message";
 }

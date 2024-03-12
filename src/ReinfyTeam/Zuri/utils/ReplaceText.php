@@ -32,7 +32,7 @@ use function str_replace;
 use function time;
 
 class ReplaceText extends ConfigManager {
-	public static function replace(PlayerAPI $player, string $text, string $module = "", string $subType = "") : string {
+	public static function replace(string|PlayerAPI $player, string $text, string $module = "", string $subType = "") : string {
 		$keys = [
 			"{prefix}",
 			"{player}",
@@ -46,13 +46,13 @@ class ReplaceText extends ConfigManager {
 		];
 		$replace = [
 			self::getData(self::PREFIX),
-			$player->getPlayer()->getName(),
+			(is_string($player) ? $player : $player->getPlayer()->getName()),
 			$module,
 			$subType,
 			date("F d, Y h:i:sA", time()),
-			$player->getRealViolation($module),
+			(is_string($player) ? "N/A" : $player->getRealViolation($module)),
 			self::getData(self::CHAT_SPAM_DELAY),
-			$player->getCaptchaCode(),
+			(is_string($player) ? "N/A" : $player->getCaptchaCode()),
 			Server::getInstance()->getTicksPerSecond()
 		];
 

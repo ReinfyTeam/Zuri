@@ -57,9 +57,12 @@ zuri:
         enable: true
         # If this is enabled, this will be used. DISABLING THIS, THE FALL BACK KICK WHICH LEADS MANY BUGS, PLAYERS CANNOT BE KICKED ETC.. SO, PLEASE DO NOT DISABLE KICK COMMAND MODE FEATURE.
         commands:
-              enabled: true
+              enable: true
               list:
                  - 'kick {player} "Unfair Advantage"'
+    warning:
+              enable: true
+              message: "{prefix} §l§7[§eWARNING§7] §r§f{player} §7is tried using §f{module} §7(§c{subtype}§7)"
     captcha:
         enable: true
         text: "{prefix} §cType §b{code} §cto get rid of mute!"

@@ -68,13 +68,11 @@ class FlyB extends Check {
 					case 102:
 					case 38:
 					case 39:
-						$event->cancel();
 						$this->failed($playerAPI);
 						break;
 				}
 				if ((($packet->flags >> 9) & 0x01 === 1) || (($packet->flags >> 7) & 0x01 === 1) || (($packet->flags >> 6) & 0x01 === 1)) {
 					$this->failed($playerAPI);
-					$event->cancel();
 				}
 				$this->debug($playerAPI, "packetFlags=" . $packet->flags);
 			}

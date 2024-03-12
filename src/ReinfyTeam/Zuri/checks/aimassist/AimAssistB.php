@@ -70,7 +70,7 @@ class AimAssistB extends Check {
 				if ($abs >= 1 && fmod($abs, 0.1) == 0) {
 					if (fmod($abs, 1.0) == 0 || fmod($abs, 10.0) == 0 || fmod($abs, 30.0) == 0) {
 						$this->failed($playerAPI);
-						$this->debug($playerAPI, "toYaw=$toYaw, fromYaw=$fromYaw, abs=$abs, toPitch=$toPitch, fromPitch=$fromPitch, abs2=$abs2");
+						$this->debug($playerAPI, "toYaw=$toYaw, fromYaw=$fromYaw, abs=$abs");
 					}
 				}
 				$toPitch = $nLocation["to"]->getPitch();
