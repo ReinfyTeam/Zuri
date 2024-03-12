@@ -481,18 +481,20 @@ class PlayerListener implements Listener {
 	}
 
 	private function checkEvent(Event $event, PlayerAPI $player) {
+		$playerAPI = PlayerAPI::getAPIPlayer($player->getPlayer());
 		if (($player = $playerAPI->getPlayer()) === null || !$player->isOnline() || !$player->spawned) {
 			return;
 		}
 
 		foreach (APIProvider::Checks() as $class) {
 			if ($class->enable()) {
-				$class->checkEvent($event, $player);
+				$class->checkEvent($event, $playerAPI);
 			}
 		}
 	}
 
 	private function check(DataPacket $packet, PlayerAPI $player) {
+		$playerAPI = PlayerAPI::getAPIPlayer($player->getPlayer());
 		if (($player = $playerAPI->getPlayer()) === null || !$player->isOnline() || !$player->spawned) {
 			return;
 		}
