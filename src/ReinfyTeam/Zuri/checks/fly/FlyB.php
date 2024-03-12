@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\fly;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 

@@ -28,6 +28,7 @@ use pocketmine\Server;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function date;
+use function is_string;
 use function str_replace;
 use function time;
 

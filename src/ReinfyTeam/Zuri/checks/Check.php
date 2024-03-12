@@ -203,13 +203,12 @@ abstract class Check extends ConfigManager {
 
 		return false;
 	}
-	
+
 	public function warning(string $username) : void {
-		
-		if(!self::getData(self::WARNING_ENABLE)) {
+		if (!self::getData(self::WARNING_ENABLE)) {
 			return;
 		}
-		
+
 		APIProvider::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($username, self::getData(self::WARNING_MESSAGE), $this->getName(), $this->getSubType()));
 		foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
 			if ($p->hasPermission("zuri.admin")) {
