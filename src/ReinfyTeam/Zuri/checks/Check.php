@@ -204,7 +204,7 @@ abstract class Check extends ConfigManager {
 		return false;
 	}
 
-	public function warning(string $username) : void {
+	public function warn(string $username) : void {
 		if (!self::getData(self::WARNING_ENABLE)) {
 			return;
 		}
