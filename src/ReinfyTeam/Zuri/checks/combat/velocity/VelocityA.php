@@ -66,6 +66,9 @@ class VelocityA extends Check {
 			if ($entity instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($entity);
 				$player = $playerAPI->getPlayer();
+				if ($player === null) {
+					return;
+				}
 				if (!$player->spawned && !$player->isConnected()) {
 					return;
 				} // Effect::$effectInstance bug fix
@@ -74,6 +77,7 @@ class VelocityA extends Check {
 				if ($lastLocation !== null) {
 					if (!$event->isCancelled() && $entity->isOnGround() && !$playerAPI->isInWeb()) {
 						$velocity = MathUtil::XZDistanceSquared($location->asVector3(), $lastLocation->asVector3());
+						$this->debug($playerAPI, "isOnGround=" . $entity->isOnGround() . ", isInWeb=" . $playerAPI->isInWeb() . ", isUnderBlock=" . $playerAPI->isUnderBlock() . ", isInBoxBlock=" . $playerAPI->isInBoxBlock());
 						if ($velocity < 0.6 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
 							$this->failed($playerAPI);
 						}
@@ -83,7 +87,6 @@ class VelocityA extends Check {
 				} else {
 					$playerAPI->setExternalData("lastLocationV", $location);
 				}
-				$this->debug($playerAPI, "isOnGround=" . $entity->isOnGround() . ", isInWeb=" . $playerAPI->isInWeb() . ", isUnderBlock=" . $playerAPI->isUnderBlock() . ", isInBoxBlock=" . $playerAPI->isInBoxBlock());
 			}
 		}
 	}

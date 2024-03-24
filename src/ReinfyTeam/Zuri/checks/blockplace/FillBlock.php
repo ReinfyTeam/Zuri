@@ -58,7 +58,10 @@ class FillBlock extends Check {
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$isCreative = $playerAPI->getPlayer()->isCreative() ? 10 : 0;
+		if (($player = $playerAPI->getPlayer()) === null) {
+			return;
+		}
+		$isCreative = $player->isCreative() ? 10 : 0;
 		if ($playerAPI->actionPlacingSpecial() && (($playerAPI->getNumberBlocksAllowPlace() + $isCreative) < $playerAPI->getBlocksPlacedASec())) {
 			$this->failed($playerAPI);
 			$player = $playerAPI->getPlayer();

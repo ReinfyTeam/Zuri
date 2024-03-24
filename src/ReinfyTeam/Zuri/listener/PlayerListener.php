@@ -301,6 +301,9 @@ class PlayerListener implements Listener {
 			return;
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($entity);
+		if ($playerAPI->getPlayer() === null) {
+			return;
+		}
 		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
 			return;
 		}

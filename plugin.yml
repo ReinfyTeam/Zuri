@@ -10,7 +10,4 @@ permissions:
      zuri.command:
           default: op
           description: Zuri command.
-     zuri.admin:
-          default: op
-          description: Zuri Admin Permission.
 ...

@@ -66,6 +66,9 @@ class FastLadder extends Check {
 			$lastY = $event->getFrom()->getY();
 			$newY = $event->getTo()->getY();
 			$player = $playerAPI->getPlayer();
+			if ($player === null) {
+				return;
+			}
 
 			$x = intval($player->getLocation()->getX());
 			$z = intval($player->getLocation()->getZ());

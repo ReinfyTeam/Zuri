@@ -74,6 +74,9 @@ class ReachA extends Check {
 			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
 				$player = $playerAPI->getPlayer();
+				if ($player === null) {
+					return;
+				}
 				$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? ($locEntity->getY() - $locDamager->getY()) : 0;
 				$distance = MathUtil::distance($locEntity, $locDamager) - $isPlayerTop;
 				if ($distance > 4.3) {

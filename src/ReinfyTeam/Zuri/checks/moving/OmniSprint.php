@@ -69,6 +69,9 @@ class OmniSprint extends Check {
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
+		if ($player === null) {
+			return;
+		}
 		if ($packet instanceof PlayerAuthInputPacket) {
 			if ($packet->getInputMode() === InputMode::MOUSE_KEYBOARD || $packet->getInputMode() === InputMode::TOUCHSCREEN) { // for windows and mobile, ios only..
 				$left = ($packet->getInputFlags() & (1 << PlayerAuthInputFlags::LEFT)) !== 0;
@@ -87,7 +90,10 @@ class OmniSprint extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.10 && !$player->getEffects()->has(VanillaEffects::SPEED())) {
+			if ($player === null) {
+				return;
+			}
+			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.8 && !$player->getEffects()->has(VanillaEffects::SPEED())) {
 				$this->check[spl_object_id($playerAPI)] = true; // moving too fast?
 			} else {
 				if (isset($this->check[spl_object_id($playerAPI)])) {

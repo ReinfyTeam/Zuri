@@ -61,6 +61,9 @@ class Step extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $event->getPlayer();
+			if ($playerAPI->getPlayer() === null) {
+				return;
+			}
 			if (
 				$playerAPI->getPing() > self::getData(self::PING_LAGGING) ||
 				!$playerAPI->isOnGround() ||

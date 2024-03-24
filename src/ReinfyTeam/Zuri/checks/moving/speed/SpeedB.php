@@ -63,6 +63,9 @@ class SpeedB extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$nLocation = $playerAPI->getNLocation();
 		$player = $playerAPI->getPlayer();
+		if ($player === null) {
+			return;
+		}
 
 		if (
 			$playerAPI->isOnStairs() ||

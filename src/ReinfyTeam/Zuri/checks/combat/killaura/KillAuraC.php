@@ -78,6 +78,9 @@ class KillAuraC extends Check {
 			return;
 		}
 		$player = $playerAPI->getPlayer();
+		if ($player === null) {
+			return;
+		}
 		$locPlayer = $player->getLocation();
 		$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
 		$from = new Vector3($locPlayer->getX(), $locPlayer->getY() + $player->getEyeHeight(), $locPlayer->getZ());

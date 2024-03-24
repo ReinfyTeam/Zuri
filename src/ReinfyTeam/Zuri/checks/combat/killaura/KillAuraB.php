@@ -62,6 +62,9 @@ class KillAuraB extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();
+			if ($player === null) {
+				return;
+			}
 			if (
 				!$player->isFlying() ||
 				!$player->getAllowFlight() ||

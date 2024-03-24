@@ -63,7 +63,9 @@ class FastSwim extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-
+			if ($player === null) {
+				return;
+			}
 			if (
 				!$playerAPI->isInLiquid() ||
 				$playerAPI->isInWeb() ||

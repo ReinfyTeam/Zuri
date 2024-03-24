@@ -59,11 +59,14 @@ class KillAuraD extends Check {
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+		if (($player = $playerAPI->getPlayer()) === null) {
+			return;
+		}
 		if (
 			$playerAPI->isDigging() ||
 			$playerAPI->getPlacingTicks() < 100 ||
 			$playerAPI->getAttackTicks() < 20 ||
-			!$playerAPI->getPlayer()->isSurvival()
+			!$player->isSurvival()
 		) {
 			return;
 		}

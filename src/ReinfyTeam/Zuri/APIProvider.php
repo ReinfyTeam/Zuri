@@ -64,6 +64,7 @@ class APIProvider extends PluginBase {
 		$this->getScheduler()->scheduleRepeatingTask(new NetworkTickTask($this), 100);
 		$this->getServer()->getAsyncPool()->submitTask(new UpdateCheckerAsyncTask($this->getDescription()->getVersion()));
 		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigManager::PERMISSION_BYPASS_PERMISSION), PermissionManager::OPERATOR);
+		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigManager::ALERTS_PERMISSION), PermissionManager::OPERATOR);
 		$this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
 		$this->getServer()->getPluginManager()->registerEvents(new ServerListener(), $this);
 		$this->getServer()->getCommandMap()->register("Zuri", new ZuriCommand());
@@ -81,7 +82,8 @@ class APIProvider extends PluginBase {
 	}
 
 	/**
-	 * Do not call internally, or do not call double.
+	 * Do not call internally, or do not call it double.
+	 * @internal
 	 */
 	public function loadChecks() : void {
 		if (!empty($this->checks)) {
@@ -157,7 +159,6 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\FastSwim();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\speed\SpeedA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\speed\SpeedB();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\speed\SpeedC();
 
 		// Network related
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\AntiBot();

@@ -74,6 +74,10 @@ abstract class Check extends ConfigManager {
 		return ReplaceText::replace($player, $text, $reason, $subType);
 	}
 
+	/**
+	 * When multiple attempts of violations is within limit of < 0.5s.
+	 * @internal
+	 */
 	public function failed(PlayerAPI $playerAPI) : bool {
 		if (($canCheck = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable")) !== null) {
 			if ($canCheck === false) {
@@ -190,7 +194,7 @@ abstract class Check extends ConfigManager {
 				}
 				$playerAPI->resetViolation($this->getName());
 				$playerAPI->resetRealViolation($this->getName());
-				$player->kick("Unfair Advantage: Zuri Anticheat", null, ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE_UI), $this->getName(), $this->getSubType()));
+				$player->kick("Unfair Advantage: Zuri Anticheat" /** TODO: Customize logout message? */, null, ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE_UI), $this->getName(), $this->getSubType()));
 				return true;
 			}
 		}
@@ -204,7 +208,11 @@ abstract class Check extends ConfigManager {
 		return false;
 	}
 
-	public function warning(string $username) : void {
+	/**
+	 * For Login purposes warning system only!
+	 * @internal
+	 */
+	public function warn(string $username) : void {
 		if (!self::getData(self::WARNING_ENABLE)) {
 			return;
 		}
@@ -217,6 +225,10 @@ abstract class Check extends ConfigManager {
 		}
 	}
 
+	/**
+	 * Developers: Debugger for Anticheat
+	 * @internal
+	 */
 	public function debug(PlayerAPI $playerAPI, string $text) : void {
 		$player = $playerAPI->getPlayer();
 

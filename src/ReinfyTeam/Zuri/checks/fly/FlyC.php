@@ -66,6 +66,9 @@ class FlyC extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
+			if ($player === null) {
+				return;
+			}
 			$oldPos = $event->getFrom();
 			$newPos = $event->getTo();
 			$surroundingBlocks = BlockUtil::getSurroundingBlocks($player);
@@ -83,6 +86,7 @@ class FlyC extends Check {
 				if ($oldPos->getY() <= $newPos->getY()) {
 					if ($player->getInAirTicks() > 40) {
 						$maxY = $player->getWorld()->getHighestBlockAt(intval($newPos->getX()), intval($newPos->getZ()));
+						$this->debug($playerAPI, "oldY=" . $oldPos->getY() . ", newY=" . $newPos->getY() . ", airTicks=" . $player->getInAirTicks() . ", surroundingBlocks=" . count($surroundingBlocks));
 						if ($newPos->getY() - 2 > $maxY) {
 							if (
 								!in_array(BlockTypeIds::OAK_FENCE, $surroundingBlocks, true)
@@ -116,7 +120,6 @@ class FlyC extends Check {
 								$this->failed($playerAPI);
 							}
 						}
-						$this->debug($playerAPI, "oldY=" . $oldPos->getY() . ", newY=" . $newPos->getY() . ", airTicks=" . $player->getInAirTicks() . ", surroundingBlocks=" . count($surroundingBlocks));
 					}
 				}
 			}

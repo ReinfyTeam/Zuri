@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.0.6" #This config version
+    version: "0.0.7" #This config version
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:

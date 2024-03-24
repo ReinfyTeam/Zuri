@@ -61,6 +61,9 @@ class FlyB extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof UpdateAdventureSettingsPacket) {
 			$player = $playerAPI->getPlayer();
+			if ($player === null) {
+				return;
+			}
 			if (!$player->isCreative() && !$player->isSpectator() && !$player->getAllowFlight()) {
 				switch ($packet->flags) {
 					case 614:

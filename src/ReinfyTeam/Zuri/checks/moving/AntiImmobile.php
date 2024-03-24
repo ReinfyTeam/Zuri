@@ -28,7 +28,6 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\MathUtil;
 
 class AntiImmobile extends Check {
 	public function getName() : string {
@@ -62,11 +61,14 @@ class AntiImmobile extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
+			if ($player === null) {
+				return;
+			}
 			if ($player->hasNoClientPredictions()) {
-				if (($limit = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.01) {
+				if ($event->getFrom()->getX() !== $event->getTo()->getX() || $event->getFrom()->getY() !== $event->getTo()->getY() || $event->getFrom()->getZ() !== $event->getTo()->getZ()) {
 					$this->failed($playerAPI);
 				}
-				$this->debug($playerAPI, "limit=$limit");
+				$this->debug($playerAPI, "lastX=" . $event->getFrom()->getX() . ", lastY=" . $event->getFrom()->getY() . ", lastZ=" . $event->getFrom()->getZ() . ", newX=" . $event->getTo()->getX() . ", newY=" . $event->getTo()->getY() . ", newZ=" . $event->getTo()->getZ());
 			}
 		}
 	}

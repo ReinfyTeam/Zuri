@@ -75,6 +75,9 @@ class ReachB extends Check {
 				$entityAPI = PlayerAPI::getAPIPlayer($entity);
 				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
 				$player = $entityAPI->getPlayer();
+				if ($player === null) {
+					return;
+				}
 				$damager = $damagerAPI->getPlayer();
 				if (MathUtil::XZDistanceSquared($entityAPI->getLocation()->asVector3(), $damager->getLocation()->asVector3()) > ($damager->isSurvival() ? 4.0 : 8.3)) {
 					$this->failed($damagerAPI);

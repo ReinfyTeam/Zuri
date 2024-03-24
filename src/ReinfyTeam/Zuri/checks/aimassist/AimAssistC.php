@@ -62,6 +62,9 @@ class AimAssistC extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();
+			if ($player === null) {
+				return;
+			}
 			if (
 				!$player->isSurvival() ||
 				$playerAPI->getAttackTicks() > 20 ||

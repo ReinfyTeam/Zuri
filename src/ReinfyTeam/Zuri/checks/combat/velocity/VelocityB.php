@@ -66,6 +66,9 @@ class VelocityB extends Check {
 			if ($entity instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($entity);
 				$player = $playerAPI->getPlayer();
+				if ($player === null) {
+					return;
+				}
 				$loc = $player->getLocation();
 				$lastLoc = $playerAPI->getExternalData("lastVLocB");
 
