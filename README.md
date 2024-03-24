@@ -88,6 +88,8 @@ $api->setBlocksBrokeASec(< it must is number >);
 
 **BadPackets Total:** 17
 
+**Total Checks:** 51
+
 <hr>
 
 
