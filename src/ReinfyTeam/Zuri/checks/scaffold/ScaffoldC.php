@@ -66,10 +66,13 @@ class ScaffoldC extends Check {
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
+			$player = $playerAPI->getPlayer();
+			if ($player === null) {
+				return;
+			}
 			$block = $event->getBlockAgainst();
 			$posBlock = $block->getPosition();
 			$posPlayer = $playerAPI->getLocation();
-			$player = $playerAPI->getPlayer();
 			$distance = MathUtil::distance($posPlayer->asVector3(), $posBlock->asVector3());
 			$this->debug($playerAPI, "distance=$distance, pitch=" . abs($posPlayer->getPitch()));
 			if ($distance < 1.25 && abs($posPlayer->getPitch()) > 90) {

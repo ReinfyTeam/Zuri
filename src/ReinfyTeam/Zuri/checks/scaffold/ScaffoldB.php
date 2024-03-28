@@ -65,8 +65,11 @@ class ScaffoldB extends Check {
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
-			$pitch = abs($playerAPI->getLocation()->getPitch());
 			$player = $playerAPI->getPlayer();
+			if ($player === null) {
+				return;
+			}
+			$pitch = abs($playerAPI->getLocation()->getPitch());
 			$this->debug($playerAPI, "pitch=$pitch, ping=" . $playerAPI->getPing());
 			if (
 				$pitch < 35 &&
