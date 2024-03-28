@@ -74,7 +74,7 @@ class Tower extends Check {
 			$posPlayer = $playerAPI->getLocation();
 			$distanceY = abs($posBlock->getY() - $posPlayer->getY());
 			$this->debug($playerAPI, "pitch=$pitch, distanceY=$distanceY");
-			if ($pitch > 35 && $distanceY > 1.0 && !$player->isFlying() && !$playerAPI->getJumpTicks() < 40 && $player->isSurvival()) {
+			if ($pitch > 80 && $distanceY > 1.0 && !$player->isFlying() && !$playerAPI->getJumpTicks() < 40 && $player->isSurvival()) {
 				$this->failed($playerAPI);
 			}
 		}
