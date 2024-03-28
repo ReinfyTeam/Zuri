@@ -112,10 +112,10 @@ class SpeedA extends Check {
 				$limit -= BlockUtil::isUnderBlock($nLocation["to"], [BlockTypeIds::SOUL_SAND], 1) ? ($limit / 1.3) : 0;
 				if ($playerAPI->isOnGround() && !$playerAPI->isOnAdhesion() && !$playerAPI->isOnIce() && $playerAPI->getAttackTicks() > 100 && $player->isSurvival() && !$recived && !$isFalling && $idBlockDown !== 0) {
 					if ($scaledEqualness > $limit) {
+						$this->debug($playerAPI, "isFalling=$isFalling, limit=$limit, distX=$distX, distZ=$distZ, dist=$dist, lastDist=$dist, shiftedLastDist=$shiftedLastDist, equalness=$equalness, scaledEqualness=$scaledEqualness");
 						$this->failed($playerAPI);
 					}
 				}
-				$this->debug($playerAPI, "isFalling=$isFalling, limit=$limit, distX=$distX, distZ=$distZ, dist=$dist, lastDist=$dist, shiftedLastDist=$shiftedLastDist, equalness=$equalness, scaledEqualness=$scaledEqualness");
 			}
 		}
 	}
