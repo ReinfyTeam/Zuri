@@ -69,9 +69,9 @@ class VelocityA extends Check {
 				if ($player === null) {
 					return;
 				}
-				if (!$player->spawned && !$player->isConnected()) {
+				if ($player->hasNoClientPredictions()) {
 					return;
-				} // Effect::$effectInstance bug fix
+				}
 				$location = $player->getLocation();
 				$lastLocation = $playerAPI->getExternalData("lastLocationV");
 				if ($lastLocation !== null) {

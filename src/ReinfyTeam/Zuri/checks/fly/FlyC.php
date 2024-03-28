@@ -78,6 +78,7 @@ class FlyC extends Check {
 				$playerAPI->isOnGround() ||
 				$playerAPI->isOnAdhesion() ||
 				$player->getAllowFlight() ||
+				$player->hasNoClientPredictions() ||
 				!$player->isSurvival()
 			) { // additional checks
 				return;

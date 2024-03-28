@@ -78,6 +78,7 @@ class VelocityB extends Check {
 					$playerAPI->isOnAdhesion() ||
 					!$entity->isOnGround() ||
 					$player->getAllowFlight() ||
+					$player->hasNoClientPredictions() ||
 					$player->isFlying()
 				) {
 					return;
