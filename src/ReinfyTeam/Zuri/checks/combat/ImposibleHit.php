@@ -34,9 +34,8 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
 class ImposibleHit extends Check {
-
 	private $eating;
-	
+
 	public function getName() : string {
 		return "InventoryMove";
 	}

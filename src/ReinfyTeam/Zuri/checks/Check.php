@@ -207,7 +207,7 @@ abstract class Check extends ConfigManager {
 
 		return false;
 	}
-	
+
 	/**
 	 * For Login purposes warning system only!
 	 * @internal

@@ -157,6 +157,7 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Spider();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\FastLadder();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\FastSwim();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\ClickTP();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\speed\SpeedA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\speed\SpeedB();
 

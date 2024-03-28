@@ -211,4 +211,7 @@ zuri:
         fastswim:
             enable: true
             maxvl: 1
+        clicktp:
+            enable: true
+            maxvl: 1
 ...

@@ -31,6 +31,11 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function in_array;
 
+/**
+ * API Documentation can be found in github wiki.
+ * This should be only use for plugins.
+ * @link https://github.com/ReinfyTeam/Zuri/wiki
+ */
 final class API {
 	private static ConfigManager $config;
 

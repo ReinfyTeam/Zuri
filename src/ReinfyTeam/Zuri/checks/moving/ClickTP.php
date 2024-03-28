@@ -22,15 +22,16 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\blockbreak;
+namespace ReinfyTeam\Zuri\checks\moving;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\event\Event;
+use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
-class WrongMining extends Check {
+class ClickTP extends Check {
 	public function getName() : string {
-		return "WrongMining";
+		return "ClickTP";
 	}
 
 	public function getSubType() : string {
@@ -38,11 +39,11 @@ class WrongMining extends Check {
 	}
 
 	public function ban() : bool {
-		return true;
+		return false;
 	}
 
 	public function kick() : bool {
-		return false;
+		return true;
 	}
 
 	public function flag() : bool {
@@ -57,20 +58,18 @@ class WrongMining extends Check {
 		return 1;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($playerAPI->getPlayer() === null) {
-			return;
-		}
-		$isCreative = $playerAPI->getPlayer()->isCreative() ? 10 : 0;
-		if ($playerAPI->actionBreakingSpecial() && (($playerAPI->getNumberBlocksAllowBreak() + $isCreative) < $playerAPI->getBlocksBrokeASec())) {
-			$this->failed($playerAPI);
-			if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
-				return;
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+		if ($event instanceof PlayerMoveEvent) {
+			$distance = $event->getFrom()->distanceSquared($event->getTo());
+			$oldYaw = $event->getFrom()->getYaw();
+			$newYaw = $event->getTo()->getYaw();
+			$oldPitch = $event->getFrom()->getPitch();
+			$newPitch = $event->getTo()->getPitch();
+			if ($distance > 40.0 && $oldYaw === $newYaw && $oldPitch === $newPitch) {
+				$event->cancel();
+				$this->failed($playerAPI);
+				$this->debug($playerAPI, "distance=$distance, oldYaw=$oldYaw, newYaw=$newYaw, oldPitch=$oldPitch, newPitch=$newPitch");
 			}
-			$playerAPI->setActionBreakingSpecial(false);
-			$playerAPI->setBlocksBrokeASec(0);
-			$playerAPI->setFlagged(true);
-			$this->debug($playerAPI, "allowedBreak=" . $playerAPI->getNumberBlocksAllowBreak() . ", isCreative=$isCreative, blocksBrokeASec=" . $playerAPI->getBlocksBrokeASec());
 		}
 	}
 }
