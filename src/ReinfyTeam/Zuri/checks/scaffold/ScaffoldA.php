@@ -66,18 +66,15 @@ class ScaffoldA extends Check {
 			$posBlock = $block->getPosition();
 			$player = $playerAPI->getPlayer();
 			$loc = $player->getLocation();
-			if (!$player->spawned && !$player->isConnected()) {
-				return;
-			} // bug fix
 			$itemHand = $playerAPI->getInventory()->getItemInHand();
 			if ($itemHand->getTypeId() === BlockTypeIds::AIR) {
 				$x = abs($posBlock->getX() - $loc->getX());
 				$y = abs($posBlock->getY() - $loc->getY());
 				$z = abs($posBlock->getZ() - $loc->getZ());
+				$this->debug($playerAPI, "x=$x, y=$y, z=$z");
 				if ($x > 1.0 || $y > 1.0 || $z > 1.0) {
 					$this->failed($playerAPI);
 				}
-				$this->debug($playerAPI, "x=$x, y=$y, z=$z");
 			}
 		}
 	}

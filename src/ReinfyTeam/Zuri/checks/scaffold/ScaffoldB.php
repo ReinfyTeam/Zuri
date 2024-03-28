@@ -67,9 +67,7 @@ class ScaffoldB extends Check {
 		if ($event instanceof BlockPlaceEvent) {
 			$pitch = abs($playerAPI->getLocation()->getPitch());
 			$player = $playerAPI->getPlayer();
-			if (!$player->spawned && !$player->isConnected()) {
-				return;
-			} //bug fix
+			$this->debug($playerAPI, "pitch=$pitch, ping=" . $playerAPI->getPing());
 			if (
 				$pitch < 35 &&
 				$event->getBlockAgainst()->getPosition()->getY() < $playerAPI->getLocation()->getY() &&
@@ -77,7 +75,6 @@ class ScaffoldB extends Check {
 			) {
 				$this->failed($playerAPI);
 			}
-			$this->debug($playerAPI, "pitch=$pitch, ping=" . $playerAPI->getPing());
 		}
 	}
 }

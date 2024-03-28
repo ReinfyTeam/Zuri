@@ -71,6 +71,7 @@ class ScaffoldE extends Check {
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof InventoryTransactionPacket) {
+			$this->debug($playerAPI, "place=" . $this->place . ", teleportTicks=" . $playerAPI->getTeleportTicks());
 			if (
 				$packet->trData instanceof ReleaseItemTransactionData &&
 				$this->place &&
@@ -78,7 +79,6 @@ class ScaffoldE extends Check {
 			) {
 				$this->failed($playerAPI);
 			}
-			$this->debug($playerAPI, "place=" . $this->place . ", teleportTicks=" . $playerAPI->getTeleportTicks());
 		}
 	}
 }

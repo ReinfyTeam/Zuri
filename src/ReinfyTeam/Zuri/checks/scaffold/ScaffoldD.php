@@ -65,13 +65,10 @@ class ScaffoldD extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
 			$player = $playerAPI->getPlayer();
-			if (!$player->spawned && !$player->isConnected()) {
-				return;
-			} // Effect::$effectInstance bug fix
+			$this->debug($playerAPI, "isItemInHandNull=" . $playerAPI->getPlayer()->getInventory()->getItemInHand()->isNull());
 			if ($playerAPI->getPlayer()->getInventory()->getItemInHand()->isNull()) {
 				$this->failed($playerAPI);
 			}
-			$this->debug($playerAPI, "isItemInHandNull=" . $playerAPI->getPlayer()->getInventory()->getItemInHand()->isNull());
 		}
 	}
 }
