@@ -89,9 +89,7 @@ $api->setBlocksBrokeASec(< it must is number >);
 | FillBlock                       | Ban Immediately      | 100% detect                |
 | WrongMining                       | Ban Immediately      | 100% detect                |
 
-**BadPackets Total:** 17
-
-**Total Checks:** 51
+**Total Checks:** 63
 
 <hr>
 
