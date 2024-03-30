@@ -45,6 +45,7 @@ $api->setBlocksBrokeASec(< it must is number >);
 |-----------------------------|----------------------|----------------------------|
 | AntiBot                       | Kick Immediately   | 100% detect                |
 | EditionFaker                 | Kick Immediately   | 100% detect                |
+| ProxyBot                 | Kick Immediately   | 100% detect                |
 | AntiImmobile                   | Kick                 | 100% detect                |
 | AutoClick                   | Kick                 | 100% detect                |
 | RapidHit                    | Kick                 | 100% detect                |
@@ -62,7 +63,7 @@ $api->setBlocksBrokeASec(< it must is number >);
 | Speed                       | Kick                 | 99% detect                 |
 | Jesus                       | Kick                 | 99% detect                 |
 | AutoMidTP                   | Kick                 | 100% detect                |
-| ClickTp                     | Kick                 | 100% detect                |
+| ClickTP                     | Kick                 | 100% detect                |
 | Step                        | Kick                 | 100% detect                |
 | AimAssist                   | Kick                 | 90% detect                 |
 | AutoArmor                   | Kick                 | 90% detect                 |
@@ -77,6 +78,8 @@ $api->setBlocksBrokeASec(< it must is number >);
 | Timer                       | Flag/Kick            | 100% detect                |
 | Phase                       | Flag                 | 100% detect                |
 | VClip                       | Flag                 | 100% detect                |
+| ImpossiblePitch                       | Flag                 | 100% detect                |
+| MessageSpoof                       | Flag                 | 100% detect                |
 | InstaBreak                  | Flag/Kick            | 100% detect                |
 | Spam                        | CAPTCHA              | 100% detect                |
 | Tower                       | Ban Immediately      | 74% detect                |

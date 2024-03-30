@@ -44,7 +44,7 @@ class TimerA extends Check {
 	}
 
 	public function kick() : bool {
-		return true;
+		return false;
 	}
 
 	public function flag() : bool {
@@ -52,7 +52,7 @@ class TimerA extends Check {
 	}
 
 	public function captcha() : bool {
-		return false;
+		return true;
 	}
 
 	public function maxViolations() : int {
