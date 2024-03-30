@@ -75,7 +75,7 @@ class TimerB extends Check {
 				} else {
 					$playerAPI->setExternalData("timerB", 0);
 				}
-				$playerAPI->setExternalData("lastTimeB", 0);
+				$playerAPI->setExternalData("lastTimeB", microtime(true));
 			}
 		}
 	}

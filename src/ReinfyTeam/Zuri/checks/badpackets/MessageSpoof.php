@@ -61,7 +61,7 @@ class MessageSpoof extends Check {
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof TextPacket) {
-			$this->debug($playerAPI, "charLength=$length");
+			$this->debug($playerAPI, "charLength=" . mb_strlen($packet->message));
 			if (($length = mb_strlen($packet->message)) > 500) {
 				$event->cancel();
 				$this->failed($playerAPI);
