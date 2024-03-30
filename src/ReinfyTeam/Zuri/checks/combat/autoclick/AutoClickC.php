@@ -70,6 +70,9 @@ class AutoClickC extends Check {
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+		if ($playerAPI->getPlayer() === null) {
+			return;
+		}
 		if (
 			$playerAPI->isDigging() ||
 			$playerAPI->getPlacingTicks() < 100 ||
