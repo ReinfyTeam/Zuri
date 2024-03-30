@@ -263,6 +263,9 @@ class PlayerListener implements Listener {
 	public function onInventoryOpen(InventoryOpenEvent $event) {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		if ($playerAPI->getPlayer() === null) {
+			return;
+		}
 		$playerAPI->setInventoryOpen(true);
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -270,6 +273,9 @@ class PlayerListener implements Listener {
 	public function onInventoryClose(InventoryCloseEvent $event) {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		if ($playerAPI->getPlayer() === null) {
+			return;
+		}
 		$playerAPI->setInventoryOpen(false);
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -454,6 +460,9 @@ class PlayerListener implements Listener {
 	}
 
 	private function addCPS(PlayerAPI $player) : void {
+		if ($player === null) {
+			return;
+		}
 		$time = microtime(true);
 		$this->clicksData[$player->getPlayer()->getName()][] = $time;
 	}
