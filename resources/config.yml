@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.0.7" #This config version
+    version: "0.0.8" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -205,13 +205,40 @@ zuri:
         fasteat:
             enable: true
             maxvl: 1
+        selfhit:
+            enable: true
+            maxvl: 1
         fastthrow:
+            enable: true
+            maxvl: 1
+        impossiblepitch:
             enable: true
             maxvl: 1
         fastswim:
             enable: true
             maxvl: 1
         clicktp:
+            enable: true
+            maxvl: 1
+        cheststealler:
+            enable: true
+            maxvl: 1
+        messagespoof:
+            enable: true
+            maxvl: 1
+        spider:
+            enable: true
+            maxvl: 1
+        fastladder:
+            enable: true
+            maxvl: 1
+        clicktp:
+            enable: true
+            maxvl: 1
+        proxybot:
+            enable: true
+            maxvl: 1
+        editionfaker:
             enable: true
             maxvl: 1
 ...

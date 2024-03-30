@@ -262,32 +262,14 @@ class PlayerListener implements Listener {
 
 	public function onInventoryOpen(InventoryOpenEvent $event) {
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if ($playerAPI->getPlayer() === null) {
-			return;
-		}
-		if (!$player->isConnected() && !$player->spawned) {
-			return;
-		}
 		$playerAPI->setInventoryOpen(true);
 		$this->checkEvent($event, $playerAPI);
 	}
 
 	public function onInventoryClose(InventoryCloseEvent $event) {
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if ($playerAPI->getPlayer() === null) {
-			return;
-		}
-		if (!$player->isConnected() && !$player->spawned) {
-			return;
-		}
 		$playerAPI->setInventoryOpen(false);
 		$this->checkEvent($event, $playerAPI);
 	}

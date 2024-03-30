@@ -22,16 +22,17 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\fly;
+namespace ReinfyTeam\Zuri\checks\badpackets;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\TextPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function microtime;
+use function mb_strlen;
 
-class FlyA extends Check {
+class MessageSpoof extends Check {
 	public function getName() : string {
-		return "Fly";
+		return "MessageSpoof";
 	}
 
 	public function getSubType() : string {
@@ -59,40 +60,12 @@ class FlyA extends Check {
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$player = $playerAPI->getPlayer();
-		if ($player === null) {
-			return;
-		}
-		if (
-			$playerAPI->getAttackTicks() < 40 ||
-			$playerAPI->getOnlineTime() <= 30 ||
-			$playerAPI->getJumpTicks() < 40 ||
-			$playerAPI->isInWeb() ||
-			$playerAPI->isOnGround() ||
-			$playerAPI->isOnAdhesion() ||
-			$player->getAllowFlight() ||
-			$player->hasNoClientPredictions() ||
-			!$player->isSurvival()
-		) {
-			$playerAPI->unsetExternalData("lastYNoGroundF");
-			$playerAPI->unsetExternalData("lastTimeF");
-			return;
-		}
-		$lastYNoGround = $playerAPI->getExternalData("lastYNoGroundF");
-		$lastTime = $playerAPI->getExternalData("lastTimeF");
-		if ($lastYNoGround !== null && $lastTime !== null) {
-			$diff = microtime(true) - $lastTime;
-			if ($diff > 1) {
-				if ((int) $player->getLocation()->getY() == $lastYNoGround) {
-					$this->failed($playerAPI);
-				}
-				$playerAPI->unsetExternalData("lastYNoGroundF");
-				$playerAPI->unsetExternalData("lastTimeF");
+		if ($packet instanceof TextPacket) {
+			$this->debug($playerAPI, "charLength=$length");
+			if (($length = mb_strlen($packet->message)) > 500) {
+				$event->cancel();
+				$this->failed($playerAPI);
 			}
-			$this->debug($playerAPI, "diff=$diff, lastTime=$lastTime, lastYNoGround=$lastYNoGround");
-		} else {
-			$playerAPI->setExternalData("lastYNoGroundF", (int) $player->getLocation()->getY());
-			$playerAPI->setExternalData("lastTimeF", microtime(true));
 		}
 	}
 }

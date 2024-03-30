@@ -22,20 +22,21 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\fly;
+namespace ReinfyTeam\Zuri\checks\badpackets\timer;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function microtime;
 
-class FlyA extends Check {
+class TimerB extends Check {
 	public function getName() : string {
-		return "Fly";
+		return "Timer";
 	}
 
 	public function getSubType() : string {
-		return "A";
+		return "B";
 	}
 
 	public function ban() : bool {
@@ -55,44 +56,27 @@ class FlyA extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 1;
+		return 3;
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$player = $playerAPI->getPlayer();
-		if ($player === null) {
-			return;
-		}
-		if (
-			$playerAPI->getAttackTicks() < 40 ||
-			$playerAPI->getOnlineTime() <= 30 ||
-			$playerAPI->getJumpTicks() < 40 ||
-			$playerAPI->isInWeb() ||
-			$playerAPI->isOnGround() ||
-			$playerAPI->isOnAdhesion() ||
-			$player->getAllowFlight() ||
-			$player->hasNoClientPredictions() ||
-			!$player->isSurvival()
-		) {
-			$playerAPI->unsetExternalData("lastYNoGroundF");
-			$playerAPI->unsetExternalData("lastTimeF");
-			return;
-		}
-		$lastYNoGround = $playerAPI->getExternalData("lastYNoGroundF");
-		$lastTime = $playerAPI->getExternalData("lastTimeF");
-		if ($lastYNoGround !== null && $lastTime !== null) {
-			$diff = microtime(true) - $lastTime;
-			if ($diff > 1) {
-				if ((int) $player->getLocation()->getY() == $lastYNoGround) {
-					$this->failed($playerAPI);
+		if ($packet instanceof PlayerAuthInputPacket) {
+			$time = $playerAPI->getExternalData("lastTimeB");
+			$ticks = $playerAPI->getExternalData("lastTicksB");
+			$timer = $playerAPI->getExternalData("timerB");
+			if (microtime(true) - $time > 1) {
+				$this->debug($playerAPI, "time=" . $time . ", ticks=" . $ticks . ", timer=" . $timer);
+
+				if ($ticks > 20) {
+					$playerAPI->setExternalData("timerB", $timer + 1);
+					if ($timer % 10 === 0) {
+						$this->failed($playerAPI);
+					}
+				} else {
+					$playerAPI->setExternalData("timerB", 0);
 				}
-				$playerAPI->unsetExternalData("lastYNoGroundF");
-				$playerAPI->unsetExternalData("lastTimeF");
+				$playerAPI->setExternalData("lastTimeB", 0);
 			}
-			$this->debug($playerAPI, "diff=$diff, lastTime=$lastTime, lastYNoGround=$lastYNoGround");
-		} else {
-			$playerAPI->setExternalData("lastYNoGroundF", (int) $player->getLocation()->getY());
-			$playerAPI->setExternalData("lastTimeF", microtime(true));
 		}
 	}
 }

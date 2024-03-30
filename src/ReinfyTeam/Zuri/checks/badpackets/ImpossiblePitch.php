@@ -22,17 +22,17 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\moving;
+namespace ReinfyTeam\Zuri\checks\badpackets;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function microtime;
+use function abs;
 
-class Timer extends Check {
+class ImpossiblePitch extends Check {
 	public function getName() : string {
-		return "Timer";
+		return "ImpossiblePitch";
 	}
 
 	public function getSubType() : string {
@@ -56,39 +56,13 @@ class Timer extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 3;
+		return 1;
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($packet instanceof PlayerAuthInputPacket) {
-			if ($playerAPI->getOnlineTime() < 10 || $playerAPI->getDeathTicks() < 40) {
-				return;
-			}
-			$point = $playerAPI->getExternalData("pointQ");
-			$lastTime = $playerAPI->getExternalData("lastTimeQ");
-			if ($lastTime === null && $point === null) {
-				$playerAPI->setExternalData("lastTimeQ", microtime(true));
-				$playerAPI->setExternalData("pointQ", 1);
-				return;
-			}
-			$timeDiff = microtime(true) - $lastTime;
-			if ($timeDiff > 0.5) { // ticks < 0.7 sec too slow
-				if ($point < 6) {
-					$this->failed($playerAPI);
-					$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
-				}
-				$playerAPI->unsetExternalData("pointQ");
-				$playerAPI->unsetExternalData("lastTimeQ");
-			} elseif ($timeDiff <= 0.001) { // ticks > 1 too fast
-				if ($point < 6) {
-					$this->failed($playerAPI);
-					$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
-					$playerAPI->unsetExternalData("pointQ");
-					$playerAPI->unsetExternalData("lastTimeQ");
-				}
-			} else {
-				$playerAPI->setExternalData("pointQ", $point + 1);
-			}
+		if ($packet instanceof PlayerAuthInputPacket && ($pitch = abs($packet->getPitch())) > 92) {
+			$this->debug($playerAPI, "pitch=$pitch");
+			$this->failed($playerAPI);
 		}
 	}
 }

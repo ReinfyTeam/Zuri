@@ -102,6 +102,10 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastEat();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\SelfHit();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastThrow();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\ImpossiblePitch();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\MessageSpoof();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerB();
 
 		// Blockbreak
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\WrongMining();
@@ -151,7 +155,6 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\AntiImmobile();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Phase();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Step();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Timer();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\OmniSprint();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Jesus();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Spider();

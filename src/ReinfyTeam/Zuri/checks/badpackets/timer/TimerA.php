@@ -22,16 +22,17 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\fly;
+namespace ReinfyTeam\Zuri\checks\badpackets\timer;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function microtime;
 
-class FlyA extends Check {
+class TimerA extends Check {
 	public function getName() : string {
-		return "Fly";
+		return "Timer";
 	}
 
 	public function getSubType() : string {
@@ -55,44 +56,39 @@ class FlyA extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 1;
+		return 3;
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$player = $playerAPI->getPlayer();
-		if ($player === null) {
-			return;
-		}
-		if (
-			$playerAPI->getAttackTicks() < 40 ||
-			$playerAPI->getOnlineTime() <= 30 ||
-			$playerAPI->getJumpTicks() < 40 ||
-			$playerAPI->isInWeb() ||
-			$playerAPI->isOnGround() ||
-			$playerAPI->isOnAdhesion() ||
-			$player->getAllowFlight() ||
-			$player->hasNoClientPredictions() ||
-			!$player->isSurvival()
-		) {
-			$playerAPI->unsetExternalData("lastYNoGroundF");
-			$playerAPI->unsetExternalData("lastTimeF");
-			return;
-		}
-		$lastYNoGround = $playerAPI->getExternalData("lastYNoGroundF");
-		$lastTime = $playerAPI->getExternalData("lastTimeF");
-		if ($lastYNoGround !== null && $lastTime !== null) {
-			$diff = microtime(true) - $lastTime;
-			if ($diff > 1) {
-				if ((int) $player->getLocation()->getY() == $lastYNoGround) {
-					$this->failed($playerAPI);
-				}
-				$playerAPI->unsetExternalData("lastYNoGroundF");
-				$playerAPI->unsetExternalData("lastTimeF");
+		if ($packet instanceof PlayerAuthInputPacket) {
+			if ($playerAPI->getOnlineTime() < 10 || $playerAPI->getDeathTicks() < 40) {
+				return;
 			}
-			$this->debug($playerAPI, "diff=$diff, lastTime=$lastTime, lastYNoGround=$lastYNoGround");
-		} else {
-			$playerAPI->setExternalData("lastYNoGroundF", (int) $player->getLocation()->getY());
-			$playerAPI->setExternalData("lastTimeF", microtime(true));
+			$point = $playerAPI->getExternalData("pointQ");
+			$lastTime = $playerAPI->getExternalData("lastTimeQ");
+			if ($lastTime === null && $point === null) {
+				$playerAPI->setExternalData("lastTimeQ", microtime(true));
+				$playerAPI->setExternalData("pointQ", 1);
+				return;
+			}
+			$timeDiff = microtime(true) - $lastTime;
+			if ($timeDiff > 0.5) { // ticks < 0.7 sec too slow
+				if ($point < 6) {
+					$this->failed($playerAPI);
+					$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
+				}
+				$playerAPI->unsetExternalData("pointQ");
+				$playerAPI->unsetExternalData("lastTimeQ");
+			} elseif ($timeDiff <= 0.001) { // ticks > 1 too fast
+				if ($point < 6) {
+					$this->failed($playerAPI);
+					$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
+					$playerAPI->unsetExternalData("pointQ");
+					$playerAPI->unsetExternalData("lastTimeQ");
+				}
+			} else {
+				$playerAPI->setExternalData("pointQ", $point + 1);
+			}
 		}
 	}
 }

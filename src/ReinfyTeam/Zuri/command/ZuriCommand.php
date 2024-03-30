@@ -174,7 +174,7 @@ class ZuriCommand extends Command implements PluginOwned {
 					$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
 					$sender->sendMessage($prefix . TextFormat::GRAY . " Zuri Modules/Check Information List:");
 					foreach (APIProvider::Checks() as $check) {
-						$sender->sendMessage($prefix . TextFormat::RESET . " " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolations());
+						$sender->sendMessage($prefix . TextFormat::RESET . " " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolations() . TextFormat::GRAY . " | " . "Max Violation: " . TextFormat::YELLOW . ConfigManager::getData(ConfigManager::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
 					}
 					$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
 					break;
