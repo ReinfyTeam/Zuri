@@ -1,0 +1,37 @@
+name: Release Plugin
+run-name: Build Zuri.phar and Draft a release to github!
+on:
+  push:
+  workflow_dispatch:
+jobs:
+ build-phar:
+   runs-on: ubuntu-latest
+   if: contains(github.event.head_commit.message, 'Release')
+   steps:
+     - name: Checkout the repository.
+       uses: actions/checkout@v4
+     - name: Download php-binaries.
+       run: "curl -sL https://github.com/pmmp/PHP-Binaries/releases/latest/download/PHP-Linux-x86_64-PM5.tar.gz -o php.tar.gz"
+     - name: Extract php-binaries.
+       run: "tar -xvzf php.tar.gz"
+     - name: chmod the php-binaries.
+       run: "chmod +x ./bin/php7/bin/php"
+     - name: Fix opcache.so
+       run: EXTENSION_DIR=$(find "$(pwd)/bin" -name "*debug-zts*") \
+            grep -q '^extension_dir' bin/php7/bin/php.ini && sed -i'bak' "s{^extension_dir=.*{extension_dir=\"$EXTENSION_DIR\"{" bin/php7/bin/php.ini || echo "extension_dir=\"$EXTENSION_DIR\"" >> bin/php7/bin/php.ini
+     - name: Install php-cs-fixer.
+       run: "curl -sL https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/latest/download/php-cs-fixer.phar -o php-cs-fixer.phar"
+     - name: Run php-cs-fixer.
+       run: "./bin/php7/bin/php php-cs-fixer.phar fix src"
+     - name: Run build.php
+       run: "./bin/php7/bin/php -dphar.readonly=0 tools/build.php"
+     - name: Draft a release
+       uses: ncipollo/release-action@v1
+       with:
+         artifacts: "Zuri.phar"
+         body: "Zuri Draft Release"
+         draft: true
+         makeLatest: true
+         token: ${{ secrets.GITHUB_TOKEN }}
+     - name: Codespace Cleanup
+       run: "rm -rf *"
