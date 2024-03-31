@@ -241,8 +241,10 @@ abstract class Check extends ConfigManager {
 				}
 
 				if (self::getData(self::DEBUG_LOG_ADMIN)) {
-					if ($p->hasPermission("zuri.admin")) {
-						$p->sendMessage(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::YELLOW . $playerAPI->getPlayer()->getName() . ": " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
+					foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+						if ($p->hasPermission("zuri.admin")) {
+							$p->sendMessage(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::YELLOW . $playerAPI->getPlayer()->getName() . ": " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
+						}
 					}
 				}
 			}

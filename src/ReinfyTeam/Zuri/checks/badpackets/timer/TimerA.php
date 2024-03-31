@@ -64,6 +64,9 @@ class TimerA extends Check {
 			if ($playerAPI->getOnlineTime() < 10 || $playerAPI->getDeathTicks() < 40) {
 				return;
 			}
+			if ($playerAPI->getPlayer() === null) {
+				return;
+			}
 			$point = $playerAPI->getExternalData("pointQ");
 			$lastTime = $playerAPI->getExternalData("lastTimeQ");
 			if ($lastTime === null && $point === null) {
@@ -74,15 +77,15 @@ class TimerA extends Check {
 			$timeDiff = microtime(true) - $lastTime;
 			if ($timeDiff > 0.5) { // ticks < 0.7 sec too slow
 				if ($point > 6) {
-					$this->failed($playerAPI);
 					$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
+					$this->failed($playerAPI);
 				}
 				$playerAPI->unsetExternalData("pointQ");
 				$playerAPI->unsetExternalData("lastTimeQ");
 			} elseif ($timeDiff <= 0.001) { // ticks > 1 too fast
 				if ($point > 6) {
-					$this->failed($playerAPI);
 					$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
+					$this->failed($playerAPI);
 					$playerAPI->unsetExternalData("pointQ");
 					$playerAPI->unsetExternalData("lastTimeQ");
 				}

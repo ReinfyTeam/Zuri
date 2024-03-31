@@ -61,10 +61,10 @@ class InventoryMove extends Check {
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
-			if ($playerAPI->isInventoryOpen() && ($distance = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.2) {
+			if ($playerAPI->isInventoryOpen() && ($distance = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.01) {
+				$this->debug($playerAPI, "isOpen=" . $playerAPI->isInventoryOpen() . ", distance=$distance");
 				$this->failed($playerAPI);
 			}
-			$this->debug($playerAPI, "isOpen=" . $playerAPI->isInventoryOpen() . ", distance=$distance");
 		}
 	}
 }

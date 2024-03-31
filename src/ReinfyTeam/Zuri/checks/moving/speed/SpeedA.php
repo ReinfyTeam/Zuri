@@ -94,22 +94,22 @@ class SpeedA extends Check {
 				$distZ = $nLocation["to"]->getZ() - $nLocation["from"]->getZ();
 				$dist = ($distX * $distX) + ($distZ * $distZ);
 				$lastDist = $dist;
-				$shiftedLastDist = $lastDist * 0.91;
+				$shiftedLastDist = $lastDist * 0.93;
 				$equalness = $dist - $shiftedLastDist;
 				$scaledEqualness = $equalness * 138;
 				$idBlockDown = $player->getWorld()->getBlockAt(intval($player->getLocation()->getX()), intval($player->getLocation()->getY() - 0.01), intval($player->getLocation()->getZ()))->getTypeId();
 				$isFalling = $playerAPI->getLastGroundY() > $player->getLocation()->getY();
 				$limit += $playerAPI->getJumpTicks() < 40 ? ($limit / 3) : 0;
-				$limit += $player->isSprinting() ? ($limit / 33) : 0;
+				$limit += $player->isSprinting() ? ($limit / 35) : 0;
 				$effects = [];
 				foreach ($player->getEffects()->all() as $index => $effect) {
 					$transtable = $effect->getType()->getName()->getText();
 					$effects[$transtable] = $effect->getEffectLevel() + 1;
 				}
 				$limit += isset($effects["potion.moveSpeed"]) ? (pow($effects["potion.moveSpeed"] * 2, 2) / 16) : 0;
-				$limit -= $playerAPI->isInLiquid() ? ($limit / 2.6) : 0;
-				$limit -= $playerAPI->isInWeb() ? ($limit / 1.1) : 0;
-				$limit -= BlockUtil::isUnderBlock($nLocation["to"], [BlockTypeIds::SOUL_SAND], 1) ? ($limit / 1.3) : 0;
+				$limit -= $playerAPI->isInLiquid() ? ($limit / 2.8) : 0;
+				$limit -= $playerAPI->isInWeb() ? ($limit / 1.2) : 0;
+				$limit -= BlockUtil::isUnderBlock($nLocation["to"], [BlockTypeIds::SOUL_SAND], 1) ? ($limit / 1.4) : 0;
 				if ($playerAPI->isOnGround() && !$playerAPI->isOnAdhesion() && !$playerAPI->isOnIce() && $playerAPI->getAttackTicks() > 100 && $player->isSurvival() && !$recived && !$isFalling && $idBlockDown !== 0) {
 					if ($scaledEqualness > $limit) {
 						$this->debug($playerAPI, "isFalling=$isFalling, limit=$limit, distX=$distX, distZ=$distZ, dist=$dist, lastDist=$dist, shiftedLastDist=$shiftedLastDist, equalness=$equalness, scaledEqualness=$scaledEqualness");
