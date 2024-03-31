@@ -149,10 +149,10 @@ class PlayerListener implements Listener {
 			return;
 		}
 		$block = $event->getBlock();
-		if (!isset($this->blockInteracted[$player->getXuid()])) {
-			$this->blockInteracted[$player->getXuid()] = $block;
+		if (!isset($this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())])) {
+			$this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())] = $block;
 		} else {
-			unset($this->blockInteracted[$player->getXuid()]);
+			unset($this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())]);
 		}
 
 		if ($playerAPI->isFlagged()) {
@@ -182,8 +182,8 @@ class PlayerListener implements Listener {
 			$event->cancel();
 			$playerAPI->setFlagged(false);
 		}
-		if (isset($this->blockInteracted[$player->getXuid()])) {
-			$blockInteracted = $this->blockInteracted[$player->getXuid()];
+		if (isset($this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())])) {
+			$blockInteracted = $this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())];
 			$xI = $blockInteracted->getPosition()->getX();
 			$zI = $blockInteracted->getPosition()->getZ();
 			if ((int) $x != (int) $xI && (int) $z != (int) $zI) {
@@ -191,7 +191,7 @@ class PlayerListener implements Listener {
 				$playerAPI->setBlocksBrokeASec($playerAPI->getBlocksBrokeASec() + 1);
 			} else {
 				$playerAPI->setBlocksBrokeASec(0);
-				unset($this->blockInteracted[$player->getXuid()]);
+				unset($this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())]);
 			}
 		}
 	}

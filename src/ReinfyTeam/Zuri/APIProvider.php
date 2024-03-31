@@ -106,8 +106,6 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\MessageSpoof();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerB();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerC();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerD();
 
 		// Blockbreak
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\WrongMining();
