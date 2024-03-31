@@ -27,10 +27,13 @@ namespace ReinfyTeam\Zuri\utils;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function base64_encode;
 use function date;
 use function is_string;
 use function str_replace;
+use function strtolower;
 use function time;
+use function zlib_encode;
 
 class ReplaceText extends ConfigManager {
 	public static function replace(string|PlayerAPI $player, string $text, string $module = "", string $subType = "") : string {
@@ -43,7 +46,8 @@ class ReplaceText extends ConfigManager {
 			"{violation}",
 			"{timechat}",
 			"{code}",
-			"{tps}"
+			"{tps}",
+			"{error_code}"
 		];
 		$replace = [
 			self::getData(self::PREFIX),
@@ -54,7 +58,8 @@ class ReplaceText extends ConfigManager {
 			(is_string($player) ? "N/A" : $player->getRealViolation($module)),
 			self::getData(self::CHAT_SPAM_DELAY),
 			(is_string($player) ? "N/A" : $player->getCaptchaCode()),
-			Server::getInstance()->getTicksPerSecond()
+			Server::getInstance()->getTicksPerSecond(),
+			base64_encode(zlib_encode(strtolower($module . $subType . date("F d, Y h:i:sA", time())), ZLIB_ENCODING_DEFLATE, 9))
 		];
 
 		$text = str_replace($keys, $replace, $text);
