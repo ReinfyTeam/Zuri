@@ -25,18 +25,17 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\badpackets\timer;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function microtime;
 
-class TimerA extends Check {
+class TimerD extends Check {
 	public function getName() : string {
 		return "Timer";
 	}
 
 	public function getSubType() : string {
-		return "A";
+		return "D";
 	}
 
 	public function ban() : bool {
@@ -44,7 +43,7 @@ class TimerA extends Check {
 	}
 
 	public function kick() : bool {
-		return false;
+		return true;
 	}
 
 	public function flag() : bool {
@@ -52,7 +51,7 @@ class TimerA extends Check {
 	}
 
 	public function captcha() : bool {
-		return true;
+		return false;
 	}
 
 	public function maxViolations() : int {
@@ -60,35 +59,19 @@ class TimerA extends Check {
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($packet instanceof PlayerAuthInputPacket) {
-			if ($playerAPI->getOnlineTime() < 10 || $playerAPI->getDeathTicks() < 40) {
-				return;
-			}
-			$point = $playerAPI->getExternalData("pointQ");
-			$lastTime = $playerAPI->getExternalData("lastTimeQ");
-			if ($lastTime === null && $point === null) {
-				$playerAPI->setExternalData("lastTimeQ", microtime(true));
-				$playerAPI->setExternalData("pointQ", 1);
-				return;
-			}
-			$timeDiff = microtime(true) - $lastTime;
-			if ($timeDiff > 0.5) { // ticks < 0.7 sec too slow
-				if ($point > 6) {
+		if ($packet instanceof MovePlayerPacket) {
+			$lastMoveTime = $playerAPI->getExternalData("lastMoveD");
+			if ($lastMoveTime !== null) {
+				$currentTime = microtime(true);
+				$timeDifference = $currentTime - $lastMoveTime;
+
+				if ($timeDifference < 0.1) {
 					$this->failed($playerAPI);
-					$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
 				}
-				$playerAPI->unsetExternalData("pointQ");
-				$playerAPI->unsetExternalData("lastTimeQ");
-			} elseif ($timeDiff <= 0.001) { // ticks > 1 too fast
-				if ($point > 6) {
-					$this->failed($playerAPI);
-					$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
-					$playerAPI->unsetExternalData("pointQ");
-					$playerAPI->unsetExternalData("lastTimeQ");
-				}
-			} else {
-				$playerAPI->setExternalData("pointQ", $point + 1);
+				$this->debug($playerAPI, "timeDiff=$timeDifference");
 			}
+
+			$playerAPI->setExternalData("lastMoveD", microtime(true));
 		}
 	}
 }

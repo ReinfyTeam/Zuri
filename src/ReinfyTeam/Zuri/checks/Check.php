@@ -232,8 +232,20 @@ abstract class Check extends ConfigManager {
 	public function debug(PlayerAPI $playerAPI, string $text) : void {
 		$player = $playerAPI->getPlayer();
 
-		if ($playerAPI->isDebug()) {
-			$player->sendMessage(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
+		if (self::getData(self::DEBUG_ENABLE)) {
+			if ($playerAPI->isDebug()) {
+				$player->sendMessage(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
+
+				if (self::getData(self::DEBUG_LOG_SERVER)) {
+					APIProvider::getInstance()->getServer()->getLogger()->notice(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::YELLOW . $playerAPI->getPlayer()->getName() . ": " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
+				}
+
+				if (self::getData(self::DEBUG_LOG_ADMIN)) {
+					if ($p->hasPermission("zuri.admin")) {
+						$p->sendMessage(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::YELLOW . $playerAPI->getPlayer()->getName() . ": " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
+					}
+				}
+			}
 		}
 	}
 }

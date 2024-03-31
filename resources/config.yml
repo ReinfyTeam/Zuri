@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.0.8" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
+    version: "0.0.9" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -63,6 +63,10 @@ zuri:
     warning:
               enable: true
               message: "{prefix} §l§7[§eWARNING§7] §r§f{player} §7is tried using §f{module} §7(§c{subtype}§7)"
+    debug:
+        enable: true # Allow debugging checks: (/zuri debug)
+        log-admin: true # Send to admin their data... Might to cause lag if enabled... Only works if player is in debug mode!
+        log-server: false # Log to server, Might to cause lag if enabled... Only works if player is in debug mode also!
     captcha:
         enable: true
         text: "{prefix} §cType §b{code} §cto get rid of mute!"

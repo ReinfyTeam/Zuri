@@ -105,4 +105,8 @@ abstract class ConfigPaths {
 
 	public const WARNING_ENABLE = "zuri.warning.enable";
 	public const WARNING_MESSAGE = "zuri.warning.message";
+
+	public const DEBUG_ENABLE = "zuri.debug.enable";
+	public const DEBUG_LOG_ADMIN = "zuri.debug.log-admin";
+	public const DEBUG_LOG_SERVER = "zuri.debug.log-server";
 }
