@@ -38,8 +38,7 @@ $api->setBlocksBrokeASec(< it must is number >);
 - ✨ It is easy to use when it comes at the game, you can easily debug things, manage them all at the game, and **disable checks** according to your wishes. 
 - ❌ Limit players joining by their ip limit, you can change it how many players can join with same ip address.
 - 🌟 It also checks the player if they are using a **Proxy or VPN**
-- 💥 You can customize all **messages** and prefix easily with language manager!
-
+- 💥 You can manage plugin at ingame using **UI** by using command!
 # Checks
 | **Module Name**             | **Punishment Type**  | **Percentage of Accuracy** |
 |-----------------------------|----------------------|----------------------------|

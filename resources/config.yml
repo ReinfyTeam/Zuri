@@ -84,23 +84,6 @@ zuri:
     discord:
         enable: false
         webhook: ""
-        player:
-            joined:
-                enable: false
-                text: "{player} has joined the server!"
-            left:
-                enable: false
-                text: "{player} has left the server!"
-            kick:
-                enable: false
-                text: "{player} has been kicked from server for hacking or abuse! When using: {module}"
-            ban:
-                enable: false
-                text: "{player} has been banned from server for hacking or abuse! When using: {module}"
-        server:
-            lagging:
-                enable: false
-                text: "Server is lagging! Zuri can't check hacker! Tick: {tick}"
     chat:
         spam:
             text: "{prefix} §cSo sorry! Each chat only has a fixed time of 2 seconds apart."

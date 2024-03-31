@@ -6,4 +6,5 @@ projects:
   Zuri-Rewrite:
     path: ""
     lint: false
+    icon: "icon.png"
 ...
