@@ -25,13 +25,26 @@ jobs:
        run: "./bin/php7/bin/php php-cs-fixer.phar fix src"
      - name: Run build.php
        run: "./bin/php7/bin/php -dphar.readonly=0 tools/build.php"
-     - name: Draft a release
-       uses: ncipollo/release-action@v1
+     - uses: ChanTsune/release-with-commit@v2.8.0
+       id: create_release
        with:
-         artifacts: "Zuri.phar"
-         body: "Zuri Draft Release"
-         draft: true
-         makeLatest: true
-         token: ${{ secrets.GITHUB_TOKEN }}
+          regexp: "Release ((\\d+([.]\\d+)*)-(alpha|beta|rc)\\d*)((\\s|\\S)*)"
+          regexp_options: "us"
+          release_name: "Zuri Anticheat: v$1"
+          tag_name: "v$1"
+          body_path: "README.md"
+          draft: true
+          prerelease: false
+       env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+     - name: Upload Release Asset
+       id: upload-release-asset 
+       uses: actions/upload-release-asset@v1
+       env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./Zuri.phar
+          asset_name: Zuri.phar
      - name: Codespace Cleanup
        run: "rm -rf *"
