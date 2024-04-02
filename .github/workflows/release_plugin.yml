@@ -28,7 +28,7 @@ jobs:
      - uses: ChanTsune/release-with-commit@v2.8.0
        id: create_release
        with:
-          regexp: "Release v((\\d+([.]\\d+)*)-(alpha|beta|rc)\\d*)((\\s|\\S)*)"
+          regexp: "Release (\\d+([.]\\d+)*)\n*((\\s|\\S)+)"
           regexp_options: "us"
           release_name: "Zuri Anticheat: v$1"
           tag_name: "v$1"
