@@ -32,7 +32,7 @@ jobs:
           regexp_options: "us"
           release_name: "Zuri Anticheat: v$1"
           tag_name: "v$1"
-          body_path: "README.md"
+          body: "$5"
           draft: true
           prerelease: false
        env:
@@ -46,5 +46,6 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: ./Zuri.phar
           asset_name: Zuri.phar
+          asset_content_type: application/zip
      - name: Codespace Cleanup
        run: "rm -rf *"
