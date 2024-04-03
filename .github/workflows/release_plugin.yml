@@ -27,18 +27,20 @@ jobs:
        run: "./bin/php7/bin/php -dphar.readonly=0 tools/build.php"
      - uses: ChanTsune/release-with-commit@v3.0.0
        id: create_release
+       continue-on-error: true
        with:
           regexp: "Release (\\d+([.]\\d+)*)\n*((\\s|\\S)+)"
           regexp_options: "us"
           release_name: "Zuri Anticheat: v$1"
           tag_name: "v$1"
-          body: "$5"
+          body: "$3"
           draft: true
           prerelease: false
        env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
      - name: Upload Release Asset
        id: upload-release-asset 
+       continue-on-error: true
        uses: actions/upload-release-asset@v1
        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
