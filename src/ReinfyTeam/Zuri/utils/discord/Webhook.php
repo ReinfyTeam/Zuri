@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\utils\Discord;
+namespace ReinfyTeam\Zuri\utils\discord;
 
 use pocketmine\Server;
 use function filter_var;
