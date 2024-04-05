@@ -29,6 +29,8 @@ use ReinfyTeam\Zuri\APIProvider;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\ReplaceText;
+use function hexdec;
+use function str_replace;
 
 class Discord extends ConfigManager {
 	public const BAN = 0;
@@ -107,6 +109,8 @@ class Discord extends ConfigManager {
 					$embed->setTimestamp(new DateTime("NOW"));
 				}
 
+				$embed->setColor(self::textToHex($webhookConfig->getNested("$sendType.embed.color", 0x000000))); // hex decimal color
+
 				// Fields
 
 				if ($webhookConfig->getNested("$sendType.embed.fields.enable", false) !== false) {
@@ -125,6 +129,13 @@ class Discord extends ConfigManager {
 	}
 
 	public static function getWebhookConfig() : Config {
-		return self::$config ??= new Config(APIProvider::getInstance()->getDataFolder() . "discord.yml");
+		return self::$config ??= new Config(APIProvider::getInstance()->getDataFolder() . "webhook.yml");
+	}
+
+	public static function textToHex(string $hex) : mixed {
+		// why this??
+		$hex = str_replace("#", "", $hex);
+
+		return hexdec($hex);
 	}
 }
