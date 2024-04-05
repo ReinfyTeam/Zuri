@@ -25,11 +25,10 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
+use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function abs;
 
 class InvalidPackets extends Check {
 	public function getName() : string {
@@ -64,15 +63,15 @@ class InvalidPackets extends Check {
 	private int $lastTime;
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if($packet instanceof MovePlayerPacket){
-            $speed = $this->ticks - $this->lastTime;
-            if($speed < 2){
+		if ($packet instanceof MovePlayerPacket) {
+			$speed = $this->ticks - $this->lastTime;
+			if ($speed < 2) {
 				$this->debug($playerAPI, "packetSpeed=$speed");
-                $this->failed($playerAPI);
-            }
-            $this->lastTime = $this->ticks;
-        } elseif($packet instanceof PlayerAuthInputPacket){
-            ++$this->ticks;
-        }
+				$this->failed($playerAPI);
+			}
+			$this->lastTime = $this->ticks;
+		} elseif ($packet instanceof PlayerAuthInputPacket) {
+			++$this->ticks;
+		}
 	}
 }

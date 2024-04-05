@@ -42,14 +42,12 @@ use function microtime;
 use function strtolower;
 
 abstract class Check extends ConfigManager {
-	public bool $enabled = true;
-
 	public abstract function getName() : string;
 
 	public abstract function getSubType() : string;
 
 	public function enable() : bool {
-		return $this->enabled;
+		return self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable");
 	}
 
 	public abstract function ban() : bool;

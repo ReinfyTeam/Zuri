@@ -208,7 +208,7 @@ final class FormSender extends ConfigManager {
 			$info = explode(":", $data);
 			foreach (APIProvider::Checks() as $check) {
 				if ($check->getName() === $info[0] && $check->getSubType() === $info[1]) {
-					$check->enabled = !$check->enabled;
+					self::setData(self::CHECK . "." . strtolower($check->getName()) . ".enable", !self::getData(self::CHECK . "." . strtolower($check->getName()) . ".enable"));
 					self::ToggleModules($player, true);
 				} else {
 					continue;
