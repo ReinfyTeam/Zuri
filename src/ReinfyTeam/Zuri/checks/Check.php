@@ -195,9 +195,9 @@ abstract class Check extends ConfigManager {
 				$playerAPI->resetViolation($this->getName());
 				$playerAPI->resetRealViolation($this->getName());
 				$player->kick("Unfair Advantage: Zuri Anticheat" /** TODO: Customize logout message? */, null, ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE_UI), $this->getName(), $this->getSubType()));
-				return true;
 			}
 			(new KickEvent($playerAPI, $this->getName(), $this->getSubType()))->kick();
+			return true;
 		}
 
 		if ($reachedMaxRealViolations && $this->captcha() && self::getData(self::CAPTCHA_ENABLE) === true) {
