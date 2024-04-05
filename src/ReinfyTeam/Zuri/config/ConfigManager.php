@@ -45,12 +45,10 @@ class ConfigManager extends ConfigPaths {
 	public static function checkConfig() : void {
 		if (!file_exists(APIProvider::getInstance()->getDataFolder() . "config.yml")) {
 			APIProvider::getInstance()->saveResource("config.yml");
-			return;
 		}
 
 		if (!file_exists(APIProvider::getInstance()->getDataFolder() . "webhook.yml")) {
 			APIProvider::getInstance()->saveResource("webhook.yml");
-			return;
 		}
 
 		$pluginConfigResource = APIProvider::getInstance()->getResource("config.yml");
