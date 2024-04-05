@@ -37,32 +37,32 @@ zuri:
         ip: 127.0.0.1
         port: 19132
     alerts:
-        message: "{prefix} §f{player} §7failed §f{module} §7(§c{subtype}§7) §7VL §2{violation}"
+        message: "{prefix} §f{player_name} §7failed §f{module} §7(§c{subtype}§7) §7VL §2{violation}"
         enable: true
         admin: false #This will cause the in-game cheat detector to send it to the person with the permissions below
         permission: "zuri.admin"
     ban:
         commands:
-            - 'ban {player} "Unfair Advantage"'
-        message: "{prefix} §f{player} §chas been banned from server for hacking or abuse."
+            - 'ban {player_name} "Unfair Advantage"'
+        message: "{prefix} §f{player_name} §chas been banned from server for hacking or abuse."
         enable: true
         randomize: false
     detection:
         # Detections when suddenly triggered any checks that detects any kind of hack. This might spam your console or chat. NOT RECOMMENDED.
         enable: false
-        message: "{prefix} §f{player} §7suspected using §f{module} §7(§c{subtype}§7)"
+        message: "{prefix} §f{player_name} §7suspected using §f{module} §7(§c{subtype}§7)"
     kick:
         kickmessage: "§fYou have been kicked from the server."
-        message: "{prefix} §f{player} §chas been kicked from server for hacking or abuse."
+        message: "{prefix} §f{player_name} §chas been kicked from server for hacking or abuse."
         enable: true
         # If this is enabled, this will be used. DISABLING THIS, THE FALL BACK KICK WHICH LEADS MANY BUGS, PLAYERS CANNOT BE KICKED ETC.. SO, PLEASE DO NOT DISABLE KICK COMMAND MODE FEATURE.
         commands:
               enable: true
               list:
-                 - 'kick {player} "Unfair Advantage"'
+                 - 'kick {player_name} "Unfair Advantage"'
     warning:
               enable: true
-              message: "{prefix} §l§7[§eWARNING§7] §r§f{player} §7is tried using §f{module} §7(§c{subtype}§7)"
+              message: "{prefix} §l§7[§eWARNING§7] §r§f{player_name} §7is tried using §f{module} §7(§c{subtype}§7)"
     debug:
         enable: true # Allow debugging checks: (/zuri debug)
         log-admin: true # Send to admin their data... Might to cause lag if enabled... Only works if player is in debug mode!
