@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\utils\Discord;
+namespace ReinfyTeam\Zuri\utils\discord;
 
 class Message implements \JsonSerializable {
 	protected $data = [];
@@ -75,7 +75,7 @@ class Message implements \JsonSerializable {
 		return $this;
 	}
 
-	public function jsonSerialize() {
+	public function jsonSerialize() : mixed {
 		return $this->data;
 	}
 

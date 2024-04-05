@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\utils\Discord;
+namespace ReinfyTeam\Zuri\utils\discord;
 
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
@@ -42,8 +42,8 @@ class WebhookSendTask extends AsyncTask {
 	protected NonThreadSafeValue $message;
 
 	public function __construct(Webhook $webhook, Message $message) {
-		$this->webhook = $webhook;
-		$this->message = $message;
+		$this->webhook = new NonThreadSafeValue($webhook);
+		$this->message = new NonThreadSafeValue($message);
 	}
 
 	public function onRun() : void {

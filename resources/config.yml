@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.0.9" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
+    version: "0.1.0" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -82,8 +82,7 @@ zuri:
             enable: true
             permission: "zuri.bypass"
     discord:
-        enable: false
-        webhook: ""
+        enable: false # Should discord webhooks are enabled in the server?
     chat:
         spam:
             text: "{prefix} §cSo sorry! Each chat only has a fixed time of 2 seconds apart."

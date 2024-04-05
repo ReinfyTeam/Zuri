@@ -59,13 +59,13 @@ class ServerListener implements Listener {
 	public function onPlayerJoin(PlayerJoinEvent $event) {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		Discord::onJoin($playerAPI);
+		Discord::Send($playerAPI, Discord::JOIN);
 	}
 
 	public function onPlayerQuit(PlayerQuitEvent $event) {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		Discord::onLeft($playerAPI);
+		Discord::Send($playerAPI, Discord::LEAVE);
 		$ip = $player->getNetworkSession()->getIp();
 		if (isset($this->ip[$ip])) {
 			$this->ip[$ip] -= 1;

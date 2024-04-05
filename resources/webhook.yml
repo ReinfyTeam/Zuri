@@ -1,0 +1,219 @@
+---
+
+# Discord webhook configuration
+#   This can only work if this is enabled in the config.yml!
+#   If you find any bugs or issue, don't hesitate to ask it on 
+#   our discord or create an issue on the github!
+
+discord:
+     #  Put your webhook url here after you read all the instructions in the github.
+     webhook_url: ""
+     #  Custom Webhook Profile Icon
+     icon:
+          enable: true
+          url: "https://raw.githubusercontent.com/ReinfyTeam/Zuri/main/icon.png"
+     username: "" # Leave blank to use original webhook username.
+
+ban:
+     enable: false #Enable or Disable the discord webhook sending.
+     message: "Zuri Anticheat"
+     embed:
+          enable: true #Enable or Disable the embeds
+          color: "FF0000"
+          title: 
+             enable: true #Enable or Disable the embed title
+             value: "Zuri AC"
+          description: 
+             enable: true #Enable or Disable the embed description.
+             value: "**{player_name}** is banned using **{module}** (**{subType}**) by Zuri AC!"
+          footer:
+             enable: true #Enable or Disable the embed footer.
+             value: "Zuri Anticheat by ReinfyTeam"
+             iconUrl: "" # Leave blank if you don't want to add clickable url in the author
+          author:
+             enable: false #Enable or Disable the embed author
+             iconUrl: "" # Leave blank if you don't want to add iconUrl
+             url: "" # Leave blank if you don't want to add clickable url in the author
+             value: "ReinfyTeam"
+          fields:
+             enable: false #Enable or Disable the field
+             value:
+                # You can add more if you want:
+                whatever_field_0: # Identifier of the field: REQUIRED
+                        inline: false # Should the field is in inlined.
+                        title: "Field #1" # Display title which are displayed in the discord.
+                        value: "Field Example 1" # The text you want to add in the field..
+                whatever_field_1:
+                        inline: false
+                        title: "Field #2"
+                        value: "Field Example 2"
+          thumbnail:
+             enable: false #Enable or Disable embed thumbnails.
+             value: "" # Url here
+          image:
+             enable: false #Enable or Disable embed image.
+             value: "" # Url here
+          timestamp: false #Should we add timestamp in the embed?
+kick:
+     enable: false #Enable or Disable the discord webhook sending.
+     message: "Zuri Anticheat"
+     embed:
+          enable: true #Enable or Disable the embeds
+          color: "FF0000"
+          title: 
+             enable: true #Enable or Disable the embed title
+             value: "Zuri AC"
+          description: 
+             enable: true #Enable or Disable the embed description.
+             value: "**{player_name}** is kicked using **{module}** (**{subType}**) by Zuri AC!"
+          footer:
+             enable: true #Enable or Disable the embed footer.
+             value: "Zuri Anticheat by ReinfyTeam"
+             iconUrl: "" # Leave blank if you don't want to add clickable url in the author
+          author:
+             enable: false #Enable or Disable the embed author
+             iconUrl: "" # Leave blank if you don't want to add iconUrl
+             url: "" # Leave blank if you don't want to add clickable url in the author
+             value: "ReinfyTeam"
+          fields:
+             enable: false #Enable or Disable the field
+             value:
+                # You can add more if you want:
+                whatever_field_0: # Identifier of the field: REQUIRED
+                        inline: false # Should the field is in inlined.
+                        title: "Field #1" # Display title which are displayed in the discord.
+                        value: "Field Example 1" # The text you want to add in the field..
+                whatever_field_1:
+                        inline: false
+                        title: "Field #2"
+                        value: "Field Example 2"
+          thumbnail:
+             enable: false #Enable or Disable embed thumbnails.
+             value: "" # Url here
+          image:
+             enable: false #Enable or Disable embed image.
+             value: "" # Url here
+          timestamp: false #Should we add timestamp in the embed?
+join:
+     enable: false #Enable or Disable the discord webhook sending.
+     message: "Zuri Anticheat"
+     embed:
+          enable: true #Enable or Disable the embeds
+          color: "FF0000"
+          title: 
+             enable: true #Enable or Disable the embed title
+             value: "Zuri AC"
+          description: 
+             enable: true #Enable or Disable the embed description.
+             value: "**{player_name}** has joined in the server and monitored by Zuri!"
+          footer:
+             enable: true #Enable or Disable the embed footer.
+             value: "Zuri Anticheat by ReinfyTeam"
+             iconUrl: "" # Leave blank if you don't want to add clickable url in the author
+          author:
+             enable: false #Enable or Disable the embed author
+             iconUrl: "" # Leave blank if you don't want to add iconUrl
+             url: "" # Leave blank if you don't want to add clickable url in the author
+             value: "ReinfyTeam"
+          fields:
+             enable: false #Enable or Disable the field
+             value:
+                # You can add more if you want:
+                whatever_field_0: # Identifier of the field: REQUIRED
+                        inline: false # Should the field is in inlined.
+                        title: "Field #1" # Display title which are displayed in the discord.
+                        value: "Field Example 1" # The text you want to add in the field..
+                whatever_field_1:
+                        inline: false
+                        title: "Field #2"
+                        value: "Field Example 2"
+          thumbnail:
+             enable: false #Enable or Disable embed thumbnails.
+             value: "" # Url here
+          image:
+             enable: false #Enable or Disable embed image.
+             value: "" # Url here
+          timestamp: false #Should we add timestamp in the embed?
+leave:
+     enable: false #Enable or Disable the discord webhook sending.
+     message: "Zuri Anticheat"
+     embed:
+          enable: true #Enable or Disable the embeds
+          color: "FF0000"
+          title: 
+             enable: true #Enable or Disable the embed title
+             value: "Zuri AC"
+          description: 
+             enable: true #Enable or Disable the embed description.
+             value: "**{player_name}** has leaved in the server and stopped monitoring by Zuri!"
+          footer:
+             enable: true #Enable or Disable the embed footer.
+             value: "Zuri Anticheat by ReinfyTeam"
+             iconUrl: "" # Leave blank if you don't want to add clickable url in the author
+          author:
+             enable: false #Enable or Disable the embed author
+             iconUrl: "" # Leave blank if you don't want to add iconUrl
+             url: "" # Leave blank if you don't want to add clickable url in the author
+             value: "ReinfyTeam"
+          fields:
+             enable: false #Enable or Disable the field
+             value:
+                # You can add more if you want:
+                whatever_field_0: # Identifier of the field: REQUIRED
+                        inline: false # Should the field is in inlined.
+                        title: "Field #1" # Display title which are displayed in the discord.
+                        value: "Field Example 1" # The text you want to add in the field..
+                whatever_field_1:
+                        inline: false
+                        title: "Field #2"
+                        value: "Field Example 2"
+          thumbnail:
+             enable: false #Enable or Disable embed thumbnails.
+             value: "" # Url here
+          image:
+             enable: false #Enable or Disable embed image.
+             value: "" # Url here
+          timestamp: false #Should we add timestamp in the embed?
+lagging:
+     enable: false #Enable or Disable the discord webhook sending.
+     message: "Zuri Anticheat"
+     embed:
+          enable: true #Enable or Disable the embeds
+          color: "FF0000"
+          title: 
+             enable: true #Enable or Disable the embed title
+             value: "Zuri AC"
+          description: 
+             enable: true #Enable or Disable the embed description.
+             value: "The server is lagging at **{tps}** tps! Zuri cannot check players at the moment!"
+          footer:
+             enable: true #Enable or Disable the embed footer.
+             value: "Zuri Anticheat by ReinfyTeam"
+             iconUrl: "" # Leave blank if you don't want to add clickable url in the author
+          author:
+             enable: false #Enable or Disable the embed author
+             iconUrl: "" # Leave blank if you don't want to add iconUrl
+             url: "" # Leave blank if you don't want to add clickable url in the author
+             value: "ReinfyTeam"
+          fields:
+             enable: false #Enable or Disable the field
+             value:
+                # You can add more if you want:
+                whatever_field_0: # Identifier of the field: REQUIRED
+                        inline: false # Should the field is in inlined.
+                        title: "Field #1" # Display title which are displayed in the discord.
+                        value: "Field Example 1" # The text you want to add in the field..
+                whatever_field_1:
+                        inline: false
+                        title: "Field #2"
+                        value: "Field Example 2"
+          thumbnail:
+             enable: false #Enable or Disable embed thumbnails.
+             value: "" # Url here
+          image:
+             enable: false #Enable or Disable embed image.
+             value: "" # Url here
+          timestamp: false #Should we add timestamp in the embed?
+
+# Please refer to the Zuri github wiki to start setup with discord webhooks!
+...

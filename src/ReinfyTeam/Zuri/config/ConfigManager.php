@@ -47,6 +47,11 @@ class ConfigManager extends ConfigPaths {
 			APIProvider::getInstance()->saveResource("config.yml");
 			return;
 		}
+		
+		if (!file_exists(APIProvider::getInstance()->getDataFolder() . "webhook.yml")) {
+			APIProvider::getInstance()->saveResource("webhook.yml");
+			return;
+		}
 
 		$pluginConfigResource = APIProvider::getInstance()->getResource("config.yml");
 		$pluginConfig = yaml_parse(stream_get_contents($pluginConfigResource));

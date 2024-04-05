@@ -55,14 +55,12 @@ abstract class ConfigPaths {
 	public const BAN_COMMANDS = "zuri.ban.commands";
 	public const BAN_MESSAGE = "zuri.ban.message";
 	public const BAN_ENABLE = "zuri.ban.enable";
-	public const BAN_RECENT_LOGS_MESSAGE = "zuri.ban.recentlogs.message";
 
 	public const KICK_ENABLE = "zuri.kick.enable";
 	public const KICK_MESSAGE = "zuri.kick.message";
 	public const KICK_COMMANDS_ENABLED = "zuri.kick.commands.enabled";
 	public const KICK_COMMANDS = "zuri.kick.commands.list";
 	public const KICK_MESSAGE_UI = "zuri.kick.kickmessage";
-	public const KICK_RECENT_LOGS_MESSAGE = "zuri.kick.recentlogs.message";
 
 	public const PERMISSION_BYPASS_ENABLE = "zuri.permissions.bypass.enable";
 	public const PERMISSION_BYPASS_PERMISSION = "zuri.permissions.bypass.permission";
@@ -71,17 +69,6 @@ abstract class ConfigPaths {
 	public const WORLD_BYPASS_LIST = "zuri.world_bypass.list";
 
 	public const DISCORD_ENABLE = "zuri.discord.enable";
-	public const DISCORD_WEBHOOK = "zuri.discord.webhook";
-	public const DISCORD_PLAYER_JOIN_ENABLE = "zuri.discord.player.joined.enable";
-	public const DISCORD_PLAYER_JOIN_TEXT = "zuri.discord.player.joined.text";
-	public const DISCORD_PLAYER_LEFT_ENABLE = "zuri.discord.player.left.enable";
-	public const DISCORD_PLAYER_LEFT_TEXT = "zuri.discord.player.left.text";
-	public const DISCORD_PLAYER_KICK_ENABLE = "zuri.discord.player.kick.enable";
-	public const DISCORD_PLAYER_KICK_TEXT = "zuri.discord.player.kick.text";
-	public const DISCORD_PLAYER_BAN_ENABLE = "zuri.discord.player.ban.enable";
-	public const DISCORD_PLAYER_BAN_TEXT = "zuri.discord.player.ban.text";
-	public const DISCORD_SERVER_LAGGING_ENABLE = "zuri.discord.server.lagging.enable";
-	public const DISCORD_SERVER_LAGGING_TEXT = "zuri.discord.server.lagging.text";
 
 	public const CAPTCHA_ENABLE = "zuri.captcha.enable";
 	public const CAPTCHA_TEXT = "zuri.captcha.text";

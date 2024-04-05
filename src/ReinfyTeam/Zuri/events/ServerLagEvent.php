@@ -29,6 +29,8 @@ use ReinfyTeam\Zuri\utils\discord\Discord;
 
 class ServerLagEvent {
 	private PlayerAPI $player;
+	private string $moduleName;
+	private string $subType;
 
 	public function __construct(PlayerAPI $player) {
 		$this->player = $player;
@@ -39,6 +41,6 @@ class ServerLagEvent {
 	}
 
 	public function isLagging() {
-		Discord::onLagging($this->player);
+		Discord::Send($this->player, Discord::LAGGING, null);
 	}
 }

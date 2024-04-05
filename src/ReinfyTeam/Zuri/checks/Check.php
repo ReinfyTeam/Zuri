@@ -168,7 +168,7 @@ abstract class Check extends ConfigManager {
 
 			$playerAPI->resetViolation($this->getName());
 			$playerAPI->resetRealViolation($this->getName());
-			(new BanEvent($playerAPI, $this->getName()))->ban();
+			(new BanEvent($playerAPI, $this->getName(), $this->getSubType()))->ban();
 			return true;
 		}
 
@@ -197,6 +197,7 @@ abstract class Check extends ConfigManager {
 				$player->kick("Unfair Advantage: Zuri Anticheat" /** TODO: Customize logout message? */, null, ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE_UI), $this->getName(), $this->getSubType()));
 				return true;
 			}
+			(new KickEvent($playerAPI, $this->getName(), $this->getSubType()))->kick();
 		}
 
 		if ($reachedMaxRealViolations && $this->captcha() && self::getData(self::CAPTCHA_ENABLE) === true) {
@@ -242,6 +243,9 @@ abstract class Check extends ConfigManager {
 
 				if (self::getData(self::DEBUG_LOG_ADMIN)) {
 					foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+						if ($p->getName() === $playerAPI->getPlayer()->getName()) {
+							continue;
+						} // Skip same player. Prevent spam in the chat history.
 						if ($p->hasPermission("zuri.admin")) {
 							$p->sendMessage(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::YELLOW . $playerAPI->getPlayer()->getName() . ": " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
 						}

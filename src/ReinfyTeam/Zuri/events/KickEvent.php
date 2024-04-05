@@ -29,22 +29,28 @@ use ReinfyTeam\Zuri\utils\discord\Discord;
 
 class KickEvent {
 	private PlayerAPI $player;
-	private string $reason;
+	private string $moduleName;
+	private string $subType;
 
-	public function __construct(PlayerAPI $player, string $reason = "") {
+	public function __construct(PlayerAPI $player, string $moduleName, string $subType) {
 		$this->player = $player;
-		$this->reason = $reason;
+		$this->moduleName = $moduleName;
+		$this->subType = $subType;
 	}
 
 	public function getPlayer() : PlayerAPI {
 		return $this->player;
 	}
 
-	public function getReason() : string {
-		return $this->reason;
+	public function getModuleName() : string {
+		return $this->moduleName;
+	}
+
+	public function getSubType() : string {
+		return $this->subType;
 	}
 
 	public function kick() {
-		Discord::onKick($this->player, $this->reason);
+		Discord::Send($this->player, Discord::KICK, ["name" => $this->getModuleName(), "subType" => $this->getSubType()]);
 	}
 }
