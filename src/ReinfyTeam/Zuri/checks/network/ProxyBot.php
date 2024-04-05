@@ -84,7 +84,7 @@ class ProxyBot extends Check {
 			if ($status === 200 && $result["status"] !== "error" && isset($result[$ip])) {
 				$proxy = $result[$ip]["proxy"] === "yes";
 				if ($proxy) {
-					$this->warn($event->getUsername());
+					$this->warn($event->getPlayerInfo()->getUsername());
 					$event->setKickFlag(0, self::getData(self::ANTIBOT_MESSAGE));
 				}
 			}
