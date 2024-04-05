@@ -104,6 +104,7 @@ class APIProvider extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastThrow();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\ImpossiblePitch();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\MessageSpoof();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\InvalidPackets();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerB();
 
