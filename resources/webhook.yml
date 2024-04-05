@@ -25,7 +25,7 @@ ban:
              value: "Zuri AC"
           description: 
              enable: true #Enable or Disable the embed description.
-             value: "**{player_name}** is banned using **{module}** (**{subType}**) by Zuri AC!"
+             value: "**{player_name}** is banned using **{module}** (**{subtype}**) by Zuri AC!"
           footer:
              enable: true #Enable or Disable the embed footer.
              value: "Zuri Anticheat by ReinfyTeam"
@@ -65,7 +65,7 @@ kick:
              value: "Zuri AC"
           description: 
              enable: true #Enable or Disable the embed description.
-             value: "**{player_name}** is kicked using **{module}** (**{subType}**) by Zuri AC!"
+             value: "**{player_name}** is kicked using **{module}** (**{subtype}**) by Zuri AC!"
           footer:
              enable: true #Enable or Disable the embed footer.
              value: "Zuri Anticheat by ReinfyTeam"

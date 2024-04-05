@@ -39,7 +39,7 @@ class ReplaceText extends ConfigManager {
 	public static function replace(string|PlayerAPI $player, string $text, string $module = "", string $subType = "") : string {
 		$keys = [
 			"{prefix}",
-			"{player}",
+			"{player_name}",
 			"{module}",
 			"{subtype}",
 			"{time}",
