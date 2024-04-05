@@ -25,7 +25,9 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\utils\discord;
 
 use pocketmine\Server;
+use ReinfyTeam\Zuri\APIProvider;
 use function filter_var;
+use function json_encode;
 
 class Webhook {
 	protected $url;
@@ -44,5 +46,6 @@ class Webhook {
 
 	public function send(Message $message) : void {
 		Server::getInstance()->getAsyncPool()->submitTask(new WebhookSendTask($this, $message));
+		APIProvider::getInstance()->getLogger()->debug("[Discord] [DEBUG]: Sending to discord with data: " . json_encode($message));
 	}
 }
