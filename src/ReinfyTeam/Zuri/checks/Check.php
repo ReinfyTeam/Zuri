@@ -157,6 +157,7 @@ abstract class Check extends ConfigManager {
 		}
 
 		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->ban() && self::getData(self::BAN_ENABLE) === true) {
+			(new BanEvent($playerAPI, $this->getName(), $this->getSubType()))->ban();
 			APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
 			foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
 				if ($p->hasPermission("zuri.admin")) {
@@ -169,11 +170,11 @@ abstract class Check extends ConfigManager {
 
 			$playerAPI->resetViolation($this->getName());
 			$playerAPI->resetRealViolation($this->getName());
-			(new BanEvent($playerAPI, $this->getName(), $this->getSubType()))->ban();
 			return true;
 		}
 
 		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->kick() && self::getData(self::KICK_ENABLE) === true) {
+			(new KickEvent($playerAPI, $this->getName(), $this->getSubType()))->kick();
 			if (self::getData(self::KICK_COMMANDS_ENABLED) === true) {
 				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 				$playerAPI->resetViolation($this->getName());
@@ -197,7 +198,6 @@ abstract class Check extends ConfigManager {
 				$playerAPI->resetRealViolation($this->getName());
 				$player->kick("Unfair Advantage: Zuri Anticheat" /** TODO: Customize logout message? */, null, ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE_UI), $this->getName(), $this->getSubType()));
 			}
-			(new KickEvent($playerAPI, $this->getName(), $this->getSubType()))->kick();
 			return true;
 		}
 
