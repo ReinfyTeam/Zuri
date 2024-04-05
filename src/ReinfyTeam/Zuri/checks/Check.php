@@ -89,10 +89,6 @@ abstract class Check extends ConfigManager {
 			return false;
 		}
 
-		if (!$this->enable()) {
-			return false;
-		}
-
 		$player = $playerAPI->getPlayer();
 		$notify = self::getData(self::ALERTS_ENABLE) === true;
 		$detectionsAllowedToSend = self::getData(self::DETECTION_ENABLE) === true;
