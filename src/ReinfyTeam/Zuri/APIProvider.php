@@ -184,5 +184,5 @@ class APIProvider extends PluginBase {
 
 	public static function Checks() : array {
 		return APIProvider::getInstance()->checks;
-	} 
+	}
 }

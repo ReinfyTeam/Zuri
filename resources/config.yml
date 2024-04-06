@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.1.0" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
+    version: "0.1.1" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -22,6 +22,13 @@ zuri:
         #This is the buyer's discretion if you have custom errors with your server we will not be responsible.
         normal: 20
         lagging: 200
+    server_ticks:
+        # Normal ticks per seconds in the server..
+        normal: 20
+        # Lagging ticks per seconds.. Which checks will going to stop..
+        lagging: 5
+        # Message displayed over the console...
+        message: "{prefix} §cThe server is lagging! The server has §b{tps} tps§c behind! Zuri can't check players at the moment!"
     #Bypass a world according to list.
     world_bypass:
         enable: true
@@ -46,7 +53,6 @@ zuri:
             - 'ban {player_name} "Unfair Advantage"'
         message: "{prefix} §f{player_name} §chas been banned from server for hacking or abuse."
         enable: true
-        randomize: false
     detection:
         # Detections when suddenly triggered any checks that detects any kind of hack. This might spam your console or chat. NOT RECOMMENDED.
         enable: false

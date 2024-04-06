@@ -24,10 +24,13 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\events;
 
+use pocketmine\Server;
+use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\Discord;
+use ReinfyTeam\Zuri\utils\ReplaceText;
 
-class ServerLagEvent {
+class ServerLagEvent extends ConfigManager {
 	private PlayerAPI $player;
 	private string $moduleName;
 	private string $subType;
@@ -42,5 +45,6 @@ class ServerLagEvent {
 
 	public function isLagging() {
 		Discord::Send($this->player, Discord::LAGGING, null);
+		Server::getInstance()->getLogger()->warning(ReplaceText::replace($this->player, self::getData(self::SERVER_LAGGING_MESSAGE)));
 	}
 }

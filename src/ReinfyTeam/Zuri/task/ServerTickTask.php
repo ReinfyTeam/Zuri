@@ -26,6 +26,7 @@ namespace ReinfyTeam\Zuri\task;
 
 use pocketmine\scheduler\Task;
 use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\config\ConfigManager;
 use function microtime;
 
 class ServerTickTask extends Task {
@@ -52,6 +53,6 @@ class ServerTickTask extends Task {
 
 	public function isLagging(float $l) : bool {
 		$lsat = $l - $this->tick;
-		return $lsat >= 5;
+		return $lsat >= ConfigManager::getData(ConfigManager::SERVER_LAGGING_TPS);
 	}
 }

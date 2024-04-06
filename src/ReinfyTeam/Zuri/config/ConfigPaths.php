@@ -96,4 +96,8 @@ abstract class ConfigPaths {
 	public const DEBUG_ENABLE = "zuri.debug.enable";
 	public const DEBUG_LOG_ADMIN = "zuri.debug.log-admin";
 	public const DEBUG_LOG_SERVER = "zuri.debug.log-server";
+
+	public const SERVER_LAGGING_TPS = "zuri.server_ticks.lagging";
+	public const SERVER_NORMAL_TPS = "zuri.server_ticks.normal";
+	public const SERVER_LAGGING_MESSAGE = "zuri.server_ticks.message";
 }
