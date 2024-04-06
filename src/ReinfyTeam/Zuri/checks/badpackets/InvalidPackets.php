@@ -59,11 +59,11 @@ class InvalidPackets extends Check {
 		return 20;
 	}
 
-	private int $ticks;
-	private int $lastTime;
+	private int $ticks = 0;
+	private int $lastTime = 0;
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($packet instanceof MovePlayerPacket) {
+		if ($packet instanceof MovePlayerPacket) { // i dont know how i did this.
 			$speed = $this->ticks - $this->lastTime;
 			if ($speed < 2) {
 				$this->debug($playerAPI, "packetSpeed=$speed");
