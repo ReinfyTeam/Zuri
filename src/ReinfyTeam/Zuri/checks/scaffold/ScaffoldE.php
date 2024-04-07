@@ -31,6 +31,7 @@ use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\ReleaseItemTransactionData;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function abs;
 use function microtime;
 
 class ScaffoldE extends Check {

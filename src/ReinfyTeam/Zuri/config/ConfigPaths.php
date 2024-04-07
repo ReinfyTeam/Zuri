@@ -58,7 +58,7 @@ abstract class ConfigPaths {
 
 	public const KICK_ENABLE = "zuri.kick.enable";
 	public const KICK_MESSAGE = "zuri.kick.message";
-	public const KICK_COMMANDS_ENABLED = "zuri.kick.commands.enabled";
+	public const KICK_COMMANDS_ENABLED = "zuri.kick.commands.enable";
 	public const KICK_COMMANDS = "zuri.kick.commands.list";
 	public const KICK_MESSAGE_UI = "zuri.kick.kickmessage";
 
