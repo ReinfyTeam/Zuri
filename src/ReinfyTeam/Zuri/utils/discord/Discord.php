@@ -70,7 +70,7 @@ class Discord extends ConfigManager {
 			$message->setContent($webhookConfig->getNested("$sendType.message", "`Empty message in the configuration!`"));
 			$message->setUsername($webhookConfig->getNested("discord.username", "Zuri"));
 
-			if ($webhookConfig->getNested("discord.icon", false) === true) {
+			if ($webhookConfig->getNested("discord.icon.enable", false) === true) {
 				$message->setAvatarURL($webhookConfig->getNested("discord.icon.url"));
 			}
 
