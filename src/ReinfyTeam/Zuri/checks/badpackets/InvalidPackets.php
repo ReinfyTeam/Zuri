@@ -59,19 +59,16 @@ class InvalidPackets extends Check {
 		return 20;
 	}
 
-	private int $ticks = 0;
-	private int $lastTime = 0;
-
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof MovePlayerPacket) { // i dont know how i did this.
-			$speed = $this->ticks - $this->lastTime;
+			$speed = $playerAPI->getExternalData("tickPackets") - $playerAPI->getExternalData("lastPacketTick");
 			if ($speed < 2) {
 				$this->debug($playerAPI, "packetSpeed=$speed");
 				$this->failed($playerAPI);
 			}
-			$this->lastTime = $this->ticks;
+			$playerAPI->setExternalData("lastPacketTick", $playerAPI->getExternalData("tickPackets"));
 		} elseif ($packet instanceof PlayerAuthInputPacket) {
-			++$this->ticks;
+			$playerAPI->setExternalData("tickPackets", $playerAPI->getExternalData("tickPackets") + 1);
 		}
 	}
 }
