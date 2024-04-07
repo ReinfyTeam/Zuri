@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\command;
+namespace ReinfyTeam\Zuri\utils\forms;
 
 use pocketmine\player\Player;
 use pocketmine\utils\NotCloneable;
@@ -32,8 +32,6 @@ use ReinfyTeam\Zuri\APIProvider;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\forms\CustomForm;
-use ReinfyTeam\Zuri\utils\forms\SimpleForm;
 use function explode;
 use function intval;
 use function strtolower;

@@ -32,6 +32,7 @@ use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\APIProvider;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\forms\FormSender;
 use function count;
 use function intval;
 use function is_float;

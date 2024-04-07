@@ -33,7 +33,6 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
 class ScaffoldE extends Check {
-	private bool $place = false;
 
 	public function getName() : string {
 		return "Scaffold";
@@ -65,16 +64,17 @@ class ScaffoldE extends Check {
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
-			$this->place = true;
+			$playerAPI->setExternalData("lastPlaceE", microtime(true));
 		}
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof InventoryTransactionPacket) {
-			$this->debug($playerAPI, "place=" . $this->place . ", teleportTicks=" . $playerAPI->getTeleportTicks());
+			$placeTicks = microtime(true) - ($playerAPI->setExternalData("lastPlaceE") ?? microtime(true)) * 20;
+			$this->debug($playerAPI, "placeTicks=" . $placeTicks . ", teleportTicks=" . $playerAPI->getTeleportTicks());
 			if (
 				$packet->trData instanceof ReleaseItemTransactionData &&
-				$this->place &&
+				$placeTicks < 20 &&
 				$playerAPI->getTeleportTicks() > 100
 			) {
 				$this->failed($playerAPI);
