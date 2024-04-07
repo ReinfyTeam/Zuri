@@ -68,7 +68,10 @@ class Discord extends ConfigManager {
 		$message = new Message();
 		if ($webhookConfig->getNested("$sendType.enable", false) === true) {
 			$message->setContent($webhookConfig->getNested("$sendType.message", "`Empty message in the configuration!`"));
-			$message->setUsername($webhookConfig->getNested("discord.username", "Zuri"));
+
+			if (!empty($webhookConfig->getNested("discord.username", ""))) {
+				$message->setUsername($webhookConfig->getNested("discord.username"));
+			}
 
 			if ($webhookConfig->getNested("discord.icon.enable", false) === true) {
 				$message->setAvatarURL($webhookConfig->getNested("discord.icon.url"));
@@ -117,6 +120,8 @@ class Discord extends ConfigManager {
 					foreach ($webhookConfig->getNested("$sendType.embed.fields.value") as $field_name => $fieldInfo) {
 						if (!empty($fieldInfo["title"]) && !empty($fieldInfo["value"]) && !empty($fieldInfo["inline"])) { // Assuming that these info's are not empty!
 							$embed->addField(ReplaceText::replace($playerAPI, $fieldInfo["title"], ($moduleInfo !== null ? $moduleInfo["name"] : ""), ($moduleInfo !== null ? $moduleInfo["subType"] : "")), ReplaceText::replace($playerAPI, $fieldInfo["value"], ($moduleInfo !== null ? $moduleInfo["name"] : ""), ($moduleInfo !== null ? $moduleInfo["subType"] : "")), $fieldInfo["inline"]);
+						} else {
+							throw new DiscordWebhookException("Field \"$field_name\" has empty " . (empty($fieldInfo["title"]) ? "title, " : "") . (empty($fieldInfo["value"]) ? "value, " : "") . (empty($fieldInfo["inline"]) ? "inline" : "") . " required value.");
 						}
 					}
 				}
