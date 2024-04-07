@@ -70,7 +70,7 @@ class ScaffoldE extends Check {
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof InventoryTransactionPacket) {
-			$placeTicks = microtime(true) - ($playerAPI->getExternalData("lastPlaceE") ?? microtime(true)) * 20;
+			$placeTicks = abs(($playerAPI->getExternalData("lastPlaceE") ?? microtime(true)) - microtime(true) * 20);
 			$this->debug($playerAPI, "placeTicks=" . $placeTicks . ", teleportTicks=" . $playerAPI->getTeleportTicks());
 			if (
 				$packet->trData instanceof ReleaseItemTransactionData &&
