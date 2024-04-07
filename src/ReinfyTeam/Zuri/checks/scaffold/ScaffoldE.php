@@ -31,9 +31,9 @@ use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\ReleaseItemTransactionData;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function microtime;
 
 class ScaffoldE extends Check {
-
 	public function getName() : string {
 		return "Scaffold";
 	}
@@ -70,7 +70,7 @@ class ScaffoldE extends Check {
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof InventoryTransactionPacket) {
-			$placeTicks = microtime(true) - ($playerAPI->setExternalData("lastPlaceE") ?? microtime(true)) * 20;
+			$placeTicks = microtime(true) - ($playerAPI->getExternalData("lastPlaceE") ?? microtime(true)) * 20;
 			$this->debug($playerAPI, "placeTicks=" . $placeTicks . ", teleportTicks=" . $playerAPI->getTeleportTicks());
 			if (
 				$packet->trData instanceof ReleaseItemTransactionData &&
