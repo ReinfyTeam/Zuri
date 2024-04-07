@@ -26,9 +26,11 @@ namespace ReinfyTeam\Zuri;
 
 use pocketmine\player\Player;
 use pocketmine\Server;
+use pocketmine\utils\Config;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\Discord;
 use function in_array;
 
 /**
@@ -126,5 +128,9 @@ final class API {
 
 	public static function getPluginInstance() : ?APIProvider {
 		return APIProvider::getInstance();
+	}
+
+	public static function getDiscordWebhookConfig() : Config {
+		return Discord::getWebhookConfig();
 	}
 }
