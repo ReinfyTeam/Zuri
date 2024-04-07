@@ -121,7 +121,7 @@ class Discord extends ConfigManager {
 						if (!empty($fieldInfo["title"]) && !empty($fieldInfo["value"]) && !empty($fieldInfo["inline"])) { // Assuming that these info's are not empty!
 							$embed->addField(ReplaceText::replace($playerAPI, $fieldInfo["title"], ($moduleInfo !== null ? $moduleInfo["name"] : ""), ($moduleInfo !== null ? $moduleInfo["subType"] : "")), ReplaceText::replace($playerAPI, $fieldInfo["value"], ($moduleInfo !== null ? $moduleInfo["name"] : ""), ($moduleInfo !== null ? $moduleInfo["subType"] : "")), $fieldInfo["inline"]);
 						} else {
-							throw new DiscordWebhookException("Field \"$field_name\" has empty " . (empty($fieldInfo["title"]) ? "title, " : "") . (empty($fieldInfo["value"]) ? "value, " : "") . (empty($fieldInfo["inline"]) ? "inline" : "") . " required value.");
+							throw new DiscordWebhookException("Field \"$field_name\" has an empty required variables. Please fix them on webhook.yml!");
 						}
 					}
 				}
