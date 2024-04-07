@@ -24,12 +24,12 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils\discord;
 
+use DateTime;
 use pocketmine\utils\Config;
 use ReinfyTeam\Zuri\APIProvider;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\ReplaceText;
-use DateTime;
 use function hexdec;
 use function str_replace;
 

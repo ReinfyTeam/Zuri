@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.1.1" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
+    version: "0.1.2" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -87,6 +87,8 @@ zuri:
         bypass:
             enable: true
             permission: "zuri.bypass"
+    # Discord Webhook: The instructions of how to use this feature is on github. Please refer to the instruction first.
+    # You can find all instructions on github wiki. You can modify webhook send embeds in "webhook.yml".
     discord:
         enable: false # Should discord webhooks are enabled in the server?
     chat:
