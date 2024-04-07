@@ -68,7 +68,7 @@ class ImposibleHit extends Check {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			if (($entity = $event->getEntity()) instanceof Player && ($damager = $event->getDamager()) instanceof Player) {
 				if ($playerAPI->isInventoryOpen() || isset($this->eating[$playerAPI->getPlayer()->getName()])) {
-					$this->failed($playerAPI); // impossible to hit player while opened an inventory :(
+					$this->failed($playerAPI); // impossible to hit player while opened an inventory :( or while eating..
 				}
 				$this->debug($playerAPI, "isInventoryOpen=" . $playerAPI->isInventoryOpen() . ", isEating=" . isset($this->eating[$playerAPI->getPlayer()->getName()]));
 			}
