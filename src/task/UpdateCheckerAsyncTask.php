@@ -42,7 +42,7 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 	}
 
 	public function onRun() : void {
-		$result = Internet::getURL("https://api.github.com/repos/ReinfyTeam/Zuri-Rewrite/releases/latest", 10, [], $err);
+		$result = Internet::getURL("https://api.github.com/repos/ReinfyTeam/Zuri/releases/latest", 10, [], $err);
 		$this->setResult([$result ?? null, $err]);
 	}
 
@@ -62,10 +62,10 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 						$ver = $ver . "-PRERELEASE";
 					}
 					$download_url = $json["assets"][0]["browser_download_url"];
-					$file_size = $json["assets"][0]["size"] / 1000;
+					$file_size = $json["assets"][0]["size"] / 1000; // to kb
 					$dlcount = $json["assets"][0]["download_count"];
 					$branch = $json["target_commitish"];
-					$publishTime = date('F j, o', strtotime($json["published_at"]));
+					$publishTime = date('F j, o', strtotime($json["published_at"])); // Jan 1, 2000
 					$noUpdates = false;
 				} else {
 					$noUpdates = true;

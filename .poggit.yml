@@ -3,7 +3,7 @@ build-by-default: true
 branches:
 - main
 projects:
-  Zuri-Rewrite:
+  Zuri:
     path: ""
     lint: false
     icon: "icon.png"

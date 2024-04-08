@@ -4,6 +4,7 @@ description: A powerful anticheat made to destroy hackers from your server for P
 authors: [ReinfyTeam, xqwtxon, xwertxy, UnknownNull]
 version: 1.1.6
 website: "https://github.com/ReinfyTeam/Zuri/"
+src-namespace-prefix: ReinfyTeam\Zuri
 main: ReinfyTeam\Zuri\APIProvider
 api: 5.0.0
 permissions:
