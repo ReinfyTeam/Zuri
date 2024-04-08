@@ -55,7 +55,7 @@ use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 use pocketmine\player\Player;
-use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\ZuriAC;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use function array_filter;
@@ -480,7 +480,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 
-		foreach (APIProvider::Checks() as $class) {
+		foreach (ZuriAC::Checks() as $class) {
 			if ($class->enable()) {
 				$class->checkEvent($event, $playerAPI);
 			}
@@ -493,7 +493,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 
-		foreach (APIProvider::Checks() as $class) {
+		foreach (ZuriAC::Checks() as $class) {
 			if ($class->enable()) {
 				$class->check($packet, $playerAPI);
 			}
@@ -501,7 +501,7 @@ class PlayerListener implements Listener {
 	}
 
 	private function checkJustEvent(Event $event) {
-		foreach (APIProvider::Checks() as $class) {
+		foreach (ZuriAC::Checks() as $class) {
 			if ($class->enable()) {
 				$class->checkJustEvent($event);
 			}

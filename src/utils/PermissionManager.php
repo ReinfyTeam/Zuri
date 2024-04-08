@@ -30,7 +30,7 @@ use pocketmine\permission\PermissionManager as PMPermissionManager;
 use pocketmine\utils\NotCloneable;
 use pocketmine\utils\NotSerializable;
 use pocketmine\utils\SingletonTrait;
-use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\ZuriAC;
 
 class PermissionManager {
 	use NotSerializable;
@@ -72,7 +72,7 @@ class PermissionManager {
 
 	public function addPlayerPermissions(Player $player, array $permissions) : void {
 		if ($this->attachment === null) {
-			$this->attachment = $player->addAttachment(APIProvider::getInstance());
+			$this->attachment = $player->addAttachment(ZuriAC::getInstance());
 		}
 		$this->attachment->setPermissions($permissions);
 		$player->getNetworkSession()->syncAvailableCommands();

@@ -25,7 +25,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\events\api;
 
 use pocketmine\event\Event;
-use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\ZuriAC;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
 class APIEvent extends Event {
@@ -43,7 +43,7 @@ class APIEvent extends Event {
 		return $this->player;
 	}
 
-	public function getAPI() : ?APIProvider {
-		return APIProvider::getInstance();
+	public function getAPI() : ?ZuriAC {
+		return ZuriAC::getInstance();
 	}
 }

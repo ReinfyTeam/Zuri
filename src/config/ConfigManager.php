@@ -25,7 +25,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\config;
 
 use pocketmine\utils\TextFormat;
-use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\ZuriAC;
 use function fclose;
 use function file_exists;
 use function rename;
@@ -34,38 +34,38 @@ use function yaml_parse;
 
 class ConfigManager extends ConfigPaths {
 	public static function getData(string $path) {
-		return APIProvider::getInstance()->getConfig()->getNested($path);
+		return ZuriAC::getInstance()->getConfig()->getNested($path);
 	}
 
 	public static function setData(string $path, $data, bool $reverseColors = false) {
-		APIProvider::getInstance()->getConfig()->setNested($path, $data);
-		APIProvider::getInstance()->getConfig()->save();
+		ZuriAC::getInstance()->getConfig()->setNested($path, $data);
+		ZuriAC::getInstance()->getConfig()->save();
 	}
 
 	public static function checkConfig() : void {
-		if (!file_exists(APIProvider::getInstance()->getDataFolder() . "config.yml")) {
-			APIProvider::getInstance()->saveResource("config.yml");
+		if (!file_exists(ZuriAC::getInstance()->getDataFolder() . "config.yml")) {
+			ZuriAC::getInstance()->saveResource("config.yml");
 		}
 
-		if (!file_exists(APIProvider::getInstance()->getDataFolder() . "webhook.yml")) {
-			APIProvider::getInstance()->saveResource("webhook.yml");
+		if (!file_exists(ZuriAC::getInstance()->getDataFolder() . "webhook.yml")) {
+			ZuriAC::getInstance()->saveResource("webhook.yml");
 		}
 
-		$pluginConfigResource = APIProvider::getInstance()->getResource("config.yml");
+		$pluginConfigResource = ZuriAC::getInstance()->getResource("config.yml");
 		$pluginConfig = yaml_parse(stream_get_contents($pluginConfigResource));
 		fclose($pluginConfigResource);
-		$config = APIProvider::getInstance()->getConfig();
-		$log = APIProvider::getInstance()->getServer()->getLogger();
+		$config = ZuriAC::getInstance()->getConfig();
+		$log = ZuriAC::getInstance()->getServer()->getLogger();
 		if ($pluginConfig == false) {
 			$log->critical(self::getData(self::PREFIX) . TextFormat::RED . " Invalid syntax. Currupted config.yml!");
-			APIProvider::getInstance()->getServer()->getPluginManager()->disablePlugin(APIProvider::getInstance());
+			ZuriAC::getInstance()->getServer()->getPluginManager()->disablePlugin(ZuriAC::getInstance());
 			return;
 		}
 		if ($config->getNested("zuri.version") === $pluginConfig["zuri"]["version"]) {
 			return;
 		}
-		@rename(APIProvider::getInstance()->getDataFolder() . "config.yml", APIProvider::getInstance()->getDataFolder() . "old-config.yml");
-		APIProvider::getInstance()->saveResource("config.yml");
+		@rename(ZuriAC::getInstance()->getDataFolder() . "config.yml", ZuriAC::getInstance()->getDataFolder() . "old-config.yml");
+		ZuriAC::getInstance()->saveResource("config.yml");
 		$log->notice(self::getData(self::PREFIX) . TextFormat::RED . " Outdated configuration! Your config will be renamed as old-config.yml to backup your data.");
 	}
 }

@@ -28,7 +28,7 @@ use pocketmine\console\ConsoleCommandSender;
 use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\utils\TextFormat;
-use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\ZuriAC;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\events\api\CheckFailedEvent;
 use ReinfyTeam\Zuri\events\BanEvent;
@@ -97,7 +97,7 @@ abstract class Check extends ConfigManager {
 		$maxViolations = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".maxvl");
 		$playerAPI->addViolation($this->getName());
 		$reachedMaxRealViolations = $playerAPI->getRealViolation($this->getName()) > $maxViolations;
-		$server = APIProvider::getInstance()->getServer();
+		$server = ZuriAC::getInstance()->getServer();
 
 		if (self::getData(self::WORLD_BYPASS_ENABLE) === true) {
 			if (strtolower(self::getData(self::WORLD_BYPASS_MODE)) === "blacklist") {
@@ -120,16 +120,16 @@ abstract class Check extends ConfigManager {
 
 		if ($reachedMaxViolations) {
 			$playerAPI->addRealViolation($this->getName());
-			APIProvider::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
-			foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+			ZuriAC::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
+			foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 				if ($p->hasPermission("zuri.admin")) {
 					$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
 				}
 			}
 		} else {
 			if ($detectionsAllowedToSend) {
-				APIProvider::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, self::getData(self::DETECTION_MESSAGE), $this->getName(), $this->getSubType()));
-				foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+				ZuriAC::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, self::getData(self::DETECTION_MESSAGE), $this->getName(), $this->getSubType()));
+				foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 					if ($p->hasPermission("zuri.admin")) {
 						$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::DETECTION_MESSAGE), $this->getName(), $this->getSubType()));
 					}
@@ -152,8 +152,8 @@ abstract class Check extends ConfigManager {
 
 		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->ban() && self::getData(self::BAN_ENABLE) === true) {
 			(new BanEvent($playerAPI, $this->getName(), $this->getSubType()))->ban();
-			APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
-			foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+			ZuriAC::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
+			foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 				if ($p->hasPermission("zuri.admin")) {
 					$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
 				}
@@ -170,10 +170,10 @@ abstract class Check extends ConfigManager {
 		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->kick() && self::getData(self::KICK_ENABLE) === true) {
 			(new KickEvent($playerAPI, $this->getName(), $this->getSubType()))->kick();
 			if (self::getData(self::KICK_COMMANDS_ENABLED) === true) {
-				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
+				ZuriAC::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 				$playerAPI->resetViolation($this->getName());
 				$playerAPI->resetRealViolation($this->getName());
-				foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+				foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 					if ($p->hasPermission("zuri.admin")) {
 						$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 					}
@@ -182,8 +182,8 @@ abstract class Check extends ConfigManager {
 					$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
 				}
 			} else {
-				APIProvider::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
-				foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+				ZuriAC::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
+				foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 					if ($p->hasPermission("zuri.admin")) {
 						$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 					}
@@ -213,8 +213,8 @@ abstract class Check extends ConfigManager {
 			return;
 		}
 
-		APIProvider::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($username, self::getData(self::WARNING_MESSAGE), $this->getName(), $this->getSubType()));
-		foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+		ZuriAC::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($username, self::getData(self::WARNING_MESSAGE), $this->getName(), $this->getSubType()));
+		foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 			if ($p->hasPermission("zuri.admin")) {
 				$p->sendMessage(ReplaceText::replace($username, self::getData(self::WARNING_MESSAGE), $this->getName(), $this->getSubType()));
 			}
@@ -233,11 +233,11 @@ abstract class Check extends ConfigManager {
 				$player->sendMessage(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
 
 				if (self::getData(self::DEBUG_LOG_SERVER)) {
-					APIProvider::getInstance()->getServer()->getLogger()->notice(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::YELLOW . $playerAPI->getPlayer()->getName() . ": " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
+					ZuriAC::getInstance()->getServer()->getLogger()->notice(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::YELLOW . $playerAPI->getPlayer()->getName() . ": " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
 				}
 
 				if (self::getData(self::DEBUG_LOG_ADMIN)) {
-					foreach (APIProvider::getInstance()->getServer()->getOnlinePlayers() as $p) {
+					foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 						if ($p->getName() === $playerAPI->getPlayer()->getName()) {
 							continue;
 						} // Skip same player. Prevent spam in the chat history.

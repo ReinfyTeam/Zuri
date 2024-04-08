@@ -25,16 +25,16 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\task;
 
 use pocketmine\scheduler\Task;
-use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\ZuriAC;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use function microtime;
 
 class ServerTickTask extends Task {
 	private float $tick;
 	private static $instance = null;
-	protected APIProvider $plugin;
+	protected ZuriAC $plugin;
 
-	public function __construct(APIProvider $plugin) {
+	public function __construct(ZuriAC $plugin) {
 		$this->plugin = $plugin;
 	}
 

@@ -26,16 +26,16 @@ namespace ReinfyTeam\Zuri\task;
 
 use pocketmine\scheduler\Task;
 use pocketmine\Server;
-use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\ZuriAC;
 use ReinfyTeam\Zuri\config\ConfigManager;
 
 class NetworkTickTask extends Task {
 	private array $network = [];
 	private array $count = [];
 	private static $instance = null;
-	protected APIProvider $plugin;
+	protected ZuriAC $plugin;
 
-	public function __construct(APIProvider $plugin) {
+	public function __construct(ZuriAC $plugin) {
 		$this->plugin = $plugin;
 	}
 

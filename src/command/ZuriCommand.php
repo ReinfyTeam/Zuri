@@ -29,7 +29,7 @@ use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginOwned;
 use pocketmine\utils\TextFormat;
-use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\ZuriAC;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\forms\FormSender;
@@ -44,8 +44,8 @@ class ZuriCommand extends Command implements PluginOwned {
 		$this->setPermission("zuri.command");
 	}
 
-	public function getOwningPlugin() : APIProvider {
-		return APIProvider::getInstance();
+	public function getOwningPlugin() : ZuriAC {
+		return ZuriAC::getInstance();
 	}
 
 	public function execute(CommandSender $sender, string $label, array $args) : void {
@@ -58,8 +58,8 @@ class ZuriCommand extends Command implements PluginOwned {
 			switch(strtolower($args[0])) {
 				case "about":
 				case "info":
-					$sender->sendMessage(TextFormat::AQUA . "Build: " . TextFormat::GRAY . APIProvider::getInstance()->getDescription()->getVersion() . TextFormat::AQUA . " Author: " . TextFormat::GRAY . APIProvider::getInstance()->getDescription()->getAuthors()[0]);
-					$sender->sendMessage(TextFormat::AQUA . "Total Checks: " . TextFormat::GRAY . count(APIProvider::Checks()));
+					$sender->sendMessage(TextFormat::AQUA . "Build: " . TextFormat::GRAY . ZuriAC::getInstance()->getDescription()->getVersion() . TextFormat::AQUA . " Author: " . TextFormat::GRAY . ZuriAC::getInstance()->getDescription()->getAuthors()[0]);
+					$sender->sendMessage(TextFormat::AQUA . "Total Checks: " . TextFormat::GRAY . count(ZuriAC::Checks()));
 					break;
 				case "notify":
 				case "notification":
@@ -174,7 +174,7 @@ class ZuriCommand extends Command implements PluginOwned {
 				case "checks":
 					$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
 					$sender->sendMessage($prefix . TextFormat::GRAY . " Zuri Modules/Check Information List:");
-					foreach (APIProvider::Checks() as $check) {
+					foreach (ZuriAC::Checks() as $check) {
 						$sender->sendMessage($prefix . TextFormat::RESET . " " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolations() . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Violation: " . TextFormat::YELLOW . ConfigManager::getData(ConfigManager::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
 					}
 					$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
@@ -194,7 +194,7 @@ class ZuriCommand extends Command implements PluginOwned {
 		} else {
 			help:
 			$sender->sendMessage(TextFormat::RED . "----- Zuri Anticheat -----");
-			$sender->sendMessage(TextFormat::AQUA . "Build: " . TextFormat::GRAY . APIProvider::getInstance()->getDescription()->getVersion() . TextFormat::AQUA . " Author: " . TextFormat::GRAY . APIProvider::getInstance()->getDescription()->getAuthors()[0]);
+			$sender->sendMessage(TextFormat::AQUA . "Build: " . TextFormat::GRAY . ZuriAC::getInstance()->getDescription()->getVersion() . TextFormat::AQUA . " Author: " . TextFormat::GRAY . ZuriAC::getInstance()->getDescription()->getAuthors()[0]);
 			$sender->sendMessage("");
 			$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " about" . TextFormat::GRAY . " - Show infomation the plugin.");
 			$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify (toggle/admin)" . TextFormat::GRAY . " - Use to on/off notify.");

@@ -30,7 +30,7 @@ use pocketmine\math\Facing;
 use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
 use ReflectionProperty;
-use ReinfyTeam\Zuri\APIProvider;
+use ReinfyTeam\Zuri\ZuriAC;
 use function microtime;
 
 class PlayerAPI implements IPlayerAPI {
@@ -89,7 +89,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getPlayer() : ?Player {
-		return APIProvider::getInstance()->getServer()->getPlayerExact($this->player);
+		return ZuriAC::getInstance()->getServer()->getPlayerExact($this->player);
 	}
 
 	//Captcha

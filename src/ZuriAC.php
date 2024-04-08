@@ -38,8 +38,8 @@ use ReinfyTeam\Zuri\task\UpdateCheckerAsyncTask;
 use ReinfyTeam\Zuri\utils\InternetAddress;
 use ReinfyTeam\Zuri\utils\PermissionManager;
 
-class APIProvider extends PluginBase {
-	private static APIProvider $instance;
+class ZuriAC extends PluginBase {
+	private static ZuriAC $instance;
 	private ProxyUDPSocket $proxyUDPSocket;
 
 	private array $checks = [];
@@ -53,7 +53,7 @@ class APIProvider extends PluginBase {
 		}
 	}
 
-	public static function getInstance() : APIProvider {
+	public static function getInstance() : ZuriAC {
 		return self::$instance;
 	}
 
@@ -183,6 +183,6 @@ class APIProvider extends PluginBase {
 	}
 
 	public static function Checks() : array {
-		return APIProvider::getInstance()->checks;
+		return ZuriAC::getInstance()->checks;
 	}
 }
