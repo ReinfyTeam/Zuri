@@ -28,7 +28,7 @@ zuri:
         # Lagging ticks per seconds.. Which checks will going to stop..
         lagging: 5
         # Message displayed over the console...
-        message: "{prefix} §cThe server is lagging! The server has §b{tps} tps§c behind! Zuri can't check players at the moment!"
+        message: "{prefix} §cThe server is lagging! The server has currently §b{tps} tps§c! Zuri can't check players at the moment!"
     #Bypass a world according to list.
     world_bypass:
         enable: true
