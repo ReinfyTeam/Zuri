@@ -82,7 +82,7 @@ final class API {
 	}
 
 	public static function allModulesInfo() : ?array {
-		foreach (APIProvider::Checks() as $module) {
+		foreach (ZuriAC::Checks() as $module) {
 			$result[$module->getName()] = ["name" => $module->getName(), "subType" => $module->getSubType(), "kick" => $module->kick(), "ban" => $module->ban(), "flag" => $module->flag(), "captcha" => $module->captcha(), "maxViolations" => $module->maxViolations()];
 		}
 
@@ -90,7 +90,7 @@ final class API {
 	}
 
 	public static function getModuleInfo(string $name, string $subType) : ?string {
-		if (in_array($name, APIProvider::Checks(), true)) {
+		if (in_array($name, ZuriAC::Checks(), true)) {
 			return null;
 		}
 
@@ -98,7 +98,7 @@ final class API {
 	}
 
 	public static function getSubTypeByModule(string $name) : ?string {
-		if (in_array($name, APIProvider::Checks(), true)) {
+		if (in_array($name, ZuriAC::Checks(), true)) {
 			return null;
 		}
 
@@ -106,7 +106,7 @@ final class API {
 	}
 
 	public static function getMaxViolationByModule(string $name) : ?string {
-		if (in_array($name, APIProvider::Checks(), true)) {
+		if (in_array($name, ZuriAC::Checks(), true)) {
 			return null;
 		}
 
@@ -114,7 +114,7 @@ final class API {
 	}
 
 	public function getPunishmentByModule(string $name) : ?array {
-		if (in_array($name, APIProvider::Checks(), true)) {
+		if (in_array($name, ZuriAC::Checks(), true)) {
 			return null;
 		}
 
@@ -126,7 +126,7 @@ final class API {
 		return $result;
 	}
 
-	public static function getPluginInstance() : ?APIProvider {
+	public static function getPluginInstance() : ?ZuriAC {
 		return ZuriAC::getInstance();
 	}
 
