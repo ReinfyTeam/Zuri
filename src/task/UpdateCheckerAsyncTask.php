@@ -42,7 +42,7 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 	}
 
 	public function onRun() : void {
-		$result = Internet::getURL("https://api.github.com/repos/ReinfyTeam/Zuri/releases/latest", 10, [], $err);
+		$result = Internet::getURL("https://api.github.com/repos/ReinfyTeam/Zuri/releases/latest", 10, [], $err); // idk why i use github for this..
 		$this->setResult([$result ?? null, $err]);
 	}
 
