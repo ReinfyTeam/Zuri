@@ -139,6 +139,7 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\velocity\VelocityA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\velocity\VelocityB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\ImposibleHit();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\FastBow();
 
 		// Fly
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\fly\FlyA();

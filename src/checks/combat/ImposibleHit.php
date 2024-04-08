@@ -34,8 +34,6 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
 class ImposibleHit extends Check {
-	private $eating;
-
 	public function getName() : string {
 		return "InventoryMove";
 	}
@@ -63,6 +61,8 @@ class ImposibleHit extends Check {
 	public function maxViolations() : int {
 		return 2;
 	}
+
+	private array $eating = [];
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {

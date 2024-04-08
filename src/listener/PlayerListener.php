@@ -29,6 +29,7 @@ use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
+use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\entity\EntityTeleportEvent;
 use pocketmine\event\entity\ProjectileLaunchEvent;
 use pocketmine\event\Event;
@@ -56,6 +57,7 @@ use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 use pocketmine\player\Player;
+use pocketmine\Server;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\ZuriAC;
@@ -135,6 +137,7 @@ class PlayerListener implements Listener {
 		$playerAPI->setOnCarpet(BlockUtil::isOnCarpet($event->getTo(), 0));
 		$playerAPI->setOnPlate(BlockUtil::isOnPlate($event->getTo(), 0));
 		$playerAPI->setOnSnow(BlockUtil::isOnSnow($event->getTo(), 0));
+		$playerAPI->setLastMoveTick((double) Server::getInstance()->getTick());
 	}
 
 	public function onPlayerInteract(PlayerInteractEvent $event) : void {
@@ -455,6 +458,21 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
+			return;
+		}
+		$this->checkEvent($event, $playerAPI);
+	}
+
+	public function onEntityShootBowEvent(EntityShootBowEvent $event) {
+		$player = $event->getEntity();
+		if (!$player instanceof Player) {
+			return;
+		}
+		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		if ($playerAPI->getPlayer() === null) {
+			return;
+		}
+		if (!$player->isConnected() && !$player->spawned) {
 			return;
 		}
 		$this->checkEvent($event, $playerAPI);

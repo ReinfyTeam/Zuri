@@ -73,6 +73,7 @@ class PlayerAPI implements IPlayerAPI {
 	private float $slimeBlockTicks = 0.0;
 	private float $deathTicks = 0.0;
 	private float $placingTicks = 0.0;
+	private int $lastMoveTick = 0;
 	private int $cps = 0;
 	private int $blocksBrokeASec = 0;
 	private int $blocksPlacedASec = 0;
@@ -171,6 +172,14 @@ class PlayerAPI implements IPlayerAPI {
 
 	public function setOnPlant(bool $data) : void {
 		$this->onPlant = $data;
+	}
+
+	public function setLastMoveTick(int $data) : void {
+		$this->lastMoveTick = $data;
+	}
+
+	public function getLastMoveTick() : int {
+		return $this->lastMoveTick;
 	}
 
 	//On door
