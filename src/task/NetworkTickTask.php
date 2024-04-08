@@ -26,8 +26,8 @@ namespace ReinfyTeam\Zuri\task;
 
 use pocketmine\scheduler\Task;
 use pocketmine\Server;
-use ReinfyTeam\Zuri\ZuriAC;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\ZuriAC;
 
 class NetworkTickTask extends Task {
 	private array $network = [];

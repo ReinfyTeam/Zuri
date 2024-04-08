@@ -26,9 +26,9 @@ namespace ReinfyTeam\Zuri\network;
 
 use Exception;
 use pocketmine\utils\TextFormat;
-use ReinfyTeam\Zuri\ZuriAC;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\utils\InternetAddress;
+use ReinfyTeam\Zuri\ZuriAC;
 use function socket_bind;
 use function socket_close;
 use function socket_connect;

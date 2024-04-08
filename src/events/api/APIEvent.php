@@ -25,8 +25,8 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\events\api;
 
 use pocketmine\event\Event;
-use ReinfyTeam\Zuri\ZuriAC;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\ZuriAC;
 
 class APIEvent extends Event {
 	private PlayerAPI $player;

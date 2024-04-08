@@ -25,9 +25,9 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\task;
 
 use pocketmine\scheduler\Task;
-use ReinfyTeam\Zuri\ZuriAC;
 use ReinfyTeam\Zuri\events\CaptchaEvent;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\ZuriAC;
 
 class CaptchaTask extends Task {
 	private static $instance = null;
