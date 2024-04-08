@@ -127,7 +127,7 @@ final class API {
 	}
 
 	public static function getPluginInstance() : ?APIProvider {
-		return APIProvider::getInstance();
+		return ZuriAC::getInstance();
 	}
 
 	public static function getDiscordWebhookConfig() : Config {
