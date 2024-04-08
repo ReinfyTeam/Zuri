@@ -72,7 +72,7 @@ class ScaffoldB extends Check {
 			$pitch = abs($playerAPI->getLocation()->getPitch());
 			$distanceY = $event->getBlockAgainst()->getPosition()->getY() < $playerAPI->getLocation()->getY();
 			$oldPitch = $playerAPI->getExternalData("oldPitchB") ?? 0;
-			$this->debug($playerAPI, "oldPitch=$olidPitch distanceY=$distanceY, newPitch=$pitch, ping=" . $playerAPI->getPing());
+			$this->debug($playerAPI, "oldPitch=$oldPitch distanceY=$distanceY, newPitch=$pitch, ping=" . $playerAPI->getPing());
 			if (
 				$pitch < 35 && // is this has good calculation enough?
 				$distanceY && // it depends on block placed is under the player..
