@@ -81,9 +81,9 @@ class RegenB extends Check {
 						if ($healCount >= 5) {
 							$healRate = (double) $healCount / (double) $healTime;
 
-							$this->debug("healRate=$healRate");
+							$this->debug($playerAPI, "healRate=$healRate");
 
-							if ($heal_rate > 0.5) {
+							if ($healRate > 0.5) {
 								$this->failed($playerAPI);
 							}
 
