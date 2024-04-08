@@ -34,11 +34,11 @@ $api->setBlocksBrokeASec(< it must is number >);
 # Features
 - You can easily configure everything in the config. ✅
   - Configure easily the max violations and checks and more! ⚙️
-- It is more **lightweight** compared to paid anticheat. You dont have to struggle about the performance, with this anticheat, it can possible block them all easily! 💰
-- ✨ It is easy to use when it comes at the game, you can easily debug things, manage them all at the game, and **disable checks** according to your wishes. 
-- ❌ Limit players joining by their ip limit, you can change it how many players can join with same ip address.
-- 🌟 It also checks the player if they are using a **Proxy or VPN**
-- 💥 You can manage plugin at ingame using **UI** by using command!
+- It is more **lightweight** compared to paid anticheat. You don't have to struggle about the performance, with this anticheat, it can possible block them all easily! 💰
+- ✨ It is easy to use when it comes at the game, you can easily debug things, manage them all at the game, and **disable checks** according to your command. 
+- ❌ Limit players joining by their ip limit, you can change and configure on how many players can join with same ip address.
+- 🌟 It also checks the player if they are using a **Proxy or VPN** *(optional)*
+- 💥 You can manage plugin at in-game using **UI** by using command! `/zuri ui`
 # Checks
 | **Module Name**             | **Punishment Type**  | **Percentage of Accuracy** |
 |-----------------------------|----------------------|----------------------------|
@@ -46,49 +46,50 @@ $api->setBlocksBrokeASec(< it must is number >);
 | EditionFaker                 | Kick Immediately   | 100% detect                |
 | ProxyBot                 | Kick Immediately   | 100% detect                |
 | AntiImmobile                   | Kick                 | 100% detect                |
-| AutoClick                   | Kick                 | 100% detect                |
-| RapidHit                    | Kick                 | 100% detect                |
-| KillAura                    | Kick                 | 100% detect                |
-| HitBox                      | Kick                 | 100% detect                |
-| Reach                       | Kick                 | 90% detect                 |
-| Fly                         | Kick                 | 100% detect                |
-| NoClip                      | Kick                 | 100% detect                |
-| NoWeb                       | Kick                 | 100% detect                |
-| JetPack                     | Kick                 | 100% detect                |
-| AirJump                     | Kick                 | 100% detect                |
-| HighJump                    | Kick                 | 100% detect                |
-| Glide                       | Kick                 | 100% detect                |
-| AntiVoid                    | Kick                 | 95% detect                 |
+| AutoClick                   | Kick                 | 90% detect                |
+| RapidHit                    | Kick                 | 95% detect                |
+| KillAura                    | Kick                 | 90% detect                |
+| HitBox                      | Kick                 | 70% detect                |
+| Reach                       | Kick                 | 97% detect                 |
+| Fly                         | Kick                 | 98% detect                |
+| NoClip                      | Kick                 | 80% detect                |
+| NoWeb                       | Kick                 | 70% detect                |
+| JetPack                     | Kick                 | 97% detect                |
+| AirJump                     | Kick                 | 90% detect                |
+| HighJump                    | Kick                 | 99% detect                |
+| Glide                       | Kick                 | 80% detect                |
+| AntiVoid                    | Kick                 | 60% detect                 |
 | Speed                       | Kick                 | 99% detect                 |
 | Jesus                       | Kick                 | 99% detect                 |
-| AutoMidTP                   | Kick                 | 100% detect                |
-| ClickTP                     | Kick                 | 100% detect                |
-| Step                        | Kick                 | 100% detect                |
-| AimAssist                   | Kick                 | 90% detect                 |
-| AutoArmor                   | Kick                 | 90% detect                 |
-| FastLadder                  | Kick                 | 80% detect                 |
-| Spider                      | Kick                 | 90% detect                 |
-| TriggerBot                  | Kick                 | 100% detect                |
-| NoPacket                    | Kick                 | 100% detect                |
-| Velocity/NoKB               | Kick                 | 100% detect                |
-| ChestAura/ChestStealer      | Kick                 | 100% detect                |
-| InventoryCleaner            | Kick                 | 100% detect                |
-| InventoryMove               | Kick                 | 100% detect                |
-| Timer                       | Flag/Kick            | 100% detect                |
-| Phase                       | Flag                 | 100% detect                |
-| VClip                       | Flag                 | 100% detect                |
-| ImpossiblePitch                       | Flag                 | 100% detect                |
+| AutoMidTP                   | Kick                 | 70% detect                |
+| ClickTP                     | Kick                 | 74% detect                |
+| Step                        | Kick                 | 78% detect                |
+| AimAssist                   | Kick                 | 85% detect                 |
+| AutoArmor                   | Kick                 | 92% detect                 |
+| FastLadder                  | Kick                 | 89% detect                 |
+| Spider                      | Kick                 | 89% detect                 |
+| TriggerBot                  | Kick                 | 90% detect                |
+| NoPacket                    | Kick                 | 86% detect                |
+| Velocity/NoKB               | Kick                 | 99% detect                |
+| ChestAura/ChestStealer      | Kick                 | 70% detect                |
+| InventoryCleaner            | Kick                 | 70% detect                |
+| InventoryMove               | Kick                 | 90% detect                |
+| Timer                       | Flag/Kick            | 70% detect                |
+| Phase                       | Flag                 | 90% detect                |
+| VClip                       | Flag                 | 94% detect                |
+| ImpossiblePitch                       | Flag                 | 93% detect                |
 | MessageSpoof                       | Flag                 | 100% detect                |
+| InvalidPackets                       | Flag                 | 90% detect                |
 | InstaBreak                  | Flag/Kick            | 100% detect                |
 | Spam                        | CAPTCHA              | 100% detect                |
 | Tower                       | Ban Immediately      | 74% detect                |
 | Scaffold                    | Kick/Ban Immediately | 70% detect                |
-| Nuker                       | Ban Immediately      | 100% detect                |
+| Nuker                       | Ban Immediately      | 90% detect                |
 | FastBreak                       | Ban Immediately      | 100% detect                |
-| FillBlock                       | Ban Immediately      | 100% detect                |
-| WrongMining                       | Ban Immediately      | 100% detect                |
+| FillBlock                       | Ban Immediately      | 98% detect                |
+| WrongMining                       | Ban Immediately      | 90% detect                |
 
-**Total Checks:** 63
+**Total Checks:** 64
 
 <hr>
 
