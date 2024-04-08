@@ -28,6 +28,7 @@ use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\EntityTeleportEvent;
 use pocketmine\event\entity\ProjectileLaunchEvent;
 use pocketmine\event\Event;
@@ -414,6 +415,21 @@ class PlayerListener implements Listener {
 	public function onPlayerItemHeld(PlayerItemHeldEvent $event) {
 		$player = $event->getPlayer();
 		if ($player === null) {
+			return;
+		}
+		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		if ($playerAPI->getPlayer() === null) {
+			return;
+		}
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
+		$this->checkEvent($event, $playerAPI);
+	}
+
+	public function onPlayerRegen(EntityRegainHealthEvent $event) {
+		$player = $event->getEntity();
+		if (!$player instanceof Player) {
 			return;
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);

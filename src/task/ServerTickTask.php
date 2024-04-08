@@ -25,7 +25,6 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\task;
 
 use pocketmine\scheduler\Task;
-use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\ZuriAC;
 use function microtime;
 

@@ -107,6 +107,8 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\InvalidPackets();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerB();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\regen\RegenA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\regen\RegenB();
 
 		// Blockbreak
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\WrongMining();

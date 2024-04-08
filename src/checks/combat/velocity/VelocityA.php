@@ -69,9 +69,19 @@ class VelocityA extends Check {
 				if ($player === null) {
 					return;
 				}
-				if ($player->hasNoClientPredictions()) {
+				if ( // prevent false-positive
+					$playerAPI->isInWeb() ||
+					!$playerAPI->isOnGround() ||
+					$playerAPI->isOnAdhesion() ||
+					!$entity->isOnGround() ||
+					$player->getAllowFlight() ||
+					$player->hasNoClientPredictions() ||
+					$player->isFlying() ||
+					$playerAPI->isInBoxBlock()
+				) {
 					return;
 				}
+
 				$location = $player->getLocation();
 				$lastLocation = $playerAPI->getExternalData("lastLocationV");
 				if ($lastLocation !== null) {

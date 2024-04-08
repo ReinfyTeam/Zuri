@@ -79,7 +79,8 @@ class VelocityB extends Check {
 					!$entity->isOnGround() ||
 					$player->getAllowFlight() ||
 					$player->hasNoClientPredictions() ||
-					$player->isFlying()
+					$player->isFlying() ||
+					$playerAPI->isInBoxBlock()
 				) {
 					return;
 				}
