@@ -53,6 +53,6 @@ class ServerTickTask extends Task {
 
 	public function isLagging(float $l) : bool {
 		$lsat = $l - $this->tick;
-		return $lsat >= ConfigManager::getData(ConfigManager::SERVER_LAGGING_TPS);
+		return $lsat * 20 >= ConfigManager::getData(ConfigManager::SERVER_LAGGING_TPS);
 	}
 }
