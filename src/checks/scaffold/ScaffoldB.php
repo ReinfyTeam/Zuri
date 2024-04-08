@@ -70,14 +70,18 @@ class ScaffoldB extends Check {
 				return;
 			}
 			$pitch = abs($playerAPI->getLocation()->getPitch());
-			$this->debug($playerAPI, "pitch=$pitch, ping=" . $playerAPI->getPing());
+			$distanceY = $event->getBlockAgainst()->getPosition()->getY() < $playerAPI->getLocation()->getY();
+			$oldPitch = $playerAPI->getExternalData("oldPitchB") ?? 0;
+			$this->debug($playerAPI, "distanceY=$distanceY, pitch=$pitch, ping=" . $playerAPI->getPing());
 			if (
-				$pitch < 35 &&
-				$event->getBlockAgainst()->getPosition()->getY() < $playerAPI->getLocation()->getY() &&
+				$pitch < 35 && // is this has good calculation enough?
+				$distanceY && // it depends on block placed is under the player..
+				$oldPitch === $pitch && // for using bedrock long bridging lol anti-false kick
 				$playerAPI->getPing() < self::getData(self::PING_LAGGING)
 			) {
 				$this->failed($playerAPI);
 			}
+			$playerAPI->setExternalData("oldPitchB", $pitch); // patching new pitch here..
 		}
 	}
 }

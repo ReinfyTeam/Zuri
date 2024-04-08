@@ -22,12 +22,7 @@ zuri:
         #This is the buyer's discretion if you have custom errors with your server we will not be responsible.
         normal: 20
         lagging: 200
-    server_ticks:
-        # Normal ticks per seconds in the server..
-        normal: 20
-        # Lagging ticks per seconds.. Which checks will going to stop..
-        lagging: 5
-        # Message displayed over the console...
+    lagging:
         message: "{prefix} §cThe server is lagging! The server has currently §b{tps} tps§c! Zuri can't check players at the moment!"
     #Bypass a world according to list.
     world_bypass:
