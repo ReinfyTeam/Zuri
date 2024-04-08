@@ -233,4 +233,10 @@ zuri:
         invalidpackets:
             enable: true
             maxvl: 1
+        regen:
+            enable: true
+            maxvl: 1
+        fastbow:
+            enable: true
+            maxvl: 1
 ...
