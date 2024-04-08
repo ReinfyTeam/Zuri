@@ -44,8 +44,8 @@ abstract class ConfigPaths {
 
 	public const PROCESS_AUTO = "zuri.process.auto";
 
-	public const XRAY_ENABLE = "zuri.xray.enable";
-	public const XRAY_DISTANCE = "zuri.xray.distance";
+	public const XRAY_ENABLE = "zuri.xray.enable"; // TODO
+	public const XRAY_DISTANCE = "zuri.xray.distance"; // TODO
 
 	public const ALERTS_MESSAGE = "zuri.alerts.message";
 	public const ALERTS_ENABLE = "zuri.alerts.enable";
