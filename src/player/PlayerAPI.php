@@ -110,6 +110,10 @@ class PlayerAPI implements IPlayerAPI {
 	public function setFlagged(bool $data) : void {
 		$this->flagged = $data;
 	}
+	
+	public function isCurrentChunkIsLoaded() : bool {
+		return $this->getPlayer()->getWorld()->isChunkLoaded($this->getPlayer()->getLocation()->getX(), $this->getPlayer()->getLocation()->getZ());
+	}
 
 	//Break many blocks just one time break (This can check NUKER PLAYER)
 	public function actionBreakingSpecial() : bool {
