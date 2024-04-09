@@ -31,6 +31,7 @@ use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
 use ReflectionProperty;
 use ReinfyTeam\Zuri\ZuriAC;
+use function intval;
 use function microtime;
 
 class PlayerAPI implements IPlayerAPI {
@@ -110,9 +111,9 @@ class PlayerAPI implements IPlayerAPI {
 	public function setFlagged(bool $data) : void {
 		$this->flagged = $data;
 	}
-	
+
 	public function isCurrentChunkIsLoaded() : bool {
-		return $this->getPlayer()->getWorld()->isChunkLoaded($this->getPlayer()->getLocation()->getX(), $this->getPlayer()->getLocation()->getZ());
+		return $this->getPlayer()->getWorld()->isChunkLoaded(intval($this->getPlayer()->getLocation()->getX()), intval($this->getPlayer()->getLocation()->getZ()));
 	}
 
 	//Break many blocks just one time break (This can check NUKER PLAYER)
