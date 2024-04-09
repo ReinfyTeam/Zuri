@@ -80,8 +80,8 @@ class FastBow extends Check {
 
 			$tickDiff = (double) ($tick - $shootFirstTick); // server ticks since last hit
 			$delta = (double) $tickDiff / (double) $tps; // seconds since last hit
-			$playerAPI->setExternalData("hsTimeSum", $hsTimeSum - $hsTimeList[$currentHsIndex] + $delta);
 			$playerAPI->setExternalData("hsTimeList", array_merge($hsTimeList, [$currentHsIndex => $delta]));
+			$playerAPI->setExternalData("hsTimeSum", $hsTimeSum - $hsTimeList[$currentHsIndex] + $delta);
 			$playerAPI->setExternalData("currentHsIndex", $currentHsIndex + 1);
 			if ($currentHsIndex >= 5) {
 				$playerAPI->setExternalData("currentHsIndex", 0);
