@@ -26,10 +26,10 @@ namespace ReinfyTeam\Zuri\utils\discord;
 
 use DateTime;
 use pocketmine\utils\Config;
-use ReinfyTeam\Zuri\APIProvider;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\ReplaceText;
+use ReinfyTeam\Zuri\ZuriAC;
 use function hexdec;
 use function str_replace;
 
@@ -135,7 +135,7 @@ class Discord extends ConfigManager {
 	}
 
 	public static function getWebhookConfig() : Config {
-		return self::$config ??= new Config(APIProvider::getInstance()->getDataFolder() . "webhook.yml", Config::YAML);
+		return self::$config ??= new Config(ZuriAC::getInstance()->getDataFolder() . "webhook.yml", Config::YAML);
 	}
 
 	public static function textToHex(string $hex) : mixed {
