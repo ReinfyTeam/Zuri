@@ -113,7 +113,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function isCurrentChunkIsLoaded() : bool {
-		return $this->getPlayer()->getWorld()->isChunkLoaded(intval($this->getPlayer()->getLocation()->getX()), intval($this->getPlayer()->getLocation()->getZ()));
+		return $this->getPlayer()->getWorld()->isInLoadedTerrain($this->getPlayer()->getLocation());
 	}
 
 	//Break many blocks just one time break (This can check NUKER PLAYER)
