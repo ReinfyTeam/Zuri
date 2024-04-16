@@ -221,9 +221,6 @@ zuri:
         fastladder:
             enable: true
             maxvl: 1
-        clicktp:
-            enable: true
-            maxvl: 1
         proxybot:
             enable: true
             maxvl: 1
