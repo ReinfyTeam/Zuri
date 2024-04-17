@@ -79,12 +79,14 @@ class RegenB extends Check {
 						$playerAPI->setExternalData("healTimeB", $healTime + $delta);
 						$healCount = $playerAPI->getExternalData("healCountB");
 						if ($healCount >= 5) {
-							$healRate = (double) $healCount / (double) $healTime;
+							if($healTime !== 0) {
+								$healRate = (float) $healCount / (float) $healTime;
 
-							$this->debug($playerAPI, "healRate=$healRate");
+								$this->debug($playerAPI, "healRate=$healRate");
 
-							if ($healRate > 0.5) {
-								$this->failed($playerAPI);
+								if ($healRate > 0.5) {
+									$this->failed($playerAPI);
+								}
 							}
 
 							$playerAPI->setExternalData("healCountB", 0);
