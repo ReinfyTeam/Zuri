@@ -64,7 +64,7 @@ class RegenA extends Check {
 			if ($event->getRegainReason() != EntityDamageEvent::CAUSE_MAGIC && $event->getRegainReason() != EntityDamageEvent::CAUSE_CUSTOM) {
 				$healAmount = $event->getAmount();
 				$this->debug($playerAPI, "healAmount=$healAmount");
-				if ($healAmount > 3) {
+				if ($healAmount > 3.4) {
 					$this->failed($playerAPI);
 				}
 			}
