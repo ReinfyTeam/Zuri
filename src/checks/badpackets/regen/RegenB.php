@@ -84,7 +84,7 @@ class RegenB extends Check {
 
 								$this->debug($playerAPI, "healRate=$healRate");
 
-								if ($healRate > 0.5) {
+								if ($healRate > 0.7) {
 									$this->failed($playerAPI);
 								}
 							}
