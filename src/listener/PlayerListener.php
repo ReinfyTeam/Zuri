@@ -494,7 +494,7 @@ class PlayerListener implements Listener {
 	}
 
 	private function addCPS(PlayerAPI $player) : void {
-		if ($player === null) {
+		if ($player->getPlayer() === null) {
 			return;
 		}
 		$time = microtime(true);
