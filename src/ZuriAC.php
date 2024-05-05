@@ -150,7 +150,7 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\AutoArmor();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\ChestAura();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\InventoryMove();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\ChestStealler();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\ChestStealer();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\InventoryCleaner();
 
 		// Movements

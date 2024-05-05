@@ -40,22 +40,6 @@ class VelocityB extends Check {
 		return "B";
 	}
 
-	public function ban() : bool {
-		return false;
-	}
-
-	public function kick() : bool {
-		return true;
-	}
-
-	public function flag() : bool {
-		return false;
-	}
-
-	public function captcha() : bool {
-		return false;
-	}
-
 	public function maxViolations() : int {
 		return 5;
 	}

@@ -32,7 +32,6 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\ZuriAC;
-use function explode;
 use function intval;
 use function strtolower;
 
@@ -203,22 +202,22 @@ final class FormSender extends ConfigManager {
 				self::ManageModules($player);
 				return;
 			}
-			$info = explode(":", $data);
-			foreach (ZuriAC::Checks() as $check) {
-				if ($check->getName() === $info[0] && $check->getSubType() === $info[1]) {
-					self::setData(self::CHECK . "." . strtolower($check->getName()) . ".enable", !self::getData(self::CHECK . "." . strtolower($check->getName()) . ".enable"));
-					self::ToggleModules($player, true);
-				} else {
-					continue;
-				}
-			}
+
+			self::setData(self::CHECK . "." . strtolower($data) . ".enable", !self::getData(self::CHECK . "." . strtolower($data) . ".enable"));
+			self::ToggleModules($player, true);
 		});
 
 		$form->setTitle("Toggle Modules");
 		$form->setContent(($toggled ? TextFormat::GREEN . "Toggled successfully!" : "Choose what do you want to toggle.."));
+
+		$list = [];
 		foreach (ZuriAC::Checks() as $check) {
-			$form->addButton(TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ")" . "\n" . TextFormat::DARK_GRAY . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled"), 0, "", $check->getName() . ":" . $check->getSubType());
+			if (!isset($list[$check->getName()])) {
+				$list[$check->getName()] = $check->enable();
+				$form->addButton(TextFormat::AQUA . $check->getName() . "\n" . TextFormat::DARK_GRAY . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled"), 0, "", $check->getName());
+			}
 		}
+
 		$player->sendForm($form);
 	}
 
@@ -229,21 +228,25 @@ final class FormSender extends ConfigManager {
 				return;
 			}
 
-			$info = explode(":", $data);
 			foreach (ZuriAC::Checks() as $check) {
-				if ($check->getName() === $info[0] && $check->getSubType() === $info[1]) {
+				if ($check->getName() === $data) {
 					self::ModuleInformation($player, $check);
-				} else {
-					continue;
+					return;
 				}
 			}
 		});
 
 		$form->setTitle("Pick a Module");
 		$form->setContent("Choose what do you want to pick..");
+
+		$list = [];
 		foreach (ZuriAC::Checks() as $check) {
-			$form->addButton(TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ")" . "\nClick to view information.", 0, "", $check->getName() . ":" . $check->getSubType());
+			if (!isset($list[$check->getName()])) {
+				$list[$check->getName()] = $check->enable();
+				$form->addButton(TextFormat::AQUA . $check->getName() . TextFormat::GRAY . "\nClick to view information.", 0, "", $check->getName());
+			}
 		}
+
 		$player->sendForm($form);
 	}
 
@@ -257,8 +260,8 @@ final class FormSender extends ConfigManager {
 			self::ChangeMaxVL($player, $check);
 		});
 
-		$form->setTitle($check->getName() . " (" . $check->getSubType() . ") Information");
-		$form->setContent(TextFormat::RESET . "Name: " . TextFormat::YELLOW . $check->getName() . "\n" . TextFormat::RESET . "Sub Type: " . TextFormat::YELLOW . $check->getSubType() . "\n" . TextFormat::RESET . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . "\n" . TextFormat::RESET . "Ban: " . ($check->ban() ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Kick: " . ($check->kick() ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Captcha: " . ($check->captcha() ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Flag: " . ($check->flag() ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolations() . "\n" . TextFormat::RESET . "Max Violation: " . TextFormat::YELLOW . self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
+		$form->setTitle($check->getName() . " Information");
+		$form->setContent(TextFormat::RESET . "Name: " . TextFormat::YELLOW . $check->getName() . "\n" . TextFormat::RESET . "Sub Types: " . TextFormat::YELLOW . $check->getAllSubTypes() . "\n" . TextFormat::RESET . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . "\n" . TextFormat::RESET . "Ban: " . ($check->getPunishment() === "ban" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Kick: " . ($check->getPunishment() === "kick" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Captcha: " . ($check->getPunishment() === "captcha" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Flag: " . ($check->getPunishment() === "flag" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolations() . "\n" . TextFormat::RESET . "Max Violation: " . TextFormat::YELLOW . self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
 		if ($check->maxViolations() !== 0) {
 			$form->addButton("Change MaxVL");
 		}

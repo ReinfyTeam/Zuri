@@ -40,22 +40,6 @@ class SpamA extends Check {
 		return "A";
 	}
 
-	public function ban() : bool {
-		return false;
-	}
-
-	public function kick() : bool {
-		return false;
-	}
-
-	public function flag() : bool {
-		return false;
-	}
-
-	public function captcha() : bool {
-		return true;
-	}
-
 	public function maxViolations() : int {
 		return 5;
 	}

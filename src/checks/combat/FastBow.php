@@ -29,6 +29,7 @@ use pocketmine\event\Event;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function array_merge;
 
 class FastBow extends Check {
 	public function getName() : string {
@@ -37,22 +38,6 @@ class FastBow extends Check {
 
 	public function getSubType() : string {
 		return "A";
-	}
-
-	public function ban() : bool {
-		return false;
-	}
-
-	public function kick() : bool {
-		return true;
-	}
-
-	public function flag() : bool {
-		return false;
-	}
-
-	public function captcha() : bool {
-		return false;
 	}
 
 	public function maxViolations() : int {

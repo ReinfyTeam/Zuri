@@ -113,7 +113,7 @@ class Discord extends ConfigManager {
 					$embed->setTimestamp(new DateTime("NOW"));
 				}
 
-				$embed->setColor(self::textToHex($webhookConfig->getNested("$sendType.embed.color", 0x000000))); // hex decimal color
+				$embed->setColor(self::textToHex($webhookConfig->getNested("$sendType.embed.color", "#000000"))); // hex decimal color
 
 				// Fields
 

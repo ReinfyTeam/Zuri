@@ -41,22 +41,6 @@ class SpamC extends Check {
 		return "C";
 	}
 
-	public function ban() : bool {
-		return false;
-	}
-
-	public function kick() : bool {
-		return false;
-	}
-
-	public function flag() : bool {
-		return false;
-	}
-
-	public function captcha() : bool {
-		return false;
-	}
-
 	public function maxViolations() : int {
 		return 3;
 	}

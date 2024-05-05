@@ -33,8 +33,8 @@ use function stream_get_contents;
 use function yaml_parse;
 
 class ConfigManager extends ConfigPaths {
-	public static function getData(string $path) {
-		return ZuriAC::getInstance()->getConfig()->getNested($path);
+	public static function getData(string $path, mixed $defaultValue = null) {
+		return ZuriAC::getInstance()->getConfig()->getNested($path, $defaultValue);
 	}
 
 	public static function setData(string $path, $data, bool $reverseColors = false) {

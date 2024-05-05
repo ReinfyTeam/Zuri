@@ -37,6 +37,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\task\ServerTickTask;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 use ReinfyTeam\Zuri\ZuriAC;
+use function implode;
 use function in_array;
 use function microtime;
 use function strtolower;
@@ -45,18 +46,6 @@ abstract class Check extends ConfigManager {
 	public abstract function getName() : string;
 
 	public abstract function getSubType() : string;
-
-	public function enable() : bool {
-		return self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable");
-	}
-
-	public abstract function ban() : bool;
-
-	public abstract function kick() : bool;
-
-	public abstract function flag() : bool;
-
-	public abstract function captcha() : bool;
 
 	public abstract function maxViolations() : int;
 
@@ -73,15 +62,32 @@ abstract class Check extends ConfigManager {
 		return ReplaceText::replace($player, $text, $reason, $subType);
 	}
 
+	public function getPunishment() : string {
+		return strtolower(self::getData(self::CHECK . "." . strtolower($this->getName()) . ".punishment", "FLAG"));
+	}
+
+	public function enable() : bool {
+		return self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable", false);
+	}
+
+	public function getAllSubTypes() : string {
+		$list = [];
+		foreach (ZuriAC::Checks() as $check) {
+			if ($check->getName() === $this->getName() && !in_array($this->getSubType(), $list, true)) {
+				$list[] = $this->getSubType();
+			}
+		}
+
+		return implode(", ", $list);
+	}
+
 	/**
 	 * When multiple attempts of violations is within limit of < 0.5s.
 	 * @internal
 	 */
 	public function failed(PlayerAPI $playerAPI) : bool {
-		if (($canCheck = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable")) !== null) {
-			if ($canCheck === false) {
-				return false;
-			}
+		if (!$this->enable()) {
+			return false;
 		}
 
 		if (ServerTickTask::getInstance()->isLagging(microtime(true)) === true) {
@@ -145,12 +151,12 @@ abstract class Check extends ConfigManager {
 			return false;
 		}
 
-		if ($this->flag()) {
+		if ($this->getPunishment() === "flag") {
 			$playerAPI->setFlagged(true);
 			return true;
 		}
 
-		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->ban() && self::getData(self::BAN_ENABLE) === true) {
+		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "ban" && self::getData(self::BAN_ENABLE) === true) {
 			(new BanEvent($playerAPI, $this->getName(), $this->getSubType()))->ban();
 			ZuriAC::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
 			foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
@@ -167,7 +173,7 @@ abstract class Check extends ConfigManager {
 			return true;
 		}
 
-		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->kick() && self::getData(self::KICK_ENABLE) === true) {
+		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "kick" && self::getData(self::KICK_ENABLE) === true) {
 			(new KickEvent($playerAPI, $this->getName(), $this->getSubType()))->kick();
 			if (self::getData(self::KICK_COMMANDS_ENABLED) === true) {
 				ZuriAC::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
@@ -195,7 +201,7 @@ abstract class Check extends ConfigManager {
 			return true;
 		}
 
-		if ($reachedMaxRealViolations && $this->captcha() && self::getData(self::CAPTCHA_ENABLE) === true) {
+		if ($reachedMaxRealViolations && $this->getPunishment() === "captcha" && self::getData(self::CAPTCHA_ENABLE) === true) {
 			$playerAPI->setCaptcha(true);
 			return true;
 		}

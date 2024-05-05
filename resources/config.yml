@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.1.3" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
+    version: "0.1.5" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -93,150 +93,187 @@ zuri:
         command:
             text: "{prefix} §cSo sorry! Each command only has a fixed time of 2 seconds apart."
             delay: 2
-            commands:
-                - "kill"
         repeat:
             text: "{prefix} §cSo sorry! Don't go back to your chat last time!"
     check:
         antibot:
             enable: true
             maxvl: 1
+            punishment: KICK
         autoclick:
             enable: true
             maxvl: 1
+            punishment: KICK
         antiimmobile:
             enable: true
             maxvl: 1
+            punishment: BAN
         killaura:
             enable: true
             maxvl: 1
+            punishment: KICK
         aimassist:
             enable: true
             maxvl: 1
+            punishment: KICK
         wrongpitch:
             enable: true
             maxvl: 1
+            punishment: KICK
         crasher:
             enable: true
             maxvl: 1
-        scaffold:
-            enable: true
+            punishment: BAN
+        scaffold: # Todo: Improve in next versions.
+            enable: false
             maxvl: 1
+            punishment: BAN
         inventorycleaner:
             enable: true
             maxvl: 1
-        antivoid:
-            enable: true
+            punishment: KICK
+        antivoid: # Todo: Improve in next versions.
+            enable: false
             maxvl: 1
+            punishment: KICK
         speed:
             enable: true
             maxvl: 1
+            punishment: KICK
         cheststealer:
             enable: true
             maxvl: 1
+            punishment: KICK
         instabreak:
             enable: true
             maxvl: 1
+            punishment: KICK
         wrongmining:
             enable: true
             maxvl: 1
+            punishment: BAN
         blockreach:
             enable: true
             maxvl: 1
+            punishment: KICK
         fillblock:
             enable: true
             maxvl: 1
+            punishment: KICK
         spam:
             enable: true
             maxvl: 1
+            punishment: CAPTCHA
         reach:
             enable: true
             maxvl: 1
+            punishment: KICK
         fly:
             enable: true
             maxvl: 1
-        jesus:
-            enable: true
+            punishment: KICK
+        jesus: # Todo: Improve in next version, still in inspections, and testing...
+            enable: false
             maxvl: 1
+            punishment: KICK
         autoarmor:
             enable: true
             maxvl: 1
-        omnisprint:
+            punishment: KICK
+        omnisprint: # Todo: Improve in next version, fix false-positive in certain moves..
+            enable: false
+            maxvl: 1
+            punishment: KICK
+        chestaura: 
             enable: true
             maxvl: 1
-        chestaura:
-            enable: true
-            maxvl: 1
+            punishment: KICK
         inventorymove:
             enable: true
             maxvl: 1
+            punishment: KICK
         airmovement:
             enable: true
             maxvl: 1
+            punishment: KICK
         phase:
             enable: true
             maxvl: 1
-        step:
-            enable: true
+            punishment: KICK
+        step: # Todo: Improve in next versions, fix false-positive in slabs...
+            enable: false
             maxvl: 1
-        wrongnetwork:
-            enable: true
-            maxvl: 1
+            punishment: KICK
         custompayload:
             enable: true
-            maxvl: 1
+            maxvl: 0
+            punishment: KICK
         velocity:
             enable: true
             maxvl: 1
-        timer:
+            punishment: KICK
+        timer: # Todo: Improve in next versions. Fix false-positive in certain packets..
+            enable: false
+            maxvl: 1
+            punishment: KICK
+        fasteat: 
             enable: true
             maxvl: 1
-        fasteat:
-            enable: true
-            maxvl: 1
+            punishment: KICK
         selfhit:
             enable: true
             maxvl: 1
+            punishment: BAN
         fastthrow:
             enable: true
             maxvl: 1
+            punishment: KICK
         impossiblepitch:
             enable: true
             maxvl: 1
-        fastswim:
-            enable: true
+            punishment: KICK
+        fastswim: # Todo: Improve in next versions, fix false-positive in potions..
+            enable: false
             maxvl: 1
-        clicktp:
-            enable: true
+            punishment: KICK
+        clicktp: # Todo: Improve in next versions. False-positive in laggy player...
+            enable: false
             maxvl: 1
-        cheststealler:
-            enable: true
-            maxvl: 1
+            punishment: FLAG
         messagespoof:
             enable: true
             maxvl: 1
-        spider:
+            punishment: CAPTCHA
+        spider: # Todo: Improve in next versions. Fix false-positive in climbable blocks...
             enable: true
             maxvl: 1
-        fastladder:
+            punishment: KICK
+        fastladder: 
             enable: true
             maxvl: 1
+            punishment: KICK
         clicktp:
             enable: true
             maxvl: 1
+            punishment: KICK
         proxybot:
             enable: true
             maxvl: 1
+            punishment: KICK
         editionfaker:
             enable: true
             maxvl: 1
+            punishment: KICK
         invalidpackets:
             enable: true
             maxvl: 1
-        regen:
-            enable: true
+            punishment: KICK
+        regen: # Todo: Improve in next versions, some false-positive in certain heal events...
+            enable: false
             maxvl: 1
-        fastbow:
-            enable: true
+            punishment: KICK
+        fastbow: # Todo: Improve in next versions, support for custom bows...
+            enable: false
             maxvl: 1
+            punishment: KICK
 ...

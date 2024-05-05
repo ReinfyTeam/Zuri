@@ -31,7 +31,6 @@ use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
 use ReflectionProperty;
 use ReinfyTeam\Zuri\ZuriAC;
-use function intval;
 use function microtime;
 
 class PlayerAPI implements IPlayerAPI {
@@ -510,7 +509,7 @@ class PlayerAPI implements IPlayerAPI {
 	public function addViolation(string $supplier) : void {
 		if (isset($this->violations[$name = $this->player][$supplier])) {
 			$delayTime = microtime(true) - $this->violations[$name][$supplier]["time"];
-			if ($delayTime < 1.5) {
+			if ($delayTime < 150) {
 				$this->violations[$name][$supplier]["vl"] += 1;
 			} else {
 				unset($this->violations[$name][$supplier]);
@@ -541,7 +540,7 @@ class PlayerAPI implements IPlayerAPI {
 	public function addRealViolation(string $supplier) : void {
 		if (isset($this->realViolations[$name = $this->player][$supplier])) {
 			$delayTime = microtime(true) - $this->realViolations[$name][$supplier]["time"];
-			if ($delayTime < 600) {
+			if ($delayTime < 300) {
 				$this->realViolations[$name][$supplier]["vl"] += 1;
 			} else {
 				unset($this->realViolations[$name][$supplier]);
@@ -588,6 +587,9 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getInventory() {
+		if ($this->getPlayer() === null) {
+			return;
+		}
 		return $this->getPlayer()->getInventory();
 	}
 
