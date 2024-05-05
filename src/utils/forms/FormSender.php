@@ -281,7 +281,7 @@ final class FormSender extends ConfigManager {
 			}
 		});
 
-		$form->setTitle($check->getName() . " (" . $check->getSubType() . ") MaxVL");
+		$form->setTitle($check->getName() . " MaxVL");
 		$form->addLabel(($saved ? TextFormat::GREEN . "Modified successfully!" : "Modify the slider do you want to set.."));
 		$form->addSlider("MaxVL", 1, 100, -1, intval(self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl")));
 		$player->sendForm($form);
