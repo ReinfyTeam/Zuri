@@ -174,8 +174,12 @@ class ZuriCommand extends Command implements PluginOwned {
 				case "checks":
 					$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
 					$sender->sendMessage($prefix . TextFormat::GRAY . " Zuri Modules/Check Information List:");
+					$added = [];
 					foreach (ZuriAC::Checks() as $check) {
-						$sender->sendMessage($prefix . TextFormat::RESET . " " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getSubType() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolations() . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Violation: " . TextFormat::YELLOW . ConfigManager::getData(ConfigManager::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
+						if(!isset($added[$check->getName()])) {
+							$sender->sendMessage($prefix . TextFormat::RESET . " " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getAllSubTypes() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolations() . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Violation: " . TextFormat::YELLOW . ConfigManager::getData(ConfigManager::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
+							$added[$check->getName()] = true;
+						}
 					}
 					$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
 					break;
