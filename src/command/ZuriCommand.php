@@ -184,6 +184,9 @@ class ZuriCommand extends Command implements PluginOwned {
 					$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
 					break;
 				case "ui":
+				case "forms":
+				case "form":
+				case "gui":
 					if ($sender instanceof Player) {
 						FormSender::MainUI($sender);
 					} else {
@@ -192,6 +195,8 @@ class ZuriCommand extends Command implements PluginOwned {
 					break;
 				default:
 				case "help":
+				case "noarguments":
+				case "cmd":
 					goto help; // redirect ..
 					break;
 			}
