@@ -71,7 +71,7 @@ class VelocityB extends Check {
 
 				if ($lastLoc !== null) {
 					$velocity = MathUtil::distance($loc->asVector3(), $lastLoc->asVector3());
-					if ($velocity < 0.6 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
+					if ($velocity < $this->getConstant("limit-horizontal") && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
 						$this->failed($playerAPI);
 					}
 					$this->debug($playerAPI, "velocity=$velocity");

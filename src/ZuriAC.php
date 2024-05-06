@@ -95,7 +95,6 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\aimassist\AimAssistB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\aimassist\AimAssistC();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\aimassist\AimAssistD();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\aimassist\AimAssistE();
 
 		// Badpackets
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\Crasher();
@@ -123,7 +122,6 @@ class ZuriAC extends PluginBase {
 		// Chat
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\chat\SpamA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\chat\SpamB();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\chat\SpamC();
 
 		// Combat
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\reach\ReachA();

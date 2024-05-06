@@ -63,7 +63,7 @@ class ReachB extends Check {
 					return;
 				}
 				$damager = $damagerAPI->getPlayer();
-				if (MathUtil::XZDistanceSquared($entityAPI->getLocation()->asVector3(), $damager->getLocation()->asVector3()) > ($damager->isSurvival() ? 4.0 : 8.3)) {
+				if (MathUtil::XZDistanceSquared($entityAPI->getLocation()->asVector3(), $damager->getLocation()->asVector3()) > ($damager->isSurvival() ? $this->getConstant("survival-max-distance") : $this->getConstant("creative-max-distance"))) {
 					$this->failed($damagerAPI);
 				}
 				$this->debug($damagerAPI, "distance=" . MathUtil::XZDistanceSquared($player->getLocation()->asVector3(), $damager->getLocation()->asVector3()));

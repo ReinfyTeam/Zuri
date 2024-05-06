@@ -58,7 +58,7 @@ class ScaffoldB extends Check {
 			$oldPitch = $playerAPI->getExternalData("oldPitchB") ?? 0;
 			$this->debug($playerAPI, "oldPitch=$oldPitch distanceY=$distanceY, newPitch=$pitch, ping=" . $playerAPI->getPing());
 			if (
-				$pitch < 35 && // is this has good calculation enough?
+				$pitch < $this->getConstant("suspecious-pitch-limit") && // is this has good calculation enough?
 				$distanceY && // it depends on block placed is under the player..
 				$oldPitch === $pitch && // for using bedrock long bridging lol anti-false kick
 				$playerAPI->getPing() < self::getData(self::PING_LAGGING)

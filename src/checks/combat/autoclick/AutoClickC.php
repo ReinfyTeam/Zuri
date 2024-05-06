@@ -72,8 +72,8 @@ class AutoClickC extends Check {
 			if ($packet->action === AnimatePacket::ACTION_SWING_ARM) {
 				if ($ticks !== null && $lastClick !== null) {
 					$diff = microtime(true) - $lastClick;
-					if ($diff > 2) {
-						if ($ticks > 15) {
+					if ($diff > $this->getConstant("animation-diff-time")) {
+						if ($ticks > $this->getConstant("animation-diff-ticks")) {
 							$this->failed($playerAPI);
 						}
 						$playerAPI->unsetExternalData("clicksTicks3");

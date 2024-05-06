@@ -54,8 +54,8 @@ class AutoClickB extends Check {
 			if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
 				if ($ticks !== null && $lastClick !== null) {
 					$diff = microtime(true) - $lastClick;
-					if ($diff > 2) {
-						if ($ticks >= 25) {
+					if ($diff > $this->getConstant("diff-time")) {
+						if ($ticks >= $this->getConstant("diff-ticks")) {
 							$this->failed($playerAPI);
 						}
 						$this->debug($playerAPI, "diff=$diff, lastClick=$lastClick, ticks=$ticks");

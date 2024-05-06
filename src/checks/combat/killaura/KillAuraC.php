@@ -76,15 +76,15 @@ class KillAuraC extends Check {
 			$from = $from->add($vector->x, $vector->y, $vector->z);
 			foreach ($player->getWorld()->getEntities() as $target) {
 				$distanceA = new Vector3($from->x, $from->y, $from->z);
-				if ($target->getPosition()->distance($distanceA) <= 2 && $target->getId() !== $player->getId()) {
+				if ($target->getPosition()->distance($distanceA) <= $this->getConstant("max-distance") && $target->getId() !== $player->getId()) {
 					$entities[$target->getId()] = $target;
 				}
 			}
 		}
 		if ($packet instanceof InventoryTransactionPacket) {
 			if ($packet->trData instanceof UseItemOnEntityTransactionData) {
-				if ($locPlayer->getPitch() < 30) {
-					if (count($entities) < 1 && $player->getTargetBlock(10)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($locPlayer->getPitch() < $this->getConstant("suspecious-pitch")) {
+					if (count($entities) < $this->getConstant("suspecious-count") && $player->getTargetBlock(10)->getTypeId() !== BlockTypeIds::AIR) {
 						$this->failed($playerAPI);
 					}
 				}

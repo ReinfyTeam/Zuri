@@ -66,8 +66,8 @@ class InventoryCleaner extends Check {
 			if ($packet->trData->getTypeId() === 0) {
 				if ($ticks !== null && $transaction !== null) {
 					$diff = microtime(true) - $ticks;
-					if ($diff > 2) {
-						if ($transaction > 20) {
+					if ($diff > $this->getConstant("diff-ticks")) {
+						if ($transaction > $this->getConstant("max-transaction")) {
 							$this->failed($playerAPI);
 						}
 						$playerAPI->unsetExternalData("ticksTransaction");

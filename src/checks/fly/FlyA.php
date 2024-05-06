@@ -67,7 +67,7 @@ class FlyA extends Check {
 		$lastTime = $playerAPI->getExternalData("lastTimeF");
 		if ($lastYNoGround !== null && $lastTime !== null) {
 			$diff = microtime(true) - $lastTime;
-			if ($diff > 1) {
+			if ($diff > $this->getConstant("max-ground-diff")) {
 				if ((int) $player->getLocation()->getY() == $lastYNoGround) {
 					$this->failed($playerAPI);
 				}

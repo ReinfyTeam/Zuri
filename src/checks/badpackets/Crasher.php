@@ -45,7 +45,7 @@ class Crasher extends Check {
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
-			if (abs($packet->getPosition()->getY()) > 500) {
+			if (abs($packet->getPosition()->getY()) > $this->getConstant("max-y")) {
 				$this->failed($playerAPI);
 				$this->debug($playerAPI, "y=" . $packet->getPosition()->getY() . ", absY=" . abs($packet->getPosition()->getY()));
 			}

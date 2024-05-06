@@ -75,7 +75,7 @@ class FastBow extends Check {
 			$playerAPI->setExternalData("hsHitTime", $hsTimeSum / 5);
 			$hsHitTime = $playerAPI->getExternalData("hsHitTime");
 			$this->debug($playerAPI, "tick=$tick, tickDiff=$tickDiff, tps=$tps, shootFirstTick=$shootFirstTick, hsTimeSum=$hsTimeSum, currentHsIndex=$currentHsIndex, delta=$delta, hsHitTime=$hsHitTime");
-			if ($hsHitTime < 0.65) { // idk how i made this..
+			if ($hsHitTime < $this->getConstant("max-hit-time")) { // idk how i made this..
 				$this->failed($playerAPI);
 			}
 		}

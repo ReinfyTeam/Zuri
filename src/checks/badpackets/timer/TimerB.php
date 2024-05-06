@@ -53,7 +53,7 @@ class TimerB extends Check {
 
 				if ($ticks > 20) {
 					$playerAPI->setExternalData("timerB", $timer + 1);
-					if ($timer % 10 === 0) {
+					if ($timer % $this->getConstant("time-percentage") === 0) {
 						$this->failed($playerAPI);
 					}
 				} else {

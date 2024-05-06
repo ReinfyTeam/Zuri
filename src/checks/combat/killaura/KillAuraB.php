@@ -60,7 +60,7 @@ class KillAuraB extends Check {
 			}
 			$deltaPitch = cos($packet->getPitch());
 			$deltaYaw = cos($packet->getYaw());
-			if ($deltaPitch === 0 and $deltaYaw === 0) {
+			if ($deltaPitch === $this->getConstant("delta-pitch") and $deltaYaw === $this->getConstant("delta-yaw")) {
 				$this->failed($playerAPI);
 			}
 			$this->debug($playerAPI, "deltaPitch=$deltaPitch, deltaYaw=$deltaYaw");

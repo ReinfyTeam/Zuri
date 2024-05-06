@@ -50,8 +50,8 @@ class ChestStealer extends Check {
 			if ($packet->trData->getTypeId() === 0) {
 				if ($ticks !== null && $lastTime !== null) {
 					$diff = microtime(true) - $lastTime;
-					if ($diff > 0.1) {
-						if ($ticks > 1) {
+					if ($diff > $this->getConstant("diff-time")) {
+						if ($ticks > $this->getConstant("diff-ticks")) {
 							$this->failed($playerAPI);
 						}
 						$playerAPI->unsetExternalData("ticksN");

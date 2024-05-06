@@ -73,7 +73,7 @@ class SpeedA extends Check {
 				$recived = true;
 			}
 			if ($packet instanceof PlayerAuthInputPacket) {
-				$limit = $player->getMovementSpeed() * 35;
+				$limit = $player->getMovementSpeed() * $this->getConstant("max-packet-speed");
 				$distX = $nLocation["to"]->getX() - $nLocation["from"]->getX();
 				$distZ = $nLocation["to"]->getZ() - $nLocation["from"]->getZ();
 				$dist = ($distX * $distX) + ($distZ * $distZ);

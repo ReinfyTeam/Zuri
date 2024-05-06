@@ -66,11 +66,11 @@ class Step extends Check {
 			}
 			$lastY = $playerAPI->getExternalData("lastY");
 			$locationPlayer = $player->getLocation();
-			$limit = 0.25;
+			$limit = $this->getConstant("y-limit");
 			if ($lastY !== null) {
 				$diff = $locationPlayer->getY() - $lastY;
-				$limit += $playerAPI->isOnStairs() ? 0.5 : 0;
-				$limit += $playerAPI->getJumpTicks() < 40 ? 0.4 : 0;
+				$limit += $playerAPI->isOnStairs() ? $this->getConstant("stairs-limit") : 0;
+				$limit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant("jump-limit") : 0;
 				if ($diff > $limit) {
 					$this->failed($playerAPI);
 				}

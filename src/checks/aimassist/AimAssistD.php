@@ -62,7 +62,7 @@ class AimAssistD extends Check {
 			if (!empty($nLocation)) {
 				$abs = abs($nLocation["to"]->getYaw() - $nLocation["from"]->getYaw());
 				$abs2 = abs($nLocation["to"]->getPitch() - $nLocation["from"]->getPitch());
-				if ($abs > 0.0 && $abs < 0.8 && $abs2 > 0.279 && $abs2 < 0.28090858) {
+				if ($abs > $this->getConstant("min-abs-yaw") && $abs < $this->getConstant("max-abs-yaw") && $abs2 > $this->getConstant("min-abs-pitch") && $abs2 < $this->getConstant("max-abs-pitch")) {
 					$this->failed($playerAPI);
 				}
 				$this->debug($playerAPI, "abs=$abs, abs2=$abs2");

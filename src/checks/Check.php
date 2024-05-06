@@ -70,6 +70,10 @@ abstract class Check extends ConfigManager {
 		return self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable", false);
 	}
 
+	public function getConstant(string $name) : mixed {
+		return self::getData(self::CHECK . "." . strtolower($this->getName()) . ".constants." . $name, null);
+	}
+
 	public function getAllSubTypes() : string {
 		$list = [];
 		foreach (ZuriAC::Checks() as $check) {

@@ -56,7 +56,7 @@ class ScaffoldA extends Check {
 				$y = abs($posBlock->getY() - $loc->getY());
 				$z = abs($posBlock->getZ() - $loc->getZ());
 				$this->debug($playerAPI, "x=$x, y=$y, z=$z");
-				if ($x > 1.0 || $y > 1.0 || $z > 1.0) {
+				if ($x > $this->getConstant("box-range-x") || $y > $this->getConstant("box-range-y") || $z > $this->getConstant("box-range-z")) {
 					$this->failed($playerAPI);
 				}
 			}

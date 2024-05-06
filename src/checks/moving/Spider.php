@@ -67,7 +67,7 @@ class Spider extends Check {
 			if ($blockSide1 || $blockSide2 || $blockSide3 || $blockSide4 && !$onLadder && !$player->getAllowFlight() && !$player->isFlying() && $player->isSurvival()) { // diagonals are solid and the player is not on ladder..
 				$diff = abs($newY - $oldY);
 				if ($newY > $oldY) { // if bigger newY > oldY
-					if ($diff > 0.5) { // impossible :O y update 0.6~?
+					if ($diff > $this->getConstant("limit-y-diff")) { // impossible :O y update 0.6~?
 						$this->failed($playerAPI);
 					}
 				}

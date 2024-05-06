@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.1.5" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
+    version: "0.1.6" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -104,6 +104,13 @@ zuri:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                  max-ticks: 5
+                  max-deviation: 5
+                  diff-ticks: 25
+                  diff-time: 2
+                  animation-diff-time: 2
+                  animation-ticks: 15
         antiimmobile:
             enable: true
             maxvl: 1
@@ -112,9 +119,24 @@ zuri:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                  delta-pitch: 0
+                  delta-yaw: 0
+                  suspecious-pitch: 30
+                  max-distance: 2
+                  min-count: 1
+                  max-range: 2.6
         aimassist:
             enable: true
             maxvl: 1
+            constants:
+                  min-yaw: 0
+                  min-pitch: 0.01
+                  max-pitch: 0.2
+                  min-abs-yaw: 0.0
+                  max-abs-yaw: 0.8
+                  min-abs-pitch: 0.279
+                  max-abs-pitch: 0.28090858
             punishment: KICK
         wrongpitch:
             enable: true
@@ -124,14 +146,26 @@ zuri:
             enable: true
             maxvl: 1
             punishment: BAN
+            constants:
+                  max-y: 500
         scaffold: # Todo: Improve in next versions.
             enable: false
             maxvl: 1
             punishment: BAN
+            constants:
+                  box-range-x: 1.0
+                  box-range-y: 1.0
+                  box-range-z: 1.0
+                  suspecious-pitch-limit: 35
+                  max-place-distance: 1.25
+                  limit-place-ticks: 20
         inventorycleaner:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                  diff-ticks: 2
+                  max-transaction: 20
         antivoid: # Todo: Improve in next versions.
             enable: false
             maxvl: 1
@@ -140,10 +174,16 @@ zuri:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                  limit-move-speed: 4.8
+                  limit-packet-speed: 35
         cheststealer:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                 diff-time: 0.1
+                 diff-ticks: 1
         instabreak:
             enable: true
             maxvl: 1
@@ -156,6 +196,9 @@ zuri:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                  max-creative-reach: 13
+                  max-survival-reach: 7
         fillblock:
             enable: true
             maxvl: 1
@@ -164,14 +207,23 @@ zuri:
             enable: true
             maxvl: 1
             punishment: CAPTCHA
+            constants:
+                   max-violation-rate: 5
         reach:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                 max-distance: 4.3
+                 survival-max-distance: 4.0
+                 creative-max-distance: 8.3
         fly:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                  max-ground-diff: 1
+                  max-air-ticks: 40
         jesus: # Todo: Improve in next version, still in inspections, and testing...
             enable: false
             maxvl: 1
@@ -184,18 +236,26 @@ zuri:
             enable: false
             maxvl: 1
             punishment: KICK
+            constants:
+                 max-speed: 0.3
         chestaura: 
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                  transaction-divisible: 3
         inventorymove:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                   move-sensitivity: 0.01
         airmovement:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                 air-limit: 2.2
         phase:
             enable: true
             maxvl: 1
@@ -204,6 +264,10 @@ zuri:
             enable: false
             maxvl: 1
             punishment: KICK
+            constants:
+                   y-limit: 0.25
+                   stairs-limit: 0.5
+                   jump-limit: 0.4
         custompayload:
             enable: true
             maxvl: 0
@@ -212,14 +276,24 @@ zuri:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                   limit-vertical: 0.6
+                   limit-horizontal: 0.6
         timer: # Todo: Improve in next versions. Fix false-positive in certain packets..
             enable: false
             maxvl: 1
             punishment: KICK
+            constants:
+                 min-time-diff: 0.001
+                 max-time-diff: 0.5
+                 max-point: 6
+                 time-percentage: 10
         fasteat: 
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                  timediff-limit: 1.5
         selfhit:
             enable: true
             maxvl: 1
@@ -228,10 +302,14 @@ zuri:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                  timediff-limit: 0.2
         impossiblepitch:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                  max-pitch: 92
         fastswim: # Todo: Improve in next versions, fix false-positive in potions..
             enable: false
             maxvl: 1
@@ -240,14 +318,20 @@ zuri:
             enable: false
             maxvl: 1
             punishment: FLAG
+            constants:
+                  max-distance: 40.0
         messagespoof:
             enable: true
             maxvl: 1
             punishment: CAPTCHA
+            constants: 
+                   max-length: 500
         spider: # Todo: Improve in next versions. Fix false-positive in climbable blocks...
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                   limit-y-diff: 0.5
         fastladder: 
             enable: true
             maxvl: 1
@@ -264,12 +348,20 @@ zuri:
             enable: true
             maxvl: 1
             punishment: KICK
+            constants:
+                  max-packet-speed: 2
         regen: # Todo: Improve in next versions, some false-positive in certain heal events...
             enable: false
             maxvl: 1
             punishment: KICK
+            constants:
+                 max-heal-amount: 3
+                 max-healcount: 5
+                 min-healrate: 0.5
         fastbow: # Todo: Improve in next versions, support for custom bows...
             enable: false
             maxvl: 1
             punishment: KICK
+            constants:
+                  max-hit-time: 0.65
 ...

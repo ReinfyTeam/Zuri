@@ -49,7 +49,7 @@ class ClickTP extends Check {
 			$newYaw = $event->getTo()->getYaw();
 			$oldPitch = $event->getFrom()->getPitch();
 			$newPitch = $event->getTo()->getPitch();
-			if ($distance > 40.0 && $oldYaw === $newYaw && $oldPitch === $newPitch) {
+			if ($distance > $this->getConstant("max-distance") && $oldYaw === $newYaw && $oldPitch === $newPitch) {
 				$event->cancel();
 				$this->failed($playerAPI);
 				$this->debug($playerAPI, "distance=$distance, oldYaw=$oldYaw, newYaw=$newYaw, oldPitch=$oldPitch, newPitch=$newPitch");

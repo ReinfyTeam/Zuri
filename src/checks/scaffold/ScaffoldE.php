@@ -59,7 +59,7 @@ class ScaffoldE extends Check {
 			$this->debug($playerAPI, "placeTicks=" . $placeTicks . ", teleportTicks=" . $playerAPI->getTeleportTicks());
 			if (
 				$packet->trData instanceof ReleaseItemTransactionData &&
-				$placeTicks < 20 &&
+				$placeTicks < $this->getConstant("limit-place-ticks") &&
 				$playerAPI->getTeleportTicks() > 100
 			) {
 				$this->failed($playerAPI);

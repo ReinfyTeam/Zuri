@@ -77,7 +77,7 @@ class OmniSprint extends Check {
 			if ($player === null) {
 				return;
 			}
-			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.3 && !$player->getEffects()->has(VanillaEffects::SPEED())) {
+			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > $this->getConstant("max-speed") && !$player->getEffects()->has(VanillaEffects::SPEED())) {
 				$this->check[spl_object_id($playerAPI)] = true; // moving too fast?
 			} else {
 				if (isset($this->check[spl_object_id($playerAPI)])) {

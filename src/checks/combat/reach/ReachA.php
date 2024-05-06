@@ -27,6 +27,7 @@ namespace ReinfyTeam\Zuri\checks\combat\reach;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Event;
+use pocketmine\player\GameMode;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
@@ -63,11 +64,12 @@ class ReachA extends Check {
 				}
 				$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? ($locEntity->getY() - $locDamager->getY()) : 0;
 				$distance = MathUtil::distance($locEntity, $locDamager) - $isPlayerTop;
-				if ($distance > 4.3) {
+				$isSurvival = $player->getGameMode() === GameMode::SURVIVAL();
+				if ($isSurvival && $distance > $this->getConstant("max-survival-distance")) {
 					$this->failed($playerAPI);
 					return;
 				}
-				$this->debug($playerAPI, "isPlayerTop=$isPlayerTop, distance=$distance");
+				$this->debug($playerAPI, "isPlayerTop=$isPlayerTop, distance=$distance, isSurvival=$isSurvival");
 			}
 		}
 	}

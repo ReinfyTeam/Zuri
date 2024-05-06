@@ -59,15 +59,15 @@ class TimerA extends Check {
 				return;
 			}
 			$timeDiff = microtime(true) - $lastTime;
-			if ($timeDiff > 0.5) { // ticks < 0.7 sec too slow
-				if ($point > 6) {
+			if ($timeDiff > $this->getConstant("max-time-diff")) { // ticks < 0.7 sec too slow
+				if ($point > $this->getConstant("max-point")) {
 					$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
 					$this->failed($playerAPI);
 				}
 				$playerAPI->unsetExternalData("pointQ");
 				$playerAPI->unsetExternalData("lastTimeQ");
-			} elseif ($timeDiff <= 0.001) { // ticks > 1 too fast
-				if ($point > 6) {
+			} elseif ($timeDiff <= $this->getConstant("min-time-diff")) { // ticks > 1 too fast
+				if ($point > $this->getConstant("max-point")) {
 					$this->debug($playerAPI, "timeDiff=$timeDiff, point=$point, lastTime=$lastTime");
 					$this->failed($playerAPI);
 					$playerAPI->unsetExternalData("pointQ");

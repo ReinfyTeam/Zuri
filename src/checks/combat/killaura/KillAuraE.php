@@ -70,7 +70,7 @@ class KillAuraE extends Check {
 					$from = $from->add($vector->x, $vector->y, $vector->z);
 					foreach ($damager->getWorld()->getEntities() as $target) {
 						$distanceA = new Vector3($from->x, $from->y, $from->z);
-						if ($target->getPosition()->distance($distanceA) <= 2.6) {
+						if ($target->getPosition()->distance($distanceA) <= $this->getConstant("max-range")) {
 							$entities[$target->getId()] = $target;
 						}
 					}

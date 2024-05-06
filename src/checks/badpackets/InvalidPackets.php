@@ -46,7 +46,7 @@ class InvalidPackets extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof MovePlayerPacket) { // i dont know how i did this.
 			$speed = $playerAPI->getExternalData("tickPackets") - $playerAPI->getExternalData("lastPacketTick");
-			if ($speed < 2) {
+			if ($speed < $this->getConstant("max-packet-speed")) {
 				$this->debug($playerAPI, "packetSpeed=$speed");
 				$this->failed($playerAPI);
 			}

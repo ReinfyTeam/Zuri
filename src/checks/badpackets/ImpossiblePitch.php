@@ -44,7 +44,7 @@ class ImpossiblePitch extends Check {
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($packet instanceof PlayerAuthInputPacket && ($pitch = abs($packet->getPitch())) > 92) {
+		if ($packet instanceof PlayerAuthInputPacket && ($pitch = abs($packet->getPitch())) > $this->getConstant("max-pitch")) {
 			$this->debug($playerAPI, "pitch=$pitch");
 			$this->failed($playerAPI);
 		}

@@ -72,7 +72,7 @@ class VelocityA extends Check {
 					if (!$event->isCancelled() && $entity->isOnGround() && !$playerAPI->isInWeb()) {
 						$velocity = MathUtil::XZDistanceSquared($location->asVector3(), $lastLocation->asVector3());
 						$this->debug($playerAPI, "isOnGround=" . $entity->isOnGround() . ", isInWeb=" . $playerAPI->isInWeb() . ", isUnderBlock=" . $playerAPI->isUnderBlock() . ", isInBoxBlock=" . $playerAPI->isInBoxBlock());
-						if ($velocity < 0.6 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
+						if ($velocity < $this->getConstant("limit-vertical") && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
 							$this->failed($playerAPI);
 						}
 						$this->debug($playerAPI, "velocity=$velocity");

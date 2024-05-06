@@ -59,7 +59,7 @@ class ScaffoldC extends Check {
 			$posPlayer = $playerAPI->getLocation();
 			$distance = MathUtil::distance($posPlayer->asVector3(), $posBlock->asVector3());
 			$this->debug($playerAPI, "distance=$distance, pitch=" . abs($posPlayer->getPitch()));
-			if ($distance < 1.25 && abs($posPlayer->getPitch()) > 90) {
+			if ($distance < $this->getConstant("max-place-distance") && abs($posPlayer->getPitch()) > 90) {
 				$this->failed($playerAPI);
 			}
 		}

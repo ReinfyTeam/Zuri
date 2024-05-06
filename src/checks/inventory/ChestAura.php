@@ -59,7 +59,7 @@ class ChestAura extends Check {
 		if ($event instanceof InventoryCloseEvent) {
 			if ($timeOpenChest !== null && $countTransaction !== null) {
 				$timeDiff = microtime(true) - $timeOpenChest;
-				if ($timeDiff < $countTransaction / 3) {
+				if ($timeDiff < $countTransaction / $this->getConstant("transaction-divisible")) {
 					$this->failed($playerAPI);
 				}
 				$playerAPI->unsetExternalData("timeOpenChest");

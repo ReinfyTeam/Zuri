@@ -52,7 +52,7 @@ class AutoClickA extends Check {
 			if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
 				if ($ticks !== null && $avgSpeed !== null && $avgDeviation !== null) {
 					$playerAPI->setExternalData("ticksClick", 0);
-					if ($playerAPI->isDigging() || $ticks > 5) {
+					if ($playerAPI->isDigging() || $ticks > $this->getConstant("max-ticks")) {
 						$playerAPI->unsetExternalData("ticksClick");
 						$playerAPI->unsetExternalData("avgSpeed");
 						$playerAPI->unsetExternalData("avgDeviation");
@@ -64,7 +64,7 @@ class AutoClickA extends Check {
 					$playerAPI->setExternalData("avgSpeed", (($avgSpeed * 14) + $speed) / 15);
 					$deviation = abs($speed - $playerAPI->getExternalData("avgSpeed"));
 					$playerAPI->setExternalData("avgDeviation", (($avgDeviation * 9) + $deviation) / 10);
-					if ($playerAPI->getExternalData("avgDeviation") < 5) {
+					if ($playerAPI->getExternalData("avgDeviation") < $this->getConstant("max-deviation")) {
 						$this->failed($playerAPI);
 					}
 					$this->debug($playerAPI, "avgDeviation=$avgDeviation, speed=$speed, deviation=$deviation, ticksClick=$ticks, avgSpeed=$avgSpeed");

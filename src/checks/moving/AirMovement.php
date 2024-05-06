@@ -74,7 +74,7 @@ class AirMovement extends Check {
 				$playerAPI->getPing() < self::getData(self::PING_LAGGING)
 			) {
 				$distance = $nLocation["to"]->getY() - $playerAPI->getLastGroundY();
-				$limit = 2.2;
+				$limit = $this->getConstant("air-limit");
 				$limit += isset($effects["potion.jump"]) ? (pow($effects["potion.jump"] + 1.4, 2) / 16) : 0;
 				if ($distance > $limit) {
 					$this->failed($playerAPI);

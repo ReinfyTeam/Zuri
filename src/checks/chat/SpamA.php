@@ -58,7 +58,7 @@ class SpamA extends Check {
 				if ($chatTick !== null || $violationChat !== null) {
 					$diff = microtime(true) - $chatTick;
 					if ($diff <= self::getData(self::CHAT_SPAM_DELAY)) {
-						if ($violationChat <= 5) {
+						if ($violationChat <= $this->getConstant("max-violation-rate")) {
 							$playerAPI->getPlayer()->sendMessage($this->replaceText($playerAPI, self::getData(self::CHAT_SPAM_TEXT), $this->getName(), $this->getSubType()));
 							$playerAPI->setExternalData("SpamATick", microtime(true));
 							$playerAPI->setExternalData("ViolationSpamA", $violationChat + 1);
