@@ -97,7 +97,7 @@ class SpeedA extends Check {
 				
 				// If the time travelled is greater than the calculated time limit, fail immediately.
 				// If speed is on limit and the distance travelled limit is high. 
-				if($time > $timeLimit || $speed > $speedLimit && $distance > $distanceLimit) {
+				if($time < $timeLimit || $speed > $speedLimit && $distance > $distanceLimit) {
 					$this->failed($playerAPI);
 				}
 			}
