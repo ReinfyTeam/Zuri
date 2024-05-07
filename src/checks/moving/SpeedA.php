@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\moving\speed;
+namespace ReinfyTeam\Zuri\checks\moving;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
@@ -36,7 +36,7 @@ use pocketmine\block\BlockTypeIds;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function intval;
 
-class SpeedA extends Check {
+class Speed extends Check {
 	public function getName() : string {
 		return "Speed";
 	}
@@ -95,7 +95,7 @@ class SpeedA extends Check {
 				
 				$this->debug($playerAPI, "timeDiff=$timeDiff, speed=$speed, distance=$distance, speedLimit=$speedLimit, distanceLimit=$distanceLimit, timeLimit=$timeLimit");
 				
-				// If the time travelled is greater than the calculated time limit, fail immediately.
+				// If the time travelled is greater than the calculated time limit, fail immediately. Lag back? (is player is laggy?)
 				// If speed is on limit and the distance travelled limit is high. 
 				if($time < $timeLimit || $speed > $speedLimit && $distance > $distanceLimit) {
 					$this->failed($playerAPI);
