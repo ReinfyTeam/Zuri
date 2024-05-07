@@ -163,8 +163,9 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\FastLadder();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\FastSwim();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\ClickTP();
+		
+		// Todo: Improve speed in v0.1.3, add more checks..
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\speed\SpeedA();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\speed\SpeedB();
 
 		// Network related
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\AntiBot();

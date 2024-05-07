@@ -174,9 +174,23 @@ zuri:
             enable: true
             maxvl: 1
             punishment: KICK
+            # This are just adding the walking constant value to evaluate the limit.
+            # Todo: Improve this more??
             constants:
-                  limit-move-speed: 4.8
-                  limit-packet-speed: 35
+                  walking-speed-limit: 8.78303
+                  sprinting-speed-limit: 3.06229
+                  jump-speed-limit: 8.19435
+                  momentum-speed-limit: 80.85742
+                  ice-walking-speed-limit: 5.09777
+                  speed-effect-limit: 7.85535
+                  time-limit: 0.5
+                  time-effect-limit: 0.2
+                  wakling-distance-limit: 0.02964
+                  sprinting-distance-limit: 0.84173
+                  jump-distance-limit: 1.35767
+                  momentum-distance-limit: 5.43645
+                  ice-walking-distance-limit: 0.20735
+                  speed-effect-distance-limit: 0.49282
         cheststealer:
             enable: true
             maxvl: 1

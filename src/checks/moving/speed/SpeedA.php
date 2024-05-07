@@ -24,15 +24,17 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving\speed;
 
-use pocketmine\block\BlockTypeIds;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
+use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\event\Event;
+use pocketmine\entity\effect\VanillaEffects;
 use ReinfyTeam\Zuri\checks\Check;
-use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use pocketmine\block\BlockTypeIds;
+use ReinfyTeam\Zuri\player\PlayerAPI;
 use function intval;
-use function pow;
 
 class SpeedA extends Check {
 	public function getName() : string {
@@ -44,63 +46,63 @@ class SpeedA extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 8;
+		return 4;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$nLocation = $playerAPI->getNLocation();
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		if ($player === null) {
 			return;
 		}
-		if (
-			$playerAPI->isOnStairs() ||
-			$playerAPI->isOnIce() ||
-			$playerAPI->getTeleportTicks() < 40 ||
-			$player->isFlying() ||
-			!$playerAPI->isOnGround() ||
-			$playerAPI->getAttackTicks() < 40 ||
-			$playerAPI->isOnAdhesion() ||
-			$player->getAllowFlight() ||
-			$player->isCreative()
-		) {
-			return;
-		}
-
-		if ($playerAPI->getOnlineTime() > 10 && !empty($nLocation) && $player->isSurvival()) {
-			$recived = false;
-			if ($packet instanceof MovePlayerPacket) {
-				$recived = true;
+		if($event instanceof PlayerMoveEvent) {
+			if(
+				!$player->isSurvival() ||
+				$playerAPI->getAttackTicks() < 40 ||
+				$playerAPI->getSlimeBlockTicks() < 20 || 
+				$playerAPI->isOnAdhesion()
+			) {
+				return;
 			}
-			if ($packet instanceof PlayerAuthInputPacket) {
-				$limit = $player->getMovementSpeed() * $this->getConstant("max-packet-speed");
-				$distX = $nLocation["to"]->getX() - $nLocation["from"]->getX();
-				$distZ = $nLocation["to"]->getZ() - $nLocation["from"]->getZ();
-				$dist = ($distX * $distX) + ($distZ * $distZ);
-				$lastDist = $dist;
-				$shiftedLastDist = $lastDist * 0.93;
-				$equalness = $dist - $shiftedLastDist;
-				$scaledEqualness = $equalness * 138;
-				$idBlockDown = $player->getWorld()->getBlockAt(intval($player->getLocation()->getX()), intval($player->getLocation()->getY() - 0.01), intval($player->getLocation()->getZ()))->getTypeId();
-				$isFalling = $playerAPI->getLastGroundY() > $player->getLocation()->getY();
-				$limit += $playerAPI->getJumpTicks() < 40 ? ($limit / 3) : 0;
-				$limit += $player->isSprinting() ? ($limit / 35) : 0;
-				$effects = [];
-				foreach ($player->getEffects()->all() as $index => $effect) {
-					$transtable = $effect->getType()->getName()->getText();
-					$effects[$transtable] = $effect->getEffectLevel() + 1;
+			
+			$time = $playerAPI->getExternalData("moveTimeA");
+			if($time !== null) {
+				$distance = round(BlockUtil::distance($event->getFrom(), $event->getTo()), 5); // Round precision of 5
+				$timeDiff = abs($time - microtime(true));
+				$speed = round($distance / $timeDiff, 5); // Round precision of 5
+				
+				// Calculate the possible speed limit
+				$speedLimit = $this->getConstant("walking-speed-limit"); // Walking 
+				$speedLimit += $player->isSprinting() ? $this->getConstant("sprinting-speed-limit") : 0; // Sprinting
+				$speedLimit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant("jump-speed-limit") : 0; // Jumping
+				$speedLimit += $player->getInAirTicks() > 10 ? $this->getConstant("momentum-speed-limit") : 0; // Falling Momentum
+				$speedLimit += $playerAPI->isOnIce() ? $this->getConstant("ice-walking-speed-limit") : 0; // Ice walking limit
+				
+				$timeLimit = $this->getConstant("time-limit");
+				
+				// Calculate max distance must be the limit of blocks travelled.
+				$distanceLimit = $this->getConstant("wakling-distance-limit"); // Walking
+				$distanceLimit += $player->isSprinting() ? $this->getConstant("sprinting-distance-limit") : 0; // Sprinting
+				$distanceLimit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant("jump-distance-limit") : 0; // Jumping
+				$distanceLimit += $player->getInAirTicks() > 10 ? $this->getConstant("momentum-distance-limit") : 0; // Falling Momentum
+				$distanceLimit += $playerAPI->isOnIce() ? $this->getConstant("ice-walking-distance-limit") : 0; // Ice walking limit
+				
+				// Calculate speed potion deriviation..
+				if(($effect = $player->getEffects()->get(VanillaEffects::SPEED())) !== null) {
+					$speedLimit += $this->getConstant("speed-effect-limit") * $effect->getEffectLevel();
+					$timeLimit += $this->getConstant("time-effect-limit") * $effect->getEffectLevel();
+					$distanceLimit += $this->getConstant("speed-effect-distance-limit") * $effect->getEffectLevel();
 				}
-				$limit += isset($effects["potion.moveSpeed"]) ? (pow($effects["potion.moveSpeed"] * 2, 2) / 16) : 0;
-				$limit -= $playerAPI->isInLiquid() ? ($limit / 2.8) : 0;
-				$limit -= $playerAPI->isInWeb() ? ($limit / 1.2) : 0;
-				$limit -= BlockUtil::isUnderBlock($nLocation["to"], [BlockTypeIds::SOUL_SAND], 1) ? ($limit / 1.4) : 0;
-				if ($playerAPI->isOnGround() && !$playerAPI->isOnAdhesion() && !$playerAPI->isOnIce() && $playerAPI->getAttackTicks() > 100 && $player->isSurvival() && !$recived && !$isFalling && $idBlockDown !== 0) {
-					if ($scaledEqualness > $limit) {
-						$this->debug($playerAPI, "isFalling=$isFalling, limit=$limit, distX=$distX, distZ=$distZ, dist=$dist, lastDist=$dist, shiftedLastDist=$shiftedLastDist, equalness=$equalness, scaledEqualness=$scaledEqualness");
-						$this->failed($playerAPI);
-					}
+				
+				$this->debug($playerAPI, "timeDiff=$timeDiff, speed=$speed, distance=$distance, speedLimit=$speedLimit, distanceLimit=$distanceLimit, timeLimit=$timeLimit");
+				
+				// If the time travelled is greater than the calculated time limit, fail immediately.
+				// If speed is on limit and the distance travelled limit is high. 
+				if($time > $timeLimit || $speed > $speedLimit && $distance > $distanceLimit) {
+					$this->failed($playerAPI);
 				}
 			}
+			
+			$playerAPI->setExternalData("moveTimeA", microtime(true));
 		}
 	}
 }

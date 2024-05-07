@@ -45,7 +45,7 @@ class BlockReach extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerInteractEvent) {
 			$block = $event->getBlock();
-			if (!$playerAPI->getPlayer()->canInteract($block->getPosition()->add(0.5, 0.5, 0.5), $playerAPI->getPlayer()->isCreative() ? $this->getConstant("max-creative-reach") : $this->getConstant("max-reach-reach"))) {
+			if (!$playerAPI->getPlayer()->canInteract($block->getPosition()->add(0.5, 0.5, 0.5), $playerAPI->getPlayer()->isCreative() ? $this->getConstant("max-creative-reach") : $this->getConstant("max-survival-reach"))) {
 				$this->failed($playerAPI);
 			}
 		}
