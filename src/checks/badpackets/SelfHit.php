@@ -46,11 +46,10 @@ class SelfHit extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			if (($entity = $event->getEntity()) instanceof Player && ($damager = $event->getDamager()) instanceof Player) {
+				$this->debug($playerAPI, "damagerId=" . $damager->getId() . ", entityId=" . $entity->getId());
 				if ($entity->getId() === $damager->getId()) {
 					$this->failed($playerAPI);
 				}
-
-				$this->debug($playerAPI, "damagerId=" . $damager->getId() . ", entityId=" . $entity->getId());
 			}
 		}
 	}

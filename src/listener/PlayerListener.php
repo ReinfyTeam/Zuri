@@ -39,6 +39,7 @@ use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerDeathEvent;
+use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerItemConsumeEvent;
 use pocketmine\event\player\PlayerItemHeldEvent;
@@ -130,6 +131,7 @@ class PlayerListener implements Listener {
 		$playerAPI->setOnIce(BlockUtil::isOnIce($event->getTo(), 1) || BlockUtil::isOnIce($event->getTo(), 2));
 		$playerAPI->setOnStairs(BlockUtil::isOnStairs($event->getTo(), 0) || BlockUtil::isOnStairs($event->getTo(), 1));
 		$playerAPI->setUnderBlock(BlockUtil::isOnGround($player->getLocation(), -2));
+		$playerAPI->setTopBlock(BlockUtil::isOnGround($player->getLocation(), 1));
 		$playerAPI->setInLiquid(BlockUtil::isOnLiquid($event->getTo(), 0) || BlockUtil::isOnLiquid($event->getTo(), 1));
 		$playerAPI->setOnAdhesion(BlockUtil::isOnAdhesion($event->getTo(), 0));
 		$playerAPI->setOnPlant(BlockUtil::isOnPlant($event->getTo(), 0));
@@ -484,6 +486,19 @@ class PlayerListener implements Listener {
 			return;
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		if ($playerAPI->getPlayer() === null) {
+			return;
+		}
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
+		$this->checkEvent($event, $playerAPI);
+	}
+
+	public function onDropItem(PlayerDropItemEvent $event) : void {
+		$player = $event->getPlayer();
+		$playerAPI = PlayerAPI::getAPIPlayer($player);
+
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}

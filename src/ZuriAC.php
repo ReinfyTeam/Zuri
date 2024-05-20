@@ -101,6 +101,7 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastEat();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\SelfHit();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastThrow();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastDrop();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\ImpossiblePitch();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\MessageSpoof();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\InvalidPackets();
@@ -126,6 +127,7 @@ class ZuriAC extends PluginBase {
 		// Combat
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\reach\ReachA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\reach\ReachB();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\reach\ReachC();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickC();
@@ -134,8 +136,6 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraC();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraD();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraE();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\velocity\VelocityA();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\velocity\VelocityB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\ImposibleHit();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\FastBow();
 
@@ -179,7 +179,6 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldC();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldD();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldE();
 	}
 
 	public static function Checks() : array {

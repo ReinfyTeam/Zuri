@@ -22,47 +22,40 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\scaffold;
+namespace ReinfyTeam\Zuri\checks\combat\reach;
 
-use pocketmine\event\block\BlockPlaceEvent;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
-use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
-use pocketmine\network\mcpe\protocol\types\inventory\ReleaseItemTransactionData;
+use pocketmine\math\Vector3;
+use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function abs;
-use function microtime;
 
-class ScaffoldE extends Check {
+class ReachC extends Check {
 	public function getName() : string {
-		return "Scaffold";
+		return "Reach";
 	}
 
 	public function getSubType() : string {
-		return "E";
+		return "C";
 	}
 
 	public function maxViolations() : int {
-		return 1;
+		return 3;
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-		if ($event instanceof BlockPlaceEvent) {
-			$playerAPI->setExternalData("lastPlaceE", microtime(true));
-		}
-	}
+		if ($event instanceof EntityDamageByEntityEvent) {
+			if (($victim = $event->getEntity()) instanceof Player && ($damager = $event->getDamager()) instanceof Player) {
+				$eyeHeight = $damager->getEyePos();
+				$cuboid = $victim->getBoundingBox();
+				// get the distance between the eye height and the cuboid
+				$distance = $eyeHeight->distance(new Vector3($cuboid->minX, $cuboid->minY, $cuboid->minZ));
+				$this->debug($playerAPI, "distance=$distance");
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($packet instanceof InventoryTransactionPacket) {
-			$placeTicks = abs(($playerAPI->getExternalData("lastPlaceE") ?? microtime(true)) - microtime(true) * 20);
-			$this->debug($playerAPI, "placeTicks=" . $placeTicks . ", teleportTicks=" . $playerAPI->getTeleportTicks());
-			if (
-				$packet->trData instanceof ReleaseItemTransactionData &&
-				$placeTicks < $this->getConstant("limit-place-ticks") &&
-				$playerAPI->getTeleportTicks() > 100
-			) {
-				$this->failed($playerAPI);
+				if ($distance > $this->getConstant("max-reach-eye-distance")) {
+					$this->failed($playerAPI);
+				}
 			}
 		}
 	}

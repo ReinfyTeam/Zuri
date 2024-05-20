@@ -27,6 +27,7 @@ namespace ReinfyTeam\Zuri\player;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Location;
 use pocketmine\math\Facing;
+use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
 use ReflectionProperty;
@@ -63,6 +64,7 @@ class PlayerAPI implements IPlayerAPI {
 	private bool $onStairs = false;
 	private bool $onIce = false;
 	private bool $debug = false;
+	private bool $topBlock = false;
 	private float $lastGroundY = 0.0;
 	private float $lastNoGroundY = 0.0;
 	private float $lastDelayedMovePacket = 0.0;
@@ -158,6 +160,15 @@ class PlayerAPI implements IPlayerAPI {
 
 	public function setUnderBlock(bool $data) : void {
 		$this->underBlock = $data;
+	}
+
+	//Top block
+	public function isTopBlock() : bool {
+		return $this->topBlock;
+	}
+
+	public function setTopBlock(bool $data) : void {
+		$this->topBlock = $data;
 	}
 
 	//On adhesion
@@ -334,6 +345,25 @@ class PlayerAPI implements IPlayerAPI {
 				return true;
 			}
 		}
+		return false;
+	}
+
+	// is in bounding box
+	public function isInBoundingBox() : bool {
+		$player = $this->getPlayer();
+		$pos = $player->getPosition();
+		foreach ([
+			$player->getWorld()->getBlock(new Vector3($pos->x + 1, $pos->y, $pos->z)),
+			$player->getWorld()->getBlock(new Vector3($pos->x - 1, $pos->y, $pos->z)),
+			$player->getWorld()->getBlock(new Vector3($pos->x, $pos->y, $pos->z + 1)),
+			$player->getWorld()->getBlock(new Vector3($pos->x, $pos->y, $pos->z - 1)),
+			$player->getWorld()->getBlock(new Vector3($pos->x, $pos->y + 1, $pos->z)),
+		] as $block) {
+			if ($block->isSolid()) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 

@@ -22,46 +22,41 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\combat\killaura;
+namespace ReinfyTeam\Zuri\checks\badpackets;
 
-use pocketmine\network\mcpe\protocol\AnimatePacket;
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\event\Event;
+use pocketmine\event\player\PlayerDropItemEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function microtime;
 
-class KillAuraD extends Check {
+class FastDrop extends Check {
 	public function getName() : string {
-		return "KillAura";
+		return "FastDrop";
 	}
 
 	public function getSubType() : string {
-		return "D";
+		return "A";
 	}
 
 	public function maxViolations() : int {
-		return 1;
+		return 5;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if (($player = $playerAPI->getPlayer()) === null) {
-			return;
-		}
-		if (
-			$playerAPI->isDigging() ||
-			$playerAPI->getPlacingTicks() < 100 ||
-			$playerAPI->getAttackTicks() < 20 ||
-			!$player->isSurvival()
-		) {
-			return;
-		}
-		if ($packet instanceof AnimatePacket) {
-			$this->debug($playerAPI, "isDigging=" . $playerAPI->isDigging() . ", placingTicks=" . $playerAPI->getPlacingTicks() . ", attackTicks=" . $playerAPI->getAttackTicks() . ", isSurvival=" . $playerAPI->getPlayer()->isSurvival());
-			if (
-				$packet->action !== AnimatePacket::ACTION_SWING_ARM &&
-				$playerAPI->getAttackTicks() > 40
-			) {
-				$this->failed($playerAPI);
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+		if ($event instanceof PlayerDropItemEvent) {
+			$lastTick = $playerAPI->getExternalData("lastTickD");
+			$currentTick = microtime(true);
+			if ($lastTick !== null) {
+				$diff = $currentTick - $lastTick;
+				$ping = $playerAPI->getPing();
+				if ($diff < $this->getConstant("time-limit") && $ping < self::getData(self::PING_LAGGING)) { // Wtf same as fastthrow?
+					$event->cancel();
+					$this->failed($playerAPI);
+				}
+				$this->debug($playerAPI, "lastTick=$lastTick, diff=$diff");
 			}
+			$playerAPI->setExternalData("lastTickD", $currentTick);
 		}
 	}
 }

@@ -32,6 +32,7 @@ use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\MathUtil;
+use function abs;
 
 class ReachA extends Check {
 	public function getName() : string {
@@ -53,23 +54,19 @@ class ReachA extends Check {
 			$damager = $event->getDamager();
 			$locEntity = $entity->getLocation();
 			$locDamager = $damager->getLocation();
-			if ($damager === null) {
-				return;
-			}
-			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player) {
+			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player && $entity instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
 				$player = $playerAPI->getPlayer();
 				if ($player === null) {
 					return;
 				}
-				$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? ($locEntity->getY() - $locDamager->getY()) : 0;
+				$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? abs($locEntity->getY() - $locDamager->getY()) : 0;
 				$distance = MathUtil::distance($locEntity, $locDamager) - $isPlayerTop;
 				$isSurvival = $player->getGameMode() === GameMode::SURVIVAL();
-				if ($isSurvival && $distance > $this->getConstant("max-survival-distance")) {
-					$this->failed($playerAPI);
-					return;
-				}
 				$this->debug($playerAPI, "isPlayerTop=$isPlayerTop, distance=$distance, isSurvival=$isSurvival");
+				if ($isSurvival && $distance > 4.3) {
+					$this->failed($playerAPI);
+				}
 			}
 		}
 	}

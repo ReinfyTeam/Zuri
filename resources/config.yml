@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.1.7" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
+    version: "0.2.0" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -156,7 +156,7 @@ zuri:
                   box-range-x: 1.0
                   box-range-y: 1.0
                   box-range-z: 1.0
-                  suspecious-pitch-limit: 35
+                  suspecious-pitch-limit: 40
                   max-place-distance: 1.25
                   limit-place-ticks: 20
         inventorycleaner:
@@ -180,7 +180,6 @@ zuri:
                   walking-speed-limit: 8.78303
                   sprinting-speed-limit: 3.06229
                   jump-speed-limit: 8.19435
-                  momentum-speed-limit: 80.85742
                   ice-walking-speed-limit: 5.09777
                   speed-effect-limit: 7.85535
                   time-limit: 0.5
@@ -188,7 +187,6 @@ zuri:
                   wakling-distance-limit: 0.02964
                   sprinting-distance-limit: 0.84173
                   jump-distance-limit: 1.35767
-                  momentum-distance-limit: 5.43645
                   ice-walking-distance-limit: 0.20735
                   speed-effect-distance-limit: 0.49282
         cheststealer:
@@ -231,6 +229,7 @@ zuri:
                  max-distance: 4.3
                  survival-max-distance: 4.0
                  creative-max-distance: 8.3
+                 max-reach-eye-distance: 4.7
         fly:
             enable: true
             maxvl: 1
@@ -286,13 +285,12 @@ zuri:
             enable: true
             maxvl: 0
             punishment: KICK
-        velocity:
+        fastdrop:
             enable: true
             maxvl: 1
             punishment: KICK
             constants:
-                   limit-vertical: 0.6
-                   limit-horizontal: 0.6
+                   time-limit: 0.06
         timer: # Todo: Improve in next versions. Fix false-positive in certain packets..
             enable: false
             maxvl: 1

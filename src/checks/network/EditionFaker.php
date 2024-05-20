@@ -70,13 +70,13 @@ class EditionFaker extends Check {
 			$nickname = $playerInfo->getUsername();
 
 			if (!(in_array($extraData["DeviceOS"], EditionFaker::DEVICE_OS_LIST, true))) {
-				$this->warn($event->getUsername());
+				$this->warn($nickname);
 				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
 				return;
 			}
 
 			if (!(in_array($extraData["DeviceOS"], EditionFaker::NULL_MODELS, true)) && $extraData["DeviceModel"] === "") {
-				$this->warn($event->getUsername());
+				$this->warn($nickname);
 				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
 				return;
 			}
