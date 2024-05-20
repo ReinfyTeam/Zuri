@@ -77,7 +77,7 @@ abstract class Check extends ConfigManager {
 	public function getAllSubTypes() : string {
 		$list = [];
 		foreach (ZuriAC::Checks() as $check) {
-			if ($check->getName() === $this->getName()) {
+			if ($check->getName() === $this->getName() && !in_array($check->getSubType(), $list)) {
 				$list[] = $check->getSubType();
 			}
 		}
