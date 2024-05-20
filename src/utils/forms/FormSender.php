@@ -261,7 +261,7 @@ final class FormSender extends ConfigManager {
 		});
 
 		$form->setTitle($check->getName() . " Information");
-		$form->setContent(TextFormat::RESET . "Name: " . TextFormat::YELLOW . $check->getName() . "\n" . TextFormat::RESET . "Sub Types: " . TextFormat::YELLOW . $check->getAllSubTypes() . "\n" . TextFormat::RESET . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . "\n" . TextFormat::RESET . "Ban: " . ($check->getPunishment() === "ban" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Kick: " . ($check->getPunishment() === "kick" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Captcha: " . ($check->getPunishment() === "captcha" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Flag: " . ($check->getPunishment() === "flag" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Max Internal Violation: " . TextFormat::YELLOW . $check->maxViolations() . "\n" . TextFormat::RESET . "Max Violation: " . TextFormat::YELLOW . self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
+		$form->setContent(TextFormat::RESET . "Name: " . TextFormat::YELLOW . $check->getName() . "\n" . TextFormat::RESET . "Sub Types: " . TextFormat::YELLOW . $check->getAllSubTypes() . "\n" . TextFormat::RESET . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . "\n" . TextFormat::RESET . "Ban: " . ($check->getPunishment() === "ban" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Kick: " . ($check->getPunishment() === "kick" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Captcha: " . ($check->getPunishment() === "captcha" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Flag: " . ($check->getPunishment() === "flag" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Max Violation: " . TextFormat::YELLOW . self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
 		if ($check->maxViolations() !== 0) {
 			$form->addButton("Change MaxVL");
 		}
@@ -339,11 +339,7 @@ final class FormSender extends ConfigManager {
 		$form->addLabel(($saved ? TextFormat::GREEN . "Modified successfully!" : "Modify the what do you want to set.."));
 		if (!self::getData(self::CAPTCHA_RANDOMIZE)) {
 			$form->addToggle("Send Tip", self::getData(self::CAPTCHA_TIP));
-		}
-		if (!self::getData(self::CAPTCHA_RANDOMIZE)) {
 			$form->addToggle("Send Message", self::getData(self::CAPTCHA_MESSAGE));
-		}
-		if (!self::getData(self::CAPTCHA_RANDOMIZE)) {
 			$form->addToggle("Send Title", self::getData(self::CAPTCHA_TITLE));
 		}
 		if (self::getData(self::CAPTCHA_RANDOMIZE)) {

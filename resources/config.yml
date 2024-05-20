@@ -156,7 +156,7 @@ zuri:
                   box-range-x: 1.0
                   box-range-y: 1.0
                   box-range-z: 1.0
-                  suspecious-pitch-limit: 40
+                  suspecious-pitch-limit: 45
                   max-place-distance: 1.25
                   limit-place-ticks: 20
         inventorycleaner:
