@@ -69,6 +69,9 @@ class Spider extends Check {
 			) {
 				return;
 			}
+			
+			$oldY = $event->getFrom()->getY();
+			$newY = $event->getTo()->getY();
 
 			$west = $player->getWorld()->getBlock($player->getPosition()->west())->isSolid() && $player->getWorld()->getBlock($player->getPosition()->west()->up())->isSolid();
 			$south = $player->getWorld()->getBlock($player->getPosition()->south())->isSolid() && $player->getWorld()->getBlock($player->getPosition()->south()->up()->normalize())->isSolid();
