@@ -37,7 +37,6 @@ use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function abs;
-use function intval;
 
 class Spider extends Check {
 	public function getName() : string {
@@ -71,17 +70,11 @@ class Spider extends Check {
 				return;
 			}
 
-			$x = $player->getLocation()->getX();
-			$z = $player->getLocation()->getZ();
-
-			$oldY = $event->getFrom()->getY();
-			$newY = $event->getTo()->getY();
-
-			$west = $player->getWorld()->getBlockAt($player->getLocation()->west()->normalize())->isSolid() && $player->getWorld()->getBlockAt($player->getLocation()->west()->up()->normalize())->isSolid();
-			$south = $player->getWorld()->getBlockAt($player->getLocation()->south()->normalize())->isSolid() && $player->getWorld()->getBlockAt($player->getLocation()->south()->up()->normalize())->isSolid();
-			$east = $player->getWorld()->getBlockAt($player->getLocation()->east()->normalize())->isSolid() && $player->getWorld()->getBlockAt($player->getLocation()->east()->up()->normalize())->isSolid();
-			$north = $player->getWorld()->getBlockAt($player->getLocation()->north()->normalize())->isSolid() && $player->getWorld()->getBlockAt($player->getLocation()->north()->up()->normalize())->isSolid();
-			$onLadder = $player->getWorld()->getBlockAt(intval($x), intval($oldY), intval($z))->getTypeId() === BlockTypeIds::LADDER;
+			$west = $player->getWorld()->getBlock($player->getPosition()->west())->isSolid() && $player->getWorld()->getBlock($player->getPosition()->west()->up())->isSolid();
+			$south = $player->getWorld()->getBlock($player->getPosition()->south())->isSolid() && $player->getWorld()->getBlock($player->getPosition()->south()->up()->normalize())->isSolid();
+			$east = $player->getWorld()->getBlock($player->getPosition()->east())->isSolid() && $player->getWorld()->getBlock($player->getPosition()->east()->up())->isSolid();
+			$north = $player->getWorld()->getBlock($player->getPosition()->north())->isSolid() && $player->getWorld()->getBlock($player->getPosition()->north()->up())->isSolid();
+			$onLadder = $player->getWorld()->getBlock($player->getPosition())->getTypeId() === BlockTypeIds::LADDER;
 
 			if ($west || $south || $east || $north && !$onLadder) { // diagonals are solid and the player is not on ladder..
 				$diff = abs($newY - $oldY);
