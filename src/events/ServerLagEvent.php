@@ -14,6 +14,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
+ * Zuri attempts to enforce "vanilla Minecraft" mechanics, as well as preventing
+ * players from abusing weaknesses in Minecraft or its protocol, making your server
+ * more safe. Organized in different sections, various checks are performed to test
+ * players doing, covering a wide range including flying and speeding, fighting
+ * hacks, fast block breaking and nukers, inventory hacks, chat spam and other types
+ * of malicious behaviour.
+ *
  * @author ReinfyTeam
  * @link https://github.com/ReinfyTeam/
  *
@@ -24,13 +31,17 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\events;
 
+use pocketmine\event\CancellableTrait;
+use pocketmine\event\Event;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\Discord;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 
-class ServerLagEvent extends ConfigManager {
+class ServerLagEvent extends Event {
+	use CancellableTrait;
+
 	private PlayerAPI $player;
 	private string $moduleName;
 	private string $subType;
@@ -43,8 +54,10 @@ class ServerLagEvent extends ConfigManager {
 		return $this->player;
 	}
 
-	public function isLagging() {
+	public function call() : void {
 		Discord::Send($this->player, Discord::LAGGING, null);
-		Server::getInstance()->getLogger()->warning(ReplaceText::replace($this->player, self::getData(self::SERVER_LAGGING_MESSAGE)));
+		Server::getInstance()->getLogger()->warning(ReplaceText::replace($this->player, ConfigManager::getData(ConfigManager::SERVER_LAGGING_MESSAGE)));
+
+		parent::call();
 	}
 }

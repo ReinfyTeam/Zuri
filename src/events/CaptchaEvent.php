@@ -14,6 +14,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
+ * Zuri attempts to enforce "vanilla Minecraft" mechanics, as well as preventing
+ * players from abusing weaknesses in Minecraft or its protocol, making your server
+ * more safe. Organized in different sections, various checks are performed to test
+ * players doing, covering a wide range including flying and speeding, fighting
+ * hacks, fast block breaking and nukers, inventory hacks, chat spam and other types
+ * of malicious behaviour.
+ *
  * @author ReinfyTeam
  * @link https://github.com/ReinfyTeam/
  *
@@ -24,13 +31,17 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\events;
 
+use pocketmine\event\CancellableTrait;
+use pocketmine\event\Event;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\CharUtil;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 use function rand;
 
-class CaptchaEvent extends ConfigManager {
+class CaptchaEvent extends Event {
+	use CancellableTrait;
+
 	private PlayerAPI $playerAPI;
 
 	public function __construct(PlayerAPI $playerAPI) {
@@ -41,24 +52,24 @@ class CaptchaEvent extends ConfigManager {
 		return $this->playerAPI;
 	}
 
-	public function sendMessage() {
-		$this->playerAPI->getPlayer()->sendMessage(ReplaceText::replace($this->playerAPI, self::getData(self::CAPTCHA_TEXT)));
+	protected function sendMessage() {
+		$this->playerAPI->getPlayer()->sendMessage(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigManager::CAPTCHA_TEXT)));
 	}
 
-	public function sendTip() {
-		$this->playerAPI->getPlayer()->sendTip(ReplaceText::replace($this->playerAPI, self::getData(self::CAPTCHA_TEXT)));
+	protected function sendTip() {
+		$this->playerAPI->getPlayer()->sendTip(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigManager::CAPTCHA_TEXT)));
 	}
 
-	public function sendTitle() {
-		$this->playerAPI->getPlayer()->sendSubTitle(ReplaceText::replace($this->playerAPI, self::getData(self::CAPTCHA_TEXT)));
+	protected function sendTitle() {
+		$this->playerAPI->getPlayer()->sendSubTitle(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigManager::CAPTCHA_TEXT)));
 	}
 
-	public function sendCaptcha() {
+	public function call() : void {
 		if ($this->playerAPI->isCaptcha()) {
 			if ($this->playerAPI->getCaptchaCode() === "nocode") {
-				$this->playerAPI->setCaptchaCode(CharUtil::generatorCode(self::getData(self::CAPTCHA_CODE_LENGTH)));
+				$this->playerAPI->setCaptchaCode(CharUtil::generatorCode(ConfigManager::getData(ConfigManager::CAPTCHA_CODE_LENGTH)));
 			}
-			if (self::getData(self::CAPTCHA_RANDOMIZE) === true) {
+			if (ConfigManager::getData(ConfigManager::CAPTCHA_RANDOMIZE) === true) {
 				switch(rand(1, 3)) {
 					case 1:
 						$this->sendMessage();
@@ -71,16 +82,18 @@ class CaptchaEvent extends ConfigManager {
 						break;
 				}
 			} else {
-				if (self::getData(self::CAPTCHA_MESSAGE) === true) {
+				if (ConfigManager::getData(ConfigManager::CAPTCHA_MESSAGE) === true) {
 					$this->sendMessage();
 				}
-				if (self::getData(self::CAPTCHA_TIP) === true) {
+				if (ConfigManager::getData(ConfigManager::CAPTCHA_TIP) === true) {
 					$this->sendTip();
 				}
-				if (self::getData(self::CAPTCHA_TITLE) === true) {
+				if (ConfigManager::getData(ConfigManager::CAPTCHA_TITLE) === true) {
 					$this->sendTitle();
 				}
 			}
 		}
+
+		parent::call();
 	}
 }

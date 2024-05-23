@@ -14,6 +14,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
+ * Zuri attempts to enforce "vanilla Minecraft" mechanics, as well as preventing
+ * players from abusing weaknesses in Minecraft or its protocol, making your server
+ * more safe. Organized in different sections, various checks are performed to test
+ * players doing, covering a wide range including flying and speeding, fighting
+ * hacks, fast block breaking and nukers, inventory hacks, chat spam and other types
+ * of malicious behaviour.
+ *
  * @author ReinfyTeam
  * @link https://github.com/ReinfyTeam/
  *
@@ -83,7 +90,7 @@ final class API {
 
 	public static function allModulesInfo() : ?array {
 		foreach (ZuriAC::Checks() as $module) {
-			$result[$module->getName()] = ["name" => $module->getName(), "subType" => $module->getSubType(), "kick" => $module->kick(), "ban" => $module->ban(), "flag" => $module->flag(), "captcha" => $module->captcha(), "maxViolations" => $module->maxViolations()];
+			$result[$module->getName()] = ["name" => $module->getName(), "subType" => $module->getSubType(), "punishment" => $module->getPunishment(), "maxViolations" => $module->maxViolations()];
 		}
 
 		return $result;
@@ -97,7 +104,7 @@ final class API {
 		return self::allModulesInfo()[$name];
 	}
 
-	public static function getSubTypeByModule(string $name) : ?string {
+	public static function getSubTypesByModule(string $name) : ?string {
 		if (in_array($name, ZuriAC::Checks(), true)) {
 			return null;
 		}
@@ -118,12 +125,7 @@ final class API {
 			return null;
 		}
 
-		$result["kick"] = self::allModulesInfo()[$name]["kick"];
-		$result["ban"] = self::allModulesInfo()[$name]["ban"];
-		$result["flag"] = self::allModulesInfo()[$name]["flag"];
-		$result["captcha"] = self::allModulesInfo()[$name]["captcha"];
-
-		return $result;
+		return self::allModulesInfo()[$name]["punishment"];
 	}
 
 	public static function getPluginInstance() : ?ZuriAC {

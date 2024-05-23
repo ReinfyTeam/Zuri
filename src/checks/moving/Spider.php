@@ -14,6 +14,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
+ * Zuri attempts to enforce "vanilla Minecraft" mechanics, as well as preventing
+ * players from abusing weaknesses in Minecraft or its protocol, making your server
+ * more safe. Organized in different sections, various checks are performed to test
+ * players doing, covering a wide range including flying and speeding, fighting
+ * hacks, fast block breaking and nukers, inventory hacks, chat spam and other types
+ * of malicious behaviour.
+ *
  * @author ReinfyTeam
  * @link https://github.com/ReinfyTeam/
  *
@@ -52,19 +59,31 @@ class Spider extends Check {
 				return;
 			}
 
+			if (
+				$playerAPI->getAttackTicks() < 40 ||
+				$playerAPI->isInWeb() ||
+				!$playerAPI->isOnGround() ||
+				$playerAPI->isOnAdhesion() ||
+				$player->getAllowFlight() ||
+				$player->hasNoClientPredictions() ||
+				!$playerAPI->isCurrentChunkIsLoaded()
+			) {
+				return;
+			}
+
 			$x = $player->getLocation()->getX();
 			$z = $player->getLocation()->getZ();
 
 			$oldY = $event->getFrom()->getY();
 			$newY = $event->getTo()->getY();
 
-			$blockSide1 = $player->getWorld()->getBlockAt(intval($x) + 1, intval($oldY), intval($z))->isSolid() && $player->getWorld()->getBlockAt(intval($x) + 1, intval($oldY) + 1, intval($z))->isSolid();
-			$blockSide2 = $player->getWorld()->getBlockAt(intval($x) - 1, intval($oldY), intval($z))->isSolid() && $player->getWorld()->getBlockAt(intval($x) - 1, intval($oldY) + 1, intval($z))->isSolid();
-			$blockSide3 = $player->getWorld()->getBlockAt(intval($x), intval($oldY), intval($z) + 1)->isSolid() && $player->getWorld()->getBlockAt(intval($x), intval($oldY) + 1, intval($z) + 1)->isSolid();
-			$blockSide4 = $player->getWorld()->getBlockAt(intval($x), intval($oldY), intval($z) - 1)->isSolid() && $player->getWorld()->getBlockAt(intval($x), intval($oldY) + 1, intval($z) - 1)->isSolid();
+			$west = $player->getWorld()->getBlockAt($player->getLocation()->west()->normalize())->isSolid() && $player->getWorld()->getBlockAt($player->getLocation()->west()->up()->normalize())->isSolid();
+			$south = $player->getWorld()->getBlockAt($player->getLocation()->south()->normalize())->isSolid() && $player->getWorld()->getBlockAt($player->getLocation()->south()->up()->normalize())->isSolid();
+			$east = $player->getWorld()->getBlockAt($player->getLocation()->east()->normalize())->isSolid() && $player->getWorld()->getBlockAt($player->getLocation()->east()->up()->normalize())->isSolid();
+			$north = $player->getWorld()->getBlockAt($player->getLocation()->north()->normalize())->isSolid() && $player->getWorld()->getBlockAt($player->getLocation()->north()->up()->normalize())->isSolid();
 			$onLadder = $player->getWorld()->getBlockAt(intval($x), intval($oldY), intval($z))->getTypeId() === BlockTypeIds::LADDER;
 
-			if ($blockSide1 || $blockSide2 || $blockSide3 || $blockSide4 && !$onLadder && !$player->getAllowFlight() && !$player->isFlying() && $player->isSurvival()) { // diagonals are solid and the player is not on ladder..
+			if ($west || $south || $east || $north && !$onLadder) { // diagonals are solid and the player is not on ladder..
 				$diff = abs($newY - $oldY);
 				if ($newY > $oldY) { // if bigger newY > oldY
 					if ($diff > $this->getConstant("limit-y-diff")) { // impossible :O y update 0.6~?

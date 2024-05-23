@@ -14,6 +14,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
+ * Zuri attempts to enforce "vanilla Minecraft" mechanics, as well as preventing
+ * players from abusing weaknesses in Minecraft or its protocol, making your server
+ * more safe. Organized in different sections, various checks are performed to test
+ * players doing, covering a wide range including flying and speeding, fighting
+ * hacks, fast block breaking and nukers, inventory hacks, chat spam and other types
+ * of malicious behaviour.
+ *
  * @author ReinfyTeam
  * @link https://github.com/ReinfyTeam/
  *
@@ -49,7 +56,7 @@ class ZuriAC extends PluginBase {
 		ConfigManager::checkConfig();
 
 		if (!\Phar::running(true)) {
-			$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade Zuri checking performance. We recommended to download phar plugin from poggit builds or github. Instead of using source-code from github.");
+			$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade checking performance. We recommended to download phar plugin from poggit builds or github releases. Instead of using source-code from github.");
 		}
 	}
 
@@ -98,20 +105,30 @@ class ZuriAC extends PluginBase {
 
 		// Badpackets
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\Crasher();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastEat();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\SelfHit();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastThrow();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\FastDrop();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\ImpossiblePitch();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\MessageSpoof();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\InvalidPackets();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerB();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\regen\RegenA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\regen\RegenB();
 
 		// Blockbreak
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\WrongMining();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\InstaBreak();
 
 		// BlockInteract
@@ -119,6 +136,8 @@ class ZuriAC extends PluginBase {
 
 		// BlockPlace
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockplace\FillBlock();
+
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockplace\Tower();
 
 		// Chat
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\chat\SpamA();
@@ -128,15 +147,19 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\reach\ReachA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\reach\ReachB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\reach\ReachC();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickC();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraC();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraD();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\killaura\KillAuraE();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\ImposibleHit();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\combat\FastBow();
 
 		// Fly
@@ -146,32 +169,49 @@ class ZuriAC extends PluginBase {
 
 		// Inventory
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\AutoArmor();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\ChestAura();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\InventoryMove();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\ChestStealer();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\inventory\InventoryCleaner();
 
 		// Movements
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\WrongPitch();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\AirMovement();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\AntiImmobile();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Phase();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Step();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\OmniSprint();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Jesus();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Spider();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\FastLadder();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\FastSwim();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\ClickTP();
+
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Velocity();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Speed(); // Improve in next versions..
 
 		// Network related
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\AntiBot();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\EditionFaker();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\ProxyBot();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\antibot\AntiBotA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\antibot\AntiBotB();
 
-		// Payloads
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\payload\CustomPayloadA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\EditionFaker();
+
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\ProxyBot();
 
 		// Scaffold
 		// Todo: Improve and add more checks in next release..

@@ -178,15 +178,15 @@ zuri:
             # Todo: Improve this more??
             constants:
                   walking-speed-limit: 8.78303
-                  sprinting-speed-limit: 3.06229
-                  jump-speed-limit: 8.19435
-                  ice-walking-speed-limit: 5.09777
-                  speed-effect-limit: 7.85535
+                  sprinting-speed-limit: 2.06229
+                  jump-speed-limit: 3.19435
+                  ice-walking-speed-limit: 1.09777
+                  speed-effect-limit: 5.85535
                   time-limit: 0.5
                   time-effect-limit: 0.2
                   wakling-distance-limit: 0.02964
                   sprinting-distance-limit: 0.84173
-                  jump-distance-limit: 1.35767
+                  jump-distance-limit: 0.35767
                   ice-walking-distance-limit: 0.20735
                   speed-effect-distance-limit: 0.49282
         cheststealer:
@@ -281,10 +281,6 @@ zuri:
                    y-limit: 0.25
                    stairs-limit: 0.5
                    jump-limit: 0.4
-        custompayload:
-            enable: true
-            maxvl: 0
-            punishment: KICK
         fastdrop:
             enable: true
             maxvl: 1
@@ -376,4 +372,17 @@ zuri:
             punishment: KICK
             constants:
                   max-hit-time: 0.65
+        tower:
+            enable: true
+            maxvl: 5
+            punishment: KICK
+            constants:
+                  margin-error: 0.1
+        velocity:
+            enable: true
+            maxvl: 5
+            punishment: KICK
+            constants:
+                  knockback-factor: 0.4
+                  tolerance: 0.8
 ...

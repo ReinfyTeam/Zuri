@@ -14,6 +14,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
+ * Zuri attempts to enforce "vanilla Minecraft" mechanics, as well as preventing
+ * players from abusing weaknesses in Minecraft or its protocol, making your server
+ * more safe. Organized in different sections, various checks are performed to test
+ * players doing, covering a wide range including flying and speeding, fighting
+ * hacks, fast block breaking and nukers, inventory hacks, chat spam and other types
+ * of malicious behaviour.
+ *
  * @author ReinfyTeam
  * @link https://github.com/ReinfyTeam/
  *
@@ -77,7 +84,7 @@ abstract class Check extends ConfigManager {
 	public function getAllSubTypes() : string {
 		$list = [];
 		foreach (ZuriAC::Checks() as $check) {
-			if ($check->getName() === $this->getName() && !in_array($check->getSubType(), $list)) {
+			if ($check->getName() === $this->getName() && !in_array($check->getSubType(), $list, true)) {
 				$list[] = $check->getSubType();
 			}
 		}
@@ -94,7 +101,7 @@ abstract class Check extends ConfigManager {
 		}
 
 		if (ServerTickTask::getInstance()->isLagging(microtime(true)) === true) {
-			(new ServerLagEvent($playerAPI))->isLagging();
+			(new ServerLagEvent($playerAPI))->call();
 			return false;
 		}
 
@@ -160,7 +167,7 @@ abstract class Check extends ConfigManager {
 		}
 
 		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "ban" && self::getData(self::BAN_ENABLE) === true) {
-			(new BanEvent($playerAPI, $this->getName(), $this->getSubType()))->ban();
+			(new BanEvent($playerAPI, $this->getName(), $this->getSubType()))->call();
 			ZuriAC::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::BAN_MESSAGE), $this->getName(), $this->getSubType()));
 			foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 				if ($p->hasPermission("zuri.admin")) {
@@ -177,7 +184,7 @@ abstract class Check extends ConfigManager {
 		}
 
 		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "kick" && self::getData(self::KICK_ENABLE) === true) {
-			(new KickEvent($playerAPI, $this->getName(), $this->getSubType()))->kick();
+			(new KickEvent($playerAPI, $this->getName(), $this->getSubType()))->call();
 			if (self::getData(self::KICK_COMMANDS_ENABLED) === true) {
 				ZuriAC::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 				$playerAPI->resetViolation($this->getName());

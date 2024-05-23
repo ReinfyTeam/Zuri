@@ -14,6 +14,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
+ * Zuri attempts to enforce "vanilla Minecraft" mechanics, as well as preventing
+ * players from abusing weaknesses in Minecraft or its protocol, making your server
+ * more safe. Organized in different sections, various checks are performed to test
+ * players doing, covering a wide range including flying and speeding, fighting
+ * hacks, fast block breaking and nukers, inventory hacks, chat spam and other types
+ * of malicious behaviour.
+ *
  * @author ReinfyTeam
  * @link https://github.com/ReinfyTeam/
  *
@@ -41,7 +48,11 @@ class CaptchaTask extends Task {
 		self::$instance = $this;
 		foreach ($this->plugin->getServer()->getOnlinePlayers() as $player) {
 			if ($player instanceof PlayerAPI) {
-				(new CaptchaEvent($player))->sendCaptcha();
+				$event = new CaptchaEvent($player);
+				$event->call();
+				if ($event->isCancelled()) {
+					return;
+				}
 			}
 		}
 	}
