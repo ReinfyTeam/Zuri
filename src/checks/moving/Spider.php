@@ -62,9 +62,9 @@ class Spider extends Check {
 			if (
 				$playerAPI->getAttackTicks() < 40 ||
 				$playerAPI->isInWeb() ||
-				!$playerAPI->isOnGround() ||
 				$playerAPI->isOnAdhesion() ||
 				$player->getAllowFlight() ||
+				$player->isFlying() ||
 				$player->hasNoClientPredictions() ||
 				!$playerAPI->isCurrentChunkIsLoaded()
 			) {
