@@ -33,9 +33,9 @@ Also, adding :star: a **Star** is also appreciated. ✨
 - 💥 You can manage plugin at in-game using **UI** by using command! `/zuri ui`
 
 # Current Modules
-**BETA** - means to be in testing, and to be optimize in the next version.
-**DISABLED** - means the code is not working or has a false-positive in certain methods.
-**OPTIONAL** - means this is optional optimization checks for certain purposes.
+**BETA** - means to be in testing, and to be optimize in the next version. <br>
+**DISABLED** - means the code is not working or has a false-positive in certain methods. <br>
+**OPTIONAL** - means this is optional optimization checks for certain purposes. <br>
 
 - **AimAssist** (BETA)
     - **A:** Check if the player yaw is normalized and valid on the auth input.
