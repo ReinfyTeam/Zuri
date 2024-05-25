@@ -146,5 +146,5 @@ Also, adding :star: a **Star** is also appreciated. ✨
 
 # Feedbacks and Issue's
 - 😁 Your feedback and reviews are highly appriciated, if you ever find a bug or false-positive in certain modules, you can create an issue in our [github repository](https://github.com/ReinfyTeam/Zuri/issues)!
-- 👍 You can also view [Frequently asked questions article](https://github.com/ReinfyTeam/Zuri/wiki/FAQs) about common encountered issues to our plugin, be sure to read that before creating an issue!
+- 👍 You can also view [Frequently asked questions article](https://github.com/ReinfyTeam/Zuri/wiki/Well-Known-Issues) about common encountered issues to our plugin, be sure to read that before creating an issue!
 > Please wait for the developer response to the issue since we have high amount of task and issue that we to do fix also ;)
