@@ -36,6 +36,7 @@ use pocketmine\event\Event;
 use pocketmine\math\Vector3;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function abs;
 use function cos;
 use function deg2rad;
 use function sin;
@@ -74,12 +75,13 @@ class Tower extends Check {
 
 				// Calculate the dot product to determine if the block is placed in the player's facing direction
 				$dotProduct = $playerDirection->dot($directionVector);
-				$this->debug($playerAPI, "dotProduct=$dotProduct");
+				$this->debug($playerAPI, "dotProduct=$dotProduct, playerPitch=$playerPitch");
 				// Check if the player's direction is approximately towards the block being placed
-				if ($dotProduct < $this->getConstant("margin-error")) {
-					// Block the placement and send a message to the player
-					$event->cancel();
-					$this->failed($playerAPI);
+				if ($playerPos->y > $blockPos->y) {
+					if ($dotProduct < $this->getConstant("margin-error") && abs($playerPitch) < $this->getConstant("invalid-pitch")) {
+						$event->cancel();
+						$this->failed($playerAPI);
+					}
 				}
 			}
 		}

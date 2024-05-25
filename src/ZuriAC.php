@@ -68,7 +68,9 @@ class ZuriAC extends PluginBase {
 		$this->loadChecks();
 		$this->getScheduler()->scheduleRepeatingTask(new ServerTickTask($this), 20);
 		$this->getScheduler()->scheduleRepeatingTask(new CaptchaTask($this), 20);
-		$this->getScheduler()->scheduleRepeatingTask(new NetworkTickTask($this), 100);
+		if (ConfigManager::getData(ConfigManager::NETWORK_LIMIT_ENABLE)) {
+			$this->getScheduler()->scheduleRepeatingTask(new NetworkTickTask($this), 100);
+		}
 		$this->getServer()->getAsyncPool()->submitTask(new UpdateCheckerAsyncTask($this->getDescription()->getVersion()));
 		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigManager::PERMISSION_BYPASS_PERMISSION), PermissionManager::OPERATOR);
 		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigManager::ALERTS_PERMISSION), PermissionManager::OPERATOR);
@@ -197,11 +199,7 @@ class ZuriAC extends PluginBase {
 
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\FastLadder();
 
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\FastSwim();
-
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\ClickTP();
-
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Velocity();
 
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\moving\Speed(); // Improve in next versions..
 

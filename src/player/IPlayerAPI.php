@@ -182,13 +182,9 @@ interface IPlayerAPI {
 
 	public function getViolation(string $supplier) : int;
 
-	public function setViolation(string $supplier, int $amount) : void;
-
 	public function addViolation(string $supplier) : void;
 
 	public function getRealViolation(string $supplier) : int;
-
-	public function setRealViolation(string $supplier, int $amount) : void;
 
 	public function addRealViolation(string $supplier) : void;
 

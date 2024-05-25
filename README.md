@@ -1,4 +1,4 @@
-# Zuri Pocketmine-MP Anticheat
+# Zuri Pocketmine-MP Anticheat 🛡️
 **Zuri** is an anticheat made to protect the server from any may unfair advantages from the players. A powerful anticheat made to destroy hackers from your server for PocketMine-MP.
 
 **Zuri** attempts to enforce "vanilla Minecraft" mechanics, as well as preventing players from abusing weaknesses in Minecraft or its protocol, making your server more safe. Organized in different sections, various checks are performed to test players doing, covering a wide range including flying and speeding, fighting hacks, fast block breaking and nukers, inventory hacks, chat spam and other types of malicious behaviour.
@@ -16,21 +16,19 @@ Also, adding :star: a **Star** is also appreciated. ✨
 > ☢ For Plugin Developers:
 > The full documentation about API and it's usage is can be found in the [github wiki](https://github.com/ReinfyTeam/Zuri/wiki).
 
-# Why?
-- This plugin has total of 40+ checks that can catch hacker more efficient and no more false-positive! 😏
-
 > ![Zuri Anticheat Meme](/meme.jpg)
 >
 > Zuri can catch hacker efficiently, with over **40+ check modules**. Unlike other **$100 Anticheat**, it is more systematic, lightweight, and easy to configure. It's too good right? 🤦
 
 # Features
+- This plugin has total of 100+ checks that can catch hacker more efficient! 😏
 - You can easily configure everything in the config. ✅
   - Configure easily the max violations and checks and more! ⚙️
 - It is more **lightweight** compared to paid anticheat. You don't have to struggle about the performance, with this anticheat, it can possible block them all easily! 💰
 - ✨ It is easy to use when it comes at the game, you can easily debug things, manage them all at the game, and **disable checks** according to your command. 
 - ❌ Limit players joining by their ip limit, you can change and configure on how many players can join with same ip address. *(optional)*
 - 🌟 It also checks the player if they are using a **Proxy or VPN** *(optional)*
-- 💥 You can manage plugin at in-game using **UI** by using command! `/zuri ui`
+- 💥 You can manage plugin at the in-game using **Interactive UI** by using command! `/zuri ui`
 
 # Current Modules
 **BETA** - means to be in testing, and to be optimize in the next version. <br>
@@ -119,8 +117,6 @@ Also, adding :star: a **Star** is also appreciated. ✨
      - **A:** Check if the player is teleporting without actually use of teleportation.
 - **FastLadder** (BETA)
      - **A:** Check if the player is climbing fast in ladders.
-- **FastSwim** (DISABLED)
-     - **A:** Check if the player swimming so fast.
 - **Jesus** (DISABLED)
      - **A:** Check the player is walking through water.
 - **Omnisprint** (DISABLED)
@@ -133,8 +129,6 @@ Also, adding :star: a **Star** is also appreciated. ✨
      - **A:** Check if the player is climbing or abnormally moving upwards to non-climbable blocks.
 - **Step** (DISABLED)
      - **A:** Check if the player is moving upwards so fast.
-- **Velocity**
-     - **A:** Check the motion velocity of the player, calculate possible horizontal and vertical knockback.
 - **AntiBot**
      - **A:** Check if the player has a valid device os.
      - **B:** Check if the player is using hack client a.k.a. toolbox.
@@ -150,6 +144,7 @@ Also, adding :star: a **Star** is also appreciated. ✨
 - **Tower** (BETA)
      - **A:** Check if the player moving upwards straight while placing blocks check if the player is actually placing the block downwards.
 
-<hr>
-
-> **This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser *General Public License* as published by the __Free Software Foundation__, either version 3 of the License, or (at your option) any later version.**
+# Feedbacks and Issue''s
+- 😁 Your feedback and reviews are highly appriciated, if you ever find a bug or false-positive in certain modules, you can create an issue in our [github repository](https://github.com/ReinfyTeam/Zuri/issues)!
+- 👍 You can also view [Frequently asked questions article](https://github.com/ReinfyTeam/Zuri/wiki/FAQs) about common encountered issues to our plugin, be sure to read that before creating an issue!
+> Please wait for the developer response to the issue since we have high amount of task and issue that we to do fix also ;)

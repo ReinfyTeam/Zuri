@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\Discord;
+use function array_values;
 use function in_array;
 
 /**
@@ -62,11 +63,11 @@ final class API {
 	}
 
 	public static function getModule(string $name, string $subType) : ?Check {
-		if (in_array($name, APIProvider::Checks(), true)) {
+		if (in_array($name, ZuriAC::Checks(), true)) {
 			return null;
 		}
 
-		foreach (APIProvider::Checks() as $module) {
+		foreach (ZuriAC::Checks() as $module) {
 			if ($module->getName() === $name && $module->getSubType() === $subType) {
 				$result = $module;
 			}
@@ -76,8 +77,44 @@ final class API {
 		return $module;
 	}
 
+	public static function getAllChecks(bool $includeSubChecks = true) : array {
+		if ($includeSubChecks === false) {
+			$list = [];
+			foreach (ZuriAC::Checks() as $module) {
+				if (!isset($list[$module->getName()])) {
+					$list[$module->getName()] = $module;
+				}
+			}
+			return array_values($list);
+		}
+
+		return ZuriAC::Checks();
+	}
+
+	public static function getAllDisabledChecks(bool $includeSubChecks = true) : array {
+		$list = [];
+		foreach (self::getAllChecks($includeSubChecks) as $module) {
+			if (!$module->enable()) {
+				$list[] = $module;
+			}
+		}
+
+		return $list;
+	}
+
+	public static function getAllEnabledChecks(bool $includeSubChecks = true) : array {
+		$list = [];
+		foreach (self::getAllChecks($includeSubChecks) as $module) {
+			if ($module->enable()) {
+				$list[] = $module;
+			}
+		}
+
+		return $list;
+	}
+
 	public static function getAllModules() : array {
-		return APIProvider::Checks();
+		return ZuriAC::Checks();
 	}
 
 	public static function getConfig() : ConfigManager {

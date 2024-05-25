@@ -31,6 +31,10 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
+use pocketmine\entity\Attribute;
+use pocketmine\entity\Living;
+use pocketmine\math\Vector3;
+use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 use function array_keys;
 use function array_values;
@@ -39,6 +43,9 @@ use function is_bool;
 use function is_float;
 use function is_int;
 use function is_string;
+use function mt_getrandmax;
+use function mt_rand;
+use function sqrt;
 use function str_replace;
 
 class Utils {
@@ -86,5 +93,32 @@ class Utils {
 		}
 
 		return $text;
+	}
+
+	// Grabbed from PMMP LOL
+	public static function calculatePossibleKnockback(Player $player, float $x, float $z, float $force = Living::DEFAULT_KNOCKBACK_FORCE, ?float $verticalLimit = Living::DEFAULT_KNOCKBACK_VERTICAL_LIMIT) : ?Vector3 {
+		$f = sqrt($x * $x + $z * $z);
+		if ($f <= 0) {
+			return null;
+		}
+		if (mt_rand() / mt_getrandmax() > $player->getAttributeMap()->get(Attribute::KNOCKBACK_RESISTANCE)->getValue()) {
+			$f = 1 / $f;
+
+			$motionX = $player->getMotion()->x / 2;
+			$motionY = $player->getMotion()->y / 2;
+			$motionZ = $player->getMotion()->z / 2;
+			$motionX += $x * $f * $force;
+			$motionY += $force;
+			$motionZ += $z * $f * $force;
+
+			$verticalLimit ??= $force;
+			if ($motionY > $verticalLimit) {
+				$motionY = $verticalLimit;
+			}
+
+			return new Vector3($motionX, $motionY, $motionZ);
+		}
+
+		return null;
 	}
 }

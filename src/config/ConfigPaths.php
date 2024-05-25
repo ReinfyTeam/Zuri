@@ -38,6 +38,7 @@ abstract class ConfigPaths {
 	public const EDITIONFAKER_MESSAGE = "zuri.editionfaker.message";
 
 	public const NETWORK_LIMIT = "zuri.network.limit";
+	public const NETWORK_LIMIT_ENABLE = "zuri.network.enable";
 	public const NETWORK_MESSAGE = "zuri.network.message";
 
 	public const PING_NORMAL = "zuri.ping.normal";

@@ -14,6 +14,7 @@ zuri:
     editionfaker:
        message: "§cInvalid client!"
     network:
+        enable: false # If you are using WaterDogPE, considering using a plugin that supports login-extras to include their player public ip address on their login. This may cause iissue between login info's given by WaterDogPE proxy when using this ip limiter. Due the certain issues occured, this feature is now optional prior for the proxy issues.
         #This is to limit the player's access to the same address to the server.
         limit: 3
         message: "§cSorry the server can't allow access to cross the line."
@@ -39,7 +40,7 @@ zuri:
         ip: 127.0.0.1
         port: 19132
     alerts:
-        message: "{prefix} §f{player_name} §7failed §f{module} §7(§c{subtype}§7) §7VL §2{violation}"
+        message: "{prefix} §f{player_name} §7failed §f{module} §7(§c{subtype}§7) §7VL §2{realViolation}"
         enable: true
         admin: false #This will cause the in-game cheat detector to send it to the person with the permissions below
         permission: "zuri.admin"
@@ -51,7 +52,7 @@ zuri:
     detection:
         # Detections when suddenly triggered any checks that detects any kind of hack. This might spam your console or chat. NOT RECOMMENDED.
         enable: false
-        message: "{prefix} §f{player_name} §7suspected using §f{module} §7(§c{subtype}§7)"
+        message: "{prefix} §f{player_name} §7suspected using §f{module} §7(§c{subtype}§7) §7PRE-VL §2{violation}"
     kick:
         kickmessage: "§fYou have been kicked from the server."
         message: "{prefix} §f{player_name} §chas been kicked from server for hacking or abuse."
@@ -318,11 +319,7 @@ zuri:
             punishment: KICK
             constants:
                   max-pitch: 92
-        fastswim: # Todo: Improve in next versions, fix false-positive in potions..
-            enable: false
-            maxvl: 1
-            punishment: KICK
-        clicktp: # Todo: Improve in next versions. False-positive in laggy player...
+        clicktp: # Todo: Improve in next versions. False-positive in laggy players...
             enable: false
             maxvl: 1
             punishment: FLAG
@@ -377,12 +374,6 @@ zuri:
             maxvl: 5
             punishment: KICK
             constants:
-                  margin-error: 0.1
-        velocity:
-            enable: true
-            maxvl: 5
-            punishment: KICK
-            constants:
-                  knockback-factor: 0.4
-                  tolerance: 0.8
+                  margin-error: 0.8
+                  invalid-pitch: 45
 ...

@@ -35,11 +35,13 @@ use pocketmine\player\Player;
 use pocketmine\utils\NotCloneable;
 use pocketmine\utils\NotSerializable;
 use pocketmine\utils\TextFormat;
+use ReinfyTeam\Zuri\API;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\ZuriAC;
 use function intval;
+use function is_bool;
 use function strtolower;
 
 final class FormSender extends ConfigManager {
@@ -57,10 +59,10 @@ final class FormSender extends ConfigManager {
 					self::ManageModules($player);
 					break;
 				case 1:
-					self::ModifyCaptcha($player);
+					self::CaptchaSettings($player);
 					break;
 				case 2:
-					self::ChangePunishment($player);
+					self::AdminSettings($player);
 					break;
 				case 3:
 					self::AdvanceTools($player);
@@ -68,11 +70,11 @@ final class FormSender extends ConfigManager {
 			}
 		});
 
-		$form->setTitle("Zuri AdminUI Manager");
+		$form->setTitle("Anticheat Manager");
 		$form->setContent("Choose what do you want to set..");
 		$form->addButton("Manage Modules");
-		$form->addButton("Modify Captcha");
-		$form->addButton("Change Punishment");
+		$form->addButton("Captcha Settings");
+		$form->addButton("Admin Settings");
 		$form->addButton("Advance Tools");
 		$player->sendForm($form);
 	}
@@ -99,130 +101,137 @@ final class FormSender extends ConfigManager {
 		});
 
 		$form->setTitle("Manage Modules");
-		$form->setContent(($reloaded ? TextFormat::GREEN . "Successfully reloaded all of the modules!" : "Choose what do you want to manage.."));
+		$form->setContent(($reloaded ? "Successfully reloaded all of the modules!" : "Choose what do you want to manage.."));
 		$form->addButton("Enable/Disable Modules");
 		$form->addButton("Module Information");
 		$form->addButton("Reload all modules");
 		$player->sendForm($form);
 	}
 
-	public static function ModifyCaptcha(Player $player) : void {
-		$form = new SimpleForm(function(Player $player, $data) {
+	public static function CaptchaSettings(Player $player, bool $updated = false) : void {
+		$form = new CustomForm(function(Player $player, $data) {
 			if ($data === null) {
 				self::MainUI($player);
 				return;
 			}
 
-			switch($data) {
-				case 0:
-					self::setData(self::CAPTCHA_ENABLE, !self::getData(self::CAPTCHA_ENABLE));
-					self::ModifyCaptcha($player);
-					break;
-				case 1:
-					self::AdjustCodeLength($player);
-					break;
-				case 2:
-					self::ModifySendType($player);
-					break;
+			self::setData(self::CAPTCHA_ENABLE, $data[1]);
+
+			if ($data[1]) {
+				self::setData(self::CAPTCHA_CODE_LENGTH, $data[2]);
+
+				if (!self::getData(self::CAPTCHA_RANDOMIZE)) {
+					self::setData(self::CAPTCHA_TIP, $data[3]);
+					self::setData(self::CAPTCHA_MESSAGE, $data[4]);
+					self::setData(self::CAPTCHA_TITLE, $data[5]);
+					self::setData(self::CAPTCHA_RANDOMIZE, $data[6]);
+				} else {
+					self::setData(self::CAPTCHA_RANDOMIZE, $data[4]);
+				}
 			}
+
+			self::CaptchaSettings($player, true);
 		});
 
-		$form->setTitle("Modify Captcha");
-		$form->setContent("Choose what do you want to modify..");
-		$form->addButton("Status: " . (self::getData(self::CAPTCHA_ENABLE) ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled"));
-		$form->addButton("Adjust Code Length");
-		$form->addButton("Modify send type");
+		$form->setTitle("Captcha Settings");
+		$form->addLabel(($updated ? "Updated Successfully!" : "Choose what do you want to modify.."));
+		$form->addToggle("Enable Captcha", self::getData(self::CAPTCHA_ENABLE));
+		if (self::getData(self::CAPTCHA_ENABLE)) {
+			$form->addSlider("Length of Code", 1, 15, -1, intval(self::getData(self::CAPTCHA_CODE_LENGTH)));
+			if (!self::getData(self::CAPTCHA_RANDOMIZE)) {
+				$form->addToggle("Send Tip", self::getData(self::CAPTCHA_TIP));
+				$form->addToggle("Send Message", self::getData(self::CAPTCHA_MESSAGE));
+				$form->addToggle("Send Title", self::getData(self::CAPTCHA_TITLE));
+			}
+			if (self::getData(self::CAPTCHA_RANDOMIZE)) {
+				$form->addLabel(TextFormat::RED . "When Random Send Type is on, to choose send type, please turn off first the random send type!");
+			}
+			$form->addToggle("Randomize Send Type", self::getData(self::CAPTCHA_RANDOMIZE));
+		}
 		$player->sendForm($form);
 	}
 
-	public static function ChangePunishment(Player $player) : void {
-		$form = new SimpleForm(function(Player $player, $data) {
+	public static function AdminSettings(Player $player, bool $updated = false) : void {
+		$form = new CustomForm(function(Player $player, $data) {
 			if ($data === null) {
 				self::MainUI($player);
 				return;
 			}
 
-			switch($data) {
-				case 0:
-					self::setData(self::BAN_ENABLE, !self::getData(self::BAN_ENABLE));
-					break;
-				case 1:
-					self::setData(self::KICK_ENABLE, !self::getData(self::KICK_ENABLE));
-					break;
-				case 2:
-					self::setData(self::PERMISSION_BYPASS_ENABLE, !self::getData(self::PERMISSION_BYPASS_ENABLE));
-					break;
-				case 3:
-					self::setData(self::ALERTS_ENABLE, !self::getData(self::ALERTS_ENABLE));
-					break;
-				case 4:
-					self::setData(self::DETECTION_ENABLE, !self::getData(self::DETECTION_ENABLE));
-					break;
+			self::setData(self::BAN_ENABLE, $data[1]);
+			self::setData(self::KICK_ENABLE, $data[2]);
+			self::setData(self::PERMISSION_BYPASS_ENABLE, $data[3]);
+			self::setData(self::ALERTS_ENABLE, $data[4]);
+			self::setData(self::DETECTION_ENABLE, $data[5]);
+			self::setData(self::NETWORK_LIMIT_ENABLE, $data[6]);
+			if ($data[6] === true && isset($data[7])) { // idk why this is crashing.. i think the variable isn't updated yet.. Probably this is the fix for it LOL :(
+				self::setData(self::NETWORK_LIMIT, $data[7]);
 			}
-
-			self::ChangePunishment($player);
+			self::AdminSettings($player, true);
 		});
 
-		$form->setTitle("Change Punishment");
-		$form->setContent("Choose what do you want to change..");
-		$form->addButton("Ban Mode: " . (self::getData(self::BAN_ENABLE) ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No"));
-		$form->addButton("Kick Mode: " . (self::getData(self::KICK_ENABLE) ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No"));
-		$form->addButton("Bypass Mode: " . (self::getData(self::PERMISSION_BYPASS_ENABLE) ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No"));
-		$form->addButton("Alert Failed Message: " . (self::getData(self::ALERTS_ENABLE) ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No"));
-		$form->addButton("Detection Message: " . (self::getData(self::DETECTION_ENABLE) ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No"));
+		$form->setTitle("Admin Settings");
+		$form->addLabel(($updated ? "Updated Successfully!" : "Choose what do you want to change.."));
+		$form->addToggle("Ban Mode", self::getData(self::BAN_ENABLE));
+		$form->addToggle("Kick Mode", self::getData(self::KICK_ENABLE));
+		$form->addToggle("Bypass Permission", self::getData(self::PERMISSION_BYPASS_ENABLE));
+		$form->addToggle("Admin Alerts", self::getData(self::ALERTS_ENABLE));
+		$form->addToggle("PreVL Detections", self::getData(self::DETECTION_ENABLE));
+		$form->addToggle("Network IP Limit", self::getData(self::NETWORK_LIMIT_ENABLE));
+		if (self::getData(self::NETWORK_LIMIT_ENABLE)) {
+			$form->addSlider("Player IP Limit", 1, 100, -1, intval(self::getData(self::NETWORK_LIMIT)));
+		}
 		$player->sendForm($form);
 	}
 
-	public static function AdvanceTools(Player $player) : void {
-		$form = new SimpleForm(function(Player $player, $data) {
+	public static function AdvanceTools(Player $player, bool $updated = false) : void {
+		$form = new CustomForm(function(Player $player, $data) {
 			if ($data === null) {
 				self::MainUI($player);
 				return;
 			}
 
-			switch($data) {
-				case 0:
-					PlayerAPI::getAPIPlayer($player)->setDebug(!PlayerAPI::getAPIPlayer($player)->isDebug());
-					break;
-				case 1:
-					self::setData(self::PROXY_ENABLE, !self::getData(self::PROXY_ENABLE));
-					break;
-				case 2:
-					self::setData(self::DISCORD_ENABLE, !self::getData(self::DISCORD_ENABLE));
-					break;
-			}
-
-			self::AdvanceTools($player);
+			PlayerAPI::getAPIPlayer($player)->setDebug($data[1]);
+			self::setData(self::PROXY_ENABLE, $data[2]);
+			self::setData(self::DISCORD_ENABLE, $data[3]);
+			self::AdvanceTools($player, true);
 		});
 
 		$form->setTitle("Advance Tools");
-		$form->setContent("Choose what do you want to select..");
-		$form->addButton("Debug Mode: " . (PlayerAPI::getAPIPlayer($player)->isDebug() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled"));
-		$form->addButton("Proxy: " . (self::getData(self::PROXY_ENABLE) ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled"));
-		$form->addButton("Discord Webhook: " . (self::getData(self::DISCORD_ENABLE) ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled"));
+		$form->addLabel(($updated ? "Updated Successfully!" : "Choose what do you want to toggle.."));
+		$form->addToggle("Debug Mode", PlayerAPI::getAPIPlayer($player)->isDebug());
+		$form->addToggle("ProxyUDP (Beta)", self::getData(self::PROXY_ENABLE));
+		$form->addToggle("Discord Webhook Alerts", self::getData(self::DISCORD_ENABLE));
 		$player->sendForm($form);
 	}
 
 	public static function ToggleModules(Player $player, bool $toggled = false) : void {
-		$form = new SimpleForm(function(Player $player, $data) {
+		$form = new CustomForm(function(Player $player, $data) {
 			if ($data === null) {
 				self::ManageModules($player);
 				return;
 			}
 
-			self::setData(self::CHECK . "." . strtolower($data) . ".enable", !self::getData(self::CHECK . "." . strtolower($data) . ".enable"));
+			// Just to filter the non-bool variable in the data.
+			$status = [];
+			foreach ($data as $toggle) {
+				if (is_bool($toggle)) {
+					$status[] = $toggle;
+				}
+			}
+
+			foreach ($status as $index => $toggle) {
+				$module = API::getAllChecks(false)[$index];
+				self::setData(self::CHECK . "." . strtolower($module->getName()) . ".enable", $toggle);
+			}
 			self::ToggleModules($player, true);
 		});
 
 		$form->setTitle("Toggle Modules");
-		$form->setContent(($toggled ? TextFormat::GREEN . "Toggled successfully!" : "Choose what do you want to toggle.."));
+		$form->addLabel(($toggled ? "Toggled successfully!" : "Choose what do you want to toggle.."));
 
-		$list = [];
-		foreach (ZuriAC::Checks() as $check) {
-			if (!isset($list[$check->getName()])) {
-				$list[$check->getName()] = $check->enable();
-				$form->addButton(TextFormat::AQUA . $check->getName() . "\n" . TextFormat::DARK_GRAY . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled"), 0, "", $check->getName());
-			}
+		foreach (API::getAllChecks(false) as $check) {
+			$form->addToggle($check->getName(), $check->enable());
 		}
 
 		$player->sendForm($form);
@@ -250,7 +259,7 @@ final class FormSender extends ConfigManager {
 		foreach (ZuriAC::Checks() as $check) {
 			if (!isset($list[$check->getName()])) {
 				$list[$check->getName()] = $check->enable();
-				$form->addButton(TextFormat::AQUA . $check->getName() . TextFormat::GRAY . "\nClick to view information.", 0, "", $check->getName());
+				$form->addButton($check->getName() . "\nClick to view information.", 0, "", $check->getName());
 			}
 		}
 
@@ -268,8 +277,8 @@ final class FormSender extends ConfigManager {
 		});
 
 		$form->setTitle($check->getName() . " Information");
-		$form->setContent(TextFormat::RESET . "Name: " . TextFormat::YELLOW . $check->getName() . "\n" . TextFormat::RESET . "Sub Types: " . TextFormat::YELLOW . $check->getAllSubTypes() . "\n" . TextFormat::RESET . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . "\n" . TextFormat::RESET . "Ban: " . ($check->getPunishment() === "ban" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Kick: " . ($check->getPunishment() === "kick" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Captcha: " . ($check->getPunishment() === "captcha" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Flag: " . ($check->getPunishment() === "flag" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Max Violation: " . TextFormat::YELLOW . self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
-		if ($check->maxViolations() !== 0) {
+		$form->setContent(TextFormat::RESET . "Name: " . TextFormat::YELLOW . $check->getName() . "\n" . TextFormat::RESET . "Sub Types: " . TextFormat::YELLOW . $check->getAllSubTypes() . "\n" . TextFormat::RESET . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . "\n" . TextFormat::RESET . "Ban: " . ($check->getPunishment() === "ban" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Kick: " . ($check->getPunishment() === "kick" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Captcha: " . ($check->getPunishment() === "captcha" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Flag: " . ($check->getPunishment() === "flag" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "PreVL Max Violation: " . TextFormat::YELLOW . ($check->maxViolations() === 0 ? "Instant Fail" : $check->maxViolations()) . "\n" . TextFormat::RESET . "Max Violation: " . TextFormat::YELLOW . (self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl") === 0 ? "Instant Punishment" : self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl"))); // bullshit this is so long..
+		if (self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl") !== 0) {
 			$form->addButton("Change MaxVL");
 		}
 		$player->sendForm($form);
@@ -291,68 +300,6 @@ final class FormSender extends ConfigManager {
 		$form->setTitle($check->getName() . " MaxVL");
 		$form->addLabel(($saved ? TextFormat::GREEN . "Modified successfully!" : "Modify the slider do you want to set.."));
 		$form->addSlider("MaxVL", 0, 100, -1, intval(self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl")));
-		$player->sendForm($form);
-	}
-
-	public static function AdjustCodeLength(Player $player, bool $saved = false) : void {
-		$form = new CustomForm(function(Player $player, $data) {
-			if ($data === null) {
-				return;
-			}
-
-			if ($data[1] !== null) {
-				self::setData(self::CAPTCHA_CODE_LENGTH, intval($data[1]));
-				self::ModifyCaptcha($player, true);
-			}
-		});
-
-		$form->setTitle("Captcha Code Generator");
-		$form->addLabel(($saved ? TextFormat::GREEN . "Changed successfully!" : "Modify the slider do you want to set.."));
-		$form->addSlider("Length of Code", 1, 15, -1, intval(self::getData(self::CAPTCHA_CODE_LENGTH)));
-		$player->sendForm($form);
-	}
-
-	public static function ModifySendType(Player $player, bool $saved = false) : void {
-		$form = new CustomForm(function(Player $player, $data) {
-			if ($data === null) {
-				return;
-			}
-			if (self::getData(self::CAPTCHA_RANDOMIZE)) {
-				if ($data[2] !== null) {
-					self::setData(self::CAPTCHA_RANDOMIZE, $data[2]);
-				}
-			} else {
-				if ($data[1] !== null) {
-					self::setData(self::CAPTCHA_TIP, $data[1]);
-				}
-
-				if ($data[2] !== null) {
-					self::setData(self::CAPTCHA_MESSAGE, $data[2]);
-				}
-
-				if ($data[3] !== null) {
-					self::setData(self::CAPTCHA_TITLE, $data[3]);
-				}
-
-				if ($data[4] !== null) {
-					self::setData(self::CAPTCHA_RANDOMIZE, $data[4]);
-				}
-			}
-
-			self::ModifyCaptcha($player, true);
-		});
-
-		$form->setTitle("Modify Send Type");
-		$form->addLabel(($saved ? TextFormat::GREEN . "Modified successfully!" : "Modify the what do you want to set.."));
-		if (!self::getData(self::CAPTCHA_RANDOMIZE)) {
-			$form->addToggle("Send Tip", self::getData(self::CAPTCHA_TIP));
-			$form->addToggle("Send Message", self::getData(self::CAPTCHA_MESSAGE));
-			$form->addToggle("Send Title", self::getData(self::CAPTCHA_TITLE));
-		}
-		if (self::getData(self::CAPTCHA_RANDOMIZE)) {
-			$form->addLabel(TextFormat::RED . "When Random Send Type is on, to choose send type, please turn off first the random send type!");
-		}
-		$form->addToggle("Randomize Send Type", self::getData(self::CAPTCHA_RANDOMIZE));
 		$player->sendForm($form);
 	}
 }

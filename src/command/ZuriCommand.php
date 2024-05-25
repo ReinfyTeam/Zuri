@@ -36,6 +36,7 @@ use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginOwned;
 use pocketmine\utils\TextFormat;
+use ReinfyTeam\Zuri\API;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\forms\FormSender;
@@ -66,7 +67,9 @@ class ZuriCommand extends Command implements PluginOwned {
 				case "about":
 				case "info":
 					$sender->sendMessage(TextFormat::AQUA . "Build: " . TextFormat::GRAY . ZuriAC::getInstance()->getDescription()->getVersion() . TextFormat::AQUA . " Author: " . TextFormat::GRAY . ZuriAC::getInstance()->getDescription()->getAuthors()[0]);
-					$sender->sendMessage(TextFormat::AQUA . "Total Checks: " . TextFormat::GRAY . count(ZuriAC::Checks()));
+					$sender->sendMessage(TextFormat::AQUA . "Total Enabled Checks: " . TextFormat::GRAY . count(API::getAllEnabledChecks(true)) . " (With SubTypes: " . count(API::getAllEnabledChecks(false)) . ")");
+					$sender->sendMessage(TextFormat::AQUA . "Total Disabled Checks: " . TextFormat::GRAY . count(API::getAllDisabledChecks(true)) . " (With SubTypes: " . count(API::getAllDisabledChecks(false)) . ")");
+					$sender->sendMessage(TextFormat::AQUA . "Total All Checks: " . TextFormat::GRAY . count(API::getAllChecks(true)) . " (With SubTypes: " . count(API::getAllChecks(false)) . ")");
 					break;
 				case "notify":
 				case "notification":

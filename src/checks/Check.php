@@ -106,6 +106,11 @@ abstract class Check extends ConfigManager {
 		}
 
 		$player = $playerAPI->getPlayer();
+
+		if ($player === null) {
+			return false;
+		}
+
 		$notify = self::getData(self::ALERTS_ENABLE) === true;
 		$detectionsAllowedToSend = self::getData(self::DETECTION_ENABLE) === true;
 		$bypass = self::getData(self::PERMISSION_BYPASS_ENABLE) === true && $player->hasPermission(self::getData(self::PERMISSION_BYPASS_PERMISSION));

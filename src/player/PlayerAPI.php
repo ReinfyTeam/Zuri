@@ -39,6 +39,8 @@ use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
 use ReflectionProperty;
 use ReinfyTeam\Zuri\ZuriAC;
+use function abs;
+use function count;
 use function microtime;
 
 class PlayerAPI implements IPlayerAPI {
@@ -528,13 +530,9 @@ class PlayerAPI implements IPlayerAPI {
 	//Violation
 	public function getViolation(string $supplier) : int {
 		if (isset($this->violations[$name = $this->player][$supplier])) {
-			return $this->violations[$name][$supplier]["vl"];
+			return count($this->violations[$name][$supplier]);
 		}
-		return 1;
-	}
-
-	public function setViolation(string $supplier, int $amount) : void {
-		$this->violations[$this->player][$supplier]["vl"] = $amount;
+		return 0;
 	}
 
 	public function resetViolation(string $supplier) : void {
@@ -543,29 +541,24 @@ class PlayerAPI implements IPlayerAPI {
 		}
 	}
 
-	public function addViolation(string $supplier) : void {
+	public function addViolation(string $supplier, int|float $amount = 1) : void {
 		if (isset($this->violations[$name = $this->player][$supplier])) {
-			$delayTime = microtime(true) - $this->violations[$name][$supplier]["time"];
-			if ($delayTime < 150) {
-				$this->violations[$name][$supplier]["vl"] += 1;
-			} else {
-				unset($this->violations[$name][$supplier]);
+			foreach ($this->violations[$name][$supplier] as $index => $time) {
+				if (abs($time - microtime(true)) * 20 > 40) {
+					unset($this->violations[$name][$supplier][$index]);
+				}
 			}
-		} else {
-			$this->violations[$name][$supplier] = ["vl" => 1, "time" => microtime(true)];
 		}
+
+		$this->violations[$name][$supplier][] = microtime(true);
 	}
 
 	//Real violation
 	public function getRealViolation(string $supplier) : int {
 		if (isset($this->realViolations[$name = $this->player][$supplier])) {
-			return $this->realViolations[$name][$supplier]["vl"];
+			return count($this->realViolations[$name][$supplier]);
 		}
 		return 0;
-	}
-
-	public function setRealViolation(string $supplier, int $amount) : void {
-		$this->realViolations[$this->player][$supplier]["vl"] = $amount;
 	}
 
 	public function resetRealViolation(string $supplier) : void {
@@ -574,17 +567,16 @@ class PlayerAPI implements IPlayerAPI {
 		}
 	}
 
-	public function addRealViolation(string $supplier) : void {
+	public function addRealViolation(string $supplier, int|float $amount = 1) : void {
 		if (isset($this->realViolations[$name = $this->player][$supplier])) {
-			$delayTime = microtime(true) - $this->realViolations[$name][$supplier]["time"];
-			if ($delayTime < 300) {
-				$this->realViolations[$name][$supplier]["vl"] += 1;
-			} else {
-				unset($this->realViolations[$name][$supplier]);
+			foreach ($this->realViolations[$name][$supplier] as $index => $time) {
+				if (abs($time - microtime(true)) * 20 > 300) {
+					unset($this->realViolations[$name][$supplier][$index]);
+				}
 			}
-		} else {
-			$this->realViolations[$name][$supplier] = ["vl" => 1, "time" => microtime(true)];
 		}
+
+		$this->realViolations[$name][$supplier][] = microtime(true);
 	}
 
 	//Location
