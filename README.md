@@ -21,7 +21,7 @@ Also, adding :star: a **Star** is also appreciated. ✨
 > Zuri can catch hacker efficiently, with over **40+ check modules**. Unlike other **$100 Anticheat**, it is more systematic, lightweight, and easy to configure. It's too good right? 🤦
 
 # Features
-- This plugin has total of 100+ checks that can catch hacker more efficient! 😏
+- This plugin has total of 63+ checks that can catch hacker more efficient! 😏
 - You can easily configure everything in the config. ✅
   - Configure easily the max violations and checks and more! ⚙️
 - It is more **lightweight** compared to paid anticheat. You don't have to struggle about the performance, with this anticheat, it can possible block them all easily! 💰
