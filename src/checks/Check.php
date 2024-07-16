@@ -33,7 +33,7 @@ namespace ReinfyTeam\Zuri\checks;
 
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\event\Event;
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\events\api\CheckFailedEvent;
@@ -50,13 +50,13 @@ use function microtime;
 use function strtolower;
 
 abstract class Check extends ConfigManager {
-	public abstract function getName() : string;
+	abstract public function getName() : string;
 
-	public abstract function getSubType() : string;
+	abstract public function getSubType() : string;
 
-	public abstract function maxViolations() : int;
+	abstract public function maxViolations() : int;
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -83,7 +83,7 @@ abstract class Check extends ConfigManager {
 
 	public function getAllSubTypes() : string {
 		$list = [];
-		foreach (ZuriAC::Checks() as $check) {
+		foreach (ZuriAC::getChecks() as $check) {
 			if ($check->getName() === $this->getName() && !in_array($check->getSubType(), $list, true)) {
 				$list[] = $check->getSubType();
 			}
@@ -106,10 +106,6 @@ abstract class Check extends ConfigManager {
 		}
 
 		$player = $playerAPI->getPlayer();
-
-		if ($player === null) {
-			return false;
-		}
 
 		$notify = self::getData(self::ALERTS_ENABLE) === true;
 		$detectionsAllowedToSend = self::getData(self::DETECTION_ENABLE) === true;
@@ -141,18 +137,20 @@ abstract class Check extends ConfigManager {
 
 		if ($reachedMaxViolations) {
 			$playerAPI->addRealViolation($this->getName());
-			ZuriAC::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
+			$message = ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType());
+			ZuriAC::getInstance()->getServer()->getLogger()->info($message);
 			foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 				if ($p->hasPermission("zuri.admin")) {
-					$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
+					$p->sendMessage($message);
 				}
 			}
 		} else {
 			if ($detectionsAllowedToSend) {
-				ZuriAC::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, self::getData(self::DETECTION_MESSAGE), $this->getName(), $this->getSubType()));
+				$message = ReplaceText::replace($playerAPI, self::getData(self::DETECTION_MESSAGE), $this->getName(), $this->getSubType());
+				ZuriAC::getInstance()->getServer()->getLogger()->info($message);
 				foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 					if ($p->hasPermission("zuri.admin")) {
-						$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::DETECTION_MESSAGE), $this->getName(), $this->getSubType()));
+						$p->sendMessage($message);
 					}
 				}
 			}

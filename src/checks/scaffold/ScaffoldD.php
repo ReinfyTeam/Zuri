@@ -33,7 +33,7 @@ namespace ReinfyTeam\Zuri\checks\scaffold;
 
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
@@ -50,15 +50,12 @@ class ScaffoldD extends Check {
 		return 1;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
 			$this->debug($playerAPI, "isItemInHandNull=" . $playerAPI->getPlayer()->getInventory()->getItemInHand()->isNull());
 			if ($playerAPI->getPlayer()->getInventory()->getItemInHand()->isNull()) {
 				$this->failed($playerAPI);

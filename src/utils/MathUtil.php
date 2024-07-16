@@ -38,7 +38,7 @@ use function pow;
 use function sqrt;
 
 class MathUtil {
-	public static function getVectorOnEyeHeight(PlayerAPI $playerAPI) {
+	public static function getVectorOnEyeHeight(PlayerAPI $playerAPI) : Vector3 {
 		return $playerAPI->getPlayer()->getLocation()->add(0, $playerAPI->getPlayer()->getEyeHeight(), 0);
 	}
 
@@ -46,11 +46,11 @@ class MathUtil {
 		return ($playerAPI->getPlayer()->getDirectionVector() ?? $playerAPI->getPlayer()->getLocation())->multiply($distance);
 	}
 
-	public static function distance(Vector3 $from, Vector3 $to) {
-		return sqrt(pow($from->getX() - $to->getX(), 2) + pow($from->getY() - $to->getY(), 2) + pow($from->getZ() - $to->getZ(), 2));
+	public static function distance(Vector3 $from, Vector3 $to) : float {
+		return sqrt((($from->getX() - $to->getX()) ** 2) + (($from->getY() - $to->getY()) ** 2) + (($from->getZ() - $to->getZ()) ** 2));
 	}
 
-	public static function pingFormula(float $ping) {
+	public static function pingFormula(float $ping) : int {
 		return (int) ceil($ping / 50);
 	}
 

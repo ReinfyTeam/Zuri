@@ -118,11 +118,11 @@ interface IPlayerAPI {
 
 	public function getLastGroundY() : float;
 
-	public function setlastGroundY(float $data) : void;
+	public function setLastGroundY(float $data) : void;
 
 	public function getLastNoGroundY() : float;
 
-	public function setlastNoGroundY(float $data) : void;
+	public function setLastNoGroundY(float $data) : void;
 
 	public function getLastDelayedMovePacket() : float;
 

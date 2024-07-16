@@ -35,7 +35,7 @@ use pocketmine\block\BlockTypeIds;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
 use ReinfyTeam\Zuri\checks\Check;
@@ -64,14 +64,11 @@ class KillAuraC extends Check {
 		}
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
 		if ($playerAPI->getAttackTicks() > 40 || $this->interact) {
 			return;
 		}
 		$player = $playerAPI->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		$locPlayer = $player->getLocation();
 		$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
 		$from = new Vector3($locPlayer->getX(), $locPlayer->getY() + $player->getEyeHeight(), $locPlayer->getZ());
@@ -79,7 +76,7 @@ class KillAuraC extends Check {
 		$distance = MathUtil::distance($from, $to);
 		$vector = $to->subtract($from->x, $from->y, $from->z)->normalize()->multiply(1);
 		$entities = [];
-		for ($i = 0; $i <= $distance; $i += 1) {
+		for ($i = 0; $i <= $distance; ++$i) {
 			$from = $from->add($vector->x, $vector->y, $vector->z);
 			foreach ($player->getWorld()->getEntities() as $target) {
 				$distanceA = new Vector3($from->x, $from->y, $from->z);

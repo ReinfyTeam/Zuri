@@ -33,12 +33,12 @@ namespace ReinfyTeam\Zuri\player;
 
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Location;
+use pocketmine\inventory\PlayerInventory;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
 use ReflectionProperty;
-use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function count;
 use function microtime;
@@ -48,11 +48,11 @@ class PlayerAPI implements IPlayerAPI {
 	public static array $players = [];
 
 	public static function getAPIPlayer(Player $player) : PlayerAPI {
-		return self::$players[$player->getUniqueId()->__toString()] ??= new PlayerAPI($player->getName());
+		return self::$players[spl_object_id($player)] ??= new PlayerAPI($player);
 	}
 
 	public static function removeAPIPlayer(Player $player) : void {
-		unset(self::$players[$player->getUniqueId()->__toString()]);
+		unset(self::$players[spl_object_id($player)]);
 	}
 
 	private bool $isCaptcha = false;
@@ -96,12 +96,12 @@ class PlayerAPI implements IPlayerAPI {
 	private array $externalData = [];
 	private string $captchaCode = "nocode";
 
-	public function __construct(private string $player) {
+	public function __construct(private Player $player) {
 		// no-op
 	}
 
-	public function getPlayer() : ?Player {
-		return ZuriAC::getInstance()->getServer()->getPlayerExact($this->player);
+	public function getPlayer() : Player {
+		return $this->player;
 	}
 
 	//Captcha
@@ -123,7 +123,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function isCurrentChunkIsLoaded() : bool {
-		return $this->getPlayer()->getWorld()->isInLoadedTerrain($this->getPlayer()->getLocation());
+		return $this->player->getWorld()->isInLoadedTerrain($this->player->getLocation());
 	}
 
 	//Break many blocks just one time break (This can check NUKER PLAYER)
@@ -244,26 +244,26 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Sprinting
 	public function isSprinting() : bool {
-		return $this->getPlayer()->isSprinting();
+		return $this->player->isSprinting();
 	}
 
 	public function setSprinting(bool $data) : void {
-		$this->getPlayer()->setSprinting($data);
+		$this->player->setSprinting($data);
 	}
 
 	//On ground
 	public function isOnGround() : bool {
-		if ($this->getPlayer() === null) {
+		if ($this->player === null) {
 			return false;
 		}
-		return $this->getPlayer()->onGround;
+		return $this->player->onGround;
 	}
 
 	public function setOnGround(bool $data) : void {
-		if ($this->getPlayer() === null) {
+		if ($this->player === null) {
 			return;
 		}
-		$this->getPlayer()->onGround = $data;
+		$this->player->onGround = $data;
 	}
 
 	//Sniffing
@@ -304,27 +304,21 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Digging
 	public function isDigging() : bool {
-		if ($this->getBlockBreakHandler() !== null) {
-			return true;
-		}
-		return false;
+		return $this->getBlockBreakHandler() !== null;
 	}
 
 	private function getBlockBreakHandler() : ?SurvivalBlockBreakHandler {
 		static $ref = null;
-		if ($this->getPlayer() === null) {
-			return null;
-		}
 		if ($ref === null) {
-			$ref = new ReflectionProperty(Player::class, "blockBreakHandler");
+			$ref = new ReflectionProperty($this->player, "blockBreakHandler");
 		}
-		return $ref->getValue($this->getPlayer());
+		return $ref->getValue($this->player);
 	}
 
 	//In Web
 	public function isInWeb() : bool {
-		$world = $this->getPlayer()->getWorld();
-		$location = $this->getPlayer()->getLocation();
+		$world = $this->player->getWorld();
+		$location = $this->player->getLocation();
 		$blocksAround = [
 			$world->getBlock($location),
 			$world->getBlock($location->add(0, 1, 0)),
@@ -342,8 +336,8 @@ class PlayerAPI implements IPlayerAPI {
 
 	//In Box Block
 	public function isInBoxBlock() : bool {
-		$world = $this->getPlayer()->getWorld();
-		$location = $this->getPlayer()->getLocation();
+		$world = $this->player->getWorld();
+		$location = $this->player->getLocation();
 		$blocksAround = [
 			$world->getBlock($location->getSide(Facing::NORTH)->add(0, 1, 0)),
 			$world->getBlock($location->getSide(Facing::WEST)->add(0, 1, 0)),
@@ -359,14 +353,15 @@ class PlayerAPI implements IPlayerAPI {
 
 	// is in bounding box
 	public function isInBoundingBox() : bool {
-		$player = $this->getPlayer();
+		$player = $this->player;
 		$pos = $player->getPosition();
+		$world = $player->getWorld();
 		foreach ([
-			$player->getWorld()->getBlock(new Vector3($pos->x + 1, $pos->y, $pos->z)),
-			$player->getWorld()->getBlock(new Vector3($pos->x - 1, $pos->y, $pos->z)),
-			$player->getWorld()->getBlock(new Vector3($pos->x, $pos->y, $pos->z + 1)),
-			$player->getWorld()->getBlock(new Vector3($pos->x, $pos->y, $pos->z - 1)),
-			$player->getWorld()->getBlock(new Vector3($pos->x, $pos->y + 1, $pos->z)),
+			$world->getBlock(new Vector3($pos->x + 1, $pos->y, $pos->z)),
+			$world->getBlock(new Vector3($pos->x - 1, $pos->y, $pos->z)),
+			$world->getBlock(new Vector3($pos->x, $pos->y, $pos->z + 1)),
+			$world->getBlock(new Vector3($pos->x, $pos->y, $pos->z - 1)),
+			$world->getBlock(new Vector3($pos->x, $pos->y + 1, $pos->z)),
 		] as $block) {
 			if ($block->isSolid()) {
 				return true;
@@ -381,7 +376,7 @@ class PlayerAPI implements IPlayerAPI {
 		return $this->lastGroundY;
 	}
 
-	public function setlastGroundY(float $data) : void {
+	public function setLastGroundY(float $data) : void {
 		$this->lastGroundY = $data;
 	}
 
@@ -390,7 +385,7 @@ class PlayerAPI implements IPlayerAPI {
 		return $this->lastNoGroundY;
 	}
 
-	public function setlastNoGroundY(float $data) : void {
+	public function setLastNoGroundY(float $data) : void {
 		$this->lastNoGroundY = $data;
 	}
 
@@ -405,11 +400,10 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Ping
 	public function getPing() : float {
-		if (!$this->getPlayer()->isConnected() && !$this->getPlayer()->spawned) {
+		if (!$this->player->isConnected()) {
 			return 0.0;
-		} // always check first if player is currently connected before initilizing the main ping. This fixes the player if it is currently connected and ping has been initilized as well. Also, checking first player if its spawn is necessary to do checking after player is spawned as well.
-
-		return $this->getPlayer()->getNetworkSession()->getPing() === null ? 0.0 : $this->getPlayer()->getNetworkSession()->getPing(); // TODO: 0.0 frrr ping?
+		}
+		return ((float) $this->player->getNetworkSession()->getPing()) ?? 0.0; // TODO: 0.0 frrr ping?
 	}
 
 	//CPS
@@ -529,54 +523,54 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Violation
 	public function getViolation(string $supplier) : int {
-		if (isset($this->violations[$name = $this->player][$supplier])) {
-			return count($this->violations[$name][$supplier]);
+		if (isset($this->violations[$supplier])) {
+			return count($this->violations[$supplier]);
 		}
 		return 0;
 	}
 
 	public function resetViolation(string $supplier) : void {
-		if (isset($this->violations[$name = $this->player][$supplier])) {
-			unset($this->violations[$name][$supplier]);
+		if (isset($this->violations[$supplier])) {
+			unset($this->violations[$supplier]);
 		}
 	}
 
 	public function addViolation(string $supplier, int|float $amount = 1) : void {
-		if (isset($this->violations[$name = $this->player][$supplier])) {
-			foreach ($this->violations[$name][$supplier] as $index => $time) {
+		if (isset($this->violations[$supplier])) {
+			foreach ($this->violations[$supplier] as $index => $time) {
 				if (abs($time - microtime(true)) * 20 > 40) {
-					unset($this->violations[$name][$supplier][$index]);
+					unset($this->violations[$supplier][$index]);
 				}
 			}
 		}
 
-		$this->violations[$name][$supplier][] = microtime(true);
+		$this->violations[$supplier][] = microtime(true);
 	}
 
 	//Real violation
 	public function getRealViolation(string $supplier) : int {
-		if (isset($this->realViolations[$name = $this->player][$supplier])) {
-			return count($this->realViolations[$name][$supplier]);
+		if (isset($this->realViolations[$supplier])) {
+			return count($this->realViolations[$supplier]);
 		}
 		return 0;
 	}
 
 	public function resetRealViolation(string $supplier) : void {
-		if (isset($this->realViolations[$name = $this->player][$supplier])) {
-			unset($this->realViolations[$name][$supplier]);
+		if (isset($this->realViolations[$supplier])) {
+			unset($this->realViolations[$supplier]);
 		}
 	}
 
 	public function addRealViolation(string $supplier, int|float $amount = 1) : void {
-		if (isset($this->realViolations[$name = $this->player][$supplier])) {
-			foreach ($this->realViolations[$name][$supplier] as $index => $time) {
+		if (isset($this->realViolations[$supplier])) {
+			foreach ($this->realViolations[$supplier] as $index => $time) {
 				if (abs($time - microtime(true)) * 20 > 300) {
-					unset($this->realViolations[$name][$supplier][$index]);
+					unset($this->realViolations[$supplier][$index]);
 				}
 			}
 		}
 
-		$this->realViolations[$name][$supplier][] = microtime(true);
+		$this->realViolations[$supplier][] = microtime(true);
 	}
 
 	//Location
@@ -590,19 +584,19 @@ class PlayerAPI implements IPlayerAPI {
 
 	//External Data
 	public function getExternalData(string $dataName) {
-		if (isset($this->externalData[$name = $this->player][$dataName])) {
-			return $this->externalData[$name][$dataName];
+		if (isset($this->externalData[$dataName])) {
+			return $this->externalData[$dataName];
 		}
 		return null;
 	}
 
 	public function setExternalData(string $dataName, mixed $amount) : void {
-		$this->externalData[$this->player][$dataName] = $amount;
+		$this->externalData[$dataName] = $amount;
 	}
 
 	public function unsetExternalData(string $dataName) : void {
-		if (isset($this->externalData[$name = $this->player][$dataName])) {
-			unset($this->externalData[$name][$dataName]);
+		if (isset($this->externalData[$dataName])) {
+			unset($this->externalData[$dataName]);
 		}
 	}
 
@@ -615,15 +609,12 @@ class PlayerAPI implements IPlayerAPI {
 		$this->captchaCode = $data;
 	}
 
-	public function getInventory() {
-		if ($this->getPlayer() === null) {
-			return;
-		}
-		return $this->getPlayer()->getInventory();
+	public function getInventory() : PlayerInventory {
+		return $this->player->getInventory();
 	}
 
-	public function getLocation() {
-		return $this->getPlayer()->getLocation();
+	public function getLocation() : Location {
+		return $this->player->getLocation();
 	}
 
 	public function setDebug(bool $value = true) : void {

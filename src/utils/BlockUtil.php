@@ -31,46 +31,36 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
+use pocketmine\block\Block;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Location;
-use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
 use function abs;
 use function fmod;
 use function in_array;
-use function pow;
 use function sqrt;
 
 class BlockUtil {
-	public static function getSurroundingBlocks(Player $player) : array {
+	/**
+	 * @return Block[]|\Generator
+	 */
+	public static function getSurroundingBlocks(Player $player) {
 		$world = $player->getWorld();
 
 		$posX = $player->getLocation()->getX();
 		$posY = $player->getLocation()->getY();
 		$posZ = $player->getLocation()->getZ();
 
-		$pos1 = new Vector3($posX  , $posY, $posZ  );
-		$pos2 = new Vector3($posX - 1, $posY, $posZ  );
-		$pos3 = new Vector3($posX - 1, $posY, $posZ - 1);
-		$pos4 = new Vector3($posX  , $posY, $posZ - 1);
-		$pos5 = new Vector3($posX + 1, $posY, $posZ  );
-		$pos6 = new Vector3($posX + 1, $posY, $posZ + 1);
-		$pos7 = new Vector3($posX  , $posY, $posZ + 1);
-		$pos8 = new Vector3($posX + 1, $posY, $posZ - 1);
-		$pos9 = new Vector3($posX - 1, $posY, $posZ + 1);
-
-		$bpos1 = $world->getBlock($pos1)->getTypeId();
-		$bpos2 = $world->getBlock($pos2)->getTypeId();
-		$bpos3 = $world->getBlock($pos3)->getTypeId();
-		$bpos4 = $world->getBlock($pos4)->getTypeId();
-		$bpos5 = $world->getBlock($pos5)->getTypeId();
-		$bpos6 = $world->getBlock($pos6)->getTypeId();
-		$bpos7 = $world->getBlock($pos7)->getTypeId();
-		$bpos8 = $world->getBlock($pos8)->getTypeId();
-		$bpos9 = $world->getBlock($pos9)->getTypeId();
-
-		return  [$bpos1, $bpos2, $bpos3, $bpos4, $bpos5, $bpos6, $bpos7, $bpos8, $bpos9];
+		yield $world->getBlockAt($posX, $posY, $posZ)->getTypeId();
+		yield $world->getBlockAt($posX - 1, $posY, $posZ)->getTypeId();
+		yield $world->getBlockAt($posX - 1, $posY, $posZ - 1)->getTypeId();
+		yield $world->getBlockAt($posX, $posY, $posZ - 1)->getTypeId();
+		yield $world->getBlockAt($posX + 1, $posY, $posZ)->getTypeId();
+		yield $world->getBlockAt($posX + 1, $posY, $posZ + 1)->getTypeId();
+		yield $world->getBlockAt($posX, $posY, $posZ + 1)->getTypeId();
+		yield $world->getBlockAt($posX + 1, $posY, $posZ - 1)->getTypeId();
+		yield $world->getBlockAt($posX - 1, $posY, $posZ + 1)->getTypeId();
 	}
 
 	public static function isOnGround(Location $location, int $down) : bool {
@@ -83,64 +73,64 @@ class BlockUtil {
 		$blockY = $location->getY() - $down;
 		$blockZ = $location->getZ();
 		$world = $location->getWorld();
-		if (!in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ))->getTypeId(), $id, true)) {
+		if ($world->getBlockAt($blockX, $blockY, $blockZ)->getTypeId() !== BlockTypeIds::AIR) {
 			return true;
 		}
 		if ($fracX < 0.3) {
-			if (!in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ))->getTypeId(), $id, true)) {
+			if ($world->getBlockAt($blockX - 1, $blockY, $blockZ)->getTypeId() !== BlockTypeIds::AIR) {
 				return true;
 			}
 			if ($fracZ < 0.3) {
-				if (!in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt($blockX - 1, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt($blockX, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt($blockX + 1, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
 			} elseif ($fracZ > 0.7) {
-				if (!in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt($blockX - 1, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt($blockX, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt($blockX + 1, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
 			}
 		} elseif ($fracX > 0.7) {
-			if (!in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ))->getTypeId(), $id, true)) {
+			if ($world->getBlockAt($blockX + 1, $blockY, $blockZ)->getTypeId() !== BlockTypeIds::AIR) {
 				return true;
 			}
 			if ($fracZ < 0.3) {
-				if (!in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt($blockX - 1, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt($blockX, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt($blockX + 1, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
 			} elseif ($fracZ > 0.7) {
-				if (!in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt($blockX - 1, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt($blockX, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt($blockX + 1, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
 			}
 		} elseif ($fracZ < 0.3) {
-			if (!in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+			if ($world->getBlockAt($blockX, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 				return true;
 			}
-		} elseif ($fracZ > 0.7 && !in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+		} else if ($fracZ > 0.7 && $world->getBlockAt($blockX, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 			return true;
 		}
 		return false;
@@ -156,71 +146,71 @@ class BlockUtil {
 		$blockZ = $location->getZ();
 		$world = $location->getWorld();
 
-		if (in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ))->getTypeId(), $id, true)) {
+		if (in_array($world->getBlockAt($blockX, $blockY, $blockZ)->getTypeId(), $id, true)) {
 			return true;
 		}
 		if ($fracX < 0.3) {
-			if (in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ))->getTypeId(), $id, true)) {
+			if (in_array($world->getBlockAt($blockX - 1, $blockY, $blockZ)->getTypeId(), $id, true)) {
 				return true;
 			}
 			if ($fracZ < 0.3) {
-				if (in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt($blockX - 1, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt($blockX, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt($blockX + 1, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
 					return true;
 				}
 			} elseif ($fracZ > 0.7) {
-				if (in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt($blockX - 1, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt($blockX, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt($blockX + 1, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
 					return true;
 				}
 			}
 		} elseif ($fracX > 0.7) {
-			if (in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ))->getTypeId(), $id, true)) {
+			if (in_array($world->getBlockAt($blockX + 1, $blockY, $blockZ)->getTypeId(), $id, true)) {
 				return true;
 			}
 			if ($fracZ < 0.3) {
-				if (in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt($blockX - 1, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt($blockX, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt($blockX + 1, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
 					return true;
 				}
 			} elseif ($fracZ > 0.7) {
-				if (in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt($blockX - 1, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt($blockX, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt($blockX + 1, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
 					return true;
 				}
 			}
 		} elseif ($fracZ < 0.3) {
-			if (in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+			if (in_array($world->getBlockAt($blockX, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
 				return true;
 			}
-		} elseif ($fracZ > 0.7 && in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+		} else if ($fracZ > 0.7 && in_array($world->getBlockAt($blockX, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
 			return true;
 		}
 		return false;
 	}
 
 	public static function isOnStairs(Location $location, int $down) : bool {
-		$stairs = [
+		static $stairs = [
 			BlockTypeIds::STONE_STAIRS,
 			BlockTypeIds::OAK_STAIRS,
 			BlockTypeIds::BIRCH_STAIRS,
@@ -257,7 +247,7 @@ class BlockUtil {
 	}
 
 	public static function isOnIce(Location $location, int $down) : bool {
-		$ice = [
+		static $ice = [
 			BlockTypeIds::ICE,
 			BlockTypeIds::BLUE_ICE,
 			BlockTypeIds::PACKED_ICE,
@@ -267,7 +257,7 @@ class BlockUtil {
 	}
 
 	public static function isOnLiquid(Location $location, int $down) : bool {
-		$liquid = [
+		static $liquid = [
 			BlockTypeIds::WATER,
 			BlockTypeIds::LAVA
 		];
@@ -275,7 +265,7 @@ class BlockUtil {
 	}
 
 	public static function isOnAdhesion(Location $location, int $down) : bool {
-		$adhesion = [
+		static $adhesion = [
 			BlockTypeIds::LADDER,
 			BlockTypeIds::VINES
 		];
@@ -283,7 +273,7 @@ class BlockUtil {
 	}
 
 	public static function isOnPlant(Location $location, int $down) : bool {
-		$plants = [
+		static $plants = [
 			BlockTypeIds::GRASS_PATH,
 			BlockTypeIds::CARROTS,
 			BlockTypeIds::SUGARCANE,
@@ -305,7 +295,7 @@ class BlockUtil {
 	}
 
 	public static function isOnDoor(Location $location, int $down) : bool {
-		$doors = [
+		static $doors = [
 			BlockTypeIds::OAK_DOOR,
 			BlockTypeIds::IRON_DOOR,
 			BlockTypeIds::DARK_OAK_DOOR,
@@ -326,14 +316,14 @@ class BlockUtil {
 	}
 
 	public static function isOnCarpet(Location $location, int $down) : bool {
-		$carpets = [
+		static $carpets = [
 			BlockTypeIds::CARPET
 		];
 		return self::isUnderBlock($location, $carpets, $down);
 	}
 
 	public static function isOnPlate(Location $location, int $down) : bool {
-		$plates = [
+		static $plates = [
 			BlockTypeIds::CARPET,
 			BlockTypeIds::BIRCH_PRESSURE_PLATE,
 			BlockTypeIds::STONE_PRESSURE_PLATE,
@@ -349,7 +339,7 @@ class BlockUtil {
 	}
 
 	public static function isOnSnow(Location $location, int $down) : bool {
-		$snow = [
+		static $snow = [
 			BlockTypeIds::SNOW,
 			BlockTypeIds::SNOW_LAYER
 		];
@@ -361,6 +351,6 @@ class BlockUtil {
 	}
 
 	public static function distance(Position $a, Position $b) {
-		return sqrt(pow($a->getX() - $b->getX(), 2) + pow($a->getY() - $b->getY(), 2) + pow($a->getZ() - $b->getZ(), 2));
+		return sqrt((($a->getX() - $b->getX()) ** 2) + (($a->getY() - $b->getY()) ** 2) + (($a->getZ() - $b->getZ()) ** 2));
 	}
 }

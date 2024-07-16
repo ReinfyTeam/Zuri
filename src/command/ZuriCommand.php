@@ -185,7 +185,7 @@ class ZuriCommand extends Command implements PluginOwned {
 					$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
 					$sender->sendMessage($prefix . TextFormat::GRAY . " Zuri Modules/Check Information List:");
 					$added = [];
-					foreach (ZuriAC::Checks() as $check) {
+					foreach (ZuriAC::getChecks() as $check) {
 						if (!isset($added[$check->getName()])) {
 							$sender->sendMessage($prefix . TextFormat::RESET . " " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getAllSubTypes() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Violation: " . TextFormat::YELLOW . ConfigManager::getData(ConfigManager::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
 							$added[$check->getName()] = true;

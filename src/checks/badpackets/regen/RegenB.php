@@ -53,15 +53,15 @@ class RegenB extends Check {
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityRegainHealthEvent) {
-			if ($event->getRegainReason() != EntityDamageEvent::CAUSE_MAGIC && $event->getRegainReason() != EntityDamageEvent::CAUSE_CUSTOM) {
+			if (!in_array($event->getRegainReason(), [EntityDamageEvent::CAUSE_MAGIC, EntityDamageEvent::CAUSE_CUSTOM], true)) {
 				$tick = (double) Server::getInstance()->getTick();
-				$tps = (double) Server::getInstance()->getTicksPerSecond();
+				$tps = Server::getInstance()->getTicksPerSecond();
 				$lastHealthTick = $playerAPI->getExternalData("lastHealthTickB") ?? 0;
 				$healAmount = $event->getAmount();
 				$this->debug($playerAPI, "tick=$tick, tps=$tps, lastHealthTick=$lastHealthTick, healAmount=$healAmount");
-				if ($tps > 0.0 && $lastHealthTick != -1.0) {
-					$diffTicks = (double) ($tick - $lastHealthTick); // server ticks since last health regain
-					$delta = (double) $diffTicks / (double) $tps; // seconds since last health regain
+				if ($tps > 0.0 && $lastHealthTick !== -1.0) {
+					$diffTicks = $tick - $lastHealthTick; // server ticks since last health regain
+					$delta = $diffTicks / $tps; // seconds since last health regain
 					$healCount = $playerAPI->getExternalData("healCountB") ?? 0;
 					$healTime = $playerAPI->getExternalData("healTimeB") ?? 0;
 					$this->debug($playerAPI, "diffTicks=$diffTicks, delta=$delta, healCount=$healCount, healTime=$healTime");

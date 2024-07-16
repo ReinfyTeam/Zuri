@@ -52,14 +52,13 @@ class AntiImmobile extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
 			if ($player->hasNoClientPredictions()) {
-				if ($event->getFrom()->getX() !== $event->getTo()->getX() || $event->getFrom()->getY() !== $event->getTo()->getY() || $event->getFrom()->getZ() !== $event->getTo()->getZ()) {
+				$from = $event->getFrom();
+				$to = $event->getTo();
+				if ($from->getX() !== $to->getX() || $from->getY() !== $to->getY() || $from->getZ() !== $to->getZ()) {
 					$this->failed($playerAPI);
 				}
-				$this->debug($playerAPI, "lastX=" . $event->getFrom()->getX() . ", lastY=" . $event->getFrom()->getY() . ", lastZ=" . $event->getFrom()->getZ() . ", newX=" . $event->getTo()->getX() . ", newY=" . $event->getTo()->getY() . ", newZ=" . $event->getTo()->getZ());
+				$this->debug($playerAPI, "lastX=" . $from->getX() . ", lastY=" . $from->getY() . ", lastZ=" . $from->getZ() . ", newX=" . $to->getX() . ", newY=" . $to->getY() . ", newZ=" . $to->getZ());
 			}
 		}
 	}

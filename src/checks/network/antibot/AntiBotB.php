@@ -33,7 +33,7 @@ namespace ReinfyTeam\Zuri\checks\network\antibot;
 
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerPreLoginEvent;
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
@@ -66,6 +66,6 @@ class AntiBotB extends Check {
 		}
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
 	}
 }

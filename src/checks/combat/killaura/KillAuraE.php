@@ -57,23 +57,17 @@ class KillAuraE extends Check {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
-			$locDamager = $damager->getLocation();
-			if ($damager === null) {
-				return;
-			}
 			if ($damager instanceof Player && $entity instanceof Player) {
+				$locDamager = $damager->getLocation();
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
 				$player = $playerAPI->getPlayer();
-				if ($player === null) {
-					return;
-				}
 				$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
 				$from = new Vector3($locDamager->getX(), $locDamager->getY() + $damager->getEyeHeight(), $locDamager->getZ());
 				$to = $damager->getLocation()->add($delta->getX(), $delta->getY() + $damager->getEyeHeight(), $delta->getZ());
 				$distance = MathUtil::distance($from, $to);
 				$vector = $to->subtract($from->x, $from->y, $from->z)->normalize()->multiply(1);
 				$entities = [];
-				for ($i = 0; $i <= $distance; $i += 1) {
+				for ($i = 0; $i <= $distance; ++$i) {
 					$from = $from->add($vector->x, $vector->y, $vector->z);
 					foreach ($damager->getWorld()->getEntities() as $target) {
 						$distanceA = new Vector3($from->x, $from->y, $from->z);

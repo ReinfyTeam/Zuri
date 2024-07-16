@@ -57,18 +57,12 @@ class ReachB extends Check {
 			$cause = $event->getCause();
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
-			$locEntity = $entity->getLocation();
-			$locDamager = $damager->getLocation();
-			if ($damager === null) {
-				return;
-			}
 			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player) {
+				$locDamager = $damager->getLocation();
+				$locEntity = $entity->getLocation();
 				$entityAPI = PlayerAPI::getAPIPlayer($entity);
 				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
 				$player = $entityAPI->getPlayer();
-				if ($player === null) {
-					return;
-				}
 				$damager = $damagerAPI->getPlayer();
 				if (MathUtil::XZDistanceSquared($entityAPI->getLocation()->asVector3(), $damager->getLocation()->asVector3()) > ($damager->isSurvival() ? $this->getConstant("survival-max-distance") : $this->getConstant("creative-max-distance"))) {
 					$this->failed($damagerAPI);

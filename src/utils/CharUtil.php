@@ -41,7 +41,7 @@ class CharUtil {
 		$code = "";
 		$keys = str_split("qwertyuiopasdfghjklzxcvbnm1234567890");
 		for ($i = 0; $i <= $count; $i++) {
-			if (rand(1, 100) < 40) {
+			if (random_int(1, 100) < 40) {
 				$code .= strtoupper($keys[array_rand($keys, 1)]);
 			} else {
 				$code .= $keys[array_rand($keys, 1)];

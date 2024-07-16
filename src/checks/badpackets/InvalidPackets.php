@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
@@ -50,7 +50,7 @@ class InvalidPackets extends Check {
 		return 20;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof MovePlayerPacket) { // i dont know how i did this.
 			$speed = $playerAPI->getExternalData("tickPackets") - $playerAPI->getExternalData("lastPacketTick");
 			if ($speed < $this->getConstant("max-packet-speed")) {

@@ -62,6 +62,7 @@ use pocketmine\inventory\ArmorInventory;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 use pocketmine\player\Player;
@@ -86,35 +87,30 @@ class PlayerListener implements Listener {
 		if ($player === null) {
 			return;
 		}
-		if ($player !== null) {
-			if (!$player->isConnected() && !$player->spawned) {
-				return;
-			}
-			$playerAPI = PlayerAPI::getAPIPlayer($player);
-			$this->check($packet, $playerAPI);
+		if (!$player->spawned && !$player->isConnected()) {
+			return;
+		}
+		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		$this->check($packet, $playerAPI);
 
-			if ($packet instanceof LevelSoundEventPacket) {
-				if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
-					$this->addCPS($playerAPI);
-					$playerAPI->setCPS($this->getCPS($playerAPI));
-				}
+		if ($packet instanceof LevelSoundEventPacket) {
+			if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
+				$this->addCPS($playerAPI);
+				$playerAPI->setCPS($this->getCPS($playerAPI));
 			}
-			if ($packet instanceof InventoryTransactionPacket) {
-				if ($packet->trData instanceof UseItemOnEntityTransactionData) {
-					$this->addCPS($playerAPI);
-					$playerAPI->setCPS($this->getCPS($playerAPI));
-				}
+		}
+		if ($packet instanceof InventoryTransactionPacket) {
+			if ($packet->trData instanceof UseItemOnEntityTransactionData) {
+				$this->addCPS($playerAPI);
+				$playerAPI->setCPS($this->getCPS($playerAPI));
 			}
 		}
 	}
 
 	public function onPlayerMove(PlayerMoveEvent $event) : void {
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		if ($playerAPI->getPlayer() === null) {
@@ -151,10 +147,7 @@ class PlayerListener implements Listener {
 
 	public function onPlayerInteract(PlayerInteractEvent $event) : void {
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
@@ -180,14 +173,11 @@ class PlayerListener implements Listener {
 		$x = $block->getPosition()->getX();
 		$z = $block->getPosition()->getZ();
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		$this->checkEvent($event, $playerAPI);
@@ -199,7 +189,7 @@ class PlayerListener implements Listener {
 			$blockInteracted = $this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())];
 			$xI = $blockInteracted->getPosition()->getX();
 			$zI = $blockInteracted->getPosition()->getZ();
-			if ((int) $x != (int) $xI && (int) $z != (int) $zI) {
+			if ((int) $x !== (int) $xI && (int) $z !== (int) $zI) {
 				$playerAPI->setActionBreakingSpecial(true);
 				$playerAPI->setBlocksBrokeASec($playerAPI->getBlocksBrokeASec() + 1);
 			} else {
@@ -214,14 +204,11 @@ class PlayerListener implements Listener {
 		$x = $block->getPosition()->getX();
 		$z = $block->getPosition()->getZ();
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		$playerAPI->setPlacingTicks(microtime(true));
@@ -234,7 +221,7 @@ class PlayerListener implements Listener {
 			$blockInteracted = $this->blockInteracted[$player->getXuid()];
 			$xI = $blockInteracted->getPosition()->getX();
 			$zI = $blockInteracted->getPosition()->getZ();
-			if ((int) $x != (int) $xI && (int) $z != (int) $zI) {
+			if ((int) $x !== (int) $xI && (int) $z !== (int) $zI) {
 				$playerAPI->setActionPlacingSpecial(true);
 				$playerAPI->setBlocksPlacedASec($playerAPI->getBlocksPlacedASec() + 1);
 			} else {
@@ -244,25 +231,19 @@ class PlayerListener implements Listener {
 		}
 	}
 
-	public function onPlayerItemUse(PlayerItemUseEvent $event) {
+	public function onPlayerItemUse(PlayerItemUseEvent $event) : void {
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		//TODO
 	}
 
 
-	public function onInventoryTransaction(InventoryTransactionEvent $event) {
+	public function onInventoryTransaction(InventoryTransactionEvent $event) : void {
 		$player = $event->getTransaction()->getSource();
-		if ($player === null) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		$this->checkEvent($event, $playerAPI);
@@ -273,7 +254,7 @@ class PlayerListener implements Listener {
 		}
 	}
 
-	public function onInventoryOpen(InventoryOpenEvent $event) {
+	public function onInventoryOpen(InventoryOpenEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
@@ -283,7 +264,7 @@ class PlayerListener implements Listener {
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onInventoryClose(InventoryCloseEvent $event) {
+	public function onInventoryClose(InventoryCloseEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
@@ -293,7 +274,7 @@ class PlayerListener implements Listener {
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onEntityTeleport(EntityTeleportEvent $event) {
+	public function onEntityTeleport(EntityTeleportEvent $event) : void {
 		$entity = $event->getEntity();
 		if ($entity === null) {
 			return;
@@ -311,32 +292,26 @@ class PlayerListener implements Listener {
 		$playerAPI->setTeleportTicks(microtime(true));
 	}
 
-	public function onPlayerJump(PlayerJumpEvent $event) {
+	public function onPlayerJump(PlayerJumpEvent $event) : void {
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		$playerAPI->setJumpTicks(microtime(true));
 	}
 
-	public function onPlayerQuit(PlayerQuitEvent $event) {
+	public function onPlayerQuit(PlayerQuitEvent $event) : void {
 		PlayerAPI::removeAPIPlayer($event->getPlayer());
 	}
 
-	public function onPlayerJoin(PlayerJoinEvent $event) {
+	public function onPlayerJoin(PlayerJoinEvent $event) : void {
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		if ($playerAPI->getPlayer() === null) {
@@ -346,15 +321,15 @@ class PlayerListener implements Listener {
 		$playerAPI->setJoinedAtTheTime(microtime(true));
 	}
 
-	public function onPlayerPreLogin(PlayerPreLoginEvent $event) {
+	public function onPlayerPreLogin(PlayerPreLoginEvent $event) : void {
 		$this->checkJustEvent($event);
 	}
 
-	public function onEntityDamage(EntityDamageEvent $event) {
+	public function onEntityDamage(EntityDamageEvent $event) : void {
 		$this->checkJustEvent($event);
 	}
 
-	public function onEntityDamageByEntity(EntityDamageByEntityEvent $event) {
+	public function onEntityDamageByEntity(EntityDamageByEntityEvent $event) : void {
 		$cause = $event->getCause();
 		$entity = $event->getEntity();
 		if ($entity === null) {
@@ -391,31 +366,25 @@ class PlayerListener implements Listener {
 		}
 	}
 
-	public function onPlayerDeath(PlayerDeathEvent $event) {
+	public function onPlayerDeath(PlayerDeathEvent $event) : void {
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		$playerAPI->setDeathTicks(microtime(true));
 	}
 
-	public function onPlayerChat(PlayerChatEvent $event) {
+	public function onPlayerChat(PlayerChatEvent $event) : void {
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		if ($playerAPI->isCaptcha()) {
@@ -424,22 +393,19 @@ class PlayerListener implements Listener {
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onPlayerItemHeld(PlayerItemHeldEvent $event) {
+	public function onPlayerItemHeld(PlayerItemHeldEvent $event) : void {
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onPlayerRegen(EntityRegainHealthEvent $event) {
+	public function onPlayerRegen(EntityRegainHealthEvent $event) : void {
 		$player = $event->getEntity();
 		if (!$player instanceof Player) {
 			return;
@@ -448,17 +414,14 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onCommandEvent(CommandEvent $event) {
+	public function onCommandEvent(CommandEvent $event) : void {
 		$sender = $event->getSender();
-		if ($sender === null) {
-			return;
-		}
 		if (!$sender instanceof Player) {
 			return;
 		}
@@ -472,7 +435,7 @@ class PlayerListener implements Listener {
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onEntityShootBowEvent(EntityShootBowEvent $event) {
+	public function onEntityShootBowEvent(EntityShootBowEvent $event) : void {
 		$player = $event->getEntity();
 		if (!$player instanceof Player) {
 			return;
@@ -481,22 +444,19 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onPlayerItemConsume(PlayerItemConsumeEvent $event) {
+	public function onPlayerItemConsume(PlayerItemConsumeEvent $event) : void {
 		$player = $event->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		$this->checkEvent($event, $playerAPI);
@@ -509,7 +469,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		}
 		$this->checkEvent($event, $playerAPI);
@@ -519,8 +479,7 @@ class PlayerListener implements Listener {
 		if ($player->getPlayer() === null) {
 			return;
 		}
-		$time = microtime(true);
-		$this->clicksData[$player->getPlayer()->getName()][] = $time;
+		$this->clicksData[$player->getPlayer()->getName()][] = microtime(true);
 	}
 
 	private function getCPS(PlayerAPI $player) : int {
@@ -530,34 +489,33 @@ class PlayerListener implements Listener {
 		}));
 	}
 
-	private function checkEvent(Event $event, PlayerAPI $player) {
-		$playerAPI = PlayerAPI::getAPIPlayer($player->getPlayer());
-		if (($player = $playerAPI->getPlayer()) === null || !$player->isOnline() || !$player->spawned) {
+	private function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+		$player = $playerAPI->getPlayer();
+		if (!$player->spawned || !$player->isOnline()) {
 			return;
 		}
-
-		foreach (ZuriAC::Checks() as $class) {
+		foreach (ZuriAC::getChecks() as $class) {
 			if ($class->enable()) {
 				$class->checkEvent($event, $playerAPI);
 			}
 		}
 	}
 
-	private function check(DataPacket $packet, PlayerAPI $player) {
-		$playerAPI = PlayerAPI::getAPIPlayer($player->getPlayer());
-		if (($player = $playerAPI->getPlayer()) === null || !$player->isOnline() || !$player->spawned) {
+	private function check(Packet $packet, PlayerAPI $playerAPI) : void {
+		$player = $playerAPI->getPlayer();
+		if (!$player->spawned || !$player->isOnline()) {
 			return;
 		}
 
-		foreach (ZuriAC::Checks() as $class) {
+		foreach (ZuriAC::getChecks() as $class) {
 			if ($class->enable()) {
 				$class->check($packet, $playerAPI);
 			}
 		}
 	}
 
-	private function checkJustEvent(Event $event) {
-		foreach (ZuriAC::Checks() as $class) {
+	private function checkJustEvent(Event $event) : void {
+		foreach (ZuriAC::getChecks() as $class) {
 			if ($class->enable()) {
 				$class->checkJustEvent($event);
 			}

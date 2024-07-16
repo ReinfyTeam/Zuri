@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\fly;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
@@ -49,12 +49,9 @@ class FlyB extends Check {
 		return 1;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($packet instanceof UpdateAdventureSettingsPacket) {
+	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
+		/*if ($packet instanceof UpdateAdventureSettingsPacket) {
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
 			if (!$player->isCreative() && !$player->isSpectator() && !$player->getAllowFlight()) {
 				switch ($packet->flags) {
 					case 614:
@@ -71,6 +68,6 @@ class FlyB extends Check {
 				}
 				$this->debug($playerAPI, "packetFlags=" . $packet->flags);
 			}
-		}
+		}*/
 	}
 }

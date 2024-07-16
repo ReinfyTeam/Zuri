@@ -40,7 +40,7 @@ class InternetAddress {
 		$this->port = $port;
 	}
 
-	public function equals(InternetAddress $address) {
-		return $this->ip == $address->ip && $this->port == $address->port;
+	public function equals(InternetAddress $address) : bool {
+		return $this->ip === $address->ip && $this->port === $address->port;
 	}
 }

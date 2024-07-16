@@ -33,11 +33,8 @@ namespace ReinfyTeam\Zuri\checks\network;
 
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerPreLoginEvent;
+use pocketmine\utils\Internet;
 use ReinfyTeam\Zuri\checks\Check;
-use function curl_exec;
-use function curl_getinfo;
-use function curl_init;
-use function curl_setopt_array;
 use function json_decode;
 
 class ProxyBot extends Check {
@@ -54,26 +51,17 @@ class ProxyBot extends Check {
 	}
 
 	public function checkJustEvent(Event $event) : void {
+		//TODO make this asynchronized
 		if ($event instanceof PlayerPreLoginEvent) {
 			$ip = $event->getIp();
-			$api_url = "https://proxycheck.io/v2/" . $ip;
-			$curl = curl_init($api_url);
-			curl_setopt_array($curl, [
-				CURLOPT_POST => true,
-				CURLOPT_HEADER => false,
-				CURLINFO_HEADER_OUT => true,
-				CURLOPT_TIMEOUT => 120,
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_SSL_VERIFYPEER => false
-			]);
-			$data = curl_exec($curl);
-			$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-			if ($data === false) {
+			$result = Internet::postURL("https://proxycheck.io/v2/" . $ip, []);
+			// if server is offline or server request problems...
+			if ($result === null || $result->getCode() !== 200) {
 				return;
-			} // if server is offline or server request problems...
-			$result = json_decode($data, true);
-			if ($status === 200 && $result["status"] !== "error" && isset($result[$ip])) {
-				$proxy = $result[$ip]["proxy"] === "yes";
+			}
+			$result = json_decode($result->getBody(), true, 16, JSON_PARTIAL_OUTPUT_ON_ERROR);
+			if (($result["status"] ?? null) !== "error" && isset($result[$ip])) {
+				$proxy = ($result[$ip]["proxy"] ?? null) === "yes";
 				if ($proxy) {
 					$this->warn($event->getPlayerInfo()->getUsername());
 					$event->setKickFlag(0, self::getData(self::ANTIBOT_MESSAGE));

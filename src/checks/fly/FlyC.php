@@ -57,9 +57,6 @@ class FlyC extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
 			$oldPos = $event->getFrom();
 			$newPos = $event->getTo();
 			$surroundingBlocks = BlockUtil::getSurroundingBlocks($player);

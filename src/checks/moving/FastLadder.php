@@ -57,15 +57,12 @@ class FastLadder extends Check {
 			$lastY = $event->getFrom()->getY();
 			$newY = $event->getTo()->getY();
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
 
-			$x = intval($player->getLocation()->getX());
-			$z = intval($player->getLocation()->getZ());
+			$x = (int) $player->getLocation()->getX();
+			$z = (int) $player->getLocation()->getZ();
 
-			$checkLadderLastX = $player->getWorld()->getBlockAt($x, intval($lastY), $z)->getTypeId() === BlockTypeIds::LADDER;
-			$checkLadderNewY = $player->getWorld()->getBlockAt($x, intval($newY), $z)->getTypeId() === BlockTypeIds::LADDER;
+			$checkLadderLastX = $player->getWorld()->getBlockAt($x, (int) $lastY, $z)->getTypeId() === BlockTypeIds::LADDER;
+			$checkLadderNewY = $player->getWorld()->getBlockAt($x, (int) $newY, $z)->getTypeId() === BlockTypeIds::LADDER;
 
 			$diff = abs($newY - $lastY);
 

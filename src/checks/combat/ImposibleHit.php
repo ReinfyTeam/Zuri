@@ -34,7 +34,7 @@ namespace ReinfyTeam\Zuri\checks\combat;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\types\ActorEvent;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
@@ -66,7 +66,7 @@ class ImposibleHit extends Check {
 		}
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof ActorEventPacket) {
 			if ($packet->eventId === ActorEvent::EATING_ITEM) {
 				$this->eating[$playerAPI->getPlayer()->getName()] = true;

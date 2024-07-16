@@ -32,7 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\combat\killaura;
 
 use pocketmine\network\mcpe\protocol\AnimatePacket;
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
@@ -49,7 +49,7 @@ class KillAuraD extends Check {
 		return 1;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
 		if (($player = $playerAPI->getPlayer()) === null) {
 			return;
 		}

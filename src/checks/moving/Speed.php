@@ -56,9 +56,6 @@ class Speed extends Check {
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		if ($event instanceof PlayerMoveEvent) {
 			if (
 				!$player->isSurvival() ||

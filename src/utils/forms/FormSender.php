@@ -244,7 +244,7 @@ final class FormSender extends ConfigManager {
 				return;
 			}
 
-			foreach (ZuriAC::Checks() as $check) {
+			foreach (ZuriAC::getChecks() as $check) {
 				if ($check->getName() === $data) {
 					self::ModuleInformation($player, $check);
 					return;
@@ -256,7 +256,7 @@ final class FormSender extends ConfigManager {
 		$form->setContent("Choose what do you want to pick..");
 
 		$list = [];
-		foreach (ZuriAC::Checks() as $check) {
+		foreach (ZuriAC::getChecks() as $check) {
 			if (!isset($list[$check->getName()])) {
 				$list[$check->getName()] = $check->enable();
 				$form->addButton($check->getName() . "\nClick to view information.", 0, "", $check->getName());

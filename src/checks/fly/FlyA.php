@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\fly;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function microtime;
@@ -49,11 +49,8 @@ class FlyA extends Check {
 		return 1;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
-		if ($player === null) {
-			return;
-		}
 		if (
 			$playerAPI->getAttackTicks() < 40 ||
 			$playerAPI->getOnlineTime() <= 30 ||
@@ -75,7 +72,7 @@ class FlyA extends Check {
 		if ($lastYNoGround !== null && $lastTime !== null) {
 			$diff = microtime(true) - $lastTime;
 			if ($diff > $this->getConstant("max-ground-diff")) {
-				if ((int) $player->getLocation()->getY() == $lastYNoGround) {
+				if ((int) $player->getLocation()->getY() === $lastYNoGround) {
 					$this->failed($playerAPI);
 				}
 				$playerAPI->unsetExternalData("lastYNoGroundF");

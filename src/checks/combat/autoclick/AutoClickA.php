@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\autoclick;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 use ReinfyTeam\Zuri\checks\Check;
@@ -51,7 +51,7 @@ class AutoClickA extends Check {
 		return 25;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
 		$ticks = $playerAPI->getExternalData("ticksClick");
 		$avgSpeed = $playerAPI->getExternalData("avgSpeed");
 		$avgDeviation = $playerAPI->getExternalData("avgDeviation");

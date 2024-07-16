@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri;
 
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
+use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\command\ZuriCommand;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\listener\PlayerListener;
@@ -49,6 +50,7 @@ class ZuriAC extends PluginBase {
 	private static ZuriAC $instance;
 	private ProxyUDPSocket $proxyUDPSocket;
 
+	/** @var Check[] */
 	private array $checks = [];
 
 	public function onLoad() : void {
@@ -66,16 +68,19 @@ class ZuriAC extends PluginBase {
 
 	public function onEnable() : void {
 		$this->loadChecks();
-		$this->getScheduler()->scheduleRepeatingTask(new ServerTickTask($this), 20);
-		$this->getScheduler()->scheduleRepeatingTask(new CaptchaTask($this), 20);
+		$scheduler = $this->getScheduler();
+		$scheduler->scheduleRepeatingTask(new ServerTickTask($this), 20);
+		$scheduler->scheduleRepeatingTask(new CaptchaTask($this), 20);
 		if (ConfigManager::getData(ConfigManager::NETWORK_LIMIT_ENABLE)) {
-			$this->getScheduler()->scheduleRepeatingTask(new NetworkTickTask($this), 100);
+			$scheduler->scheduleRepeatingTask(new NetworkTickTask($this), 100);
 		}
 		$this->getServer()->getAsyncPool()->submitTask(new UpdateCheckerAsyncTask($this->getDescription()->getVersion()));
-		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigManager::PERMISSION_BYPASS_PERMISSION), PermissionManager::OPERATOR);
-		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigManager::ALERTS_PERMISSION), PermissionManager::OPERATOR);
-		$this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
-		$this->getServer()->getPluginManager()->registerEvents(new ServerListener(), $this);
+		$permissionManager = PermissionManager::getInstance();
+		$permissionManager->register(ConfigManager::getData(ConfigManager::PERMISSION_BYPASS_PERMISSION), PermissionManager::OPERATOR);
+		$permissionManager->register(ConfigManager::getData(ConfigManager::ALERTS_PERMISSION), PermissionManager::OPERATOR);
+		$pluginManager = $this->getServer()->getPluginManager();
+		$pluginManager->registerEvents(new PlayerListener(), $this);
+		$pluginManager->registerEvents(new ServerListener(), $this);
 		$this->getServer()->getCommandMap()->register("Zuri", new ZuriCommand());
 		$this->proxyUDPSocket = new ProxyUDPSocket();
 		if (ConfigManager::getData(ConfigManager::PROXY_ENABLE)) {
@@ -166,7 +171,7 @@ class ZuriAC extends PluginBase {
 
 		// Fly
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\fly\FlyA();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\fly\FlyB();
+		//$this->checks[] = new \ReinfyTeam\Zuri\checks\fly\FlyB();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\fly\FlyC();
 
 		// Inventory
@@ -209,7 +214,8 @@ class ZuriAC extends PluginBase {
 
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\EditionFaker();
 
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\ProxyBot();
+		//TODO really need to rewrite ProxyBot check
+		//$this->checks[] = new \ReinfyTeam\Zuri\checks\network\ProxyBot();
 
 		// Scaffold
 		// Todo: Improve and add more checks in next release..
@@ -219,7 +225,10 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldD();
 	}
 
-	public static function Checks() : array {
-		return ZuriAC::getInstance()->checks;
+	/**
+	 * @return Check[]
+	 */
+	public static function getChecks() : array {
+		return self::getInstance()->checks;
 	}
 }

@@ -60,16 +60,13 @@ class ReachA extends Check {
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
 			$locEntity = $entity->getLocation();
-			$locDamager = $damager->getLocation();
 			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player && $entity instanceof Player) {
+				$locDamager = $damager->getLocation();
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
 				$player = $playerAPI->getPlayer();
-				if ($player === null) {
-					return;
-				}
 				$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? abs($locEntity->getY() - $locDamager->getY()) : 0;
 				$distance = MathUtil::distance($locEntity, $locDamager) - $isPlayerTop;
-				$isSurvival = $player->getGameMode() === GameMode::SURVIVAL();
+				$isSurvival = $player->getGamemode() === GameMode::SURVIVAL();
 				$this->debug($playerAPI, "isPlayerTop=$isPlayerTop, distance=$distance, isSurvival=$isSurvival");
 				if ($isSurvival && $distance > 4.3) {
 					$this->failed($playerAPI);

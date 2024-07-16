@@ -31,12 +31,12 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\Packet;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
+use pocketmine\world\format\Chunk;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function abs;
-use function intval;
 
 class Crasher extends Check {
 	public function getName() : string {
@@ -51,15 +51,18 @@ class Crasher extends Check {
 		return 5;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
-			if (abs($packet->getPosition()->getY()) > $this->getConstant("max-y") && $player->getWorld()->getChunk(intval($packet->getPosition()->getX()), intval($packet->getPosition()->getZ()))->getHeight() > $this->getConstant("max-y")) {
+			$position = $packet->getPosition();
+			$chunk = $player->getWorld()->getChunk((int) $position->getX() >> Chunk::COORD_BIT_SIZE, (int) $position->getZ() >> Chunk::COORD_BIT_SIZE);
+
+			if (
+				($chunk !== null && $chunk->getHeight() > $this->getConstant("max-y")) ||
+				(abs($position->getY()) > $this->getConstant("max-y"))
+			) {
 				$this->failed($playerAPI);
-				$this->debug($playerAPI, "y=" . $packet->getPosition()->getY() . ", absY=" . abs($packet->getPosition()->getY()));
+				$this->debug($playerAPI, "y=" . $position->getY() . ", absY=" . abs($position->getY()));
 			}
 		}
 	}

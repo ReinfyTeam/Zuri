@@ -33,7 +33,9 @@ namespace ReinfyTeam\Zuri\utils;
 
 use pocketmine\permission\DefaultPermissions;
 use pocketmine\permission\Permission as PMPermission;
+use pocketmine\permission\PermissionAttachment;
 use pocketmine\permission\PermissionManager as PMPermissionManager;
+use pocketmine\player\Player;
 use pocketmine\utils\NotCloneable;
 use pocketmine\utils\NotSerializable;
 use pocketmine\utils\SingletonTrait;
@@ -43,6 +45,8 @@ class PermissionManager {
 	use NotSerializable;
 	use NotCloneable;
 	use SingletonTrait;
+
+	protected ?PermissionAttachment $attachment = null;
 
 	/** @var string[] */
 	private array $perm = [];
