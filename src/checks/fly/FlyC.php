@@ -59,7 +59,7 @@ class FlyC extends Check {
 			$player = $playerAPI->getPlayer();
 			$oldPos = $event->getFrom();
 			$newPos = $event->getTo();
-			$surroundingBlocks = BlockUtil::getSurroundingBlocks($player);
+			$surroundingBlocks = iterator_to_array(BlockUtil::getSurroundingBlocks($player));
 			if (
 				$playerAPI->getAttackTicks() < 40 ||
 				$playerAPI->isInWeb() ||
