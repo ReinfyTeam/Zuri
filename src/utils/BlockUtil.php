@@ -52,15 +52,15 @@ class BlockUtil {
 		$posY = $player->getLocation()->getY();
 		$posZ = $player->getLocation()->getZ();
 
-		yield $world->getBlockAt($posX, $posY, $posZ)->getTypeId();
-		yield $world->getBlockAt($posX - 1, $posY, $posZ)->getTypeId();
-		yield $world->getBlockAt($posX - 1, $posY, $posZ - 1)->getTypeId();
-		yield $world->getBlockAt($posX, $posY, $posZ - 1)->getTypeId();
-		yield $world->getBlockAt($posX + 1, $posY, $posZ)->getTypeId();
-		yield $world->getBlockAt($posX + 1, $posY, $posZ + 1)->getTypeId();
-		yield $world->getBlockAt($posX, $posY, $posZ + 1)->getTypeId();
-		yield $world->getBlockAt($posX + 1, $posY, $posZ - 1)->getTypeId();
-		yield $world->getBlockAt($posX - 1, $posY, $posZ + 1)->getTypeId();
+		yield $world->getBlockAt((int) $posX, (int) $posY, (int) $posZ)->getTypeId();
+		yield $world->getBlockAt((int) $posX - 1, (int) $posY, (int) $posZ)->getTypeId();
+		yield $world->getBlockAt((int) $posX - 1, (int) $posY, (int) $posZ - 1)->getTypeId();
+		yield $world->getBlockAt((int) $posX, (int) $posY, (int) $posZ - 1)->getTypeId();
+		yield $world->getBlockAt((int) $posX + 1, (int) $posY, (int) $posZ)->getTypeId();
+		yield $world->getBlockAt((int) $posX + 1, (int) $posY, (int) $posZ + 1)->getTypeId();
+		yield $world->getBlockAt((int) $posX, (int) $posY, (int) $posZ + 1)->getTypeId();
+		yield $world->getBlockAt((int) $posX + 1, (int) $posY, (int) $posZ - 1)->getTypeId();
+		yield $world->getBlockAt((int) $posX - 1, (int) $posY, (int) $posZ + 1)->getTypeId();
 	}
 
 	public static function isOnGround(Location $location, int $down) : bool {
@@ -73,64 +73,64 @@ class BlockUtil {
 		$blockY = $location->getY() - $down;
 		$blockZ = $location->getZ();
 		$world = $location->getWorld();
-		if ($world->getBlockAt($blockX, $blockY, $blockZ)->getTypeId() !== BlockTypeIds::AIR) {
+		if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ)->getTypeId() !== BlockTypeIds::AIR) {
 			return true;
 		}
 		if ($fracX < 0.3) {
-			if ($world->getBlockAt($blockX - 1, $blockY, $blockZ)->getTypeId() !== BlockTypeIds::AIR) {
+			if ($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ)->getTypeId() !== BlockTypeIds::AIR) {
 				return true;
 			}
 			if ($fracZ < 0.3) {
-				if ($world->getBlockAt($blockX - 1, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if ($world->getBlockAt($blockX, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if ($world->getBlockAt($blockX + 1, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
 			} elseif ($fracZ > 0.7) {
-				if ($world->getBlockAt($blockX - 1, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if ($world->getBlockAt($blockX, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if ($world->getBlockAt($blockX + 1, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
 			}
 		} elseif ($fracX > 0.7) {
-			if ($world->getBlockAt($blockX + 1, $blockY, $blockZ)->getTypeId() !== BlockTypeIds::AIR) {
+			if ($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ)->getTypeId() !== BlockTypeIds::AIR) {
 				return true;
 			}
 			if ($fracZ < 0.3) {
-				if ($world->getBlockAt($blockX - 1, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if ($world->getBlockAt($blockX, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if ($world->getBlockAt($blockX + 1, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
 			} elseif ($fracZ > 0.7) {
-				if ($world->getBlockAt($blockX - 1, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if ($world->getBlockAt($blockX, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if ($world->getBlockAt($blockX + 1, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
+				if ($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
 			}
 		} elseif ($fracZ < 0.3) {
-			if ($world->getBlockAt($blockX, $blockY, $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
+			if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 				return true;
 			}
-		} else if ($fracZ > 0.7 && $world->getBlockAt($blockX, $blockY, $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
+		} else if ($fracZ > 0.7 && $world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 			return true;
 		}
 		return false;
@@ -146,64 +146,64 @@ class BlockUtil {
 		$blockZ = $location->getZ();
 		$world = $location->getWorld();
 
-		if (in_array($world->getBlockAt($blockX, $blockY, $blockZ)->getTypeId(), $id, true)) {
+		if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ)->getTypeId(), $id, true)) {
 			return true;
 		}
 		if ($fracX < 0.3) {
-			if (in_array($world->getBlockAt($blockX - 1, $blockY, $blockZ)->getTypeId(), $id, true)) {
+			if (in_array($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ)->getTypeId(), $id, true)) {
 				return true;
 			}
 			if ($fracZ < 0.3) {
-				if (in_array($world->getBlockAt($blockX - 1, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlockAt($blockX, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlockAt($blockX + 1, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
 					return true;
 				}
 			} elseif ($fracZ > 0.7) {
-				if (in_array($world->getBlockAt($blockX - 1, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlockAt($blockX, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlockAt($blockX + 1, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
 					return true;
 				}
 			}
 		} elseif ($fracX > 0.7) {
-			if (in_array($world->getBlockAt($blockX + 1, $blockY, $blockZ)->getTypeId(), $id, true)) {
+			if (in_array($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ)->getTypeId(), $id, true)) {
 				return true;
 			}
 			if ($fracZ < 0.3) {
-				if (in_array($world->getBlockAt($blockX - 1, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlockAt($blockX, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlockAt($blockX + 1, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
 					return true;
 				}
 			} elseif ($fracZ > 0.7) {
-				if (in_array($world->getBlockAt($blockX - 1, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlockAt($blockX, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
 					return true;
 				}
-				if (in_array($world->getBlockAt($blockX + 1, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
+				if (in_array($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
 					return true;
 				}
 			}
 		} elseif ($fracZ < 0.3) {
-			if (in_array($world->getBlockAt($blockX, $blockY, $blockZ - 1)->getTypeId(), $id, true)) {
+			if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
 				return true;
 			}
-		} else if ($fracZ > 0.7 && in_array($world->getBlockAt($blockX, $blockY, $blockZ + 1)->getTypeId(), $id, true)) {
+		} else if ($fracZ > 0.7 && in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
 			return true;
 		}
 		return false;
