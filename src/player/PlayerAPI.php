@@ -38,10 +38,10 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
 use ReflectionProperty;
-use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function count;
 use function microtime;
+use function spl_object_id;
 
 class PlayerAPI implements IPlayerAPI {
 	/** @var PlayerAPI[] */

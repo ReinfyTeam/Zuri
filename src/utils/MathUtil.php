@@ -34,7 +34,6 @@ namespace ReinfyTeam\Zuri\utils;
 use pocketmine\math\Vector3;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function ceil;
-use function pow;
 use function sqrt;
 
 class MathUtil {
@@ -46,11 +45,11 @@ class MathUtil {
 		return ($playerAPI->getPlayer()->getDirectionVector() ?? $playerAPI->getPlayer()->getLocation())->multiply($distance);
 	}
 
-	public static function distance(Vector3 $from, Vector3 $to) : float|int{
+	public static function distance(Vector3 $from, Vector3 $to) : float|int {
 		return sqrt((($from->getX() - $to->getX()) ** 2) + (($from->getY() - $to->getY()) ** 2) + (($from->getZ() - $to->getZ()) ** 2));
 	}
 
-	public static function pingFormula(float $ping) : int{
+	public static function pingFormula(float $ping) : int {
 		return (int) ceil($ping / 50);
 	}
 
