@@ -14,7 +14,7 @@ zuri:
     editionfaker:
        message: "§cInvalid client!"
     network:
-        enable: false # If you are using WaterDogPE, considering using a plugin that supports login-extras to include their player public ip address on their login. This may cause iissue between login info's given by WaterDogPE proxy when using this ip limiter. Due the certain issues occured, this feature is now optional prior for the proxy issues.
+        enable: false # If you are using WaterDogPE, considering using a plugin that supports login-extras to include their player public ip address on their login. This may cause issue between login info's given by WaterDogPE proxy when using this ip limiter. Due the certain issues occured, this feature is now optional prior for the proxy issues.
         #This is to limit the player's access to the same address to the server.
         limit: 3
         message: "§cSorry the server can't allow access to cross the line."

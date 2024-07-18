@@ -141,7 +141,7 @@ final class API {
 		return self::allModulesInfo()[$name];
 	}
 
-	public static function getSubTypesByModule(string $name) : ?string {
+	public static function getSubTypeByModule(string $name) : ?string {
 		if (in_array($name, ZuriAC::Checks(), true)) {
 			return null;
 		}
