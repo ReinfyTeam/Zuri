@@ -68,9 +68,6 @@ class ZuriAC extends PluginBase {
 		$this->loadChecks();
 		$this->getScheduler()->scheduleRepeatingTask(new ServerTickTask($this), 20);
 		$this->getScheduler()->scheduleRepeatingTask(new CaptchaTask($this), 20);
-		if (ConfigManager::getData(ConfigManager::NETWORK_LIMIT_ENABLE)) {
-			$this->getScheduler()->scheduleRepeatingTask(new NetworkTickTask($this), 100);
-		}
 		$this->getServer()->getAsyncPool()->submitTask(new UpdateCheckerAsyncTask($this->getDescription()->getVersion()));
 		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigManager::PERMISSION_BYPASS_PERMISSION), PermissionManager::OPERATOR);
 		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigManager::ALERTS_PERMISSION), PermissionManager::OPERATOR);
@@ -97,6 +94,10 @@ class ZuriAC extends PluginBase {
 	public function loadChecks() : void {
 		if (!empty($this->checks)) {
 			$this->checks = [];
+		}
+		
+		if (ConfigManager::getData(ConfigManager::NETWORK_LIMIT_ENABLE)) {
+			$this->checks[] = new \ReinfyTeam\Zuri\checks\network\NetworkLimit; // Required to reload the modules if modified at the game!!!
 		}
 
 		// Aim Assist

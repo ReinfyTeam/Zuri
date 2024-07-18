@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.2.0" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
+    version: "0.2.1" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -178,11 +178,11 @@ zuri:
             # This are just adding the walking constant value to evaluate the limit.
             # Todo: Improve this more??
             constants:
-                  walking-speed-limit: 8.78303
-                  sprinting-speed-limit: 2.06229
-                  jump-speed-limit: 3.19435
+                  walking-speed-limit: 11.78303
+                  sprinting-speed-limit: 4.06229
+                  jump-speed-limit: 4.19435
                   ice-walking-speed-limit: 1.09777
-                  speed-effect-limit: 5.85535
+                  speed-effect-limit: 7.85535
                   time-limit: 0.5
                   time-effect-limit: 0.2
                   wakling-distance-limit: 0.02964
@@ -190,6 +190,7 @@ zuri:
                   jump-distance-limit: 0.35767
                   ice-walking-distance-limit: 0.20735
                   speed-effect-distance-limit: 0.49282
+                  top-block-limit: 2.02384
         cheststealer:
             enable: true
             maxvl: 1
@@ -343,11 +344,11 @@ zuri:
             punishment: KICK
         proxybot:
             enable: true
-            maxvl: 1
+            maxvl: 0
             punishment: KICK
         editionfaker:
             enable: true
-            maxvl: 1
+            maxvl: 0
             punishment: KICK
         invalidpackets:
             enable: true
@@ -376,4 +377,7 @@ zuri:
             constants:
                   margin-error: 0.8
                   invalid-pitch: 45
+        networklimit:
+            enable: false
+            maxvl: 0
 ...

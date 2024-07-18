@@ -149,6 +149,6 @@ class Discord extends ConfigManager {
 		// why this??
 		$hex = str_replace("#", "", $hex);
 
-		return hexdec($hex);
+		return hexdec($hex); // ty php
 	}
 }
