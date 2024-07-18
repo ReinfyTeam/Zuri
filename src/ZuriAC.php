@@ -56,7 +56,7 @@ class ZuriAC extends PluginBase {
 		ConfigManager::checkConfig();
 
 		if (!\Phar::running(true)) {
-			$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade checking performance. We recommended to download phar plugin from poggit builds or github releases. Instead of using source-code from github.");
+			$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade checking performance. We recommended you to download phar plugin from poggit builds or github releases. Instead of using source-code from github.");
 		}
 	}
 

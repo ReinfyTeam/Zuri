@@ -61,7 +61,7 @@ class KillAuraE extends Check {
 			if ($damager === null) {
 				return;
 			}
-			if ($damager instanceof Player) {
+			if ($damager instanceof Player && $entity instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
 				$player = $playerAPI->getPlayer();
 				if ($player === null) {
