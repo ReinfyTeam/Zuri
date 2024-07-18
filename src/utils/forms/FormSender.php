@@ -260,7 +260,9 @@ final class FormSender extends ConfigManager {
 		foreach (ZuriAC::Checks() as $check) {
 			if (!isset($list[$check->getName()])) {
 				$list[$check->getName()] = $check->enable();
-				if ($check->getName() === "NetworkLimit") continue;
+				if ($check->getName() === "NetworkLimit") {
+					continue;
+				}
 				$form->addButton($check->getName() . "\nClick to view information.", 0, "", $check->getName());
 			}
 		}

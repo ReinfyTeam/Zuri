@@ -36,11 +36,6 @@ use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function curl_exec;
-use function curl_getinfo;
-use function curl_init;
-use function curl_setopt_array;
-use function json_decode;
 
 class NetworkLimit extends Check {
 	public function getName() : string {
@@ -54,33 +49,33 @@ class NetworkLimit extends Check {
 	public function maxViolations() : int {
 		return 0;
 	}
-	
+
 	private array $ipList = [];
 
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof PlayerPreLoginEvent) {
-		  $ip = $event->getIp();
-		  if (!isset($this->ipList[$ip])) {
-		    $this->ipList[$ip] = 1;
-		  } else {
-		    $this->ipList[$ip]++;
-		  }
-		  
-		  if ($this->ipList[$ip] > self::getData(self::NETWORK_LIMIT)) {
-		    $this->warn($event->getPlayerInfo()->getUsername());
-		    $event->setKickFlag(0, self::getData(self::NETWORK_MESSAGE));
-		    $this->ipList[$ip]--;
-		  }
+			$ip = $event->getIp();
+			if (!isset($this->ipList[$ip])) {
+				$this->ipList[$ip] = 1;
+			} else {
+				$this->ipList[$ip]++;
+			}
+
+			if ($this->ipList[$ip] > self::getData(self::NETWORK_LIMIT)) {
+				$this->warn($event->getPlayerInfo()->getUsername());
+				$event->setKickFlag(0, self::getData(self::NETWORK_MESSAGE));
+				$this->ipList[$ip]--;
+			}
 		}
 	}
-	
+
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-	  if ($event instanceof PlayerQuitEvent) {
-	    $ip = $event->getPlayer()->getNetworkSession()->getIp();
-	    
-	    if (isset($this->ipList[$ip])) {
-	      $this->ipList[$ip]--;
-	    }
-	  }
+		if ($event instanceof PlayerQuitEvent) {
+			$ip = $event->getPlayer()->getNetworkSession()->getIp();
+
+			if (isset($this->ipList[$ip])) {
+				$this->ipList[$ip]--;
+			}
+		}
 	}
 }

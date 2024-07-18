@@ -34,7 +34,6 @@ namespace ReinfyTeam\Zuri\checks\moving;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function pow;
 
 class AirMovement extends Check {
 	public function getName() : string {
@@ -82,7 +81,7 @@ class AirMovement extends Check {
 			) {
 				$distance = $nLocation["to"]->getY() - $playerAPI->getLastGroundY();
 				$limit = $this->getConstant("air-limit");
-				$limit += isset($effects["potion.jump"]) ? (pow($effects["potion.jump"] + 1.4, 2) / 16) : 0;
+				$limit += isset($effects["potion.jump"]) ? ((($effects["potion.jump"] + 1.4) ** 2) / 16) : 0;
 				if ($distance > $limit) {
 					$this->failed($playerAPI);
 				}

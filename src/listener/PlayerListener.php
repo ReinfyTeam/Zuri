@@ -244,7 +244,7 @@ class PlayerListener implements Listener {
 		}
 	}
 
-	public function onPlayerItemUse(PlayerItemUseEvent $event) {
+	public function onPlayerItemUse(PlayerItemUseEvent $event) : void {
 		$player = $event->getPlayer();
 		if ($player === null) {
 			return;
@@ -253,7 +253,7 @@ class PlayerListener implements Listener {
 	}
 
 
-	public function onInventoryTransaction(InventoryTransactionEvent $event) {
+	public function onInventoryTransaction(InventoryTransactionEvent $event) : void {
 		$player = $event->getTransaction()->getSource();
 		if ($player === null) {
 			return;
@@ -273,7 +273,7 @@ class PlayerListener implements Listener {
 		}
 	}
 
-	public function onInventoryOpen(InventoryOpenEvent $event) {
+	public function onInventoryOpen(InventoryOpenEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
@@ -283,7 +283,7 @@ class PlayerListener implements Listener {
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onInventoryClose(InventoryCloseEvent $event) {
+	public function onInventoryClose(InventoryCloseEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
@@ -293,7 +293,7 @@ class PlayerListener implements Listener {
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onEntityTeleport(EntityTeleportEvent $event) {
+	public function onEntityTeleport(EntityTeleportEvent $event) : void {
 		$entity = $event->getEntity();
 		if ($entity === null) {
 			return;
@@ -311,7 +311,7 @@ class PlayerListener implements Listener {
 		$playerAPI->setTeleportTicks(microtime(true));
 	}
 
-	public function onPlayerJump(PlayerJumpEvent $event) {
+	public function onPlayerJump(PlayerJumpEvent $event) : void {
 		$player = $event->getPlayer();
 		if ($player === null) {
 			return;
@@ -326,11 +326,11 @@ class PlayerListener implements Listener {
 		$playerAPI->setJumpTicks(microtime(true));
 	}
 
-	public function onPlayerQuit(PlayerQuitEvent $event) {
+	public function onPlayerQuit(PlayerQuitEvent $event) : void {
 		PlayerAPI::removeAPIPlayer($event->getPlayer());
 	}
 
-	public function onPlayerJoin(PlayerJoinEvent $event) {
+	public function onPlayerJoin(PlayerJoinEvent $event) : void {
 		$player = $event->getPlayer();
 		if ($player === null) {
 			return;
@@ -346,15 +346,15 @@ class PlayerListener implements Listener {
 		$playerAPI->setJoinedAtTheTime(microtime(true));
 	}
 
-	public function onPlayerPreLogin(PlayerPreLoginEvent $event) {
+	public function onPlayerPreLogin(PlayerPreLoginEvent $event) : void {
 		$this->checkJustEvent($event);
 	}
 
-	public function onEntityDamage(EntityDamageEvent $event) {
+	public function onEntityDamage(EntityDamageEvent $event) : void {
 		$this->checkJustEvent($event);
 	}
 
-	public function onEntityDamageByEntity(EntityDamageByEntityEvent $event) {
+	public function onEntityDamageByEntity(EntityDamageByEntityEvent $event) : void {
 		$cause = $event->getCause();
 		$entity = $event->getEntity();
 		if ($entity === null) {
@@ -391,7 +391,7 @@ class PlayerListener implements Listener {
 		}
 	}
 
-	public function onPlayerDeath(PlayerDeathEvent $event) {
+	public function onPlayerDeath(PlayerDeathEvent $event) : void {
 		$player = $event->getPlayer();
 		if ($player === null) {
 			return;
@@ -406,7 +406,7 @@ class PlayerListener implements Listener {
 		$playerAPI->setDeathTicks(microtime(true));
 	}
 
-	public function onPlayerChat(PlayerChatEvent $event) {
+	public function onPlayerChat(PlayerChatEvent $event) : void {
 		$player = $event->getPlayer();
 		if ($player === null) {
 			return;
@@ -424,7 +424,7 @@ class PlayerListener implements Listener {
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onPlayerItemHeld(PlayerItemHeldEvent $event) {
+	public function onPlayerItemHeld(PlayerItemHeldEvent $event) : void {
 		$player = $event->getPlayer();
 		if ($player === null) {
 			return;
@@ -439,7 +439,7 @@ class PlayerListener implements Listener {
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onPlayerRegen(EntityRegainHealthEvent $event) {
+	public function onPlayerRegen(EntityRegainHealthEvent $event) : void {
 		$player = $event->getEntity();
 		if (!$player instanceof Player) {
 			return;
@@ -454,7 +454,7 @@ class PlayerListener implements Listener {
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onCommandEvent(CommandEvent $event) {
+	public function onCommandEvent(CommandEvent $event) : void {
 		$sender = $event->getSender();
 		if ($sender === null) {
 			return;
@@ -472,7 +472,7 @@ class PlayerListener implements Listener {
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onEntityShootBowEvent(EntityShootBowEvent $event) {
+	public function onEntityShootBowEvent(EntityShootBowEvent $event) : void {
 		$player = $event->getEntity();
 		if (!$player instanceof Player) {
 			return;
@@ -487,7 +487,7 @@ class PlayerListener implements Listener {
 		$this->checkEvent($event, $playerAPI);
 	}
 
-	public function onPlayerItemConsume(PlayerItemConsumeEvent $event) {
+	public function onPlayerItemConsume(PlayerItemConsumeEvent $event) : void {
 		$player = $event->getPlayer();
 		if ($player === null) {
 			return;
@@ -543,7 +543,7 @@ class PlayerListener implements Listener {
 		}
 	}
 
-	private function check(DataPacket $packet, PlayerAPI $player) {
+	private function check(DataPacket $packet, PlayerAPI $player) : void {
 		$playerAPI = PlayerAPI::getAPIPlayer($player->getPlayer());
 		if (($player = $playerAPI->getPlayer()) === null || !$player->isOnline() || !$player->spawned) {
 			return;
@@ -556,7 +556,7 @@ class PlayerListener implements Listener {
 		}
 	}
 
-	private function checkJustEvent(Event $event) {
+	private function checkJustEvent(Event $event) : void {
 		foreach (ZuriAC::Checks() as $class) {
 			if ($class->enable()) {
 				$class->checkJustEvent($event);

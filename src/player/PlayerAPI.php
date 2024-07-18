@@ -48,11 +48,11 @@ class PlayerAPI implements IPlayerAPI {
 	public static array $players = [];
 
 	public static function getAPIPlayer(Player $player) : PlayerAPI {
-		return self::$players[$player->getUniqueId()->__toString()] ??= new PlayerAPI($player->getName());
+		return self::$players[spl_object_id($player)] ??= new PlayerAPI($player->getName());
 	}
 
 	public static function removeAPIPlayer(Player $player) : void {
-		unset(self::$players[$player->getUniqueId()->__toString()]);
+		unset(self::$players[spl_object_id($player)]);
 	}
 
 	private bool $isCaptcha = false;
@@ -96,12 +96,12 @@ class PlayerAPI implements IPlayerAPI {
 	private array $externalData = [];
 	private string $captchaCode = "nocode";
 
-	public function __construct(private string $player) {
+	public function __construct(private Player $player) {
 		// no-op
 	}
 
-	public function getPlayer() : ?Player {
-		return ZuriAC::getInstance()->getServer()->getPlayerExact($this->player);
+	public function getPlayer() : Player {
+		return $this->player;
 	}
 
 	//Captcha
@@ -316,7 +316,7 @@ class PlayerAPI implements IPlayerAPI {
 			return null;
 		}
 		if ($ref === null) {
-			$ref = new ReflectionProperty(Player::class, "blockBreakHandler");
+			$ref = new ReflectionProperty($this->getPlayer(), "blockBreakHandler");
 		}
 		return $ref->getValue($this->getPlayer());
 	}
@@ -529,54 +529,54 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Violation
 	public function getViolation(string $supplier) : int {
-		if (isset($this->violations[$name = $this->player][$supplier])) {
-			return count($this->violations[$name][$supplier]);
+		if (isset($this->violations[$supplier])) {
+			return count($this->violations[$supplier]);
 		}
 		return 0;
 	}
 
 	public function resetViolation(string $supplier) : void {
-		if (isset($this->violations[$name = $this->player][$supplier])) {
-			unset($this->violations[$name][$supplier]);
+		if (isset($this->violations[$supplier])) {
+			unset($this->violations[$supplier]);
 		}
 	}
 
 	public function addViolation(string $supplier, int|float $amount = 1) : void {
-		if (isset($this->violations[$name = $this->player][$supplier])) {
-			foreach ($this->violations[$name][$supplier] as $index => $time) {
+		if (isset($this->violations[$supplier])) {
+			foreach ($this->violations[$supplier] as $index => $time) {
 				if (abs($time - microtime(true)) * 20 > 40) {
-					unset($this->violations[$name][$supplier][$index]);
+					unset($this->violations[$supplier][$index]);
 				}
 			}
 		}
 
-		$this->violations[$name][$supplier][] = microtime(true);
+		$this->violations[$supplier][] = microtime(true);
 	}
 
 	//Real violation
 	public function getRealViolation(string $supplier) : int {
-		if (isset($this->realViolations[$name = $this->player][$supplier])) {
-			return count($this->realViolations[$name][$supplier]);
+		if (isset($this->realViolations[$supplier])) {
+			return count($this->realViolations[$supplier]);
 		}
 		return 0;
 	}
 
 	public function resetRealViolation(string $supplier) : void {
-		if (isset($this->realViolations[$name = $this->player][$supplier])) {
-			unset($this->realViolations[$name][$supplier]);
+		if (isset($this->realViolations[$supplier])) {
+			unset($this->realViolations[$supplier]);
 		}
 	}
 
 	public function addRealViolation(string $supplier, int|float $amount = 1) : void {
-		if (isset($this->realViolations[$name = $this->player][$supplier])) {
-			foreach ($this->realViolations[$name][$supplier] as $index => $time) {
+		if (isset($this->realViolations[$supplier])) {
+			foreach ($this->realViolations[$supplier] as $index => $time) {
 				if (abs($time - microtime(true)) * 20 > 300) {
-					unset($this->realViolations[$name][$supplier][$index]);
+					unset($this->realViolations[$supplier][$index]);
 				}
 			}
 		}
 
-		$this->realViolations[$name][$supplier][] = microtime(true);
+		$this->realViolations[$supplier][] = microtime(true);
 	}
 
 	//Location
@@ -590,19 +590,19 @@ class PlayerAPI implements IPlayerAPI {
 
 	//External Data
 	public function getExternalData(string $dataName) {
-		if (isset($this->externalData[$name = $this->player][$dataName])) {
-			return $this->externalData[$name][$dataName];
+		if (isset($this->externalData[$dataName])) {
+			return $this->externalData[$dataName];
 		}
 		return null;
 	}
 
 	public function setExternalData(string $dataName, mixed $amount) : void {
-		$this->externalData[$this->player][$dataName] = $amount;
+		$this->externalData[$dataName] = $amount;
 	}
 
 	public function unsetExternalData(string $dataName) : void {
-		if (isset($this->externalData[$name = $this->player][$dataName])) {
-			unset($this->externalData[$name][$dataName]);
+		if (isset($this->externalData[$dataName])) {
+			unset($this->externalData[$dataName]);
 		}
 	}
 

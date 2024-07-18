@@ -37,7 +37,7 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\CharUtil;
 use ReinfyTeam\Zuri\utils\ReplaceText;
-use function rand;
+use function random_int;
 
 class CaptchaEvent extends Event {
 	use CancellableTrait;
@@ -52,15 +52,15 @@ class CaptchaEvent extends Event {
 		return $this->playerAPI;
 	}
 
-	protected function sendMessage() {
+	protected function sendMessage() : void {
 		$this->playerAPI->getPlayer()->sendMessage(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigManager::CAPTCHA_TEXT)));
 	}
 
-	protected function sendTip() {
+	protected function sendTip() : void {
 		$this->playerAPI->getPlayer()->sendTip(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigManager::CAPTCHA_TEXT)));
 	}
 
-	protected function sendTitle() {
+	protected function sendTitle() : void {
 		$this->playerAPI->getPlayer()->sendSubTitle(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigManager::CAPTCHA_TEXT)));
 	}
 
@@ -70,7 +70,7 @@ class CaptchaEvent extends Event {
 				$this->playerAPI->setCaptchaCode(CharUtil::generatorCode(ConfigManager::getData(ConfigManager::CAPTCHA_CODE_LENGTH)));
 			}
 			if (ConfigManager::getData(ConfigManager::CAPTCHA_RANDOMIZE) === true) {
-				switch(rand(1, 3)) {
+				switch(random_int(1, 3)) {
 					case 1:
 						$this->sendMessage();
 						break;

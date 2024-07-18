@@ -79,7 +79,7 @@ class KillAuraC extends Check {
 		$distance = MathUtil::distance($from, $to);
 		$vector = $to->subtract($from->x, $from->y, $from->z)->normalize()->multiply(1);
 		$entities = [];
-		for ($i = 0; $i <= $distance; $i += 1) {
+		for ($i = 0; $i <= $distance; ++$i) {
 			$from = $from->add($vector->x, $vector->y, $vector->z);
 			foreach ($player->getWorld()->getEntities() as $target) {
 				$distanceA = new Vector3($from->x, $from->y, $from->z);

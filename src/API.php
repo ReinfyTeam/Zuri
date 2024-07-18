@@ -50,7 +50,7 @@ final class API {
 	private static ConfigManager $config;
 
 	public static function getVersion() : string {
-		return $this->getPluginInstance()->getDescription()->getVersion();
+		return self::getPluginInstance()->getDescription()->getVersion();
 	}
 
 	public static function getPlayer(string|Player $player) : ?PlayerAPI {
@@ -69,7 +69,7 @@ final class API {
 
 		foreach (ZuriAC::Checks() as $module) {
 			if ($module->getName() === $name && $module->getSubType() === $subType) {
-				$result = $module;
+				return $module;
 			}
 			continue;
 		}
@@ -165,7 +165,7 @@ final class API {
 		return self::allModulesInfo()[$name]["punishment"];
 	}
 
-	public static function getPluginInstance() : ?ZuriAC {
+	public static function getPluginInstance() : ZuriAC {
 		return ZuriAC::getInstance();
 	}
 

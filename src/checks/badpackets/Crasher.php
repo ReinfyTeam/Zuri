@@ -36,7 +36,6 @@ use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function abs;
-use function intval;
 
 class Crasher extends Check {
 	public function getName() : string {
@@ -57,9 +56,14 @@ class Crasher extends Check {
 			if ($player === null) {
 				return;
 			}
-			if (abs($packet->getPosition()->getY()) > $this->getConstant("max-y") && $player->getWorld()->getChunk(intval($packet->getPosition()->getX()), intval($packet->getPosition()->getZ()))->getHeight() > $this->getConstant("max-y")) {
+			$pos = $packet->getPosition();
+			$chunk = $player->getWorld()->getChunk((int) $pos->getX() >> Chunk::COORD_BIT_SIZE, (int) $pos->getZ() >> Chunk::COORD_BIT_SIZE);
+			if (
+				($chunk !== null && $chunk->getHeight() > $this->getConstant("max-y")) ||
+				(abs($pos->getY()) > $this->getConstant("max-y"))
+			) {
 				$this->failed($playerAPI);
-				$this->debug($playerAPI, "y=" . $packet->getPosition()->getY() . ", absY=" . abs($packet->getPosition()->getY()));
+				$this->debug($playerAPI, "y=" . $pos->getY() . ", absY=" . abs($pos->getY()));
 			}
 		}
 	}

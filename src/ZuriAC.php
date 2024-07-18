@@ -39,7 +39,6 @@ use ReinfyTeam\Zuri\listener\PlayerListener;
 use ReinfyTeam\Zuri\listener\ServerListener;
 use ReinfyTeam\Zuri\network\ProxyUDPSocket;
 use ReinfyTeam\Zuri\task\CaptchaTask;
-use ReinfyTeam\Zuri\task\NetworkTickTask;
 use ReinfyTeam\Zuri\task\ServerTickTask;
 use ReinfyTeam\Zuri\task\UpdateCheckerAsyncTask;
 use ReinfyTeam\Zuri\utils\InternetAddress;
@@ -95,7 +94,7 @@ class ZuriAC extends PluginBase {
 		if (!empty($this->checks)) {
 			$this->checks = [];
 		}
-		
+
 		if (ConfigManager::getData(ConfigManager::NETWORK_LIMIT_ENABLE)) {
 			$this->checks[] = new \ReinfyTeam\Zuri\checks\network\NetworkLimit; // Required to reload the modules if modified at the game!!!
 		}

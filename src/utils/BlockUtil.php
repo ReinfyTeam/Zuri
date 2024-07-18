@@ -50,27 +50,15 @@ class BlockUtil {
 		$posY = $player->getLocation()->getY();
 		$posZ = $player->getLocation()->getZ();
 
-		$pos1 = new Vector3($posX  , $posY, $posZ  );
-		$pos2 = new Vector3($posX - 1, $posY, $posZ  );
-		$pos3 = new Vector3($posX - 1, $posY, $posZ - 1);
-		$pos4 = new Vector3($posX  , $posY, $posZ - 1);
-		$pos5 = new Vector3($posX + 1, $posY, $posZ  );
-		$pos6 = new Vector3($posX + 1, $posY, $posZ + 1);
-		$pos7 = new Vector3($posX  , $posY, $posZ + 1);
-		$pos8 = new Vector3($posX + 1, $posY, $posZ - 1);
-		$pos9 = new Vector3($posX - 1, $posY, $posZ + 1);
-
-		$bpos1 = $world->getBlock($pos1)->getTypeId();
-		$bpos2 = $world->getBlock($pos2)->getTypeId();
-		$bpos3 = $world->getBlock($pos3)->getTypeId();
-		$bpos4 = $world->getBlock($pos4)->getTypeId();
-		$bpos5 = $world->getBlock($pos5)->getTypeId();
-		$bpos6 = $world->getBlock($pos6)->getTypeId();
-		$bpos7 = $world->getBlock($pos7)->getTypeId();
-		$bpos8 = $world->getBlock($pos8)->getTypeId();
-		$bpos9 = $world->getBlock($pos9)->getTypeId();
-
-		return  [$bpos1, $bpos2, $bpos3, $bpos4, $bpos5, $bpos6, $bpos7, $bpos8, $bpos9];
+		yield $world->getBlockAt((int) $posX, (int) $posY, (int) $posZ)->getTypeId();
+		yield $world->getBlockAt((int) $posX - 1, (int) $posY, (int) $posZ)->getTypeId();
+		yield $world->getBlockAt((int) $posX - 1, (int) $posY, (int) $posZ - 1)->getTypeId();
+		yield $world->getBlockAt((int) $posX, (int) $posY, (int) $posZ - 1)->getTypeId();
+		yield $world->getBlockAt((int) $posX + 1, (int) $posY, (int) $posZ)->getTypeId();
+		yield $world->getBlockAt((int) $posX + 1, (int) $posY, (int) $posZ + 1)->getTypeId();
+		yield $world->getBlockAt((int) $posX, (int) $posY, (int) $posZ + 1)->getTypeId();
+		yield $world->getBlockAt((int) $posX + 1, (int) $posY, (int) $posZ - 1)->getTypeId();
+		yield $world->getBlockAt((int) $posX - 1, (int) $posY, (int) $posZ + 1)->getTypeId();
 	}
 
 	public static function isOnGround(Location $location, int $down) : bool {
@@ -83,64 +71,64 @@ class BlockUtil {
 		$blockY = $location->getY() - $down;
 		$blockZ = $location->getZ();
 		$world = $location->getWorld();
-		if (!in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ))->getTypeId(), $id, true)) {
+		if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ)->getTypeId() !== BlockTypeIds::AIR) {
 			return true;
 		}
 		if ($fracX < 0.3) {
-			if (!in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ))->getTypeId(), $id, true)) {
+			if ($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ)->getTypeId() !== BlockTypeIds::AIR) {
 				return true;
 			}
 			if ($fracZ < 0.3) {
-				if (!in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
 			} elseif ($fracZ > 0.7) {
-				if (!in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
 			}
 		} elseif ($fracX > 0.7) {
-			if (!in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ))->getTypeId(), $id, true)) {
+			if ($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ)->getTypeId() !== BlockTypeIds::AIR) {
 				return true;
 			}
 			if ($fracZ < 0.3) {
-				if (!in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
 			} elseif ($fracZ > 0.7) {
-				if (!in_array($world->getBlock(new Vector3($blockX - 1, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
-				if (!in_array($world->getBlock(new Vector3($blockX + 1, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+				if ($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 					return true;
 				}
 			}
 		} elseif ($fracZ < 0.3) {
-			if (!in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ - 1))->getTypeId(), $id, true)) {
+			if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 				return true;
 			}
-		} elseif ($fracZ > 0.7 && !in_array($world->getBlock(new Vector3($blockX, $blockY, $blockZ + 1))->getTypeId(), $id, true)) {
+		} else if ($fracZ > 0.7 && $world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 			return true;
 		}
 		return false;

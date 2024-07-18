@@ -38,7 +38,6 @@ use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerMoveEvent;
-use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
@@ -50,26 +49,13 @@ use ReinfyTeam\Zuri\utils\discord\Discord;
 class ServerListener implements Listener {
 	private array $ip = [];
 
-	public function onPlayerPreLogin(PlayerPreLoginEvent $event) {
-		$ip = $event->getIp();
-		if (!isset($this->ip[$ip])) {
-			$this->ip[$ip] = 1;
-		} else {
-			if ($this->ip[$ip] >= ConfigManager::getData(ConfigManager::NETWORK_LIMIT)) {
-				$event->setKickFlag(0, ConfigManager::getData(ConfigManager::NETWORK_MESSAGE));
-			} else {
-				$this->ip[$ip] += 1;
-			}
-		}
-	}
-
-	public function onPlayerJoin(PlayerJoinEvent $event) {
+	public function onPlayerJoin(PlayerJoinEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		Discord::Send($playerAPI, Discord::JOIN);
 	}
 
-	public function onPlayerQuit(PlayerQuitEvent $event) {
+	public function onPlayerQuit(PlayerQuitEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		Discord::Send($playerAPI, Discord::LEAVE);
@@ -79,7 +65,7 @@ class ServerListener implements Listener {
 		}
 	}
 
-	public function onPlayerChat(PlayerChatEvent $event) {
+	public function onPlayerChat(PlayerChatEvent $event) : void {
 		$player = $event->getPlayer();
 		$message = $event->getMessage();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
@@ -95,7 +81,7 @@ class ServerListener implements Listener {
 		}
 	}
 
-	public function onEntityDamageByEntity(EntityDamageByEntityEvent $event) {
+	public function onEntityDamageByEntity(EntityDamageByEntityEvent $event) : void {
 		$damager = $event->getDamager();
 		if (!$damager instanceof Player) {
 			return;
@@ -107,7 +93,7 @@ class ServerListener implements Listener {
 		}
 	}
 
-	public function onPlayerInteract(PlayerInteractEvent $event) {
+	public function onPlayerInteract(PlayerInteractEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->isCaptcha()) {
@@ -116,7 +102,7 @@ class ServerListener implements Listener {
 		}
 	}
 
-	public function onPlayerMove(PlayerMoveEvent $event) {
+	public function onPlayerMove(PlayerMoveEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->isCaptcha()) {
@@ -125,7 +111,7 @@ class ServerListener implements Listener {
 		}
 	}
 
-	public function onBlockBreak(BlockBreakEvent $event) {
+	public function onBlockBreak(BlockBreakEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->isCaptcha()) {

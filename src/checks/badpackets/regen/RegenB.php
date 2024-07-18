@@ -37,6 +37,7 @@ use pocketmine\event\Event;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function in_array;
 
 class RegenB extends Check {
 	public function getName() : string {
@@ -53,7 +54,7 @@ class RegenB extends Check {
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityRegainHealthEvent) {
-			if ($event->getRegainReason() != EntityDamageEvent::CAUSE_MAGIC && $event->getRegainReason() != EntityDamageEvent::CAUSE_CUSTOM) {
+			if (!in_array($event->getRegainReason(), [EntityDamageEvent::CAUSE_MAGIC, EntityDamageEvent::CAUSE_CUSTOM], true)) {
 				$tick = (double) Server::getInstance()->getTick();
 				$tps = (double) Server::getInstance()->getTicksPerSecond();
 				$lastHealthTick = $playerAPI->getExternalData("lastHealthTickB") ?? 0;
