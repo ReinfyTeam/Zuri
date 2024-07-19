@@ -34,7 +34,6 @@ namespace ReinfyTeam\Zuri\utils;
 use pocketmine\math\Vector3;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function ceil;
-use function pow;
 use function sqrt;
 
 class MathUtil {

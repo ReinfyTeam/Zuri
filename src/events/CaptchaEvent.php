@@ -37,7 +37,7 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\CharUtil;
 use ReinfyTeam\Zuri\utils\ReplaceText;
-use function rand;
+use function random_int;
 
 class CaptchaEvent extends Event {
 	use CancellableTrait;

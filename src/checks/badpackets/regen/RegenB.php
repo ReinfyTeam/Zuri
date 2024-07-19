@@ -37,6 +37,7 @@ use pocketmine\event\Event;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function in_array;
 
 class RegenB extends Check {
 	public function getName() : string {

@@ -130,7 +130,7 @@ class BlockUtil {
 			if ($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId() !== BlockTypeIds::AIR) {
 				return true;
 			}
-		} else if ($fracZ > 0.7 && $world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
+		} elseif ($fracZ > 0.7 && $world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId() !== BlockTypeIds::AIR) {
 			return true;
 		}
 		return false;
@@ -203,7 +203,7 @@ class BlockUtil {
 			if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
 				return true;
 			}
-		} else if ($fracZ > 0.7 && in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
+		} elseif ($fracZ > 0.7 && in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
 			return true;
 		}
 		return false;

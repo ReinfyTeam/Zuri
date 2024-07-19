@@ -32,7 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\utils;
 
 use function array_rand;
-use function rand;
+use function random_int;
 use function str_split;
 use function strtoupper;
 

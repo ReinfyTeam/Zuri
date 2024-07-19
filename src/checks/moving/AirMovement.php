@@ -34,7 +34,6 @@ namespace ReinfyTeam\Zuri\checks\moving;
 use pocketmine\network\mcpe\protocol\Packet;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function pow;
 
 class AirMovement extends Check {
 	public function getName() : string {

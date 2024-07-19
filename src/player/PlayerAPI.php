@@ -42,6 +42,7 @@ use ReflectionProperty;
 use function abs;
 use function count;
 use function microtime;
+use function spl_object_id;
 
 class PlayerAPI implements IPlayerAPI {
 	/** @var PlayerAPI[] */
