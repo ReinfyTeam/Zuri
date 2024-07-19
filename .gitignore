@@ -3,3 +3,4 @@
 
 # Composer
 vendor/*
+.php-cs-fixer.cache

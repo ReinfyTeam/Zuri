@@ -38,7 +38,6 @@ use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerMoveEvent;
-use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
@@ -49,19 +48,6 @@ use ReinfyTeam\Zuri\utils\discord\Discord;
 
 class ServerListener implements Listener {
 	private array $ip = [];
-
-	public function onPlayerPreLogin(PlayerPreLoginEvent $event) : void {
-		$ip = $event->getIp();
-		if (!isset($this->ip[$ip])) {
-			$this->ip[$ip] = 1;
-		} else {
-			if ($this->ip[$ip] >= ConfigManager::getData(ConfigManager::NETWORK_LIMIT)) {
-				$event->setKickFlag(0, ConfigManager::getData(ConfigManager::NETWORK_MESSAGE));
-			} else {
-				$this->ip[$ip]++;
-			}
-		}
-	}
 
 	public function onPlayerJoin(PlayerJoinEvent $event) : void {
 		$player = $event->getPlayer();

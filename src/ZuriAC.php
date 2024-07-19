@@ -40,7 +40,6 @@ use ReinfyTeam\Zuri\listener\PlayerListener;
 use ReinfyTeam\Zuri\listener\ServerListener;
 use ReinfyTeam\Zuri\network\ProxyUDPSocket;
 use ReinfyTeam\Zuri\task\CaptchaTask;
-use ReinfyTeam\Zuri\task\NetworkTickTask;
 use ReinfyTeam\Zuri\task\ServerTickTask;
 use ReinfyTeam\Zuri\task\UpdateCheckerAsyncTask;
 use ReinfyTeam\Zuri\utils\InternetAddress;
@@ -58,7 +57,7 @@ class ZuriAC extends PluginBase {
 		ConfigManager::checkConfig();
 
 		if (!\Phar::running(true)) {
-			$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade checking performance. We recommended to download phar plugin from poggit builds or github releases. Instead of using source-code from github.");
+			$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade checking performance. We recommended you to download phar plugin from poggit builds or github releases. Instead of using source-code from github.");
 		}
 	}
 
@@ -71,9 +70,7 @@ class ZuriAC extends PluginBase {
 		$scheduler = $this->getScheduler();
 		$scheduler->scheduleRepeatingTask(new ServerTickTask($this), 20);
 		$scheduler->scheduleRepeatingTask(new CaptchaTask($this), 20);
-		if (ConfigManager::getData(ConfigManager::NETWORK_LIMIT_ENABLE)) {
-			$scheduler->scheduleRepeatingTask(new NetworkTickTask($this), 100);
-		}
+
 		$this->getServer()->getAsyncPool()->submitTask(new UpdateCheckerAsyncTask($this->getDescription()->getVersion()));
 		$permissionManager = PermissionManager::getInstance();
 		$permissionManager->register(ConfigManager::getData(ConfigManager::PERMISSION_BYPASS_PERMISSION), PermissionManager::OPERATOR);
@@ -102,6 +99,10 @@ class ZuriAC extends PluginBase {
 	public function loadChecks() : void {
 		if (!empty($this->checks)) {
 			$this->checks = [];
+		}
+
+		if (ConfigManager::getData(ConfigManager::NETWORK_LIMIT_ENABLE)) {
+			$this->checks[] = new \ReinfyTeam\Zuri\checks\network\NetworkLimit; // Required to reload the modules if modified at the game!!!
 		}
 
 		// Aim Assist

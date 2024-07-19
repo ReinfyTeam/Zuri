@@ -54,15 +54,14 @@ class Crasher extends Check {
 	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();
-			$position = $packet->getPosition();
-			$chunk = $player->getWorld()->getChunk((int) $position->getX() >> Chunk::COORD_BIT_SIZE, (int) $position->getZ() >> Chunk::COORD_BIT_SIZE);
-
+			$pos = $packet->getPosition();
+			$chunk = $player->getWorld()->getChunk((int) $pos->getX() >> Chunk::COORD_BIT_SIZE, (int) $pos->getZ() >> Chunk::COORD_BIT_SIZE);
 			if (
 				($chunk !== null && $chunk->getHeight() > $this->getConstant("max-y")) ||
-				(abs($position->getY()) > $this->getConstant("max-y"))
+				(abs($pos->getY()) > $this->getConstant("max-y"))
 			) {
 				$this->failed($playerAPI);
-				$this->debug($playerAPI, "y=" . $position->getY() . ", absY=" . abs($position->getY()));
+				$this->debug($playerAPI, "y=" . $pos->getY() . ", absY=" . abs($pos->getY()));
 			}
 		}
 	}

@@ -33,13 +33,13 @@ namespace ReinfyTeam\Zuri\checks\network;
 
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerPreLoginEvent;
-use pocketmine\utils\Internet;
+use pocketmine\event\player\PlayerQuitEvent;
 use ReinfyTeam\Zuri\checks\Check;
-use function json_decode;
+use ReinfyTeam\Zuri\player\PlayerAPI;
 
-class ProxyBot extends Check {
+class NetworkLimit extends Check {
 	public function getName() : string {
-		return "ProxyBot";
+		return "NetworkLimit";
 	}
 
 	public function getSubType() : string {
@@ -50,22 +50,31 @@ class ProxyBot extends Check {
 		return 0;
 	}
 
+	private array $ipList = [];
+
 	public function checkJustEvent(Event $event) : void {
-		//TODO make this asynchronized
 		if ($event instanceof PlayerPreLoginEvent) {
 			$ip = $event->getIp();
-			$request = Internet::getURL("https://proxycheck.io/v2/" . $ip, 10, ["Content-Type: application/json"], $err);
+			if (!isset($this->ipList[$ip])) {
+				$this->ipList[$ip] = 1;
+			} else {
+				$this->ipList[$ip]++;
+			}
 
-			if ( $request !== null && $err === null ) {
-				$data = json_decode($request->getBody(), true, 16, JSON_PARTIAL_OUTPUT_ON_ERROR);
+			if ($this->ipList[$ip] > self::getData(self::NETWORK_LIMIT)) {
+				$this->warn($event->getPlayerInfo()->getUsername());
+				$event->setKickFlag(0, self::getData(self::NETWORK_MESSAGE));
+				$this->ipList[$ip]--;
+			}
+		}
+	}
 
-				if (($data["status"] ?? null) !== "error" && isset($data[$ip])) {
-					$proxy = ($data[$ip]["proxy"] ?? null) === "yes";
-					if ($proxy) {
-						$this->warn($event->getPlayerInfo()->getUsername());
-						$event->setKickFlag(0, self::getData(self::ANTIBOT_MESSAGE));
-					}
-				}
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+		if ($event instanceof PlayerQuitEvent) {
+			$ip = $event->getPlayer()->getNetworkSession()->getIp();
+
+			if (isset($this->ipList[$ip])) {
+				$this->ipList[$ip]--;
 			}
 		}
 	}

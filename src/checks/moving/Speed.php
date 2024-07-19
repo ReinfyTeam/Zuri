@@ -78,6 +78,7 @@ class Speed extends Check {
 				$speedLimit += $player->isSprinting() ? $this->getConstant("sprinting-speed-limit") : 0; // Sprinting
 				$speedLimit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant("jump-speed-limit") : 0; // Jumping
 				$speedLimit += $playerAPI->isOnIce() ? $this->getConstant("ice-walking-speed-limit") : 0; // Ice walking limit
+				$speedLimit += $playerAPI->isTopBlock() ? $this->getConstant("top-block-limit") : 0; // Ice walking limit
 
 				$timeLimit = $this->getConstant("time-limit");
 

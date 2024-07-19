@@ -167,6 +167,7 @@ final class FormSender extends ConfigManager {
 			if ($data[6] === true && isset($data[7])) { // idk why this is crashing.. i think the variable isn't updated yet.. Probably this is the fix for it LOL :(
 				self::setData(self::NETWORK_LIMIT, $data[7]);
 			}
+			ZuriAC::getInstance()->loadChecks();
 			self::AdminSettings($player, true);
 		});
 
@@ -259,6 +260,9 @@ final class FormSender extends ConfigManager {
 		foreach (ZuriAC::getChecks() as $check) {
 			if (!isset($list[$check->getName()])) {
 				$list[$check->getName()] = $check->enable();
+				if ($check->getName() === "NetworkLimit") {
+					continue;
+				}
 				$form->addButton($check->getName() . "\nClick to view information.", 0, "", $check->getName());
 			}
 		}

@@ -67,9 +67,9 @@ class ZuriCommand extends Command implements PluginOwned {
 				case "about":
 				case "info":
 					$sender->sendMessage(TextFormat::AQUA . "Build: " . TextFormat::GRAY . ZuriAC::getInstance()->getDescription()->getVersion() . TextFormat::AQUA . " Author: " . TextFormat::GRAY . ZuriAC::getInstance()->getDescription()->getAuthors()[0]);
-					$sender->sendMessage(TextFormat::AQUA . "Total Enabled Checks: " . TextFormat::GRAY . count(API::getAllEnabledChecks(true)) . " (With SubTypes: " . count(API::getAllEnabledChecks(false)) . ")");
-					$sender->sendMessage(TextFormat::AQUA . "Total Disabled Checks: " . TextFormat::GRAY . count(API::getAllDisabledChecks(true)) . " (With SubTypes: " . count(API::getAllDisabledChecks(false)) . ")");
-					$sender->sendMessage(TextFormat::AQUA . "Total All Checks: " . TextFormat::GRAY . count(API::getAllChecks(true)) . " (With SubTypes: " . count(API::getAllChecks(false)) . ")");
+					$sender->sendMessage(TextFormat::AQUA . "Total Enabled Checks: " . TextFormat::GRAY . count(API::getAllEnabledChecks(false)) . " (With SubTypes: " . count(API::getAllEnabledChecks(true)) . ")");
+					$sender->sendMessage(TextFormat::AQUA . "Total Disabled Checks: " . TextFormat::GRAY . count(API::getAllDisabledChecks(false)) . " (With SubTypes: " . count(API::getAllDisabledChecks(true)) . ")");
+					$sender->sendMessage(TextFormat::AQUA . "Total All Checks: " . TextFormat::GRAY . count(API::getAllChecks(false)) . " (With SubTypes: " . count(API::getAllChecks(true)) . ")");
 					break;
 				case "notify":
 				case "notification":

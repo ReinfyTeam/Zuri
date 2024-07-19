@@ -76,7 +76,7 @@ class CaptchaEvent extends Event {
 				$this->playerAPI->setCaptchaCode(CharUtil::generatorCode(ConfigManager::getData(ConfigManager::CAPTCHA_CODE_LENGTH)));
 			}
 			if (ConfigManager::getData(ConfigManager::CAPTCHA_RANDOMIZE) === true) {
-				switch (random_int(1, 3)) {
+				switch(random_int(1, 3)) {
 					case 1:
 						$this->sendMessage();
 						break;
