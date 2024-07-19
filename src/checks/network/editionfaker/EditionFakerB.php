@@ -29,70 +29,42 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\network;
+namespace ReinfyTeam\Zuri\checks\network\editionfaker;
 
-use pocketmine\event\Event;
-use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use ReinfyTeam\Zuri\checks\Check;
-use function in_array;
-use function strtoupper;
 
-class EditionFaker extends Check {
+class EditionFakerB extends Check {
 	public function getName() : string {
 		return "EditionFaker";
 	}
 
 	public function getSubType() : string {
-		return "A";
+		return "B";
 	}
 
 	public function maxViolations() : int {
 		return 0;
 	}
 
-	public const NULL_MODELS = [
-		DeviceOS::ANDROID,
-		DeviceOS::OSX,
-		DeviceOS::WINDOWS_10,
-		DeviceOS::WIN32,
-		DeviceOS::DEDICATED,
-	];
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+		if ( $packet instanceof LoginPacket ) {
+			$authData = PacketUtils::fetchAuthData($packet->chainDataJwt);
+			$titleId = $authData->titleId;
+			$givenOS = $playerAPI->getDeviceOS();
 
-	public const DEVICE_OS_LIST = [
-		DeviceOS::ANDROID,
-		DeviceOS::IOS,
-		DeviceOS::AMAZON,
-		DeviceOS::WINDOWS_10,
-		DeviceOS::WIN32,
-		DeviceOS::PLAYSTATION,
-		DeviceOS::NINTENDO,
-		DeviceOS::XBOX
-	];
+			$expectedOS = match ($titleId) {
+				"896928775" => DeviceOS::WINDOWS_10,
+				"2047319603" => DeviceOS::NINTENDO,
+				"1739947436" => DeviceOS::ANDROID,
+				"20444565596" => DeviceOS::PLAYSTATION,
+				"1828326430" => DeviceOS::XBOX,
+				"1810924247" => DeviceOS::IOS,
+			};
 
-	public function checkJustEvent(Event $event) : void {
-		if ($event instanceof PlayerPreLoginEvent) {
-			$playerInfo = $event->getPlayerInfo();
-			$extraData = $playerInfo->getExtraData();
-			$nickname = $playerInfo->getUsername();
-
-			if (!(in_array($extraData["DeviceOS"], EditionFaker::DEVICE_OS_LIST, true))) {
-				$this->warn($nickname);
-				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
-				return;
-			}
-
-			if (!(in_array($extraData["DeviceOS"], EditionFaker::NULL_MODELS, true)) && $extraData["DeviceModel"] === "") {
-				$this->warn($nickname);
-				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
-				return;
-			}
-
-			if ($extraData["DeviceOS"] === DeviceOS::IOS) {
-				$this->warn($nickname);
-				if ($extraData["DeviceId"] !== strtoupper($extraData["DeviceId"])) {
-					$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
-				}
+			if ( $expectedOS !== $givenOS ) {
+				$this->debug($playerAPI, "titleId=$titleId");
+				$this->failed($playerAPI);
 			}
 		}
 	}

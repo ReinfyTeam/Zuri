@@ -289,15 +289,12 @@ zuri:
             punishment: KICK
             constants:
                    time-limit: 0.06
-        timer: # Todo: Improve in next versions. Fix false-positive in certain packets..
+        timer: 
             enable: false
             maxvl: 1
             punishment: KICK
             constants:
-                 min-time-diff: 0.001
-                 max-time-diff: 0.5
-                 max-point: 6
-                 time-percentage: 10
+                 max-diff: 10
         fasteat: 
             enable: true
             maxvl: 1
