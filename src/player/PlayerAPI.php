@@ -48,7 +48,7 @@ class PlayerAPI implements IPlayerAPI {
 	public static array $players = [];
 
 	public static function getAPIPlayer(Player $player) : PlayerAPI {
-		return self::$players[spl_object_id($player)] ??= new PlayerAPI($player->getName());
+		return self::$players[spl_object_id($player)] ??= new PlayerAPI($player);
 	}
 
 	public static function removeAPIPlayer(Player $player) : void {

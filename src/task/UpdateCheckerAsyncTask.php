@@ -79,7 +79,7 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 				}
 			}
 		} else {
-			$server->getLogger()->notice(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::RED . "An error occur while checking updates from github. Error Code: " . $result[1] . ", Please check your internet connection, and try again.");
+			$server->getLogger()->notice(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::RED . "An error occur while checking updates from github. " . $result[1] . ", Please check your internet connection, and try again.");
 			return;
 		}
 
