@@ -50,6 +50,7 @@ class FlyB extends Check {
 	}
 
 	public function check(Packet $packet, PlayerAPI $playerAPI) : void {
+		//TODO rewrite FlyB
 		/*if ($packet instanceof UpdateAdventureSettingsPacket) {
 			$player = $playerAPI->getPlayer();
 			if (!$player->isCreative() && !$player->isSpectator() && !$player->getAllowFlight()) {

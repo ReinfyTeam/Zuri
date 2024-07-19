@@ -54,7 +54,7 @@ class ProxyBot extends Check {
 		//TODO make this asynchronized
 		if ($event instanceof PlayerPreLoginEvent) {
 			$ip = $event->getIp();
-			$result = Internet::postURL("https://proxycheck.io/v2/" . $ip, []);
+			$result = Internet::getURL("https://proxycheck.io/v2/" . $ip, []);
 			// if server is offline or server request problems...
 			if ($result === null || $result->getCode() !== 200) {
 				return;

@@ -45,7 +45,7 @@ class BlockUtil {
 	/**
 	 * @return Block[]|\Generator
 	 */
-	public static function getSurroundingBlocks(Player $player) {
+	public static function getSurroundingBlocks(Player $player) : array|\Generator {
 		$world = $player->getWorld();
 
 		$posX = $player->getLocation()->getX();
