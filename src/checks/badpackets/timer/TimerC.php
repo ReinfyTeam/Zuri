@@ -29,46 +29,44 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\network\editionfaker;
+namespace ReinfyTeam\Zuri\checks\badpackets\timer;
 
-use pocketmine\network\mcpe\protocol\LoginPacket;
-use pocketmine\network\mcpe\protocol\types\DeviceOS;
+use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\MovePlayerPacket;
+use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
-use ReinfyTeam\Zuri\utils\Utils;
+use ReinfyTeam\Zuri\player\PlayerAPI;
 
-class EditionFakerB extends Check {
+class TimerC extends Check {
 	public function getName() : string {
-		return "EditionFaker";
+		return "Timer";
 	}
 
 	public function getSubType() : string {
-		return "B";
+		return "C";
 	}
 
 	public function maxViolations() : int {
-		return 0; // Instant fail
+		return 5;
 	}
 
-	// From Esoteric Code
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ( $packet instanceof LoginPacket ) {
-			$authData = Utils::fetchAuthData($packet->chainDataJwt);
-			$titleId = $authData->titleId;
-			$givenOS = $playerAPI->getDeviceOS();
-
-			$expectedOS = match ($titleId) {
-				"896928775" => DeviceOS::WINDOWS_10,
-				"2047319603" => DeviceOS::NINTENDO,
-				"1739947436" => DeviceOS::ANDROID,
-				"20444565596" => DeviceOS::PLAYSTATION,
-				"1828326430" => DeviceOS::XBOX,
-				"1810924247" => DeviceOS::IOS,
-			};
-
-			if ( $expectedOS !== $givenOS ) {
-				$this->debug($playerAPI, "titleId=$titleId");
+		if ( $packet instanceof PlayerAuthInputPacket ) {
+			// From Esoteric
+			$delay = $playerAPI->getExternalData("DelayCounter");
+			if ($delay === null) {
+				$playerAPI->setExternalData("DelayCounter", 0);
+				return;
+			}
+			$playerAPI->setExternalData("DelayCounter", $counter + 1);
+		} elseif ( $packet instanceof MovePlayerPacket ) {
+			$delay = $playerAPI->getExternalData("DelayCounter");
+			if ( $delay < 2 && $playerAPI->getPlayer()->hasClientNoPredictions() && $playerAPI->getPlayer()->isAlive()) {
+				$this->debug($playerAPI, "delay=$delay");
 				$this->failed($playerAPI);
 			}
+
+			$playerAPI->setExternalData("DelayCounter", 0);
 		}
 	}
 }
