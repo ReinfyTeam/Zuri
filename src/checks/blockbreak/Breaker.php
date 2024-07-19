@@ -29,17 +29,16 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets\timer;
+namespace ReinfyTeam\Zuri\checks\blockbreak;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
+use pocketmine\event\block\BlockBreakEvent;
+use pocketmine\event\Event;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function abs;
 
-class TimerA extends Check {
+class Breaker extends Check {
 	public function getName() : string {
-		return "Timer";
+		return "Breaker";
 	}
 
 	public function getSubType() : string {
@@ -47,25 +46,39 @@ class TimerA extends Check {
 	}
 
 	public function maxViolations() : int {
-		return 3;
+		return 5;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($packet instanceof PlayerAuthInputPacket) {
-			$tps = Server::getInstance()->getTicksPerSecond();
-			$tick = Server::getInstance()->getTick();
-			$tickDiff = $tps - $tick;
-
-			if ($tps < 19 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
-				$playerAPI->setExternalData("TimerATick", $tps - $packet->getTick());
-			}
-
-			$delayTicks = $playerAPI->getExternalData("TimerATick");
-
-			if ($delayTicks !== null) {
-				$tickDiff = $delayTicks - $packet->getTick();
-				if ( $tickDiff >= ($this->getConstant("max-diff") + (abs(20 - $tps) * 2)) ) {
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+		if ($event instanceof BlockBreakEvent) {
+			$block = $event->getBlock();
+			$player = $playerAPI->getPlayer();
+			$playerPos = $player->getPosition();
+			$eyePos = $player->getEyePos();
+			$world = $player->getWorld();
+			if ($block instanceof Bed) {
+				$distance = $playerPos->distance($block->getPosition());
+				if ($distance > $this->getConstant("max-range")) {
+					$this->debug($playerAPI, "distance=$distance");
 					$this->failed($playerAPI);
+					return;
+				}
+
+				$direction = $blockPos->subtract($eyePos)->normalize();
+				if (!$eyePos->floor()->equals($blockPos->floor())) {
+					$this->failed($playerAPI);
+					return;
+				}
+
+				while ($playerPos->distance($blockPos) > 1) {
+					$currentPos = $playerPos->add($direction);
+
+					$blockAtCurrentPos = $world->getBlock($currentPos->floor());
+
+					if (!$blockAtCurrentPos->isSolid()) {
+						$this->failed($playerAPI);
+						return;
+					}
 				}
 			}
 		}

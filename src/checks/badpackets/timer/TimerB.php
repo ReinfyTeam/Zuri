@@ -36,6 +36,7 @@ use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function microtime;
+use function round;
 
 class TimerB extends Check {
 	public function getName() : string {
@@ -52,23 +53,33 @@ class TimerB extends Check {
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
-			$time = $playerAPI->getExternalData("lastTimeB");
-			$ticks = $playerAPI->getExternalData("lastTicksB");
-			$timer = $playerAPI->getExternalData("timerB");
-			if (microtime(true) - $time > 1) {
-				$this->debug($playerAPI, "time=" . $time . ", ticks=" . $ticks . ", timer=" . $timer);
-
-				if ($ticks > 20) {
-					$playerAPI->setExternalData("timerB", $timer + 1);
-					if ($timer % $this->getConstant("time-percentage") === 0) {
-						$this->failed($playerAPI);
-					}
-				} else {
-					$playerAPI->setExternalData("timerB", 0);
-				}
-				$playerAPI->setExternalData("lastTimeB", microtime(true));
-				$playerAPI->setExternalData("lastTicksB", $timer + 1);
+			$player = $playerAPI->getPlayer();
+			if (!$player->isAlive()) {
+				$playerAPI->setExternalData("TimerLastA", null);
+				$playerAPI->setExternalData("TimerBalanceA", 0);
+				return;
 			}
+
+			$currentTime = microtime(true) * 1000;
+			$lastTime = $playerAPI->getExternalData("TimerLastA");
+			if ($lastTime === null) {
+				$playerAPI->setExternalData("TimerLastA", $currentTime);
+				return;
+			}
+
+			// Esoteric Method
+			// convert the time difference into ticks (round this value to detect lower timer values).
+			$timeDiff = round(($currentTime - $this->lastTime) / 50, 2);
+			$timeBalance = $playerAPI->getExternalData("TimerBalanceA");
+			// there should be a one tick difference between two packets
+			$playerAPI->setExternalData("TimerBalanceA", $timeBalance - 1);
+			$playerAPI->setExternalData("TimerBalanceA", $timeBalance + $timeDiff);
+			$newBalance = $playerAPI->getExternalData("TimerBalanceA");
+			if ( $newBalance <= -5 ) {
+				$this->failed($playerAPI);
+				$playerAPI->setExternalData("TimerBalanceA", 0);
+			}
+			$playerAPI->setExternalData("TimerLastA", $currentTime);
 		}
 	}
 }

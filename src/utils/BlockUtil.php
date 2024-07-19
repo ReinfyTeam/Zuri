@@ -41,7 +41,7 @@ use function in_array;
 use function sqrt;
 
 class BlockUtil {
-	public static function getSurroundingBlocks(Player $player){
+	public static function getSurroundingBlocks(Player $player) {
 		$world = $player->getWorld();
 
 		$posX = $player->getLocation()->getX();

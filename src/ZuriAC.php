@@ -131,6 +131,8 @@ class ZuriAC extends PluginBase {
 		// Blockbreak
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\WrongMining();
 
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\Breaker();
+
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\InstaBreak();
 
 		// BlockInteract
