@@ -29,45 +29,43 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\scaffold;
+namespace ReinfyTeam\Zuri\checks\blockplace\scaffold;
 
+use pocketmine\block\BlockTypeIds;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
-use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
 
-class ScaffoldC extends Check {
+class ScaffoldA extends Check {
 	public function getName() : string {
 		return "Scaffold";
 	}
 
 	public function getSubType() : string {
-		return "C";
+		return "A";
 	}
 
 	public function maxViolations() : int {
-		return 10;
-	}
-
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+		return 2;
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
-			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
 			$block = $event->getBlockAgainst();
 			$posBlock = $block->getPosition();
-			$posPlayer = $playerAPI->getLocation();
-			$distance = MathUtil::distance($posPlayer->asVector3(), $posBlock->asVector3());
-			$this->debug($playerAPI, "distance=$distance, pitch=" . abs($posPlayer->getPitch()));
-			if ($distance < $this->getConstant("max-place-distance") && abs($posPlayer->getPitch()) > 90) {
-				$this->failed($playerAPI);
+			$player = $playerAPI->getPlayer();
+			$loc = $player->getLocation();
+			$itemHand = $playerAPI->getInventory()->getItemInHand();
+			if ($itemHand->getTypeId() === BlockTypeIds::AIR) {
+				$x = abs($posBlock->getX() - $loc->getX());
+				$y = abs($posBlock->getY() - $loc->getY());
+				$z = abs($posBlock->getZ() - $loc->getZ());
+				$this->debug($playerAPI, "x=$x, y=$y, z=$z");
+				if ($x > $this->getConstant("box-range-x") || $y > $this->getConstant("box-range-y") || $z > $this->getConstant("box-range-z")) {
+					$this->failed($playerAPI);
+				}
 			}
 		}
 	}

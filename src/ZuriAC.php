@@ -124,14 +124,13 @@ class ZuriAC extends PluginBase {
 
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerB();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\timer\TimerC();
 
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\regen\RegenA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\badpackets\regen\RegenB();
 
 		// Blockbreak
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\WrongMining();
-
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\Breaker();
 
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockbreak\InstaBreak();
 
@@ -142,6 +141,11 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockplace\FillBlock();
 
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockplace\Tower();
+
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockplace\scaffold\ScaffoldA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockplace\scaffold\ScaffoldB();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockplace\scaffold\ScaffoldC();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\blockplace\scaffold\ScaffoldD();
 
 		// Chat
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\chat\SpamA();
@@ -209,16 +213,10 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\antibot\AntiBotA();
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\antibot\AntiBotB();
 
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\EditionFaker();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\editionfaker\EditionFakerA();
+		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\editionfaker\EditionFakerB();
 
 		$this->checks[] = new \ReinfyTeam\Zuri\checks\network\ProxyBot();
-
-		// Scaffold
-		// Todo: Improve and add more checks in next release..
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldA();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldB();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldC();
-		$this->checks[] = new \ReinfyTeam\Zuri\checks\scaffold\ScaffoldD();
 	}
 
 	public static function Checks() : array {

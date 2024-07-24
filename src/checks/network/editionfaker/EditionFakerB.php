@@ -31,9 +31,11 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\network\editionfaker;
 
+use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\Utils;
 
 class EditionFakerB extends Check {
@@ -57,15 +59,16 @@ class EditionFakerB extends Check {
 			$givenOS = $playerAPI->getDeviceOS();
 
 			$expectedOS = match ($titleId) {
-				"896928775" => DeviceOS::WINDOWS_10,
-				"2047319603" => DeviceOS::NINTENDO,
-				"1739947436" => DeviceOS::ANDROID,
-				"20444565596" => DeviceOS::PLAYSTATION,
-				"1828326430" => DeviceOS::XBOX,
-				"1810924247" => DeviceOS::IOS,
+				$this->getConstant("windows-10") => DeviceOS::WINDOWS_10,
+				$this->getConstant("nintendo") => DeviceOS::NINTENDO,
+				$this->getConstant("android") => DeviceOS::ANDROID,
+				$this->getConstant("playstation") => DeviceOS::PLAYSTATION,
+				$this->getConstant("xbox") => DeviceOS::XBOX,
+				$this->getConstant("apple") => DeviceOS::IOS,
+				default => null
 			};
 
-			if ( $expectedOS !== $givenOS ) {
+			if ( $expectedOS !== null && $expectedOS !== $givenOS ) {
 				$this->debug($playerAPI, "titleId=$titleId");
 				$this->failed($playerAPI);
 			}

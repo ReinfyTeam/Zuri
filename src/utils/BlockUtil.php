@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri\utils;
 
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Location;
+use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
 use function abs;
@@ -41,22 +42,34 @@ use function in_array;
 use function sqrt;
 
 class BlockUtil {
-	public static function getSurroundingBlocks(Player $player) {
+	public static function getSurroundingBlocks(Player $player) : array {
 		$world = $player->getWorld();
 
 		$posX = $player->getLocation()->getX();
 		$posY = $player->getLocation()->getY();
 		$posZ = $player->getLocation()->getZ();
 
-		yield $world->getBlockAt((int) $posX, (int) $posY, (int) $posZ)->getTypeId();
-		yield $world->getBlockAt((int) $posX - 1, (int) $posY, (int) $posZ)->getTypeId();
-		yield $world->getBlockAt((int) $posX - 1, (int) $posY, (int) $posZ - 1)->getTypeId();
-		yield $world->getBlockAt((int) $posX, (int) $posY, (int) $posZ - 1)->getTypeId();
-		yield $world->getBlockAt((int) $posX + 1, (int) $posY, (int) $posZ)->getTypeId();
-		yield $world->getBlockAt((int) $posX + 1, (int) $posY, (int) $posZ + 1)->getTypeId();
-		yield $world->getBlockAt((int) $posX, (int) $posY, (int) $posZ + 1)->getTypeId();
-		yield $world->getBlockAt((int) $posX + 1, (int) $posY, (int) $posZ - 1)->getTypeId();
-		yield $world->getBlockAt((int) $posX - 1, (int) $posY, (int) $posZ + 1)->getTypeId();
+		$pos1 = new Vector3($posX  , $posY, $posZ  );
+		$pos2 = new Vector3($posX - 1, $posY, $posZ  );
+		$pos3 = new Vector3($posX - 1, $posY, $posZ - 1);
+		$pos4 = new Vector3($posX  , $posY, $posZ - 1);
+		$pos5 = new Vector3($posX + 1, $posY, $posZ  );
+		$pos6 = new Vector3($posX + 1, $posY, $posZ + 1);
+		$pos7 = new Vector3($posX  , $posY, $posZ + 1);
+		$pos8 = new Vector3($posX + 1, $posY, $posZ - 1);
+		$pos9 = new Vector3($posX - 1, $posY, $posZ + 1);
+
+		$bpos1 = $world->getBlock($pos1)->getTypeId();
+		$bpos2 = $world->getBlock($pos2)->getTypeId();
+		$bpos3 = $world->getBlock($pos3)->getTypeId();
+		$bpos4 = $world->getBlock($pos4)->getTypeId();
+		$bpos5 = $world->getBlock($pos5)->getTypeId();
+		$bpos6 = $world->getBlock($pos6)->getTypeId();
+		$bpos7 = $world->getBlock($pos7)->getTypeId();
+		$bpos8 = $world->getBlock($pos8)->getTypeId();
+		$bpos9 = $world->getBlock($pos9)->getTypeId();
+
+		return  [$bpos1, $bpos2, $bpos3, $bpos4, $bpos5, $bpos6, $bpos7, $bpos8, $bpos9];
 	}
 
 	public static function isOnGround(Location $location, int $down) : bool {

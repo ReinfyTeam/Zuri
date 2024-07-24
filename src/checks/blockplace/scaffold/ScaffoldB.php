@@ -29,44 +29,50 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\scaffold;
+namespace ReinfyTeam\Zuri\checks\blockplace\scaffold;
 
-use pocketmine\block\BlockTypeIds;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
+use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function abs;
 
-class ScaffoldA extends Check {
+class ScaffoldB extends Check {
 	public function getName() : string {
 		return "Scaffold";
 	}
 
 	public function getSubType() : string {
-		return "A";
+		return "B";
 	}
 
 	public function maxViolations() : int {
-		return 2;
+		return 10;
+	}
+
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
-			$block = $event->getBlockAgainst();
-			$posBlock = $block->getPosition();
 			$player = $playerAPI->getPlayer();
-			$loc = $player->getLocation();
-			$itemHand = $playerAPI->getInventory()->getItemInHand();
-			if ($itemHand->getTypeId() === BlockTypeIds::AIR) {
-				$x = abs($posBlock->getX() - $loc->getX());
-				$y = abs($posBlock->getY() - $loc->getY());
-				$z = abs($posBlock->getZ() - $loc->getZ());
-				$this->debug($playerAPI, "x=$x, y=$y, z=$z");
-				if ($x > $this->getConstant("box-range-x") || $y > $this->getConstant("box-range-y") || $z > $this->getConstant("box-range-z")) {
-					$this->failed($playerAPI);
-				}
+			if ($player === null) {
+				return;
 			}
+			$pitch = abs($playerAPI->getLocation()->getPitch());
+			$distanceY = $event->getBlockAgainst()->getPosition()->getY() < $playerAPI->getLocation()->getY();
+			$oldPitch = $playerAPI->getExternalData("oldPitchB") ?? 0;
+			$this->debug($playerAPI, "oldPitch=$oldPitch distanceY=$distanceY, newPitch=$pitch, ping=" . $playerAPI->getPing());
+			if (
+				$pitch < $this->getConstant("suspecious-pitch-limit") && // is this has good calculation enough?
+				$distanceY && // it depends on block placed is under the player..
+				$oldPitch === $pitch && // for using bedrock long bridging lol anti-false kick
+				$playerAPI->getPing() < self::getData(self::PING_LAGGING)
+			) {
+				$this->failed($playerAPI);
+			}
+			$playerAPI->setExternalData("oldPitchB", $pitch); // patching new pitch here..
 		}
 	}
 }

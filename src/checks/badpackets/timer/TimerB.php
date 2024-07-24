@@ -69,13 +69,13 @@ class TimerB extends Check {
 
 			// Esoteric Method
 			// convert the time difference into ticks (round this value to detect lower timer values).
-			$timeDiff = round(($currentTime - $this->lastTime) / 50, 2);
+			$timeDiff = round(($currentTime - $lastTime) / 50, 2);
 			$timeBalance = $playerAPI->getExternalData("TimerBalanceA");
 			// there should be a one tick difference between two packets
 			$playerAPI->setExternalData("TimerBalanceA", $timeBalance - 1);
 			$playerAPI->setExternalData("TimerBalanceA", $timeBalance + $timeDiff);
 			$newBalance = $playerAPI->getExternalData("TimerBalanceA");
-			if ( $newBalance <= -5 ) {
+			if ( $newBalance <= $this->getConstant("diff-balance") ) {
 				$this->failed($playerAPI);
 				$playerAPI->setExternalData("TimerBalanceA", 0);
 			}

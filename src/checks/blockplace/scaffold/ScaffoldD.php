@@ -29,57 +29,39 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\blockbreak;
+namespace ReinfyTeam\Zuri\checks\blockplace\scaffold;
 
-use pocketmine\event\block\BlockBreakEvent;
+use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
+use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
-class Breaker extends Check {
+class ScaffoldD extends Check {
 	public function getName() : string {
-		return "Breaker";
+		return "Scaffold";
 	}
 
 	public function getSubType() : string {
-		return "A";
+		return "D";
 	}
 
 	public function maxViolations() : int {
-		return 5;
+		return 1;
+	}
+
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-		if ($event instanceof BlockBreakEvent) {
-			$block = $event->getBlock();
+		if ($event instanceof BlockPlaceEvent) {
 			$player = $playerAPI->getPlayer();
-			$playerPos = $player->getPosition();
-			$eyePos = $player->getEyePos();
-			$world = $player->getWorld();
-			if ($block instanceof Bed) {
-				$distance = $playerPos->distance($block->getPosition());
-				if ($distance > $this->getConstant("max-range")) {
-					$this->debug($playerAPI, "distance=$distance");
-					$this->failed($playerAPI);
-					return;
-				}
-
-				$direction = $blockPos->subtract($eyePos)->normalize();
-				if (!$eyePos->floor()->equals($blockPos->floor())) {
-					$this->failed($playerAPI);
-					return;
-				}
-
-				while ($playerPos->distance($blockPos) > 1) {
-					$currentPos = $playerPos->add($direction);
-
-					$blockAtCurrentPos = $world->getBlock($currentPos->floor());
-
-					if (!$blockAtCurrentPos->isSolid()) {
-						$this->failed($playerAPI);
-						return;
-					}
-				}
+			if ($player === null) {
+				return;
+			}
+			$this->debug($playerAPI, "isItemInHandNull=" . $playerAPI->getPlayer()->getInventory()->getItemInHand()->isNull());
+			if ($playerAPI->getPlayer()->getInventory()->getItemInHand()->isNull()) {
+				$this->failed($playerAPI);
 			}
 		}
 	}

@@ -188,7 +188,7 @@ class PlayerAPI implements IPlayerAPI {
 	public function setOnAdhesion(bool $data) : void {
 		$this->onAdhesion = $data;
 	}
-	
+
 	public function getDeviceOS() : int {
 		return $this->getPlayer()->getPlayerInfo()->getExtraData()["DeviceOS"];
 	}
