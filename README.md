@@ -59,7 +59,7 @@ Also, adding :star: a **Star** is also appreciated. ✨
 - **Regen** (BETA)
    - **A:** Check the heal rate is valid for the damage.
    - **B:** Check the consistency and tolerance of heal rate is valid when player regenerated hearts.
-- **Timer** (DISABLED)
+- **Timer** (BETA)
    - **A:** Check the packet time consistency if it is balanced.
    - **B:** Check the ticks between packet is balanced.
 - **Instabreak** 
@@ -134,6 +134,7 @@ Also, adding :star: a **Star** is also appreciated. ✨
      - **B:** Check if the player is using hack client a.k.a. toolbox.
 - **EditionFaker**
      - **A:** Check if the player has a valid platform.
+     - **B:** Check device title id if it is valid.
 - **ProxyBot** (OPTIONAL)
      - **A:** Check player if it is using proxy, tor or other internet exploit ip services.
 - **Scaffold** (BETA)
@@ -143,6 +144,8 @@ Also, adding :star: a **Star** is also appreciated. ✨
      - **D:** Check if the hand item is null while placing blocks.
 - **Tower** (BETA)
      - **A:** Check if the player moving upwards straight while placing blocks check if the player is actually placing the block downwards.
+- **NetworkLimit** (BETA)
+     - **A:** Limit players same ip to prevent malicious bots.
 
 # Feedbacks and Issue's
 - 😁 Your feedback and reviews are highly appriciated, if you ever find a bug or false-positive in certain modules, you can create an issue in our [github repository](https://github.com/ReinfyTeam/Zuri/issues)!
