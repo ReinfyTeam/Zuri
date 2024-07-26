@@ -62,6 +62,7 @@ Also, adding :star: a **Star** is also appreciated. ✨
 - **Timer** (BETA)
    - **A:** Check the packet time consistency if it is balanced.
    - **B:** Check the ticks between packet is balanced.
+   - **C:** Check MovePlayerPacket is stable or has delay with PlayerAuthInputPacket.
 - **Instabreak** 
    - **A:** Check the block break information and calculate the possible expected time to break the block.
 - **WrongMining**
