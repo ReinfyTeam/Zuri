@@ -61,7 +61,7 @@ class TimerC extends Check {
 			$playerAPI->setExternalData("DelayCounter", $delay + 1);
 		} elseif ( $packet instanceof MovePlayerPacket ) {
 			$delay = $playerAPI->getExternalData("DelayCounter");
-			if ( $delay < 2 && $playerAPI->getPlayer()->hasClientNoPredictions() && $playerAPI->getPlayer()->isAlive()) {
+			if ( $delay < 2 && $playerAPI->getPlayer()->hasNoClientPredictions() && $playerAPI->getPlayer()->isAlive()) {
 				$this->debug($playerAPI, "delay=$delay");
 				$this->failed($playerAPI);
 			}
