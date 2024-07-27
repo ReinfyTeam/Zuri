@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\config;
 
+use JsonException;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\ZuriAC;
 use function fclose;
@@ -44,7 +45,11 @@ class ConfigManager extends ConfigPaths {
 		return ZuriAC::getInstance()->getConfig()->getNested($path, $defaultValue);
 	}
 
-	public static function setData(string $path, $data, bool $reverseColors = false) {
+    /**
+     * @throws JsonException
+     */
+    public static function setData(string $path, $data): void
+    {
 		ZuriAC::getInstance()->getConfig()->setNested($path, $data);
 		ZuriAC::getInstance()->getConfig()->save();
 	}
@@ -63,7 +68,7 @@ class ConfigManager extends ConfigPaths {
 		fclose($pluginConfigResource);
 		$config = ZuriAC::getInstance()->getConfig();
 		$log = ZuriAC::getInstance()->getServer()->getLogger();
-		if ($pluginConfig == false) {
+		if (!$pluginConfig) {
 			$log->critical(self::getData(self::PREFIX) . TextFormat::RED . " Invalid syntax. Currupted config.yml!");
 			ZuriAC::getInstance()->getServer()->getPluginManager()->disablePlugin(ZuriAC::getInstance());
 			return;

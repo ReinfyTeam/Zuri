@@ -35,6 +35,7 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerDropItemEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function microtime;
 
 class FastDrop extends Check {
@@ -50,7 +51,10 @@ class FastDrop extends Check {
 		return 5;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerDropItemEvent) {
 			$lastTick = $playerAPI->getExternalData("lastTickD");
 			$currentTick = microtime(true);

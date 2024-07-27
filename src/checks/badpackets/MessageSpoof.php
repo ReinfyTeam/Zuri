@@ -35,6 +35,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function mb_strlen;
 
 class MessageSpoof extends Check {
@@ -50,10 +51,13 @@ class MessageSpoof extends Check {
 		return 1;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof TextPacket) {
 			$this->debug($playerAPI, "charLength=" . mb_strlen($packet->message));
-			if (($length = mb_strlen($packet->message)) > $this->getConstant("max-length")) {
+			if ((mb_strlen($packet->message)) > $this->getConstant("max-length")) {
 				$this->failed($playerAPI);
 			}
 		}

@@ -37,6 +37,7 @@ use pocketmine\event\Event;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function microtime;
 
 class FastThrow extends Check {
@@ -52,15 +53,14 @@ class FastThrow extends Check {
 		return 5;
 	}
 
-	public function checkJustEvent(Event $event) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkJustEvent(Event $event) : void {
 		if ($event instanceof ProjectileLaunchEvent) {
 			if (($entity = $event->getEntity()->getOwningEntity()) instanceof Player) { // prevent from crashing
 				$playerAPI = PlayerAPI::getAPIPlayer($entity);
-				$player = $playerAPI->getPlayer();
-				if ($player === null) {
-					return;
-				}
-				$projectile = $event->getEntity();
+                $projectile = $event->getEntity();
 				if (!$projectile instanceof Arrow) { // ignore for Arrows
 					$lastUse = $playerAPI->getExternalData("lastUseFT");
 					if ($lastUse !== null) {

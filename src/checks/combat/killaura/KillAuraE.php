@@ -37,6 +37,7 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function count;
 
@@ -53,21 +54,17 @@ class KillAuraE extends Check {
 		return 3;
 	}
 
-	public function checkJustEvent(Event $event) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
 			$locDamager = $damager->getLocation();
-			if ($damager === null) {
-				return;
-			}
-			if ($damager instanceof Player && $entity instanceof Player) {
+            if ($damager instanceof Player && $entity instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
-				$player = $playerAPI->getPlayer();
-				if ($player === null) {
-					return;
-				}
-				$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
+                $delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
 				$from = new Vector3($locDamager->getX(), $locDamager->getY() + $damager->getEyeHeight(), $locDamager->getZ());
 				$to = $damager->getLocation()->add($delta->getX(), $delta->getY() + $damager->getEyeHeight(), $delta->getZ());
 				$distance = MathUtil::distance($from, $to);

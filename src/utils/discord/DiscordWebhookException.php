@@ -31,6 +31,8 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils\discord;
 
-class DiscordWebhookException extends \Exception {
+use Exception;
+
+class DiscordWebhookException extends Exception {
 	// no-op
 }

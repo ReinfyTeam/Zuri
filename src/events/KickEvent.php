@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\events;
 use pocketmine\event\Event;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\Discord;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
 class KickEvent extends Event {
 	private PlayerAPI $player;
@@ -58,7 +59,10 @@ class KickEvent extends Event {
 		return $this->subType;
 	}
 
-	public function call() : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function call() : void {
 		Discord::Send($this->player, Discord::KICK, ["name" => $this->getModuleName(), "subType" => $this->getSubType()]);
 		parent::call();
 	}

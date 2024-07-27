@@ -31,20 +31,24 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
+use Random\RandomException;
 use function array_rand;
 use function random_int;
 use function str_split;
 use function strtoupper;
 
 class CharUtil {
-	public static function generatorCode(int $count) : string {
+    /**
+     * @throws RandomException
+     */
+    public static function generatorCode(int $count) : string {
 		$code = "";
 		$keys = str_split("qwertyuiopasdfghjklzxcvbnm1234567890");
 		for ($i = 0; $i <= $count; $i++) {
 			if (random_int(1, 100) < 40) {
-				$code .= strtoupper($keys[array_rand($keys, 1)]);
+				$code .= strtoupper($keys[array_rand($keys)]);
 			} else {
-				$code .= $keys[array_rand($keys, 1)];
+				$code .= $keys[array_rand($keys)];
 			}
 		}
 		return $code;

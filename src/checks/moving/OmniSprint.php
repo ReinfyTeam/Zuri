@@ -40,6 +40,7 @@ use pocketmine\network\mcpe\protocol\types\InputMode;
 use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function spl_object_id;
 
@@ -58,12 +59,12 @@ class OmniSprint extends Check {
 
 	private array $check = [];
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
-		if ($player === null) {
-			return;
-		}
-		if ($packet instanceof PlayerAuthInputPacket) {
+        if ($packet instanceof PlayerAuthInputPacket) {
 			if ($packet->getInputMode() === InputMode::MOUSE_KEYBOARD || $packet->getInputMode() === InputMode::TOUCHSCREEN) { // for windows and mobile, ios only..
 				$left = ($packet->getInputFlags() & (1 << PlayerAuthInputFlags::LEFT)) !== 0;
 				$right = ($packet->getInputFlags() & (1 << PlayerAuthInputFlags::RIGHT)) !== 0;
@@ -81,10 +82,7 @@ class OmniSprint extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
-			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > $this->getConstant("max-speed") && !$player->getEffects()->has(VanillaEffects::SPEED())) {
+            if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > $this->getConstant("max-speed") && !$player->getEffects()->has(VanillaEffects::SPEED())) {
 				$this->check[spl_object_id($playerAPI)] = true; // moving too fast?
 			} else {
 				if (isset($this->check[spl_object_id($playerAPI)])) {

@@ -35,6 +35,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 
 class AimAssistA extends Check {
@@ -50,13 +51,13 @@ class AimAssistA extends Check {
 		return 10;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
-			if (
+            if (
 				!$player->isSurvival() ||
 				$playerAPI->getAttackTicks() > 20 ||
 				$playerAPI->getTeleportTicks() < 100 ||

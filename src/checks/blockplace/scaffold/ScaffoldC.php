@@ -36,6 +36,7 @@ use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
 
@@ -55,13 +56,12 @@ class ScaffoldC extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
-			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
-			$block = $event->getBlockAgainst();
+            $block = $event->getBlockAgainst();
 			$posBlock = $block->getPosition();
 			$posPlayer = $playerAPI->getLocation();
 			$distance = MathUtil::distance($posPlayer->asVector3(), $posBlock->asVector3());

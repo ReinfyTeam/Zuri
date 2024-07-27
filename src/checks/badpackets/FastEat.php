@@ -39,6 +39,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\types\ActorEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function microtime;
 
 class FastEat extends Check {
@@ -66,7 +67,10 @@ class FastEat extends Check {
 		}
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerItemConsumeEvent) {
 			if ($event->getItem() instanceof ConsumableItem) {
 				$lastTick = $playerAPI->getExternalData("lastTickP");

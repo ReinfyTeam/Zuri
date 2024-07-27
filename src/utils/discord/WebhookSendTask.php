@@ -43,9 +43,7 @@ use function in_array;
 use function json_encode;
 
 class WebhookSendTask extends AsyncTask {
-	/** @var Webhook */
 	protected NonThreadSafeValue $webhook;
-	/** @var Message */
 	protected NonThreadSafeValue $message;
 
 	public function __construct(Webhook $webhook, Message $message) {
@@ -68,7 +66,7 @@ class WebhookSendTask extends AsyncTask {
 	public function onCompletion() : void {
 		$response = $this->getResult();
 		if (!in_array($response[1], [200, 204], true)) {
-			ZuriAC::getInstance()->getLogger()->debug("[Discord] [ERROR]: An error occured while sending to discord ({$response[1]}): " . $response[0]);
+			ZuriAC::getInstance()->getLogger()->debug("[Discord] [ERROR]: An error occured while sending to discord ($response[1]): " . $response[0]);
 		}
 	}
 }

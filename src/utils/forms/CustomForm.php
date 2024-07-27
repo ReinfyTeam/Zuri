@@ -41,8 +41,8 @@ use function is_int;
 use function is_string;
 
 class CustomForm extends Form {
-	private $labelMap = [];
-	private $validationMethods = [];
+	private array $labelMap = [];
+	private array $validationMethods = [];
 
 	public function __construct(?callable $callable) {
 		parent::__construct($callable);

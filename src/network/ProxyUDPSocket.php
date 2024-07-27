@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\network;
 use Exception;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\utils\InternetAddress;
 use ReinfyTeam\Zuri\ZuriAC;
 use function socket_bind;
@@ -59,24 +60,24 @@ class ProxyUDPSocket {
 	 * @throws Exception
 	 */
 	public function bind(InternetAddress $address) : void {
-		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " --------------------------------------------------------------");
-		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " YOU ARE RUNNING THIS PLUGIN WITH PROXY UDP SUPPORT!");
-		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " ProxyUDP is on development testing stage, which leads many bugs and issue you will encounter.");
-		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " If you encountered any bugs or issues, dont hesitate to create an issue on github.");
-		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " This feature has many performance impact. Your performance might be degraded.");
-		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " USE IT AT YOUR OWN RISKS! IM NOT RESPONSIBLE FOR ANY DAMAGE COST.");
-		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " To disable this feature, set 'zuri.proxy.enabled' value in the config to false.");
-		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::YELLOW . " --------------------------------------------------------------");
+		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::YELLOW . " --------------------------------------------------------------");
+		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::YELLOW . " YOU ARE RUNNING THIS PLUGIN WITH PROXY UDP SUPPORT!");
+		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::YELLOW . " ProxyUDP is on development testing stage, which leads many bugs and issue you will encounter.");
+		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::YELLOW . " If you encountered any bugs or issues, dont hesitate to create an issue on github.");
+		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::YELLOW . " This feature has many performance impact. Your performance might be degraded.");
+		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::YELLOW . " USE IT AT YOUR OWN RISKS! IM NOT RESPONSIBLE FOR ANY DAMAGE COST.");
+		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::YELLOW . " To disable this feature, set 'zuri.proxy.enabled' value in the config to false.");
+		ZuriAC::getInstance()->getServer()->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::YELLOW . " --------------------------------------------------------------");
 
 		if (socket_bind($this->socket, $address->ip, $address->port)) {
-			ZuriAC::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::GREEN . " Successfully bound to {$address->ip}:{$address->port}!");
+			ZuriAC::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::GREEN . " Successfully bound to $address->ip:$address->port!");
 			$result = socket_connect($this->socket, $address->ip, $address->port);
 			if ($result) {
-				ZuriAC::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::GREEN . " Proxy has been binded successfully!");
+				ZuriAC::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::GREEN . " Proxy has been binded successfully!");
 			}
 		} else {
-			ZuriAC::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigManager::PREFIX) . TextFormat::RED . " We could'nt bind to {$address->ip}:{$address->port}! Is something running in that same ip?");
-			throw new Exception("Could not bound to {$address->ip}:{$address->port}");
+			ZuriAC::getInstance()->getServer()->getLogger()->info(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::RED . " We could'nt bind to $address->ip:$address->port! Is something running in that same ip?");
+			throw new Exception("Could not bound to $address->ip:$address->port");
 		}
 	}
 

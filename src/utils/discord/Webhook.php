@@ -37,7 +37,7 @@ use function filter_var;
 use function json_encode;
 
 class Webhook {
-	protected $url;
+	protected string $url;
 
 	public function __construct(string $url) {
 		$this->url = $url;

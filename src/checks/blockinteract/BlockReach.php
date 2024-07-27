@@ -35,6 +35,7 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerInteractEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
 class BlockReach extends Check {
 	public function getName() : string {
@@ -49,7 +50,10 @@ class BlockReach extends Check {
 		return 5;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerInteractEvent) {
 			$block = $event->getBlock();
 			if (!$playerAPI->getPlayer()->canInteract($block->getPosition()->add(0.5, 0.5, 0.5), $playerAPI->getPlayer()->isCreative() ? $this->getConstant("max-creative-reach") : $this->getConstant("max-survival-reach"))) {

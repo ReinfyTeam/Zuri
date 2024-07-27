@@ -35,8 +35,10 @@ use pocketmine\event\CancellableTrait;
 use pocketmine\event\Event;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\Discord;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 
 class ServerLagEvent extends Event {
@@ -54,9 +56,12 @@ class ServerLagEvent extends Event {
 		return $this->player;
 	}
 
-	public function call() : void {
-		Discord::Send($this->player, Discord::LAGGING, null);
-		Server::getInstance()->getLogger()->warning(ReplaceText::replace($this->player, ConfigManager::getData(ConfigManager::SERVER_LAGGING_MESSAGE)));
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function call() : void {
+		Discord::Send($this->player, Discord::LAGGING);
+		Server::getInstance()->getLogger()->warning(ReplaceText::replace($this->player, ConfigManager::getData(ConfigPaths::SERVER_LAGGING_MESSAGE)));
 
 		parent::call();
 	}

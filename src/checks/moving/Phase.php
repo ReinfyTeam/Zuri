@@ -38,6 +38,7 @@ use pocketmine\math\Vector3;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function in_array;
 use function intval;
 
@@ -54,7 +55,10 @@ class Phase extends Check {
 		return 8;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $event->getPlayer();
 			$world = $player->getWorld();

@@ -36,6 +36,7 @@ use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 
 class ScaffoldA extends Check {
@@ -51,7 +52,10 @@ class ScaffoldA extends Check {
 		return 2;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
 			$block = $event->getBlockAgainst();
 			$posBlock = $block->getPosition();

@@ -40,6 +40,7 @@ use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function count;
 
@@ -64,15 +65,15 @@ class KillAuraC extends Check {
 		}
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($playerAPI->getAttackTicks() > 40 || $this->interact) {
 			return;
 		}
 		$player = $playerAPI->getPlayer();
-		if ($player === null) {
-			return;
-		}
-		$locPlayer = $player->getLocation();
+        $locPlayer = $player->getLocation();
 		$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
 		$from = new Vector3($locPlayer->getX(), $locPlayer->getY() + $player->getEyeHeight(), $locPlayer->getZ());
 		$to = $player->getLocation()->add($delta->getX(), $delta->getY() + $player->getEyeHeight(), $delta->getZ());

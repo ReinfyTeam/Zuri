@@ -39,6 +39,7 @@ use pocketmine\inventory\PlayerCraftingInventory;
 use pocketmine\inventory\PlayerInventory;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function microtime;
 
 class ChestAura extends Check {
@@ -54,7 +55,10 @@ class ChestAura extends Check {
 		return 1;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		$countTransaction = $playerAPI->getExternalData("countTransaction");
 		$timeOpenChest = $playerAPI->getExternalData("timeOpenChest");
 		if ($event instanceof InventoryOpenEvent) {

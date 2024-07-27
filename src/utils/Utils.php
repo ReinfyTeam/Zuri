@@ -46,9 +46,6 @@ use pocketmine\utils\TextFormat;
 use function array_keys;
 use function array_values;
 use function is_array;
-use function is_bool;
-use function is_float;
-use function is_int;
 use function is_string;
 use function mt_getrandmax;
 use function mt_rand;
@@ -57,7 +54,7 @@ use function str_replace;
 
 class Utils {
 	public static function ParseColors($text, bool $reverse = false) : string {
-		if (is_bool($text) || is_int($text) || is_float($text) || is_array($text) || !is_string($text)) {
+		if (!is_string($text)) {
 			return "";
 		}
 
@@ -132,8 +129,8 @@ class Utils {
 	public static function fetchAuthData(JwtChain $chain) : AuthenticationData {
 		/** @var AuthenticationData|null $extraData */
 		$extraData = null;
-		foreach ($chain->chain as $k => $jwt) {
-			//validate every chain element
+		foreach ($chain->chain as $jwt) {
+			// Validate every chain element
 			try {
 				[, $claims,] = JwtUtils::parse($jwt);
 			} catch(JwtException $e) {

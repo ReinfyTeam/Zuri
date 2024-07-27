@@ -35,6 +35,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 
 class WrongPitch extends Check {
@@ -50,7 +51,10 @@ class WrongPitch extends Check {
 		return 2;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			if ($playerAPI->getTeleportTicks() > 100 && abs($packet->getPitch()) > 90) {
 				$this->failed($playerAPI);

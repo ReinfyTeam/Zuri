@@ -37,6 +37,7 @@ use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function count;
 use function in_array;
 use function intval;
@@ -54,13 +55,13 @@ class FlyC extends Check {
 		return 1;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
-			$oldPos = $event->getFrom();
+            $oldPos = $event->getFrom();
 			$newPos = $event->getTo();
 			$surroundingBlocks = BlockUtil::getSurroundingBlocks($player);
 			if (

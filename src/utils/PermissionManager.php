@@ -31,15 +31,17 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
+use AllowDynamicProperties;
 use pocketmine\permission\DefaultPermissions;
 use pocketmine\permission\Permission as PMPermission;
 use pocketmine\permission\PermissionManager as PMPermissionManager;
+use pocketmine\player\Player;
 use pocketmine\utils\NotCloneable;
 use pocketmine\utils\NotSerializable;
 use pocketmine\utils\SingletonTrait;
 use ReinfyTeam\Zuri\ZuriAC;
 
-class PermissionManager {
+#[AllowDynamicProperties] class PermissionManager {
 	use NotSerializable;
 	use NotCloneable;
 	use SingletonTrait;
@@ -47,10 +49,10 @@ class PermissionManager {
 	/** @var string[] */
 	private array $perm = [];
 
-	public const USER = 0;
-	public const OPERATOR = 1;
-	public const CONSOLE = 3;
-	public const NONE = -1;
+	public const int USER = 0;
+	public const int OPERATOR = 1;
+	public const int CONSOLE = 3;
+	public const int NONE = -1;
 
 	public function register(string $permission, int $permAccess, array $childPermission = []) : void {
 		$this->perm[] = $permission;

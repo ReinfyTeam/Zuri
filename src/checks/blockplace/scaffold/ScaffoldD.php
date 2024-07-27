@@ -36,6 +36,7 @@ use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
 class ScaffoldD extends Check {
 	public function getName() : string {
@@ -53,13 +54,12 @@ class ScaffoldD extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
-			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
-			$this->debug($playerAPI, "isItemInHandNull=" . $playerAPI->getPlayer()->getInventory()->getItemInHand()->isNull());
+            $this->debug($playerAPI, "isItemInHandNull=" . $playerAPI->getPlayer()->getInventory()->getItemInHand()->isNull());
 			if ($playerAPI->getPlayer()->getInventory()->getItemInHand()->isNull()) {
 				$this->failed($playerAPI);
 			}

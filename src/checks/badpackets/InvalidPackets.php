@@ -36,6 +36,7 @@ use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
 class InvalidPackets extends Check {
 	public function getName() : string {
@@ -50,7 +51,10 @@ class InvalidPackets extends Check {
 		return 20;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof MovePlayerPacket) { // i dont know how i did this.
 			$speed = $playerAPI->getExternalData("tickPackets") - $playerAPI->getExternalData("lastPacketTick");
 			if ($speed < $this->getConstant("max-packet-speed")) {
