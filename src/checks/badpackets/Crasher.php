@@ -36,6 +36,7 @@ use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\world\format\Chunk;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 
 class Crasher extends Check {
@@ -51,13 +52,13 @@ class Crasher extends Check {
 		return 5;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
-			$pos = $packet->getPosition();
+            $pos = $packet->getPosition();
 			$chunk = $player->getWorld()->getChunk((int) $pos->getX() >> Chunk::COORD_BIT_SIZE, (int) $pos->getZ() >> Chunk::COORD_BIT_SIZE);
 			if (
 				($chunk !== null && $chunk->getHeight() > $this->getConstant("max-y")) ||

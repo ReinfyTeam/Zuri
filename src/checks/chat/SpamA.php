@@ -36,6 +36,7 @@ use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function microtime;
 
 class SpamA extends Check {
@@ -54,7 +55,10 @@ class SpamA extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerChatEvent) {
 			$chatTick = $playerAPI->getExternalData("SpamATick");
 			if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
@@ -70,13 +74,12 @@ class SpamA extends Check {
 							$playerAPI->setExternalData("SpamATick", microtime(true));
 							$playerAPI->setExternalData("ViolationSpamA", $violationChat + 1);
 							$this->failed($playerAPI);
-							$event->cancel();
-						} else {
+                        } else {
 							$playerAPI->setExternalData("SpamATick", microtime(true));
 							$playerAPI->setExternalData("ViolationSpamA", 0);
-							$event->cancel();
-						}
-					} else {
+                        }
+                        $event->cancel();
+                    } else {
 						$playerAPI->setExternalData("SpamATick", microtime(true));
 						$playerAPI->setExternalData("ViolationSpamA", 0);
 					}

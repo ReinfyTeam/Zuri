@@ -39,6 +39,7 @@ use pocketmine\network\mcpe\protocol\types\ActorEvent;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
 class ImposibleHit extends Check {
 	public function getName() : string {
@@ -55,9 +56,12 @@ class ImposibleHit extends Check {
 
 	private array $eating = [];
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
-			if (($entity = $event->getEntity()) instanceof Player && ($damager = $event->getDamager()) instanceof Player) {
+			if (($event->getEntity()) instanceof Player && ($event->getDamager()) instanceof Player) {
 				if ($playerAPI->isInventoryOpen() || isset($this->eating[$playerAPI->getPlayer()->getName()])) {
 					$this->failed($playerAPI); // impossible to hit player while opened an inventory :( or while eating..
 				}

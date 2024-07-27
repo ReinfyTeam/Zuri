@@ -34,8 +34,10 @@ namespace ReinfyTeam\Zuri\checks\combat\autoclick;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
+use ReflectionException;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 
 class AutoClickA extends Check {
@@ -51,15 +53,19 @@ class AutoClickA extends Check {
 		return 25;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws ReflectionException
+     * @throws DiscordWebhookException
+     */
+    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$ticks = $playerAPI->getExternalData("ticksClick");
 		$avgSpeed = $playerAPI->getExternalData("avgSpeed");
 		$avgDeviation = $playerAPI->getExternalData("avgDeviation");
 		if ($packet instanceof LevelSoundEventPacket) {
 			if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
-				if ($ticks !== null && $avgSpeed !== null && $avgDeviation !== null) {
-					$playerAPI->setExternalData("ticksClick", 0);
-					if ($playerAPI->isDigging() || $ticks > $this->getConstant("max-ticks")) {
+                $playerAPI->setExternalData("ticksClick", 0);
+                if ($ticks !== null && $avgSpeed !== null && $avgDeviation !== null) {
+                    if ($playerAPI->isDigging() || $ticks > $this->getConstant("max-ticks")) {
 						$playerAPI->unsetExternalData("ticksClick");
 						$playerAPI->unsetExternalData("avgSpeed");
 						$playerAPI->unsetExternalData("avgDeviation");
@@ -76,8 +82,7 @@ class AutoClickA extends Check {
 					}
 					$this->debug($playerAPI, "avgDeviation=$avgDeviation, speed=$speed, deviation=$deviation, ticksClick=$ticks, avgSpeed=$avgSpeed");
 				} else {
-					$playerAPI->setExternalData("ticksClick", 0);
-					$playerAPI->setExternalData("avgSpeed", 0);
+                    $playerAPI->setExternalData("avgSpeed", 0);
 					$playerAPI->setExternalData("avgDeviation", 0);
 				}
 			}

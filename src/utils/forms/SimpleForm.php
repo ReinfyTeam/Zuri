@@ -37,13 +37,13 @@ use function gettype;
 use function is_int;
 
 class SimpleForm extends Form {
-	const IMAGE_TYPE_PATH = 0;
-	const IMAGE_TYPE_URL = 1;
+	const int IMAGE_TYPE_PATH = 0;
+	const int IMAGE_TYPE_URL = 1;
 
 	/** @var string */
-	private $content = "";
+	private string $content = "";
 
-	private $labelMap = [];
+	private array $labelMap = [];
 
 	public function __construct(?callable $callable) {
 		parent::__construct($callable);

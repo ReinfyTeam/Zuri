@@ -33,10 +33,12 @@ namespace ReinfyTeam\Zuri\player;
 
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Location;
+use pocketmine\inventory\PlayerInventory;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
+use ReflectionException;
 use ReflectionProperty;
 use function abs;
 use function count;
@@ -96,7 +98,7 @@ class PlayerAPI implements IPlayerAPI {
 	private array $externalData = [];
 	private string $captchaCode = "nocode";
 
-	public function __construct(private Player $player) {
+	public function __construct(private readonly Player $player) {
 		// no-op
 	}
 
@@ -307,14 +309,21 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	//Digging
-	public function isDigging() : bool {
+
+    /**
+     * @throws ReflectionException
+     */
+    public function isDigging() : bool {
 		if ($this->getBlockBreakHandler() !== null) {
 			return true;
 		}
 		return false;
 	}
 
-	private function getBlockBreakHandler() : ?SurvivalBlockBreakHandler {
+    /**
+     * @throws ReflectionException
+     */
+    private function getBlockBreakHandler() : ?SurvivalBlockBreakHandler {
 		static $ref = null;
 		if ($this->getPlayer() === null) {
 			return null;
@@ -619,14 +628,16 @@ class PlayerAPI implements IPlayerAPI {
 		$this->captchaCode = $data;
 	}
 
-	public function getInventory() {
+	public function getInventory(): PlayerInventory|static
+    {
 		if ($this->getPlayer() === null) {
-			return;
+			return $this;
 		}
 		return $this->getPlayer()->getInventory();
 	}
 
-	public function getLocation() {
+	public function getLocation(): Location
+    {
 		return $this->getPlayer()->getLocation();
 	}
 

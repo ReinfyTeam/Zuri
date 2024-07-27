@@ -51,7 +51,7 @@ class EditionFakerA extends Check {
 		return 0;
 	}
 
-	public const NULL_MODELS = [
+	public const array NULL_MODELS = [
 		DeviceOS::ANDROID,
 		DeviceOS::OSX,
 		DeviceOS::WINDOWS_10,
@@ -59,7 +59,7 @@ class EditionFakerA extends Check {
 		DeviceOS::DEDICATED,
 	];
 
-	public const DEVICE_OS_LIST = [
+	public const array DEVICE_OS_LIST = [
 		DeviceOS::ANDROID,
 		DeviceOS::IOS,
 		DeviceOS::AMAZON,

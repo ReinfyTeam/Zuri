@@ -32,19 +32,23 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\task;
 
 use pocketmine\scheduler\Task;
+use Random\RandomException;
 use ReinfyTeam\Zuri\events\CaptchaEvent;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\ZuriAC;
 
 class CaptchaTask extends Task {
-	private static $instance = null;
+	private static ?CaptchaTask $instance = null;
 	protected ZuriAC $plugin;
 
 	public function __construct(ZuriAC $plugin) {
 		$this->plugin = $plugin;
 	}
 
-	public function onRun() : void {
+    /**
+     * @throws RandomException
+     */
+    public function onRun() : void {
 		self::$instance = $this;
 		foreach ($this->plugin->getServer()->getOnlinePlayers() as $player) {
 			if ($player instanceof PlayerAPI) {

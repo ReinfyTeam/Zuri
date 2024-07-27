@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\checks\moving\speed;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
 class AntiVoid extends Check {
 	public function getName() : string {
@@ -48,7 +49,10 @@ class AntiVoid extends Check {
 		return 3;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if (
 			$playerAPI->isOnAdhesion() ||
 			$playerAPI->isInLiquid() ||
@@ -69,6 +73,7 @@ class AntiVoid extends Check {
 			$playerAPI->unsetExternalData("lastYB");
 		}
 
-		$this->debug($playerAPI, "lastY=$lastY, lastYB=$lastYB");
+        $lastYB = $playerAPI->getExternalData("lastYB");
+        $this->debug($playerAPI, "lastY=$lastY, lastYB=$lastYB");
 	}
 }

@@ -36,6 +36,7 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 use function intval;
 
@@ -52,16 +53,16 @@ class FastLadder extends Check {
 		return 5;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$lastY = $event->getFrom()->getY();
 			$newY = $event->getTo()->getY();
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
 
-			$x = intval($player->getLocation()->getX());
+            $x = intval($player->getLocation()->getX());
 			$z = intval($player->getLocation()->getZ());
 
 			$checkLadderLastX = $player->getWorld()->getBlockAt($x, intval($lastY), $z)->getTypeId() === BlockTypeIds::LADDER;

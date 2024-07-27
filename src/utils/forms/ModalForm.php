@@ -37,7 +37,7 @@ use function is_bool;
 
 class ModalForm extends Form {
 	/** @var string */
-	private $content = "";
+	private string $content = "";
 
 	public function __construct(?callable $callable) {
 		parent::__construct($callable);

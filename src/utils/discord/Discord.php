@@ -41,15 +41,18 @@ use function hexdec;
 use function str_replace;
 
 class Discord extends ConfigManager {
-	public const BAN = 0;
-	public const KICK = 1;
-	public const JOIN = 2;
-	public const LEAVE = 3;
-	public const LAGGING = 4;
+	public const int BAN = 0;
+	public const int KICK = 1;
+	public const int JOIN = 2;
+	public const int LEAVE = 3;
+	public const int LAGGING = 4;
 
 	public static ?Config $config = null;
 
-	public static function Send(PlayerAPI $playerAPI, int $type, ?array $moduleInfo = null) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public static function Send(PlayerAPI $playerAPI, int $type, ?array $moduleInfo = null) : void {
 		$sendType = match ($type) {
 			self::BAN => "ban",
 			self::KICK => "kick",
@@ -145,7 +148,7 @@ class Discord extends ConfigManager {
 		return self::$config ??= new Config(ZuriAC::getInstance()->getDataFolder() . "webhook.yml", Config::YAML);
 	}
 
-	public static function textToHex(string $hex) : mixed {
+	public static function textToHex(string $hex) : int|float {
 		// why this??
 		$hex = str_replace("#", "", $hex);
 

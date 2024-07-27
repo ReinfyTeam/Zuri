@@ -36,6 +36,7 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 
 class Jesus extends Check {
@@ -51,13 +52,13 @@ class Jesus extends Check {
 		return 3;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
-			if (
+            if (
 				!$playerAPI->isInLiquid() ||
 				$playerAPI->isInWeb() ||
 				$playerAPI->isOnGround() ||
@@ -71,7 +72,7 @@ class Jesus extends Check {
 			$bottomBlockId = $player->getWorld()->getBlock($player->getLocation()->add(0, -1, 0))->getTypeId();
 			$halfBlockId = $player->getWorld()->getBlock($player->getLocation())->getTypeId();
 			$upperBlockId = $player->getWorld()->getBlock($player->getLocation()->add(0, 1, 0))->getTypeId();
-			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.07 && $bottomBlockId === BlockTypeIds::WATER && $upperBlockId !== BlockTypeIds::WATER && $halfBlockId !== BlockTypeIds::WATER) { // i think this is weak type of checking..
+			if ((MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > 0.07 && $bottomBlockId === BlockTypeIds::WATER && $upperBlockId !== BlockTypeIds::WATER && $halfBlockId !== BlockTypeIds::WATER) { // i think this is weak type of checking..
 				$this->failed($playerAPI);
 			}
 			$this->debug($playerAPI, "bottomId=$bottomBlockId, upperBlockId=$upperBlockId, halfBlockId=$halfBlockId");

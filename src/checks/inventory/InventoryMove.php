@@ -35,6 +35,7 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 
 class InventoryMove extends Check {
@@ -50,7 +51,10 @@ class InventoryMove extends Check {
 		return 10;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			if ($playerAPI->isInventoryOpen() && ($distance = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > $this->getConstant("move-sensitivity")) {
 				$this->debug($playerAPI, "isOpen=" . $playerAPI->isInventoryOpen() . ", distance=$distance");

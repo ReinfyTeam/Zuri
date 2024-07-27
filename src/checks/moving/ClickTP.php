@@ -35,6 +35,7 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
 class ClickTP extends Check {
 	public function getName() : string {
@@ -49,7 +50,10 @@ class ClickTP extends Check {
 		return 1;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$distance = $event->getFrom()->distanceSquared($event->getTo());
 			$oldYaw = $event->getFrom()->getYaw();

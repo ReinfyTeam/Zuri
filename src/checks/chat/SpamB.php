@@ -101,11 +101,9 @@ class SpamB extends Check {
 						$playerAPI->getPlayer()->sendMessage($this->replaceText($playerAPI, self::getData(self::CHAT_REPEAT_TEXT), $this->getName(), $this->getSubType()));
 						$event->cancel();
 					}
-					$playerAPI->setExternalData("lastMessage", $message);
-				} else {
-					$playerAPI->setExternalData("lastMessage", $message);
-				}
-			}
+                }
+                $playerAPI->setExternalData("lastMessage", $message);
+            }
 		}
 	}
 }

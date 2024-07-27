@@ -37,6 +37,7 @@ use pocketmine\event\Event;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 
 class ReachB extends Check {
@@ -52,24 +53,19 @@ class ReachB extends Check {
 		return 3;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			$cause = $event->getCause();
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
-			$locEntity = $entity->getLocation();
-			$locDamager = $damager->getLocation();
-			if ($damager === null) {
-				return;
-			}
-			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player) {
+            if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player) {
 				$entityAPI = PlayerAPI::getAPIPlayer($entity);
 				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
 				$player = $entityAPI->getPlayer();
-				if ($player === null) {
-					return;
-				}
-				$damager = $damagerAPI->getPlayer();
+                $damager = $damagerAPI->getPlayer();
 				if (MathUtil::XZDistanceSquared($entityAPI->getLocation()->asVector3(), $damager->getLocation()->asVector3()) > ($damager->isSurvival() ? $this->getConstant("survival-max-distance") : $this->getConstant("creative-max-distance"))) {
 					$this->failed($damagerAPI);
 				}

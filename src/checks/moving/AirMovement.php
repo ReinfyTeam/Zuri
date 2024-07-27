@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\checks\moving;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
 class AirMovement extends Check {
 	public function getName() : string {
@@ -48,16 +49,16 @@ class AirMovement extends Check {
 		return 5;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$effects = [];
 		$player = $playerAPI->getPlayer();
-		if ($player === null) {
-			return;
-		}
-		if (!$player->spawned && !$player->isConnected()) {
+        if (!$player->spawned && !$player->isConnected()) {
 			return;
 		} // Effect::$effectInstance bug fix
-		foreach ($player->getEffects()->all() as $index => $effect) {
+		foreach ($player->getEffects()->all() as $effect) {
 			$transtable = $effect->getType()->getName()->getText();
 			$effects[$transtable] = $effect->getEffectLevel() + 1;
 		}

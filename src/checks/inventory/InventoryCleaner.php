@@ -35,6 +35,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function microtime;
 
 class InventoryCleaner extends Check {
@@ -58,15 +59,14 @@ class InventoryCleaner extends Check {
 		return false;
 	}
 
-	public function captcha() : bool {
-		return false;
-	}
-
-	public function maxViolations() : int {
+    public function maxViolations() : int {
 		return 1;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$ticks = $playerAPI->getExternalData("ticksTransaction");
 		$transaction = $playerAPI->getExternalData("transaction");
 		if ($packet instanceof InventoryTransactionPacket) {

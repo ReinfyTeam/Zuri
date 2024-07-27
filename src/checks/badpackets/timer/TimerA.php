@@ -36,6 +36,7 @@ use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 
 class TimerA extends Check {
@@ -51,13 +52,14 @@ class TimerA extends Check {
 		return 3;
 	}
 
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$tps = Server::getInstance()->getTicksPerSecond();
-			$tick = Server::getInstance()->getTick();
-			$tickDiff = $tps - $tick;
 
-			if ($tps < 19 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
+            if ($tps < 19 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
 				$playerAPI->setExternalData("TimerATick", $tps - $packet->getTick());
 			}
 

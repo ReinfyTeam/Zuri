@@ -36,6 +36,7 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 
 class Spider extends Check {
@@ -51,14 +52,14 @@ class Spider extends Check {
 		return 5;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-			if ($player === null) {
-				return;
-			}
 
-			if (
+            if (
 				$playerAPI->getAttackTicks() < 40 ||
 				$playerAPI->isInWeb() ||
 				$playerAPI->isOnAdhesion() ||

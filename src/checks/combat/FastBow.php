@@ -36,6 +36,7 @@ use pocketmine\event\Event;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function array_merge;
 
 class FastBow extends Check {
@@ -51,27 +52,24 @@ class FastBow extends Check {
 		return 3;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityShootBowEvent) {
 			$tick = (double) Server::getInstance()->getTick();
-			$tickDiff = (double) $tick - $playerAPI->getLastMoveTick();
-			$tps = (double) Server::getInstance()->getTicksPerSecond();
+            $tps = Server::getInstance()->getTicksPerSecond();
 			$shootFirstTick = $playerAPI->getExternalData("shootFirstTickA");
 			$hsTimeSum = $playerAPI->getExternalData("hsTimeSum") ?? 0;
 			$currentHsIndex = $playerAPI->getExternalData("currentHsIndex") ?? 0;
 			$hsTimeList = $playerAPI->getExternalData("hsTimeList") ?? [];
-			if ($tps != 0) {
-				$delta = (double) $tickDiff / (double) $tps;
-			} else {
-				$delta = 0;
-			}
 
-			if ($shootFirstTick == -1) {
+            if ($shootFirstTick == -1) {
 				$playerAPI->setExternalData("shootFirstTickA", $tick - 30);
 			}
 
-			$tickDiff = (double) ($tick - $shootFirstTick); // server ticks since last hit
-			$delta = (double) $tickDiff / (double) $tps; // seconds since last hit
+			$tickDiff = $tick - $shootFirstTick; // server ticks since last hit
+			$delta = $tickDiff / $tps; // seconds since last hit
 			$playerAPI->setExternalData("hsTimeList", array_merge($hsTimeList, [$currentHsIndex => $delta])); // merge the new array to a new another one..
 			$hsTimeList = $playerAPI->getExternalData("hsTimeList"); // update again the list..
 			$playerAPI->setExternalData("hsTimeSum", $hsTimeSum - $hsTimeList[$currentHsIndex] + $delta);

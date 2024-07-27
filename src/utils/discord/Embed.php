@@ -31,8 +31,11 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils\discord;
 
+use DateTime;
+use DateTimeZone;
+
 class Embed {
-	protected $data = [];
+	protected array $data = [];
 
 	public function asArray() : array {
 		return $this->data;
@@ -106,8 +109,8 @@ class Embed {
 		return $this;
 	}
 
-	public function setTimestamp(\DateTime $timestamp) : self {
-		$timestamp->setTimezone(new \DateTimeZone("UTC"));
+	public function setTimestamp(DateTime $timestamp) : self {
+		$timestamp->setTimezone(new DateTimeZone("UTC"));
 		$this->data["timestamp"] = $timestamp->format("Y-m-d\TH:i:s.v\Z");
 		return $this;
 	}

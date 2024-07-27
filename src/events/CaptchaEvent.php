@@ -33,7 +33,9 @@ namespace ReinfyTeam\Zuri\events;
 
 use pocketmine\event\CancellableTrait;
 use pocketmine\event\Event;
+use Random\RandomException;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\CharUtil;
 use ReinfyTeam\Zuri\utils\ReplaceText;
@@ -53,23 +55,26 @@ class CaptchaEvent extends Event {
 	}
 
 	protected function sendMessage() : void {
-		$this->playerAPI->getPlayer()->sendMessage(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigManager::CAPTCHA_TEXT)));
+		$this->playerAPI->getPlayer()->sendMessage(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigPaths::CAPTCHA_TEXT)));
 	}
 
 	protected function sendTip() : void {
-		$this->playerAPI->getPlayer()->sendTip(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigManager::CAPTCHA_TEXT)));
+		$this->playerAPI->getPlayer()->sendTip(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigPaths::CAPTCHA_TEXT)));
 	}
 
 	protected function sendTitle() : void {
-		$this->playerAPI->getPlayer()->sendSubTitle(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigManager::CAPTCHA_TEXT)));
+		$this->playerAPI->getPlayer()->sendSubTitle(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigPaths::CAPTCHA_TEXT)));
 	}
 
-	public function call() : void {
+    /**
+     * @throws RandomException
+     */
+    public function call() : void {
 		if ($this->playerAPI->isCaptcha()) {
 			if ($this->playerAPI->getCaptchaCode() === "nocode") {
-				$this->playerAPI->setCaptchaCode(CharUtil::generatorCode(ConfigManager::getData(ConfigManager::CAPTCHA_CODE_LENGTH)));
+				$this->playerAPI->setCaptchaCode(CharUtil::generatorCode(ConfigManager::getData(ConfigPaths::CAPTCHA_CODE_LENGTH)));
 			}
-			if (ConfigManager::getData(ConfigManager::CAPTCHA_RANDOMIZE) === true) {
+			if (ConfigManager::getData(ConfigPaths::CAPTCHA_RANDOMIZE) === true) {
 				switch(random_int(1, 3)) {
 					case 1:
 						$this->sendMessage();
@@ -82,13 +87,13 @@ class CaptchaEvent extends Event {
 						break;
 				}
 			} else {
-				if (ConfigManager::getData(ConfigManager::CAPTCHA_MESSAGE) === true) {
+				if (ConfigManager::getData(ConfigPaths::CAPTCHA_MESSAGE) === true) {
 					$this->sendMessage();
 				}
-				if (ConfigManager::getData(ConfigManager::CAPTCHA_TIP) === true) {
+				if (ConfigManager::getData(ConfigPaths::CAPTCHA_TIP) === true) {
 					$this->sendTip();
 				}
-				if (ConfigManager::getData(ConfigManager::CAPTCHA_TITLE) === true) {
+				if (ConfigManager::getData(ConfigPaths::CAPTCHA_TITLE) === true) {
 					$this->sendTitle();
 				}
 			}

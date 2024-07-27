@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\command;
 
+use JsonException;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
@@ -38,6 +39,7 @@ use pocketmine\plugin\PluginOwned;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\API;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\forms\FormSender;
 use ReinfyTeam\Zuri\ZuriAC;
@@ -56,8 +58,11 @@ class ZuriCommand extends Command implements PluginOwned {
 		return ZuriAC::getInstance();
 	}
 
-	public function execute(CommandSender $sender, string $label, array $args) : void {
-		$prefix = ConfigManager::getData(ConfigManager::PREFIX);
+    /**
+     * @throws JsonException
+     */
+    public function execute(CommandSender $sender, string $label, array $args) : void {
+		$prefix = ConfigManager::getData(ConfigPaths::PREFIX);
 		$namecmd = $this->getName();
 		if ($sender instanceof Player) {
 			$playerAPI = PlayerAPI::getAPIPlayer($sender);
@@ -67,21 +72,21 @@ class ZuriCommand extends Command implements PluginOwned {
 				case "about":
 				case "info":
 					$sender->sendMessage(TextFormat::AQUA . "Build: " . TextFormat::GRAY . ZuriAC::getInstance()->getDescription()->getVersion() . TextFormat::AQUA . " Author: " . TextFormat::GRAY . ZuriAC::getInstance()->getDescription()->getAuthors()[0]);
-					$sender->sendMessage(TextFormat::AQUA . "Total Enabled Checks: " . TextFormat::GRAY . count(API::getAllEnabledChecks(false)) . " (With SubTypes: " . count(API::getAllEnabledChecks(true)) . ")");
-					$sender->sendMessage(TextFormat::AQUA . "Total Disabled Checks: " . TextFormat::GRAY . count(API::getAllDisabledChecks(false)) . " (With SubTypes: " . count(API::getAllDisabledChecks(true)) . ")");
-					$sender->sendMessage(TextFormat::AQUA . "Total All Checks: " . TextFormat::GRAY . count(API::getAllChecks(false)) . " (With SubTypes: " . count(API::getAllChecks(true)) . ")");
+					$sender->sendMessage(TextFormat::AQUA . "Total Enabled Checks: " . TextFormat::GRAY . count(API::getAllEnabledChecks(false)) . " (With SubTypes: " . count(API::getAllEnabledChecks()) . ")");
+					$sender->sendMessage(TextFormat::AQUA . "Total Disabled Checks: " . TextFormat::GRAY . count(API::getAllDisabledChecks(false)) . " (With SubTypes: " . count(API::getAllDisabledChecks()) . ")");
+					$sender->sendMessage(TextFormat::AQUA . "Total All Checks: " . TextFormat::GRAY . count(API::getAllChecks(false)) . " (With SubTypes: " . count(API::getAllChecks()) . ")");
 					break;
 				case "notify":
 				case "notification":
 					if (isset($args[1])) {
 						switch(strtolower($args[1])) {
 							case "toggle":
-								$data = ConfigManager::getData(ConfigManager::ALERTS_ENABLE) === true ? ConfigManager::setData(ConfigManager::ALERTS_ENABLE, false) : ConfigManager::setData(ConfigManager::ALERTS_ENABLE, true);
-								$sender->sendMessage($prefix . TextFormat::GRAY . " Notify toggle is " . (ConfigManager::getData(ConfigManager::ALERTS_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
+								$data = ConfigManager::getData(ConfigPaths::ALERTS_ENABLE) === true ? ConfigManager::setData(ConfigPaths::ALERTS_ENABLE, false) : ConfigManager::setData(ConfigPaths::ALERTS_ENABLE, true);
+								$sender->sendMessage($prefix . TextFormat::GRAY . " Notify toggle is " . (ConfigManager::getData(ConfigPaths::ALERTS_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 								break;
 							case "admin":
-								$data = ConfigManager::getData(ConfigManager::ALERTS_ADMIN) === true ? ConfigManager::setData(ConfigManager::ALERTS_ADMIN, false) : ConfigManager::setData(ConfigManager::ALERTS_ADMIN, true);
-								$sender->sendMessage($prefix . TextFormat::GRAY . " Notify admin mode is " . (ConfigManager::getData(ConfigManager::ALERTS_ADMIN) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
+								$data = ConfigManager::getData(ConfigPaths::ALERTS_ADMIN) === true ? ConfigManager::setData(ConfigPaths::ALERTS_ADMIN, false) : ConfigManager::setData(ConfigPaths::ALERTS_ADMIN, true);
+								$sender->sendMessage($prefix . TextFormat::GRAY . " Notify admin mode is " . (ConfigManager::getData(ConfigPaths::ALERTS_ADMIN) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 								break;
 							default:
 								$sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify (toggle/admin) - Use to on/off notify.");
@@ -96,8 +101,8 @@ class ZuriCommand extends Command implements PluginOwned {
 					if (isset($args[1])) {
 						switch($args[1]) {
 							case "toggle":
-								$data = ConfigManager::getData(ConfigManager::BAN_ENABLE) === true ? ConfigManager::setData(ConfigManager::BAN_ENABLE, false) : ConfigManager::setData(ConfigManager::BAN_ENABLE, true);
-								$sender->sendMessage($prefix . TextFormat::GRAY . " Ban Mode is " . (ConfigManager::getData(ConfigManager::BAN_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
+								$data = ConfigManager::getData(ConfigPaths::BAN_ENABLE) === true ? ConfigManager::setData(ConfigPaths::BAN_ENABLE, false) : ConfigManager::setData(ConfigPaths::BAN_ENABLE, true);
+								$sender->sendMessage($prefix . TextFormat::GRAY . " Ban Mode is " . (ConfigManager::getData(ConfigPaths::BAN_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 								break;
 							default: $sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode (toggle/randomize) - Use to on/off ban mode.");
 						}
@@ -111,36 +116,36 @@ class ZuriCommand extends Command implements PluginOwned {
 					if (isset($args[1])) {
 						switch($args[1]) {
 							case "toggle":
-								$data = ConfigManager::getData(ConfigManager::CAPTCHA_ENABLE) === true ? ConfigManager::setData(ConfigManager::CAPTCHA_ENABLE, false) : ConfigManager::setData(ConfigManager::CAPTCHA_ENABLE, true);
-								$sender->sendMessage($prefix . TextFormat::GRAY . " Captcha is " . (ConfigManager::getData(ConfigManager::CAPTCHA_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
+								$data = ConfigManager::getData(ConfigPaths::CAPTCHA_ENABLE) === true ? ConfigManager::setData(ConfigPaths::CAPTCHA_ENABLE, false) : ConfigManager::setData(ConfigPaths::CAPTCHA_ENABLE, true);
+								$sender->sendMessage($prefix . TextFormat::GRAY . " Captcha is " . (ConfigManager::getData(ConfigPaths::CAPTCHA_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 								break;
 							case "message":
-								if (!ConfigManager::getData(ConfigManager::CAPTCHA_RANDOMIZE)) {
-									$data = ConfigManager::getData(ConfigManager::CAPTCHA_MESSAGE) === true ? ConfigManager::setData(ConfigManager::CAPTCHA_MESSAGE, false) : ConfigManager::setData(ConfigManager::CAPTCHA_MESSAGE, true);
-									$sender->sendMessage($prefix . TextFormat::GRAY . " Message Captcha is " . (ConfigManager::getData(ConfigManager::CAPTCHA_MESSAGE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
+								if (!ConfigManager::getData(ConfigPaths::CAPTCHA_RANDOMIZE)) {
+									$data = ConfigManager::getData(ConfigPaths::CAPTCHA_MESSAGE) === true ? ConfigManager::setData(ConfigPaths::CAPTCHA_MESSAGE, false) : ConfigManager::setData(ConfigPaths::CAPTCHA_MESSAGE, true);
+									$sender->sendMessage($prefix . TextFormat::GRAY . " Message Captcha is " . (ConfigManager::getData(ConfigPaths::CAPTCHA_MESSAGE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 								} else {
 									$sender->sendMessage($prefix . TextFormat::RED . " Randomize is on! Turn off randomize to toggle this!");
 								}
 								break;
 							case "tip":
-								if (!ConfigManager::getData(ConfigManager::CAPTCHA_RANDOMIZE)) {
-									$data = ConfigManager::getData(ConfigManager::CAPTCHA_TIP) === true ? ConfigManager::setData(ConfigManager::CAPTCHA_TIP, false) : ConfigManager::setData(ConfigManager::CAPTCHA_TIP, true);
-									$sender->sendMessage($prefix . TextFormat::GRAY . " Tip Captcha is " . (ConfigManager::getData(ConfigManager::CAPTCHA_TIP) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
+								if (!ConfigManager::getData(ConfigPaths::CAPTCHA_RANDOMIZE)) {
+									$data = ConfigManager::getData(ConfigPaths::CAPTCHA_TIP) === true ? ConfigManager::setData(ConfigPaths::CAPTCHA_TIP, false) : ConfigManager::setData(ConfigPaths::CAPTCHA_TIP, true);
+									$sender->sendMessage($prefix . TextFormat::GRAY . " Tip Captcha is " . (ConfigManager::getData(ConfigPaths::CAPTCHA_TIP) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 								} else {
 									$sender->sendMessage($prefix . TextFormat::RED . " Randomize is on! Turn off randomize to toggle this!");
 								}
 								break;
 							case "title":
-								if (!ConfigManager::getData(ConfigManager::CAPTCHA_RANDOMIZE)) {
-									$data = ConfigManager::getData(ConfigManager::CAPTCHA_TITLE) === true ? ConfigManager::setData(ConfigManager::CAPTCHA_TITLE, false) : ConfigManager::setData(ConfigManager::CAPTCHA_TITLE, true);
-									$sender->sendMessage($prefix . TextFormat::GRAY . " Title Captcha is " . (ConfigManager::getData(ConfigManager::CAPTCHA_TITLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
+								if (!ConfigManager::getData(ConfigPaths::CAPTCHA_RANDOMIZE)) {
+									$data = ConfigManager::getData(ConfigPaths::CAPTCHA_TITLE) === true ? ConfigManager::setData(ConfigPaths::CAPTCHA_TITLE, false) : ConfigManager::setData(ConfigPaths::CAPTCHA_TITLE, true);
+									$sender->sendMessage($prefix . TextFormat::GRAY . " Title Captcha is " . (ConfigManager::getData(ConfigPaths::CAPTCHA_TITLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 								} else {
 									$sender->sendMessage($prefix . TextFormat::RED . " Randomize is on! Turn off randomize to toggle this!");
 								}
 								break;
 							case "randomize":
-								$data = ConfigManager::getData(ConfigManager::CAPTCHA_RANDOMIZE) === true ? ConfigManager::setData(ConfigManager::CAPTCHA_RANDOMIZE, false) : ConfigManager::setData(ConfigManager::CAPTCHA_RANDOMIZE, true);
-								$sender->sendMessage($prefix . TextFormat::GRAY . " Randomize Mode is " . (ConfigManager::getData(ConfigManager::CAPTCHA_RANDOMIZE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
+								ConfigManager::getData(ConfigPaths::CAPTCHA_RANDOMIZE) === true ? ConfigManager::setData(ConfigPaths::CAPTCHA_RANDOMIZE, false) : ConfigManager::setData(ConfigPaths::CAPTCHA_RANDOMIZE, true);
+								$sender->sendMessage($prefix . TextFormat::GRAY . " Randomize Mode is " . (ConfigManager::getData(ConfigPaths::CAPTCHA_RANDOMIZE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 								break;
 							case "length":
 								if (!isset($args[2])) {
@@ -158,7 +163,7 @@ class ZuriCommand extends Command implements PluginOwned {
 								}
 
 								$sender->sendMessage($prefix . TextFormat::GREEN . " Changed the code length to " . $args[2] . "!");
-								ConfigManager::setData(ConfigManager::CAPTCHA_CODE_LENGTH, intval($args[2])); // incase of using ""
+								ConfigManager::setData(ConfigPaths::CAPTCHA_CODE_LENGTH, intval($args[2])); // incase of using ""
 								break;
 							default: $sender->sendMessage(TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha " . TextFormat::RED . "(toggle/message/tip/title/randomize/length) - Use to on/off and set length code for captcha.");
 						}
@@ -167,13 +172,13 @@ class ZuriCommand extends Command implements PluginOwned {
 					}
 					break;
 				case "bypass":
-					$data = ConfigManager::getData(ConfigManager::PERMISSION_BYPASS_ENABLE) === true ? ConfigManager::setData(ConfigManager::PERMISSION_BYPASS_ENABLE, false) : ConfigManager::setData(ConfigManager::PERMISSION_BYPASS_ENABLE, true);
-					$sender->sendMessage($prefix . TextFormat::GRAY . " Bypass mode is " . (ConfigManager::getData(ConfigManager::PERMISSION_BYPASS_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
+					$data = ConfigManager::getData(ConfigPaths::PERMISSION_BYPASS_ENABLE) === true ? ConfigManager::setData(ConfigPaths::PERMISSION_BYPASS_ENABLE, false) : ConfigManager::setData(ConfigPaths::PERMISSION_BYPASS_ENABLE, true);
+					$sender->sendMessage($prefix . TextFormat::GRAY . " Bypass mode is " . (ConfigManager::getData(ConfigPaths::PERMISSION_BYPASS_ENABLE) ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 					break;
 				case "debug":
 				case "analyze":
 					if ($sender instanceof Player) {
-						$data = $playerAPI->isDebug() === true ? $playerAPI->setDebug(false) : $playerAPI->setDebug(true);
+						$data = $playerAPI->isDebug() === true ? $playerAPI->setDebug(false) : $playerAPI->setDebug();
 						$sender->sendMessage($prefix . TextFormat::GRAY . " Debug mode is " . ($playerAPI->isDebug() ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable"));
 					} else {
 						$sender->sendMessage($prefix . TextFormat::RED . " Please use this command at the game!");
@@ -187,7 +192,7 @@ class ZuriCommand extends Command implements PluginOwned {
 					$added = [];
 					foreach (ZuriAC::Checks() as $check) {
 						if (!isset($added[$check->getName()])) {
-							$sender->sendMessage($prefix . TextFormat::RESET . " " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getAllSubTypes() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Violation: " . TextFormat::YELLOW . ConfigManager::getData(ConfigManager::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
+							$sender->sendMessage($prefix . TextFormat::RESET . " " . TextFormat::AQUA . $check->getName() . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getAllSubTypes() . TextFormat::DARK_GRAY . ") " . TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Violation: " . TextFormat::YELLOW . ConfigManager::getData(ConfigPaths::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
 							$added[$check->getName()] = true;
 						}
 					}
@@ -207,9 +212,8 @@ class ZuriCommand extends Command implements PluginOwned {
 				case "help":
 				case "noarguments":
 				case "cmd":
-					goto help; // redirect ..
-					break;
-			}
+					goto help; // Re-Direct.
+            }
 		} else {
 			help:
 			$sender->sendMessage(TextFormat::RED . "----- Zuri Anticheat -----");

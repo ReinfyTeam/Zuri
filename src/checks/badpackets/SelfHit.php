@@ -36,6 +36,7 @@ use pocketmine\event\Event;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
 class SelfHit extends Check {
 	public function getName() : string {
@@ -50,7 +51,10 @@ class SelfHit extends Check {
 		return 2;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+    /**
+     * @throws DiscordWebhookException
+     */
+    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			if (($entity = $event->getEntity()) instanceof Player && ($damager = $event->getDamager()) instanceof Player) {
 				$this->debug($playerAPI, "damagerId=" . $damager->getId() . ", entityId=" . $entity->getId());

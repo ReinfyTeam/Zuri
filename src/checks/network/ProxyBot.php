@@ -53,7 +53,8 @@ class ProxyBot extends Check {
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof PlayerPreLoginEvent) {
 			$ip = $event->getIp();
-			$request = Internet::getUrl("https://proxycheck.io/v2/" . $ip, 10, ["Content-Type: application/json"], $err);
+            $err = $ip;
+            $request = Internet::getUrl("https://proxycheck.io/v2/" . $ip, 10, ["Content-Type: application/json"], $err);
 
 			if ( $err === null ) {
 				$data = json_decode($request->getBody(), true, 16, JSON_PARTIAL_OUTPUT_ON_ERROR);
