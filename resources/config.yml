@@ -27,7 +27,7 @@ zuri:
         message: "{prefix} §cThe server is lagging! The server has currently §b{tps} tps§c! Zuri can't check players at the moment!"
     #Bypass a world according to list.
     world_bypass:
-        enable: true
+        enable: false
         #You can use "whitelist" or "blacklist", the fallback is blacklist.
         mode: blacklist
         list:
