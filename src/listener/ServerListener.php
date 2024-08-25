@@ -81,7 +81,7 @@ class ServerListener implements Listener {
 				$playerAPI->setCaptchaCode("nocode");
 				$playerAPI->getPlayer()->sendMessage(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::GREEN . " Successfully completed the captcha!");
 			}
-			(new CaptchaEvent($playerAPI))->sendCaptcha();
+			(new CaptchaEvent($playerAPI))->call();
 			$event->cancel();
 		}
 	}
@@ -93,7 +93,7 @@ class ServerListener implements Listener {
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($damager);
 		if ($playerAPI->isCaptcha()) {
-			(new CaptchaEvent($playerAPI))->sendCaptcha();
+			(new CaptchaEvent($playerAPI))->call();
 			$event->cancel();
 		}
 	}
@@ -102,7 +102,7 @@ class ServerListener implements Listener {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->isCaptcha()) {
-			(new CaptchaEvent($playerAPI))->sendCaptcha();
+			(new CaptchaEvent($playerAPI))->call();
 			$event->cancel();
 		}
 	}
@@ -111,7 +111,7 @@ class ServerListener implements Listener {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->isCaptcha()) {
-			(new CaptchaEvent($playerAPI))->sendCaptcha();
+			(new CaptchaEvent($playerAPI))->call();
 			$event->cancel();
 		}
 	}
@@ -120,7 +120,7 @@ class ServerListener implements Listener {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->isCaptcha()) {
-			(new CaptchaEvent($playerAPI))->sendCaptcha();
+			(new CaptchaEvent($playerAPI))->call();
 			$event->cancel();
 		}
 	}
