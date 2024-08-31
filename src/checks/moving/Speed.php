@@ -62,7 +62,11 @@ class Speed extends Check {
 				$playerAPI->getAttackTicks() < 40 ||
 				$playerAPI->getSlimeBlockTicks() < 20 ||
 				$playerAPI->isOnAdhesion() ||
-				(!$player->isOnGround() && $player->getInAirTicks() > 5)
+				(!$player->isOnGround() && $player->getInAirTicks() > 5) ||
+				$player->isFlying() ||
+				$player->getAllowFlight() ||
+				$player->hasNoClientPredictions() || 
+				!$playerAPI->isCurrentChunkIsLoaded()
 			) {
 				return;
 			}
