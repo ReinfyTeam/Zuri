@@ -81,7 +81,7 @@ class FlyC extends Check {
 					if ($player->getInAirTicks() > $this->getConstant("max-air-ticks")) {
 						$maxY = $player->getWorld()->getHighestBlockAt(intval($newPos->getX()), intval($newPos->getZ()));
 						$this->debug($playerAPI, "oldY=" . $oldPos->getY() . ", newY=" . $newPos->getY() . ", airTicks=" . $player->getInAirTicks() . ", surroundingBlocks=" . count($surroundingBlocks));
-						if ($newPos->getY() - 2 > $maxY) {
+						if ($newPos->getY() - 1 > $maxY) {
 							if (
 								!in_array(BlockTypeIds::OAK_FENCE, $surroundingBlocks, true)
 								|| !in_array(BlockTypeIds::COBBLESTONE_WALL, $surroundingBlocks, true)
