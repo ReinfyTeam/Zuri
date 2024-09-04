@@ -63,10 +63,10 @@ class ReplaceText extends ConfigManager {
 			$module,
 			$subType,
 			date("F d, Y h:i:sA", time()),
-			(is_string($player) ? (PlayerAPI::getAPIPlayer($player) === null ? "N/A" : PlayerAPI::getAPIPlayer($player)->getViolation()) : $player->getRealViolation($module)),
-			(is_string($player) ? (PlayerAPI::getAPIPlayer($player) === null ? "N/A" : PlayerAPI::getAPIPlayer($player)->getViolation()) : $player->getViolation($module)),
+			(is_string($player) ? (Server::getInstance()->getPlayerExact($player) === null ? "N/A" : PlayerAPI::getAPIPlayer($player)->getViolation()) : $player->getRealViolation($module)),
+			(is_string($player) ? (Server::getInstance()->getPlayerExact($player) === null ? "N/A" : PlayerAPI::getAPIPlayer($player)->getViolation()) : $player->getViolation($module)),
 			self::getData(self::CHAT_SPAM_DELAY),
-			(is_string($player) ? (PlayerAPI::getAPIPlayer($player) === null ? "N/A" : PlayerAPI::getAPIPlayer($player)->getCaptchaCode()) : $player->getCaptchaCode()),
+			(is_string($player) ? (Server::getInstance()->getPlayerExact($player) === null ? "N/A" : PlayerAPI::getAPIPlayer($player)->getCaptchaCode()) : $player->getCaptchaCode()),
 			Server::getInstance()->getTicksPerSecond(),
 			base64_encode(zlib_encode(strtolower($module . $subType . date("F d, Y h:i:sA", time())), ZLIB_ENCODING_DEFLATE, 9))
 		];
