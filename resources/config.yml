@@ -314,7 +314,7 @@ zuri:
                   timediff-limit: 0.2
         impossiblepitch:
             enable: true
-            maxvl: 1
+            maxvl: 0 # immediate kick
             punishment: KICK
             constants:
                   max-pitch: 92
