@@ -46,7 +46,7 @@ zuri:
         permission: "zuri.admin"
     ban:
         commands:
-            - 'ban {player_name} "Unfair Advantage"'
+            - 'ban "{player_name}" Unfair Advantage'
         message: "{prefix} §f{player_name} §chas been banned from server for hacking or abuse."
         enable: true
     detection:
@@ -61,7 +61,7 @@ zuri:
         commands:
               enable: true
               list:
-                 - 'kick {player_name} "Unfair Advantage"'
+                 - 'kick "{player_name}" Unfair Advantage'
     warning:
               enable: true
               message: "{prefix} §l§7[§eWARNING§7] §r§f{player_name} §7is tried using §f{module} §7(§c{subtype}§7)"
