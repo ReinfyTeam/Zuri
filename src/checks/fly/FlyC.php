@@ -72,7 +72,8 @@ class FlyC extends Check {
 				$player->getAllowFlight() ||
 				$player->hasNoClientPredictions() ||
 				!$player->isSurvival() ||
-				!$playerAPI->isCurrentChunkIsLoaded()
+				!$playerAPI->isCurrentChunkIsLoaded() ||
+				BlockUtil::isGroundSolid($player)
 			) { // additional checks
 				return;
 			}

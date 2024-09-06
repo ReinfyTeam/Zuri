@@ -35,6 +35,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use ReinfyTeam\Zuri\utils\BlockUtil;
 use function microtime;
 
 class FlyA extends Check {
@@ -65,7 +66,8 @@ class FlyA extends Check {
 			$player->getAllowFlight() ||
 			$player->hasNoClientPredictions() ||
 			!$player->isSurvival() ||
-			!$playerAPI->isCurrentChunkIsLoaded()
+			!$playerAPI->isCurrentChunkIsLoaded() ||
+			BlockUtil::isGroundSolid($player)
 		) {
 			$playerAPI->unsetExternalData("lastYNoGroundF");
 			$playerAPI->unsetExternalData("lastTimeF");

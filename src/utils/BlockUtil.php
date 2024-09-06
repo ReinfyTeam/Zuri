@@ -42,6 +42,26 @@ use function in_array;
 use function sqrt;
 
 class BlockUtil {
+	
+	public static function isGroundSolid(Player $player) : bool {
+		$world = $player->getWorld();
+		$pos = $player->getPosition();
+		
+		for ($x = -2; $x <= 2; $x++) {
+			for ($z = -2; $z <= 2; $z++) {
+				$blockPos = new Vector3($pos->x + $x, $pos->y - 1, $pos->z + $z);  // Check 1 block under the player
+				$block = $world->getBlock($blockPos);
+
+				// If the block is not a solid, return false
+				if (!$block->isSolid()) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+	
 	public static function getSurroundingBlocks(Player $player) : array {
 		$world = $player->getWorld();
 
