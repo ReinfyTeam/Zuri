@@ -125,7 +125,8 @@ Also, adding :star: a **Star** is also appreciated. ✨
 - **Phase**
      - **A:** Check if the player stucks at the block, teleport when to a safe place.
 - **Speed**
-     - **A:** Calculates the possible speed of the player.
+     - **A:** Calculates the possible speed motion of the player.
+    - **B:** Calculates the distance difference from to the player.
 - **Spider** (DISABLED)
      - **A:** Check if the player is climbing or abnormally moving upwards to non-climbable blocks.
 - **Step** (DISABLED)
