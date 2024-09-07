@@ -51,10 +51,10 @@ class WrongPitch extends Check {
 		return 2;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			if ($playerAPI->getTeleportTicks() > 100 && abs($packet->getPitch()) > 90) {
 				$this->failed($playerAPI);

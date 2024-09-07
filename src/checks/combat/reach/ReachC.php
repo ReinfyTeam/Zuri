@@ -52,10 +52,10 @@ class ReachC extends Check {
 		return 3;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			if (($victim = $event->getEntity()) instanceof Player && ($damager = $event->getDamager()) instanceof Player) {
 				$eyeHeight = $damager->getEyePos();

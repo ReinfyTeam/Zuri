@@ -52,13 +52,13 @@ class Crasher extends Check {
 		return 5;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();
-            $pos = $packet->getPosition();
+			$pos = $packet->getPosition();
 			$chunk = $player->getWorld()->getChunk((int) $pos->getX() >> Chunk::COORD_BIT_SIZE, (int) $pos->getZ() >> Chunk::COORD_BIT_SIZE);
 			if (
 				($chunk !== null && $chunk->getHeight() > $this->getConstant("max-y")) ||

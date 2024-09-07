@@ -50,13 +50,13 @@ class AntiImmobile extends Check {
 		return 1;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-            if ($player->hasNoClientPredictions()) {
+			if ($player->hasNoClientPredictions()) {
 				if ($event->getFrom()->getX() !== $event->getTo()->getX() || $event->getFrom()->getY() !== $event->getTo()->getY() || $event->getFrom()->getZ() !== $event->getTo()->getZ()) {
 					$this->failed($playerAPI);
 				}

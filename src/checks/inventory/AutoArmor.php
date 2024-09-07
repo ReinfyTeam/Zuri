@@ -51,10 +51,10 @@ class AutoArmor extends Check {
 
 	//This only causes cheaters to slow down their actions
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($playerAPI->isInventoryOpen() && $playerAPI->isTransactionArmorInventory()) {
 			$this->failed($playerAPI);
 		} else {

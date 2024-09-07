@@ -44,6 +44,7 @@ use function abs;
 use function count;
 use function microtime;
 use function spl_object_id;
+use function sqrt;
 
 class PlayerAPI implements IPlayerAPI {
 	/** @var PlayerAPI[] */
@@ -126,6 +127,19 @@ class PlayerAPI implements IPlayerAPI {
 
 	public function isCurrentChunkIsLoaded() : bool {
 		return $this->getPlayer()->getWorld()->isInLoadedTerrain($this->getPlayer()->getLocation());
+	}
+
+	public function isGliding() : bool {
+		$motion = $this->getPlayer()->getMotion();
+		$isGliding = $this->getPlayer()->isGliding();
+		$isFalling = $motion->y < 0; // Check player is falling when motion y falls down...
+		$horizontalSpeed = sqrt($motion->x ** 2 + $motion->z ** 2); // Check horizontal speed if it is on threshold
+
+		if ($isFalling && $horizontalSpeed > 0.5 || $isGliding) { // Check flags if were accurate also...
+			return true;
+		}
+
+		return false;
 	}
 
 	//Break many blocks just one time break (This can check NUKER PLAYER)
@@ -310,20 +324,20 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Digging
 
-    /**
-     * @throws ReflectionException
-     */
-    public function isDigging() : bool {
+	/**
+	 * @throws ReflectionException
+	 */
+	public function isDigging() : bool {
 		if ($this->getBlockBreakHandler() !== null) {
 			return true;
 		}
 		return false;
 	}
 
-    /**
-     * @throws ReflectionException
-     */
-    private function getBlockBreakHandler() : ?SurvivalBlockBreakHandler {
+	/**
+	 * @throws ReflectionException
+	 */
+	private function getBlockBreakHandler() : ?SurvivalBlockBreakHandler {
 		static $ref = null;
 		if ($this->getPlayer() === null) {
 			return null;
@@ -628,16 +642,14 @@ class PlayerAPI implements IPlayerAPI {
 		$this->captchaCode = $data;
 	}
 
-	public function getInventory(): PlayerInventory|static
-    {
+	public function getInventory() : PlayerInventory|static {
 		if ($this->getPlayer() === null) {
 			return $this;
 		}
 		return $this->getPlayer()->getInventory();
 	}
 
-	public function getLocation(): Location
-    {
+	public function getLocation() : Location {
 		return $this->getPlayer()->getLocation();
 	}
 

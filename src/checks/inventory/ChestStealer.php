@@ -51,10 +51,10 @@ class ChestStealer extends Check {
 		return 1;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$ticks = $playerAPI->getExternalData("ticksN");
 		$lastTime = $playerAPI->getExternalData("lastTimeN");
 		if ($packet instanceof InventoryTransactionPacket) {

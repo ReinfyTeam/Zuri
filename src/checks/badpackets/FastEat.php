@@ -32,9 +32,9 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
 use pocketmine\event\Event;
-use pocketmine\item\Food;
 use pocketmine\event\player\PlayerItemConsumeEvent;
 use pocketmine\item\ConsumableItem;
+use pocketmine\item\Food;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\types\ActorEvent;
@@ -68,10 +68,10 @@ class FastEat extends Check {
 		}
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerItemConsumeEvent) {
 			if ($event->getItem() instanceof ConsumableItem && $event->getItem() instanceof Food) {
 				$lastTick = $playerAPI->getExternalData("lastTickP");

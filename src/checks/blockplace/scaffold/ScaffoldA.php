@@ -52,10 +52,10 @@ class ScaffoldA extends Check {
 		return 2;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
 			$block = $event->getBlockAgainst();
 			$posBlock = $block->getPosition();

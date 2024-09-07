@@ -65,15 +65,15 @@ class KillAuraC extends Check {
 		}
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($playerAPI->getAttackTicks() > 40 || $this->interact) {
 			return;
 		}
 		$player = $playerAPI->getPlayer();
-        $locPlayer = $player->getLocation();
+		$locPlayer = $player->getLocation();
 		$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
 		$from = new Vector3($locPlayer->getX(), $locPlayer->getY() + $player->getEyeHeight(), $locPlayer->getZ());
 		$to = $player->getLocation()->add($delta->getX(), $delta->getY() + $player->getEyeHeight(), $delta->getZ());

@@ -34,8 +34,8 @@ namespace ReinfyTeam\Zuri\checks\fly;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function microtime;
 
 class FlyA extends Check {
@@ -51,12 +51,12 @@ class FlyA extends Check {
 		return 1;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
-        if (
+		if (
 			$playerAPI->getAttackTicks() < 40 ||
 			$playerAPI->getOnlineTime() <= 30 ||
 			$playerAPI->getJumpTicks() < 40 ||
@@ -67,7 +67,8 @@ class FlyA extends Check {
 			$player->hasNoClientPredictions() ||
 			!$player->isSurvival() ||
 			!$playerAPI->isCurrentChunkIsLoaded() ||
-			BlockUtil::isGroundSolid($player)
+			BlockUtil::isGroundSolid($player) ||
+			$playerAPI->isGliding()
 		) {
 			$playerAPI->unsetExternalData("lastYNoGroundF");
 			$playerAPI->unsetExternalData("lastTimeF");

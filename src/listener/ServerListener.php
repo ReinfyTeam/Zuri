@@ -57,10 +57,10 @@ class ServerListener implements Listener {
 		Discord::Send($playerAPI, Discord::JOIN);
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function onPlayerQuit(PlayerQuitEvent $event) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function onPlayerQuit(PlayerQuitEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		Discord::Send($playerAPI, Discord::LEAVE);

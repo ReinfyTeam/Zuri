@@ -66,10 +66,10 @@ class CaptchaEvent extends Event {
 		$this->playerAPI->getPlayer()->sendSubTitle(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigPaths::CAPTCHA_TEXT)));
 	}
 
-    /**
-     * @throws RandomException
-     */
-    public function call() : void {
+	/**
+	 * @throws RandomException
+	 */
+	public function call() : void {
 		if ($this->playerAPI->isCaptcha()) {
 			if ($this->playerAPI->getCaptchaCode() === "nocode") {
 				$this->playerAPI->setCaptchaCode(CharUtil::generatorCode(ConfigManager::getData(ConfigPaths::CAPTCHA_CODE_LENGTH)));

@@ -55,10 +55,10 @@ class Tower extends Check {
 		return 5;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof BlockPlaceEvent) {
 			foreach ($event->getTransaction()->getBlocks() as [$x, $y, $z, $block]) {
 				$player = $event->getPlayer();

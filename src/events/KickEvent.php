@@ -59,10 +59,10 @@ class KickEvent extends Event {
 		return $this->subType;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function call() : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function call() : void {
 		Discord::Send($this->player, Discord::KICK, ["name" => $this->getModuleName(), "subType" => $this->getSubType()]);
 		parent::call();
 	}

@@ -55,10 +55,10 @@ class ChestAura extends Check {
 		return 1;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		$countTransaction = $playerAPI->getExternalData("countTransaction");
 		$timeOpenChest = $playerAPI->getExternalData("timeOpenChest");
 		if ($event instanceof InventoryOpenEvent) {

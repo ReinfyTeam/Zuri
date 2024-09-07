@@ -38,10 +38,10 @@ use function str_split;
 use function strtoupper;
 
 class CharUtil {
-    /**
-     * @throws RandomException
-     */
-    public static function generatorCode(int $count) : string {
+	/**
+	 * @throws RandomException
+	 */
+	public static function generatorCode(int $count) : string {
 		$code = "";
 		$keys = str_split("qwertyuiopasdfghjklzxcvbnm1234567890");
 		for ($i = 0; $i <= $count; $i++) {

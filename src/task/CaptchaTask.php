@@ -45,10 +45,10 @@ class CaptchaTask extends Task {
 		$this->plugin = $plugin;
 	}
 
-    /**
-     * @throws RandomException
-     */
-    public function onRun() : void {
+	/**
+	 * @throws RandomException
+	 */
+	public function onRun() : void {
 		self::$instance = $this;
 		foreach ($this->plugin->getServer()->getOnlinePlayers() as $player) {
 			if ($player instanceof PlayerAPI) {

@@ -45,11 +45,10 @@ class ConfigManager extends ConfigPaths {
 		return ZuriAC::getInstance()->getConfig()->getNested($path, $defaultValue);
 	}
 
-    /**
-     * @throws JsonException
-     */
-    public static function setData(string $path, $data): void
-    {
+	/**
+	 * @throws JsonException
+	 */
+	public static function setData(string $path, $data) : void {
 		ZuriAC::getInstance()->getConfig()->setNested($path, $data);
 		ZuriAC::getInstance()->getConfig()->save();
 	}

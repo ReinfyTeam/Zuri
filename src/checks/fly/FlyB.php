@@ -50,13 +50,13 @@ class FlyB extends Check {
 		return 1;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof UpdateAdventureSettingsPacket) {
 			$player = $playerAPI->getPlayer();
-            if (!$player->isCreative() && !$player->isSpectator() && !$player->getAllowFlight()) {
+			if (!$player->isCreative() && !$player->isSpectator() && !$player->getAllowFlight()) {
 				switch ($packet->flags) {
 					case 614:
 					case 615:

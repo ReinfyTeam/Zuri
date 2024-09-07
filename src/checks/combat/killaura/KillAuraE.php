@@ -54,17 +54,17 @@ class KillAuraE extends Check {
 		return 3;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkJustEvent(Event $event) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
 			$locDamager = $damager->getLocation();
-            if ($damager instanceof Player && $entity instanceof Player) {
+			if ($damager instanceof Player && $entity instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
-                $delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
+				$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
 				$from = new Vector3($locDamager->getX(), $locDamager->getY() + $damager->getEyeHeight(), $locDamager->getZ());
 				$to = $damager->getLocation()->add($delta->getX(), $delta->getY() + $damager->getEyeHeight(), $delta->getZ());
 				$distance = MathUtil::distance($from, $to);

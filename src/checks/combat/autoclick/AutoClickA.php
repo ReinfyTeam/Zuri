@@ -53,19 +53,19 @@ class AutoClickA extends Check {
 		return 25;
 	}
 
-    /**
-     * @throws ReflectionException
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws ReflectionException
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$ticks = $playerAPI->getExternalData("ticksClick");
 		$avgSpeed = $playerAPI->getExternalData("avgSpeed");
 		$avgDeviation = $playerAPI->getExternalData("avgDeviation");
 		if ($packet instanceof LevelSoundEventPacket) {
 			if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
-                $playerAPI->setExternalData("ticksClick", 0);
-                if ($ticks !== null && $avgSpeed !== null && $avgDeviation !== null) {
-                    if ($playerAPI->isDigging() || $ticks > $this->getConstant("max-ticks")) {
+				$playerAPI->setExternalData("ticksClick", 0);
+				if ($ticks !== null && $avgSpeed !== null && $avgDeviation !== null) {
+					if ($playerAPI->isDigging() || $ticks > $this->getConstant("max-ticks")) {
 						$playerAPI->unsetExternalData("ticksClick");
 						$playerAPI->unsetExternalData("avgSpeed");
 						$playerAPI->unsetExternalData("avgDeviation");
@@ -82,7 +82,7 @@ class AutoClickA extends Check {
 					}
 					$this->debug($playerAPI, "avgDeviation=$avgDeviation, speed=$speed, deviation=$deviation, ticksClick=$ticks, avgSpeed=$avgSpeed");
 				} else {
-                    $playerAPI->setExternalData("avgSpeed", 0);
+					$playerAPI->setExternalData("avgSpeed", 0);
 					$playerAPI->setExternalData("avgDeviation", 0);
 				}
 			}

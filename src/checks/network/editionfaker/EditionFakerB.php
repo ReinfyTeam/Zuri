@@ -54,10 +54,10 @@ class EditionFakerB extends Check {
 
 	// From Esoteric Code
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ( $packet instanceof LoginPacket ) {
 			$authData = Utils::fetchAuthData($packet->chainDataJwt);
 			$titleId = $authData->titleId;

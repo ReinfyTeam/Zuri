@@ -56,7 +56,7 @@ class Speed extends Check {
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
-        if ($event instanceof PlayerMoveEvent) {
+		if ($event instanceof PlayerMoveEvent) {
 			if (
 				!$player->isSurvival() ||
 				$playerAPI->getAttackTicks() < 40 ||
@@ -65,7 +65,7 @@ class Speed extends Check {
 				(!$player->isOnGround() && $player->getInAirTicks() > 5) ||
 				$player->isFlying() ||
 				$player->getAllowFlight() ||
-				$player->hasNoClientPredictions() || 
+				$player->hasNoClientPredictions() ||
 				!$playerAPI->isCurrentChunkIsLoaded()
 			) {
 				return;

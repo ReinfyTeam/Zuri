@@ -55,10 +55,10 @@ class ReachA extends Check {
 		return 3;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkJustEvent(Event $event) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			$cause = $event->getCause();
 			$entity = $event->getEntity();
@@ -68,7 +68,7 @@ class ReachA extends Check {
 			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player && $entity instanceof Player) {
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
 				$player = $playerAPI->getPlayer();
-                $isPlayerTop = $locEntity->getY() > $locDamager->getY() ? abs($locEntity->getY() - $locDamager->getY()) : 0;
+				$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? abs($locEntity->getY() - $locDamager->getY()) : 0;
 				$distance = MathUtil::distance($locEntity, $locDamager) - $isPlayerTop;
 				$isSurvival = $player->getGameMode() === GameMode::SURVIVAL();
 				$this->debug($playerAPI, "isPlayerTop=$isPlayerTop, distance=$distance, isSurvival=$isSurvival");

@@ -56,10 +56,10 @@ class ServerLagEvent extends Event {
 		return $this->player;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function call() : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function call() : void {
 		Discord::Send($this->player, Discord::LAGGING);
 		Server::getInstance()->getLogger()->warning(ReplaceText::replace($this->player, ConfigManager::getData(ConfigPaths::SERVER_LAGGING_MESSAGE)));
 

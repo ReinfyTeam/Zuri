@@ -53,16 +53,16 @@ class FastLadder extends Check {
 		return 5;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$lastY = $event->getFrom()->getY();
 			$newY = $event->getTo()->getY();
 			$player = $playerAPI->getPlayer();
 
-            $x = intval($player->getLocation()->getX());
+			$x = intval($player->getLocation()->getX());
 			$z = intval($player->getLocation()->getZ());
 
 			$checkLadderLastX = $player->getWorld()->getBlockAt($x, intval($lastY), $z)->getTypeId() === BlockTypeIds::LADDER;

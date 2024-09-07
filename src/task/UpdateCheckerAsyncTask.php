@@ -56,14 +56,14 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 	public function onCompletion() : void {
 		$server = Server::getInstance();
 		$result = $this->getResult();
-        $ver = "";
+		$ver = "";
 		$download_url = "";
 		$noUpdates = false;
 		if ($result[1] === null && $result[0] !== null) {
 			$json = json_decode($result[0]->getBody(), true);
 			if ($json !== false && $json !== null) {
 				if (($ver = $json["tag_name"]) !== "v" . $this->currentVersion) {
-                    if ($json["prerelease"]) {
+					if ($json["prerelease"]) {
 						$ver = $ver . "-PRERELEASE";
 					}
 					$download_url = $json["assets"][0]["browser_download_url"];

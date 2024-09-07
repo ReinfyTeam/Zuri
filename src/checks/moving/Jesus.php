@@ -52,13 +52,13 @@ class Jesus extends Check {
 		return 3;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-            if (
+			if (
 				!$playerAPI->isInLiquid() ||
 				$playerAPI->isInWeb() ||
 				$playerAPI->isOnGround() ||

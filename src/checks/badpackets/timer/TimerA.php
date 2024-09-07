@@ -52,14 +52,14 @@ class TimerA extends Check {
 		return 3;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$tps = Server::getInstance()->getTicksPerSecond();
 
-            if ($tps < 19 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
+			if ($tps < 19 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
 				$playerAPI->setExternalData("TimerATick", $tps - $packet->getTick());
 			}
 

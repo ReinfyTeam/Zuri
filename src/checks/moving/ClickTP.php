@@ -50,10 +50,10 @@ class ClickTP extends Check {
 		return 1;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$distance = $event->getFrom()->distanceSquared($event->getTo());
 			$oldYaw = $event->getFrom()->getYaw();

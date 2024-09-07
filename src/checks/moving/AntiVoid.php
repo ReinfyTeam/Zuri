@@ -49,10 +49,10 @@ class AntiVoid extends Check {
 		return 3;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if (
 			$playerAPI->isOnAdhesion() ||
 			$playerAPI->isInLiquid() ||
@@ -73,7 +73,7 @@ class AntiVoid extends Check {
 			$playerAPI->unsetExternalData("lastYB");
 		}
 
-        $lastYB = $playerAPI->getExternalData("lastYB");
-        $this->debug($playerAPI, "lastY=$lastY, lastYB=$lastYB");
+		$lastYB = $playerAPI->getExternalData("lastYB");
+		$this->debug($playerAPI, "lastY=$lastY, lastYB=$lastYB");
 	}
 }

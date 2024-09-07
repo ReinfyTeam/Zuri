@@ -49,13 +49,13 @@ class AirMovement extends Check {
 		return 5;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$effects = [];
 		$player = $playerAPI->getPlayer();
-        if (!$player->spawned && !$player->isConnected()) {
+		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		} // Effect::$effectInstance bug fix
 		foreach ($player->getEffects()->all() as $effect) {

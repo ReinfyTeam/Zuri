@@ -51,13 +51,13 @@ class KillAuraB extends Check {
 		return 5;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();
-            if (
+			if (
 				!$player->isFlying() ||
 				!$player->getAllowFlight() ||
 				$playerAPI->getAttackTicks() < 100 ||

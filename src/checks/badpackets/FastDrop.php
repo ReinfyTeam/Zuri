@@ -51,10 +51,10 @@ class FastDrop extends Check {
 		return 5;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerDropItemEvent) {
 			$lastTick = $playerAPI->getExternalData("lastTickD");
 			$currentTick = microtime(true);

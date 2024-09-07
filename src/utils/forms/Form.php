@@ -35,7 +35,6 @@ use pocketmine\form\Form as IForm;
 use pocketmine\player\Player;
 
 abstract class Form implements IForm {
-	/** @var array */
 	protected array $data = [];
 	/** @var callable|null */
 	private $callable;
@@ -56,7 +55,7 @@ abstract class Form implements IForm {
 		return $this->callable;
 	}
 
-	public function setCallable(?callable $callable): void {
+	public function setCallable(?callable $callable) : void {
 		$this->callable = $callable;
 	}
 

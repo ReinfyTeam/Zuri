@@ -62,11 +62,11 @@ class AutoClickC extends Check {
 		}
 	}
 
-    /**
-     * @throws ReflectionException
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws ReflectionException
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}

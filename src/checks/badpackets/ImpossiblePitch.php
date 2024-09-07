@@ -51,10 +51,10 @@ class ImpossiblePitch extends Check {
 		return 1;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket && ($pitch = abs($packet->getPitch())) > $this->getConstant("max-pitch")) {
 			$this->debug($playerAPI, "pitch=$pitch");
 			$this->failed($playerAPI);

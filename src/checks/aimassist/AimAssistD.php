@@ -51,13 +51,13 @@ class AimAssistD extends Check {
 		return 3;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();
-            if (
+			if (
 				!$player->isSurvival() ||
 				$playerAPI->getAttackTicks() > 100 ||
 				$playerAPI->getTeleportTicks() < 100 ||

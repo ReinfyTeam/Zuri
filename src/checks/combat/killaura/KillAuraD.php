@@ -51,11 +51,11 @@ class KillAuraD extends Check {
 		return 1;
 	}
 
-    /**
-     * @throws ReflectionException
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws ReflectionException
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if (($player = $playerAPI->getPlayer()) === null) {
 			return;
 		}

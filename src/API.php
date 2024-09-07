@@ -71,7 +71,7 @@ final class API {
 			if ($module->getName() === $name && $module->getSubType() === $subType) {
 				return $module;
 			}
-        }
+		}
 
 		return $module;
 	}

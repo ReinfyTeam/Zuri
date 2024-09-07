@@ -115,7 +115,7 @@ use ReinfyTeam\Zuri\utils\PermissionManager;
 class ZuriAC extends PluginBase {
 	private static ZuriAC $instance;
 
-    private array $checks = [];
+	private array $checks = [];
 
 	public function onLoad() : void {
 		self::$instance = $this;

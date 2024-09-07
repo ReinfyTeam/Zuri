@@ -42,11 +42,10 @@ use function in_array;
 use function sqrt;
 
 class BlockUtil {
-	
 	public static function isGroundSolid(Player $player) : bool {
 		$world = $player->getWorld();
 		$pos = $player->getPosition();
-		
+
 		for ($x = -2; $x <= 2; $x++) {
 			for ($z = -2; $z <= 2; $z++) {
 				$blockPos = new Vector3($pos->x + $x, $pos->y - 1, $pos->z + $z);  // Check 1 block under the player
@@ -58,10 +57,10 @@ class BlockUtil {
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	public static function getSurroundingBlocks(Player $player) : array {
 		$world = $player->getWorld();
 
@@ -93,7 +92,7 @@ class BlockUtil {
 	}
 
 	public static function isOnGround(Location $location, int $down) : bool {
-        $posX = $location->getX();
+		$posX = $location->getX();
 		$posZ = $location->getZ();
 		$fracX = (fmod($posX, 1.0) > 0.0) ? abs(fmod($posX, 1.0)) : (1.0 - abs(fmod($posX, 1.0)));
 		$fracZ = (fmod($posZ, 1.0) > 0.0) ? abs(fmod($posZ, 1.0)) : (1.0 - abs(fmod($posZ, 1.0)));

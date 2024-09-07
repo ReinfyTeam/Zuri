@@ -52,19 +52,19 @@ class FastBow extends Check {
 		return 3;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityShootBowEvent) {
 			$tick = (double) Server::getInstance()->getTick();
-            $tps = Server::getInstance()->getTicksPerSecond();
+			$tps = Server::getInstance()->getTicksPerSecond();
 			$shootFirstTick = $playerAPI->getExternalData("shootFirstTickA");
 			$hsTimeSum = $playerAPI->getExternalData("hsTimeSum") ?? 0;
 			$currentHsIndex = $playerAPI->getExternalData("currentHsIndex") ?? 0;
 			$hsTimeList = $playerAPI->getExternalData("hsTimeList") ?? [];
 
-            if ($shootFirstTick == -1) {
+			if ($shootFirstTick == -1) {
 				$playerAPI->setExternalData("shootFirstTickA", $tick - 30);
 			}
 

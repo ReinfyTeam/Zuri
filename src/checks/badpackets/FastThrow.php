@@ -53,14 +53,14 @@ class FastThrow extends Check {
 		return 5;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function checkJustEvent(Event $event) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof ProjectileLaunchEvent) {
 			if (($entity = $event->getEntity()->getOwningEntity()) instanceof Player) { // prevent from crashing
 				$playerAPI = PlayerAPI::getAPIPlayer($entity);
-                $projectile = $event->getEntity();
+				$projectile = $event->getEntity();
 				if (!$projectile instanceof Arrow) { // ignore for Arrows
 					$lastUse = $playerAPI->getExternalData("lastUseFT");
 					if ($lastUse !== null) {

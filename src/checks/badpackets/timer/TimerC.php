@@ -51,10 +51,10 @@ class TimerC extends Check {
 		return 5;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ( $packet instanceof PlayerAuthInputPacket ) {
 			// From Esoteric
 			$delay = $playerAPI->getExternalData("DelayCounter");

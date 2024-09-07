@@ -49,10 +49,10 @@ class Discord extends ConfigManager {
 
 	public static ?Config $config = null;
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public static function Send(PlayerAPI $playerAPI, int $type, ?array $moduleInfo = null) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public static function Send(PlayerAPI $playerAPI, int $type, ?array $moduleInfo = null) : void {
 		$sendType = match ($type) {
 			self::BAN => "ban",
 			self::KICK => "kick",

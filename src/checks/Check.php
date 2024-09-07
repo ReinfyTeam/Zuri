@@ -92,11 +92,11 @@ abstract class Check extends ConfigManager {
 		return implode(", ", $list);
 	}
 
-    /**
-     * When multiple attempts of violations is within limit of < 0.5s.
-     * @throws DiscordWebhookException
-     * @internal
-     */
+	/**
+	 * When multiple attempts of violations is within limit of < 0.5s.
+	 * @throws DiscordWebhookException
+	 * @internal
+	 */
 	public function failed(PlayerAPI $playerAPI) : bool {
 		if (!$this->enable()) {
 			return false;
@@ -109,7 +109,7 @@ abstract class Check extends ConfigManager {
 
 		$player = $playerAPI->getPlayer();
 
-        $notify = self::getData(self::ALERTS_ENABLE) === true;
+		$notify = self::getData(self::ALERTS_ENABLE) === true;
 		$detectionsAllowedToSend = self::getData(self::DETECTION_ENABLE) === true;
 		$bypass = self::getData(self::PERMISSION_BYPASS_ENABLE) === true && $player->hasPermission(self::getData(self::PERMISSION_BYPASS_PERMISSION));
 		$reachedMaxViolations = $playerAPI->getViolation($this->getName()) > $this->maxViolations();
@@ -188,9 +188,9 @@ abstract class Check extends ConfigManager {
 
 		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "kick" && self::getData(self::KICK_ENABLE) === true) {
 			(new KickEvent($playerAPI, $this->getName(), $this->getSubType()))->call();
-            ZuriAC::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
-            if (self::getData(self::KICK_COMMANDS_ENABLED) === true) {
-                $playerAPI->resetViolation($this->getName());
+			ZuriAC::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
+			if (self::getData(self::KICK_COMMANDS_ENABLED) === true) {
+				$playerAPI->resetViolation($this->getName());
 				$playerAPI->resetRealViolation($this->getName());
 				foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 					if ($p->hasPermission("zuri.admin")) {
@@ -201,7 +201,7 @@ abstract class Check extends ConfigManager {
 					$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
 				}
 			} else {
-                foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
+				foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 					if ($p->hasPermission("zuri.admin")) {
 						$p->sendMessage(ReplaceText::replace($playerAPI, self::getData(self::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 					}

@@ -58,10 +58,10 @@ class ZuriCommand extends Command implements PluginOwned {
 		return ZuriAC::getInstance();
 	}
 
-    /**
-     * @throws JsonException
-     */
-    public function execute(CommandSender $sender, string $label, array $args) : void {
+	/**
+	 * @throws JsonException
+	 */
+	public function execute(CommandSender $sender, string $label, array $args) : void {
 		$prefix = ConfigManager::getData(ConfigPaths::PREFIX);
 		$namecmd = $this->getName();
 		if ($sender instanceof Player) {
@@ -213,7 +213,7 @@ class ZuriCommand extends Command implements PluginOwned {
 				case "noarguments":
 				case "cmd":
 					goto help; // Re-Direct.
-            }
+			}
 		} else {
 			help:
 			$sender->sendMessage(TextFormat::RED . "----- Zuri Anticheat -----");

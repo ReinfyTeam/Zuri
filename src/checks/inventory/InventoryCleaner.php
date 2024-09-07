@@ -59,14 +59,14 @@ class InventoryCleaner extends Check {
 		return false;
 	}
 
-    public function maxViolations() : int {
+	public function maxViolations() : int {
 		return 1;
 	}
 
-    /**
-     * @throws DiscordWebhookException
-     */
-    public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	/**
+	 * @throws DiscordWebhookException
+	 */
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$ticks = $playerAPI->getExternalData("ticksTransaction");
 		$transaction = $playerAPI->getExternalData("transaction");
 		if ($packet instanceof InventoryTransactionPacket) {
