@@ -29,7 +29,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\moving;
+namespace ReinfyTeam\Zuri\checks\moving\speed;
 
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
@@ -44,7 +44,7 @@ use function abs;
 use function max;
 use function min;
 
-class Speed extends Check {
+class SpeedA extends Check {
 	public function getName() : string {
 		return "Speed";
 	}
