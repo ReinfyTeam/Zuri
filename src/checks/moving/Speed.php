@@ -57,9 +57,9 @@ class Speed extends Check {
 		return 4;
 	}
 
-	public function check(DataPacket $event, PlayerAPI $playerAPI) : void {
+	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
-		if ($event instanceof PlayerAuthInputPacket) {
+		if ($packet instanceof PlayerAuthInputPacket) {
 			if (
 				$playerAPI->getAttackTicks() < 40 ||
 				$playerAPI->getOnlineTime() <= 30 ||
@@ -82,7 +82,7 @@ class Speed extends Check {
 			$friction = $playerAPI->isOnGround() ? $frictionBlock->getFrictionFactor() : $this->getConstant("friction-factor");
 			$lastDistance = $playerAPI->getExternalData("lastDistanceXZ") ?? $this->getConstant("xz-distance");
 			$momentum = MathUtil::getMomentum($lastDistance, $friction);
-			$movement = MathUtil::getMovement($player, new Vector3(max(-1, min(1, $event->getMoveVecZ())), 0, max(-1, min(1, $user->getMoveStrafe()))));
+			$movement = MathUtil::getMovement($player, new Vector3(max(-1, min(1, $packet->getMoveVecZ())), 0, max(-1, min(1, $packet->getMoveVecX()))));
 			$effects = MathUtil::getEffectsMultiplier($player);
 			$acceleration = MathUtil::getAcceleration($movement, $effects, $friction, $player->isOnGround());
 
