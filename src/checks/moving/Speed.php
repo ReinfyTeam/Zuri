@@ -105,7 +105,7 @@ class Speed extends Check {
 			$playerAPI->setExternalData("lastDistanceXZ", $expected);
 
 			$expected += ($player->isOnGround()) ? $this->getConstant("ground-factor") : 0;
-			$expected += ($packet->hasFlag(PlayerAuthInputFlags::START_JUMPING) && $user->getTicksSinceLanding() > 5) ? $this->getConstant("lastjump-factor") : 0;
+			$expected += ($packet->hasFlag(PlayerAuthInputFlags::START_JUMPING) && $playerAPI->getLastMoveTick() > 5) ? $this->getConstant("lastjump-factor") : 0;
 			$expected += ($playerAPI->getJumpTicks() <= 20 && $playerAPI->isOnIce()) ? $this->getConstant("ice-factor") : 0;
 
 			$dist = $previous->distance($next);

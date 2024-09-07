@@ -170,8 +170,7 @@ class PlayerListener implements Listener {
 	}
 
 	public function onMotion(EntityMotionEvent $event) : void {
-		$player = $event->getEntity();
-		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		$entity = $event->getEntity();
 		if (!$entity instanceof Player) {
 			return;
 		}

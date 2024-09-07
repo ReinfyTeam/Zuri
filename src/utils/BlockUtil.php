@@ -36,6 +36,7 @@ use pocketmine\entity\Location;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
+use pocketmine\block\Block;
 use pocketmine\world\Position;
 use function abs;
 use function fmod;
