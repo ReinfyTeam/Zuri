@@ -29,7 +29,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\moving;
+namespace ReinfyTeam\Zuri\checks\moving\speed;
 
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
@@ -41,13 +41,13 @@ use function abs;
 use function microtime;
 use function round;
 
-class Speed extends Check {
+class SpeedB extends Check {
 	public function getName() : string {
 		return "Speed";
 	}
 
 	public function getSubType() : string {
-		return "A";
+		return "B";
 	}
 
 	public function maxViolations() : int {
