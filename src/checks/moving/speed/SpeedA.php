@@ -111,9 +111,8 @@ class SpeedA extends Check {
 			$dist = $previous->distance($next);
 			$distDiff = abs($dist - $expected);
 
-			$this->debug($playerAPI, "expected=$expected, distance=$distDiff");
-
 			if ($dist > $expected && $distDiff > $this->getConstant("threshold")) {
+				$this->debug($playerAPI, "expected=$expected, distance=$distDiff");
 				$this->failed($playerAPI);
 			}
 		}
