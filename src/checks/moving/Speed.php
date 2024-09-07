@@ -80,7 +80,7 @@ class Speed extends Check {
 
 			$frictionBlock = $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN));
 			$friction = $playerAPI->isOnGround() ? $frictionBlock->getFrictionFactor() : $this->getConstant("friction-factor");
-			$lastDistance = $playerAPI->getExternalData("lastDistanceXZ") ?? $this->getConstant("xz-distance");
+			$lastDistance = $playerAPI->getExternalData("lastDistanceXZ", $this->getConstant("xz-distance"));
 			$momentum = MathUtil::getMomentum($lastDistance, $friction);
 			$movement = MathUtil::getMovement($player, new Vector3(max(-1, min(1, $packet->getMoveVecZ())), 0, max(-1, min(1, $packet->getMoveVecX()))));
 			$effects = MathUtil::getEffectsMultiplier($player);
