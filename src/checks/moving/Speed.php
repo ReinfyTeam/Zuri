@@ -32,10 +32,15 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\moving;
 
 use pocketmine\math\Facing;
+use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
+use function max;
+use function min;
 
 class Speed extends Check {
 	public function getName() : string {
@@ -56,10 +61,10 @@ class Speed extends Check {
 			if (
 				$playerAPI->getAttackTicks() < 40 ||
 				$playerAPI->getOnlineTime() <= 30 ||
-				$playerAPI->isInWeb() ||
-				$playerAPI->isOnGround() ||
+				!$playerAPI->isOnGround() ||
 				$playerAPI->isOnAdhesion() ||
 				$player->getAllowFlight() ||
+				$player->isFlying() ||
 				$player->hasNoClientPredictions() ||
 				!$player->isSurvival() ||
 				!$playerAPI->isCurrentChunkIsLoaded() ||
@@ -76,7 +81,7 @@ class Speed extends Check {
 			$friction = $playerAPI->isOnGround() ? $frictionBlock->getFrictionFactor() : $this->getConstant("friction-factor");
 			$lastDistance = $playerAPI->getExternalData("lastDistanceXZ") ?? $this->getConstant("xz-distance");
 			$momentum = MathUtil::getMomentum($lastDistance, $friction);
-			$movement = MathUtil::getMovement($player, new Vector3($user->getMoveForward(), 0, $user->getMoveStrafe()));
+			$movement = MathUtil::getMovement($player, new Vector3(max(-1, min(1, $event->getMoveVecZ())), 0, max(-1, min(1, $user->getMoveStrafe()))));
 			$effects = MathUtil::getEffectsMultiplier($player);
 			$acceleration = MathUtil::getAcceleration($movement, $effects, $friction, $player->isOnGround());
 
