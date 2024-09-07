@@ -69,8 +69,7 @@ class Speed extends Check {
 				$player->isFlying() ||
 				$player->hasNoClientPredictions() ||
 				!$player->isSurvival() ||
-				!$playerAPI->isCurrentChunkIsLoaded() ||
-				$playerAPI->isGliding()
+				!$playerAPI->isCurrentChunkIsLoaded()
 			) {
 				return;
 			}

@@ -632,8 +632,8 @@ class PlayerAPI implements IPlayerAPI {
 		return $default;
 	}
 
-	public function setExternalData(string $dataName, mixed $amount) : void {
-		$this->externalData[$dataName] = $amount;
+	public function setExternalData(string $dataName, mixed $value) : void {
+		$this->externalData[$dataName] = $value;
 	}
 
 	public function unsetExternalData(string $dataName) : void {
