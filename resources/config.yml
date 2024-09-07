@@ -175,22 +175,17 @@ zuri:
             enable: true
             maxvl: 1
             punishment: KICK
-            # This are just adding the walking constant value to evaluate the limit.
             # Todo: Improve this more??
             constants:
-                  walking-speed-limit: 4.39999
-                  sprinting-speed-limit: 2.06229
-                  jump-speed-limit: 4.19435
-                  ice-walking-speed-limit: 2.09777
-                  speed-effect-limit: 5.85535
-                  time-limit: 0.5
-                  time-effect-limit: 0.2
-                  wakling-distance-limit: 0.25754
-                  sprinting-distance-limit: 0.25344
-                  jump-distance-limit: 0.45767
-                  ice-walking-distance-limit: 0.00735
-                  speed-effect-distance-limit: 0.49282
-                  top-block-limit: 1.02384
+                  threshold: 0.1
+                  friction-factor: 1.0
+                  xz-distance: 0.28
+                  knockback-factor: 4
+                  jump-factor: 0.8
+                  lastmove-factor: 0.9
+                  ground-factor: 0.4
+                  lastjump-factor: 0.26
+                  ice-factor: 0.2
         cheststealer:
             enable: true
             maxvl: 1

@@ -31,12 +31,60 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
+use pocketmine\entity\effect\VanillaEffects;
+use pocketmine\item\enchantment\VanillaEnchantments;
 use pocketmine\math\Vector3;
+use pocketmine\player\Player;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function ceil;
+use function max;
+use function min;
 use function sqrt;
 
 class MathUtil {
+	public static function getMovement(Player $player, Vector3 $move) : float {
+		$armorLeggings = $player->getArmorInventory()->getLeggings();
+		$movement = 1.0;
+
+		if ($player->isSprinting()) {
+			$movement = 1.3;
+		}
+
+		if ($player->isSneaking()) {
+			$movement = max(0.3, min(1.0, 0.3 + (0.15 * $armorLeggings->getEnchantmentLevel(VanillaEnchantments::SWIFT_SNEAK()))));
+		}
+
+		if ($player->isUsingItem()) {
+			$movement = 0.2;
+		}
+
+		return $movement;
+	}
+
+	public static function getEffectsMultiplier(Player $player) : float {
+		$effects = $player->getEffects();
+		$speed = $effects->get(VanillaEffects::SPEED());
+		$slowness = $effects->get(VanillaEffects::SLOWNESS());
+
+		$speed = $speed != null ? $speed->getEffectLevel() : 0;
+		$slowness = $slowness != null ? $slowness->getEffectLevel() : 0;
+
+		return (1 + 0.2 * $speed) * (1 - 0.15 * $slowness);
+	}
+
+	public static function getMomentum(float $lastDistance, float $friction) : float {
+		return $lastDistance * $friction * 0.91;
+	}
+
+	public static function getAcceleration(float $movement, float $effectMultiplier, float $friction, bool $onGround) : float {
+		if (!$onGround) {
+			return 0.02 * $movement;
+		}
+
+		return 0.1 * $movement * $effectMultiplier * ((0.6 / $friction) ** 3);
+	}
+
+
 	public static function getVectorOnEyeHeight(PlayerAPI $playerAPI) : Vector3 {
 		return $playerAPI->getPlayer()->getLocation()->add(0, $playerAPI->getPlayer()->getEyeHeight(), 0);
 	}

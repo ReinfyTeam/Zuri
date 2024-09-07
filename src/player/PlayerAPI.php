@@ -58,6 +58,7 @@ class PlayerAPI implements IPlayerAPI {
 		unset(self::$players[spl_object_id($player)]);
 	}
 
+	private Vector3 $motion;
 	private bool $isCaptcha = false;
 	private bool $flagged = false;
 	private bool $actionBreakingSpecial = false;
@@ -140,6 +141,14 @@ class PlayerAPI implements IPlayerAPI {
 		}
 
 		return false;
+	}
+
+	public function getMotion() : Vector3 {
+		return $this->motion ??= Vector3::zero();
+	}
+
+	public function setMotion(Vector3 $motion) : void {
+		$this->motion = $motion;
 	}
 
 	//Break many blocks just one time break (This can check NUKER PLAYER)

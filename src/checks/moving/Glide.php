@@ -31,13 +31,12 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
-use pocketmine\item\ItemTypeIds;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\item\ItemTypeIds;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
-use ReinfyTeam\Zuri\utils\MathUtil;
 
 class Glide extends Check {
 	public function getName() : string {
@@ -58,7 +57,7 @@ class Glide extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
-			
+
 			$chestplate = $player->getArmorInventory()->getChestplate();
 
 			if ($chestplate->getTypeId() === ItemTypeIds::ELYTRA) {

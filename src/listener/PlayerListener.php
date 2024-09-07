@@ -35,6 +35,7 @@ use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\entity\EntityMotionEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\entity\EntityTeleportEvent;
@@ -69,6 +70,7 @@ use pocketmine\Server;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\ZuriAC;
+use function abs;
 use function array_filter;
 use function count;
 use function in_array;
@@ -165,6 +167,23 @@ class PlayerListener implements Listener {
 			$playerAPI->setFlagged(false);
 		}
 		$this->checkEvent($event, $playerAPI);
+	}
+
+	public function onMotion(EntityMotionEvent $event) : void {
+		$player = $event->getEntity();
+		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		if (!$entity instanceof Player) {
+			return;
+		}
+		$playerAPI = PlayerAPI::getAPIPlayer($entity);
+		if ($playerAPI->getPlayer() === null) {
+			return;
+		}
+		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
+			return;
+		}
+		$playerAPI->getMotion()->x += abs($event->getVector()->getX());
+		$playerAPI->getMotion()->z += abs($event->getVector()->getZ());
 	}
 
 	public function onPlayerBreak(BlockBreakEvent $event) : void {
@@ -275,9 +294,6 @@ class PlayerListener implements Listener {
 
 	public function onEntityTeleport(EntityTeleportEvent $event) : void {
 		$entity = $event->getEntity();
-		if ($entity === null) {
-			return;
-		}
 		if (!$entity instanceof Player) {
 			return;
 		}

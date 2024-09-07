@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri\utils;
 
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Location;
+use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
@@ -42,6 +43,11 @@ use function in_array;
 use function sqrt;
 
 class BlockUtil {
+	public static function getBlockAbove(Player $player) : ?Block {
+		$position = $player->getPosition()->add(0, 1.0, 0);
+		return $player->getWorld()->getBlock($position->getSide(Facing::UP));
+	}
+
 	public static function isGroundSolid(Player $player) : bool {
 		$world = $player->getWorld();
 		$pos = $player->getPosition();

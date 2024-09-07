@@ -31,15 +31,11 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
-use pocketmine\entity\effect\VanillaEffects;
-use pocketmine\event\Event;
-use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\math\Facing;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
-use function microtime;
-use function round;
 
 class Speed extends Check {
 	public function getName() : string {
@@ -54,61 +50,67 @@ class Speed extends Check {
 		return 4;
 	}
 
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	public function check(DataPacket $event, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
-		if ($event instanceof PlayerMoveEvent) {
+		if ($event instanceof PlayerAuthInputPacket) {
 			if (
-				!$player->isSurvival() ||
 				$playerAPI->getAttackTicks() < 40 ||
-				$playerAPI->getSlimeBlockTicks() < 20 ||
+				$playerAPI->getOnlineTime() <= 30 ||
+				$playerAPI->isInWeb() ||
+				$playerAPI->isOnGround() ||
 				$playerAPI->isOnAdhesion() ||
-				(!$player->isOnGround() && $player->getInAirTicks() > 5) ||
-				$player->isFlying() ||
 				$player->getAllowFlight() ||
 				$player->hasNoClientPredictions() ||
-				!$playerAPI->isCurrentChunkIsLoaded()
+				!$player->isSurvival() ||
+				!$playerAPI->isCurrentChunkIsLoaded() ||
+				BlockUtil::isGroundSolid($player) ||
+				$playerAPI->isGliding()
 			) {
 				return;
 			}
 
-			$time = $playerAPI->getExternalData("moveTimeA");
-			if ($time !== null) {
-				$distance = round(BlockUtil::distance($event->getFrom(), $event->getTo()), 5); // Round precision of 5
-				$timeDiff = abs($time - microtime(true));
-				$speed = round($distance / $timeDiff, 5); // Round precision of 5; s = d/t
+			$previous = new Vector3($player->getPosition()->getX(), 0, $player->getPosition()->getZ());
+			$next = new Vector3($packet->getPosition()->getX(), 0, $packet->getPosition()->getZ());
 
-				// Calculate the possible speed limit
-				$speedLimit = $this->getConstant("walking-speed-limit"); // Walking
-				$speedLimit += $player->isSprinting() ? $this->getConstant("sprinting-speed-limit") : 0; // Sprinting
-				$speedLimit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant("jump-speed-limit") : 0; // Jumping
-				$speedLimit += $playerAPI->isOnIce() ? $this->getConstant("ice-walking-speed-limit") : 0; // Ice walking limit
-				$speedLimit += $playerAPI->isTopBlock() ? $this->getConstant("top-block-limit") : 0; // Ice walking limit
+			$frictionBlock = $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN));
+			$friction = $playerAPI->isOnGround() ? $frictionBlock->getFrictionFactor() : $this->getConstant("friction-factor");
+			$lastDistance = $playerAPI->getExternalData("lastDistanceXZ") ?? $this->getConstant("xz-distance");
+			$momentum = MathUtil::getMomentum($lastDistance, $friction);
+			$movement = MathUtil::getMovement($player, new Vector3($user->getMoveForward(), 0, $user->getMoveStrafe()));
+			$effects = MathUtil::getEffectsMultiplier($player);
+			$acceleration = MathUtil::getAcceleration($movement, $effects, $friction, $player->isOnGround());
 
-				$timeLimit = $this->getConstant("time-limit");
+			$expected = $momentum + $acceleration;
 
-				// Calculate max distance must be the limit of blocks travelled.
-				$distanceLimit = $this->getConstant("wakling-distance-limit"); // Walking
-				$distanceLimit += $player->isSprinting() ? $this->getConstant("sprinting-distance-limit") : 0; // Sprinting
-				$distanceLimit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant("jump-distance-limit") : 0; // Jumping
-				$distanceLimit += $playerAPI->isOnIce() ? $this->getConstant("ice-walking-distance-limit") : 0; // Ice walking limit
+			if (abs($playerAPI->getMotion()->getX()) > 0 || abs($playerAPI->getMotion()->getZ()) > 0) {
+				$motionX = abs($playerAPI->getMotion()->getX());
+				$motionZ = abs($playerAPI->getMotion()->getZ());
+				$knockback = $motionX * $motionX + $motionZ * $motionZ;
 
-				// Calculate speed potion deviation..
-				if (($effect = $player->getEffects()->get(VanillaEffects::SPEED())) !== null) {
-					$speedLimit += $this->getConstant("speed-effect-limit") * $effect->getEffectLevel();
-					$timeLimit += $this->getConstant("time-effect-limit") * $effect->getEffectLevel();
-					$distanceLimit += $this->getConstant("speed-effect-distance-limit") * $effect->getEffectLevel();
-				}
+				$knockback *= $this->getConstant("knockback-factor");
+				$expected += $knockback;
 
-				$this->debug($playerAPI, "timeDiff=$timeDiff, speed=$speed, distance=$distance, speedLimit=$speedLimit, distanceLimit=$distanceLimit, timeLimit=$timeLimit");
-
-				// If the time travelled is greater than the calculated time limit, fail immediately. Lag back? (is player is laggy?)
-				// If speed is on limit and the distance travelled limit is high.
-				if ($time > $timeLimit && $speed > $speedLimit && $distance > $distanceLimit && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
-					$this->failed($playerAPI);
-				}
+				$playerAPI->getMotion()->x = 0;
+				$playerAPI->getMotion()->z = 0;
 			}
 
-			$playerAPI->setExternalData("moveTimeA", microtime(true));
+			$expected += ($playerAPI->getJumpTicks() < 5 && BlockUtil::getBlockAbove($player)->isSolid()) ? $this->getConstant("jump-factor") : 0;
+			$expected += $playerAPI->getLastMoveTick() < 5 ? $this->getConstant("lastmove-factor") : 0;
+
+			$playerAPI->setExternalData("lastDistanceXZ", $expected);
+
+			$expected += ($player->isOnGround()) ? $this->getConstant("ground-factor") : 0;
+			$expected += ($packet->hasFlag(PlayerAuthInputFlags::START_JUMPING) && $user->getTicksSinceLanding() > 5) ? $this->getConstant("lastjump-factor") : 0;
+			$expected += ($playerAPI->getJumpTicks() <= 20 && $playerAPI->isOnIce()) ? $this->getConstant("ice-factor") : 0;
+
+			$dist = $previous->distance($next);
+			$distDiff = abs($dist - $expected);
+
+			$this->debug($playerAPI, "expected=$expected, distance=$distDiff");
+
+			if ($dist > $expected && $distDiff > $this->getConstant("threshold")) {
+				$this->failed($playerAPI);
+			}
 		}
 	}
 }
