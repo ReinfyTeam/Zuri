@@ -280,7 +280,7 @@ zuri:
             maxvl: 1
             punishment: KICK
             constants:
-                 air-limit: 2.2
+                 air-limit: 3.0
         phase:
             enable: true
             maxvl: 1

@@ -16,7 +16,7 @@ Also, adding :star: a **Star** is also appreciated. ✨
 > ☢ For Plugin Developers:
 > The full documentation about API and it's usage is can be found in the [github wiki](https://github.com/ReinfyTeam/Zuri/wiki).
 
-> ![Zuri Anticheat Meme](/meme.jpg)
+> ![Zuri Anticheat Meme](https://raw.githubusercontent.com/ReinfyTeam/Zuri/main/meme.jpg)
 >
 > Zuri can catch hacker efficiently, with over **40+ check modules**. Unlike other **$100 Anticheat**, it is more systematic, lightweight, and easy to configure. It's too good right? 🤦
 
