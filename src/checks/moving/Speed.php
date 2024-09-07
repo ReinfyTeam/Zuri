@@ -32,8 +32,10 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\moving;
 
 use pocketmine\math\Facing;
+use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
+use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
@@ -68,7 +70,6 @@ class Speed extends Check {
 				$player->hasNoClientPredictions() ||
 				!$player->isSurvival() ||
 				!$playerAPI->isCurrentChunkIsLoaded() ||
-				BlockUtil::isGroundSolid($player) ||
 				$playerAPI->isGliding()
 			) {
 				return;
