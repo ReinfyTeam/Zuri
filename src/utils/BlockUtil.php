@@ -31,12 +31,12 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
+use pocketmine\block\Block;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Location;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
-use pocketmine\block\Block;
 use pocketmine\world\Position;
 use function abs;
 use function fmod;

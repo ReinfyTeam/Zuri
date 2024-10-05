@@ -277,7 +277,7 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new ClickTP();
 
 		$this->checks[] = new SpeedA(); // Improve in next versions.
-		
+
 		$this->checks[] = new SpeedB(); // Improve in next versions.
 
 		$this->checks[] = new Glide(); // Improve in next versions.
