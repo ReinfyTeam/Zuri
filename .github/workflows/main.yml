@@ -5,12 +5,14 @@ on:
   workflow_dispatch:
 jobs:
  build-phar:
+   env:
+    PHP_VERSION: 8.3
    runs-on: ubuntu-latest
    steps:
      - name: Checkout the repository.
        uses: actions/checkout@v4
      - name: Download php-binaries.
-       run: "curl -sL https://github.com/pmmp/PHP-Binaries/releases/latest/download/PHP-Linux-x86_64-PM5.tar.gz -o php.tar.gz"
+       run: "curl -sL https://github.com/pmmp/PHP-Binaries/releases/download/pm5-php-$PHP_VERSION-latest/PHP-$PHP_VERSION-Linux-x86_64-PM5.tar.gz -o php.tar.gz"
      - name: Extract php-binaries.
        run: "tar -xvzf php.tar.gz"
      - name: chmod the php-binaries.
