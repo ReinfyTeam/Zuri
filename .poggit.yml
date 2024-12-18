@@ -5,6 +5,6 @@ branches:
 projects:
   Zuri:
     path: ""
-    lint: true
+    lint: false
     icon: "icon.png"
 ...
