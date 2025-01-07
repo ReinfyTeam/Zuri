@@ -21,6 +21,7 @@ jobs:
        with:
          php-version: ${{ inputs.php }}
          install-path: "./bin"
+         pm-version-major: 5
      - name: Install php-cs-fixer.
        run: "curl -sL https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/latest/download/php-cs-fixer.phar -o php-cs-fixer"
      - name: Run php-cs-fixer.
