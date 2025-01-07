@@ -1,5 +1,8 @@
 # Common IDEs
 .idea/*
 
+# PHP-CS-Fixer
+.php-cs-fixer.cache
+
 # Composer
 vendor/*
