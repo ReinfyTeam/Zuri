@@ -3,31 +3,30 @@ run-name: Build Zuri.phar and Draft a release to github!
 on:
   push:
   workflow_dispatch:
+    inputs:
+      php:
+        description: 'PHP version in X.Y format'
+        required: true
+        type: string
 jobs:
  build-phar:
    permissions: write-all
    runs-on: ubuntu-latest
-   env:
-    PHP_VERSION: 8.3
    if: contains(github.event.head_commit.message, 'Release')
    steps:
      - name: Checkout the repository.
        uses: actions/checkout@v4
-     - name: Download php-binaries.
-       run: "curl -sL https://github.com/pmmp/PHP-Binaries/releases/download/pm5-php-$PHP_VERSION-latest/PHP-$PHP_VERSION-Linux-x86_64-PM5.tar.gz -o php.tar.gz"
-     - name: Extract php-binaries.
-       run: "tar -xvzf php.tar.gz"
-     - name: chmod the php-binaries.
-       run: "chmod +x ./bin/php7/bin/php"
-     - name: Fix opcache.so
-       run: EXTENSION_DIR=$(find "$(pwd)/bin" -name "*debug-zts*") \
-            grep -q '^extension_dir' bin/php7/bin/php.ini && sed -i'bak' "s{^extension_dir=.*{extension_dir=\"$EXTENSION_DIR\"{" bin/php7/bin/php.ini || echo "extension_dir=\"$EXTENSION_DIR\"" >> bin/php7/bin/php.ini
+     - name: Setup PHP
+       uses: pmmp/setup-php-action@3.2.0
+       with:
+         php-version: ${{ inputs.php }}
+         install-path: "./bin"
      - name: Install php-cs-fixer.
-       run: "curl -sL https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/latest/download/php-cs-fixer.phar -o php-cs-fixer.phar"
+       run: "curl -sL https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/latest/download/php-cs-fixer.phar -o php-cs-fixer"
      - name: Run php-cs-fixer.
-       run: "./bin/php7/bin/php php-cs-fixer.phar fix src"
+       run: "php php-cs-fixer fix src"
      - name: Run build.php
-       run: "./bin/php7/bin/php -dphar.readonly=0 tools/build.php"
+       run: "php -dphar.readonly=0 tools/build.php"
      - uses: ChanTsune/release-with-commit@v3.0.0
        id: create_release
        continue-on-error: true
