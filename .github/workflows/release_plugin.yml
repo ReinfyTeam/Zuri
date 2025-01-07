@@ -3,12 +3,6 @@ run-name: Build Zuri.phar and Draft a release to github!
 on:
   push:
   workflow_dispatch:
-    inputs:
-      php:
-        description: 'PHP version in X.Y format'
-        required: true
-        default: 8.3
-        type: string
 jobs:
  build-phar:
    permissions: write-all
@@ -20,7 +14,7 @@ jobs:
      - name: Setup PHP
        uses: pmmp/setup-php-action@3.2.0
        with:
-         php-version: ${{ inputs.php }}
+         php-version: 8.3
          install-path: "./bin"
          pm-version-major: 5
      - name: Install php-cs-fixer.
