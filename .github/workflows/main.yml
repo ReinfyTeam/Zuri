@@ -3,10 +3,13 @@ run-name: Build Zuri.phar package with build.php
 on:
   push:
   workflow_dispatch:
+    inputs:
+      php:
+        description: 'PHP version in X.Y format'
+        required: true
+        type: string
 jobs:
  build-phar:
-   env:
-    PHP_VERSION: 8.3
    runs-on: ubuntu-latest
    steps:
      - name: Checkout the repository.
@@ -14,7 +17,7 @@ jobs:
      - name: Setup PHP
        uses: pmmp/setup-php-action@3.2.0
        with:
-         php-version: 8.3
+         php-version: ${{ inputs.php }}
          install-path: "./bin"
      - name: Install php-cs-fixer.
        run: "curl -sL https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/latest/download/php-cs-fixer.phar -o php-cs-fixer"
