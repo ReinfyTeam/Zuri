@@ -33,12 +33,14 @@ namespace ReinfyTeam\Zuri\listener;
 
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
+use pocketmine\event\entity\EntityDamageByChildEntityEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityMotionEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\entity\EntityTeleportEvent;
+use pocketmine\event\entity\ProjectileHitEntityEvent;
 use pocketmine\event\entity\ProjectileLaunchEvent;
 use pocketmine\event\Event;
 use pocketmine\event\inventory\InventoryCloseEvent;
@@ -380,6 +382,23 @@ class PlayerListener implements Listener {
 		}
 	}
 
+	public function onProjectileHitEntity(ProjectileHitEntityEvent $event) {
+	    $projectile = $event->getEntity();
+		$entity = $event->getEntityHit();
+
+		if ($entity instanceof Player) {
+			$playerAPI = PlayerAPI::getAPIPlayer($entity);
+			if ($playerAPI->getPlayer() === null) {
+				return;
+			}
+			if (!$entity->isConnected() && !$entity->spawned) {
+				return;
+			}
+
+			$playerAPI->setProjectileAttackTicks(microtime(true));
+		}
+	}
+
 	public function onPlayerDeath(PlayerDeathEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
@@ -461,6 +480,7 @@ class PlayerListener implements Listener {
 		if (!$player->isConnected() && !$player->spawned) {
 			return;
 		}
+		$playerAPI->setBowShotTicks(microtime(true));
 		$this->checkEvent($event, $playerAPI);
 	}
 
