@@ -60,6 +60,7 @@ class SpeedB extends Check {
 			if (
 				!$player->isSurvival() ||
 				$playerAPI->getAttackTicks() < 40 ||
+				$playerAPI->getProjectileAttackTicks() < 40 ||
 				$playerAPI->getSlimeBlockTicks() < 20 ||
 				$playerAPI->isOnAdhesion() ||
 				(!$player->isOnGround() && $player->getInAirTicks() > 5) ||
