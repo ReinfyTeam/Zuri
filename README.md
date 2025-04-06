@@ -30,6 +30,12 @@ Also, adding :star: a **Star** is also appreciated. ✨
 - 🌟 It also checks the player if they are using a **Proxy or VPN** *(optional)*
 - 💥 You can manage plugin at the in-game using **Interactive UI** by using command! `/zuri ui`
 
+# Forks / Dependencies
+Here are the **dependencies** were used in the plugin:
+- [FormAPI Fix](https://github.com/DavyCraft648/FormAPI-PM)
+- [Modified DiscordWebhookAPI](https://github.com/CortexPE/DiscordWebhookAPI/)
+Some are for fixes and some are modified for compability.
+
 # Current Modules
 **BETA** - means to be in testing, and to be optimize in the next version. <br>
 **DISABLED** - means the code is not working or has a false-positive in certain methods. <br>
