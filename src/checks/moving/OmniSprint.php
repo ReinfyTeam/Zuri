@@ -58,7 +58,7 @@ class OmniSprint extends Check {
 	}
 
 	private array $check = [];
-	
+
 	/**
 	 * @throws DiscordWebhookException
 	 */

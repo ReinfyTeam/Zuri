@@ -33,7 +33,6 @@ namespace ReinfyTeam\Zuri\listener;
 
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
-use pocketmine\event\entity\EntityDamageByChildEntityEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityMotionEvent;
@@ -383,7 +382,7 @@ class PlayerListener implements Listener {
 	}
 
 	public function onProjectileHitEntity(ProjectileHitEntityEvent $event) {
-	    $projectile = $event->getEntity();
+		$projectile = $event->getEntity();
 		$entity = $event->getEntityHit();
 
 		if ($entity instanceof Player) {

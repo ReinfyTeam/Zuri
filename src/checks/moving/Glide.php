@@ -33,10 +33,10 @@ namespace ReinfyTeam\Zuri\checks\moving;
 
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
-use pocketmine\item\ItemTypeIds;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function strpos;
 
 class Glide extends Check {
 	public function getName() : string {
@@ -60,7 +60,7 @@ class Glide extends Check {
 
 			$chestplate = $player->getArmorInventory()->getChestplate();
 
-			// since elytra is non-existent in vanilla pmmp we will check for the word elytra in the vanilla name and if its found continue 
+			// since elytra is non-existent in vanilla pmmp we will check for the word elytra in the vanilla name and if its found continue
 			if (strpos($chestplate->getVanillaName(), "elytra")) {
 				if (!($glide = $playerAPI->isGliding())) {
 					$this->debug($playerAPI, "isGliding=" . $glide);

@@ -66,12 +66,12 @@ class KillAuraE extends Check {
 				$playerAPI = PlayerAPI::getAPIPlayer($damager);
 				$opAPI = PlayerAPI::getAPIPlayer($entity);
 
-				/** 
+				/**
 				 * this might be lazy but it may work, checks if the user has shot his bow and the other user got hit by projectile
 				 * tho this must be improved later, this is just an temporary solution.
 				 */
 				if ($playerAPI->getBowShotTicks() < 40 && $opAPI->getProjectileAttackTicks() < 40) {
-                    return;
+					return;
 				}
 
 				$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
