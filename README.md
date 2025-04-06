@@ -32,8 +32,10 @@ Also, adding :star: a **Star** is also appreciated. ✨
 
 # Forks / Dependencies
 Here are the **dependencies** were used in the plugin:
+
 - [FormAPI Fix](https://github.com/DavyCraft648/FormAPI-PM)
 - [Modified DiscordWebhookAPI](https://github.com/CortexPE/DiscordWebhookAPI/)
+
 Some are for fixes and some are modified for compability.
 
 # Current Modules
