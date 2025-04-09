@@ -71,6 +71,13 @@ class InstaBreak extends Check {
 					return;
 				}
 				$target = $event->getBlock();
+
+				// pocketmine seems to not compensate for bamboo break time
+				// we'll ignore this so long.
+				if ($target->getTypeId() == BlockTypeIds::BAMBOO) {
+                                         return;
+				}
+				
 				$item = $event->getItem();
 				$expectedTime = ceil($target->getBreakInfo()->getBreakTime($item) * 20);
 				if (($haste = $playerAPI->getPlayer()->getEffects()->get(VanillaEffects::HASTE())) !== null) {
