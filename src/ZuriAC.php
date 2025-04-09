@@ -127,7 +127,7 @@ class ZuriAC extends PluginBase {
 
 	        $minimumVersion = self::MINIMUM_PHP_VERSION;
                 if (version_compare(PHP_VERSION, $minimumVersion, '<')) {
-                    $this->getLogger()->error("⚠️ You're running PHP " . PHP_VERSION . ", which is older than $minimumVersion. Please upgrade your PHP Installion to $minimummVersion or later!");
+                    $this->getLogger()->error("⚠️ You're running PHP " . PHP_VERSION . ", which is older than $minimumVersion. Please upgrade your PHP Installion to $minimummVersion or later! You may find PHP $minimumVersion builds at github.com/pmmp/PHP-Binaries/releases");
                     $this->getServer()->shutdown();
                 }
 		
