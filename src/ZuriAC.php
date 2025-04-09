@@ -119,12 +119,15 @@ class ZuriAC extends PluginBase {
 
 	private array $checks = [];
 
+	private const string MINIMUM_PHP_VERSION = "8.3.0";
+
 	public function onLoad() : void {
 		self::$instance = $this;
 		ConfigManager::checkConfig();
 
-                if (!version_compare(PHP_VERSION, '8.3.0', '>=')) {
-                    $this->getLogger()->error("⚠️ You're running PHP " . PHP_VERSION . ", which is older than 8.3.0. Please upgrade your PHP Installion to 8.3.0 or later!");
+	        $minimumVersion = self::MINIMUM_PHP_VERSION;
+                if (version_compare(PHP_VERSION, $minimumVersion, '<')) {
+                    $this->getLogger()->error("⚠️ You're running PHP " . PHP_VERSION . ", which is older than $minimumVersion. Please upgrade your PHP Installion to $minimummVersion or later!");
                     $this->getServer()->shutdown();
                 }
 		
