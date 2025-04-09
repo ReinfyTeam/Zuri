@@ -123,8 +123,13 @@ class ZuriAC extends PluginBase {
 		self::$instance = $this;
 		ConfigManager::checkConfig();
 
+                if (!version_compare(PHP_VERSION, '8.3.0', '>=')) {
+                    $this->getLogger()->error("⚠️ You're running PHP " . PHP_VERSION . ", which is older than 8.3.0. Please upgrade your PHP Installion to 8.3.0 or later!");
+                    $this->getServer()->shutdown();
+                }
+		
 		if (!Phar::running()) {
-			$this->getServer()->getLogger()->notice(ConfigManager::getData(config\ConfigPaths::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade checking performance. We recommended you to download phar plugin from poggit builds or github releases. Instead of using source-code from github.");
+	            $this->getServer()->getLogger()->notice(ConfigManager::getData(config\ConfigPaths::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade checking performance. We recommended you to download phar plugin from poggit builds or github releases. Instead of using source-code from github.");
 		}
 	}
 
