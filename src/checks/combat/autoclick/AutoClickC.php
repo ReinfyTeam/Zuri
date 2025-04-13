@@ -52,10 +52,6 @@ class AutoClickC extends Check {
 		return "C";
 	}
 
-	public function maxViolations() : int {
-		return 1;
-	}
-
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageEvent) {
 			$this->canDamagable = $event->isCancelled();

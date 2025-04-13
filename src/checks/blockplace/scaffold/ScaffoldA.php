@@ -48,10 +48,6 @@ class ScaffoldA extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 2;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

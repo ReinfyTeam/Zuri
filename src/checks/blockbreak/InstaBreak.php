@@ -50,10 +50,6 @@ class InstaBreak extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 3;
-	}
-
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		$breakTimes = $playerAPI->getExternalData("breakTimes");
 		if ($event instanceof PlayerInteractEvent) {

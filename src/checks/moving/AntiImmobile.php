@@ -46,10 +46,6 @@ class AntiImmobile extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 1;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

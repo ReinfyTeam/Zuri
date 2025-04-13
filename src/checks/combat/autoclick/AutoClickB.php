@@ -48,10 +48,6 @@ class AutoClickB extends Check {
 		return "B";
 	}
 
-	public function maxViolations() : int {
-		return 1;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

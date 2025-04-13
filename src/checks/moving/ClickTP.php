@@ -45,11 +45,7 @@ class ClickTP extends Check {
 	public function getSubType() : string {
 		return "A";
 	}
-
-	public function maxViolations() : int {
-		return 1;
-	}
-
+	
 	/**
 	 * @throws DiscordWebhookException
 	 */

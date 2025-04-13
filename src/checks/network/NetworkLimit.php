@@ -46,10 +46,6 @@ class NetworkLimit extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 0;
-	}
-
 	private array $ipList = [];
 
 	public function checkJustEvent(Event $event) : void {

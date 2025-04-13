@@ -53,10 +53,6 @@ class SpeedA extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 4;
-	}
-
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		if ($packet instanceof PlayerAuthInputPacket) {

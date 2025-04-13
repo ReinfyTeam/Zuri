@@ -51,10 +51,6 @@ class Phase extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 8;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

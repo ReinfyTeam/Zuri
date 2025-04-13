@@ -50,10 +50,6 @@ class ImposibleHit extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 2;
-	}
-
 	private array $eating = [];
 
 	/**

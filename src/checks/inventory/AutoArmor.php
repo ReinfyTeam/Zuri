@@ -45,10 +45,6 @@ class AutoArmor extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 5;
-	}
-
 	//This only causes cheaters to slow down their actions
 
 	/**

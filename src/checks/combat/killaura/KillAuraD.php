@@ -47,10 +47,6 @@ class KillAuraD extends Check {
 		return "D";
 	}
 
-	public function maxViolations() : int {
-		return 1;
-	}
-
 	/**
 	 * @throws ReflectionException
 	 * @throws DiscordWebhookException

@@ -45,10 +45,6 @@ class AntiVoid extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 3;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

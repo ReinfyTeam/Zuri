@@ -55,8 +55,6 @@ abstract class Check extends ConfigManager {
 
 	public abstract function getSubType() : string;
 
-	public abstract function maxViolations() : int;
-
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 	}
 
@@ -76,6 +74,10 @@ abstract class Check extends ConfigManager {
 
 	public function enable() : bool {
 		return self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable", false);
+	}
+	
+	public function maxViolations() : int {
+		return self::getData(self::CHECK . "." . strtolower($this->getName()) . ".pre-vl." . strtolower($this->getSubType()), false);
 	}
 
 	public function getConstant(string $name) : mixed {

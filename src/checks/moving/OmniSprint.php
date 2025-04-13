@@ -53,10 +53,6 @@ class OmniSprint extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 10;
-	}
-
 	private array $check = [];
 
 	/**

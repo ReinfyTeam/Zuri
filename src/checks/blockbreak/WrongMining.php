@@ -44,10 +44,6 @@ class WrongMining extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 1;
-	}
-
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($playerAPI->getPlayer() === null) {
 			return;

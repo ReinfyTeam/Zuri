@@ -46,11 +46,7 @@ class AimAssistC extends Check {
 	public function getSubType() : string {
 		return "C";
 	}
-
-	public function maxViolations() : int {
-		return 10;
-	}
-
+	
 	/**
 	 * @throws DiscordWebhookException
 	 */

@@ -48,10 +48,6 @@ class TimerB extends Check {
 		return "B";
 	}
 
-	public function maxViolations() : int {
-		return 3;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

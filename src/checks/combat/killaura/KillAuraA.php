@@ -49,10 +49,6 @@ class KillAuraA extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 5;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

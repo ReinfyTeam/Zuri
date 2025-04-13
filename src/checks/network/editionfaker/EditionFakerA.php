@@ -47,10 +47,6 @@ class EditionFakerA extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 0;
-	}
-
 	public const array NULL_MODELS = [
 		DeviceOS::ANDROID,
 		DeviceOS::OSX,

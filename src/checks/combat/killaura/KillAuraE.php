@@ -50,10 +50,6 @@ class KillAuraE extends Check {
 		return "E";
 	}
 
-	public function maxViolations() : int {
-		return 3;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

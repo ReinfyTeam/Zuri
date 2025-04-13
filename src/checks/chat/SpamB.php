@@ -50,13 +50,6 @@ class SpamB extends Check {
 		return "B";
 	}
 
-	public function maxViolations() : int {
-		return 3;
-	}
-
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-	}
-
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerChatEvent) {
 			if (!$event->isCancelled()) {

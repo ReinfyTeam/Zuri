@@ -49,10 +49,6 @@ class ScaffoldC extends Check {
 		return "C";
 	}
 
-	public function maxViolations() : int {
-		return 10;
-	}
-
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 	}
 

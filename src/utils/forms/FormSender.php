@@ -277,11 +277,23 @@ final class FormSender extends ConfigManager {
 				return;
 			}
 
-			self::ChangeMaxVL($player, $check);
+			switch($data) {
+				case 0:
+					self::ChangePreVL($player, $check);
+					break;
+				case 1:
+					self::TogglePunishment($player, $check);
+					break;
+				case 2:
+					self::ChangeMaxVL($player, $check);
+					break;
+			}
 		});
 
 		$form->setTitle($check->getName() . " Information");
-		$form->setContent(TextFormat::RESET . "Name: " . TextFormat::YELLOW . $check->getName() . "\n" . TextFormat::RESET . "Sub Types: " . TextFormat::YELLOW . $check->getAllSubTypes() . "\n" . TextFormat::RESET . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . "\n" . TextFormat::RESET . "Ban: " . ($check->getPunishment() === "ban" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Kick: " . ($check->getPunishment() === "kick" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Captcha: " . ($check->getPunishment() === "captcha" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Flag: " . ($check->getPunishment() === "flag" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "PreVL Max Violation: " . TextFormat::YELLOW . ($check->maxViolations() === 0 ? "Instant Fail" : $check->maxViolations()) . "\n" . TextFormat::RESET . "Max Violation: " . TextFormat::YELLOW . (self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl") === 0 ? "Instant Punishment" : self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl"))); // bullshit this is so long..
+		$form->setContent(TextFormat::RESET . "Name: " . TextFormat::YELLOW . $check->getName() . "\n" . TextFormat::RESET . "Sub Types: " . TextFormat::YELLOW . $check->getAllSubTypes() . "\n" . TextFormat::RESET . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . "\n" . TextFormat::RESET . "Ban: " . ($check->getPunishment() === "ban" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Kick: " . ($check->getPunishment() === "kick" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Captcha: " . ($check->getPunishment() === "captcha" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Flag: " . ($check->getPunishment() === "flag" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Max Violation: " . TextFormat::YELLOW . (self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl") === 0 ? "Instant Punishment" : self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl"))); // bullshit this is so long..
+		$form->addButton("Change PreVL");
+		$form->addButton("Toggle Punishment");
 		if (self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl") !== 0) {
 			$form->addButton("Change MaxVL");
 		}
@@ -304,6 +316,59 @@ final class FormSender extends ConfigManager {
 		$form->setTitle($check->getName() . " MaxVL");
 		$form->addLabel(($saved ? TextFormat::GREEN . "Modified successfully!" : "Modify the slider do you want to set.."));
 		$form->addSlider("MaxVL", 0, 100, -1, intval(self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl")));
+		$player->sendForm($form);
+	}
+	
+	public static function ChangePreVL(Player $player, Check $check, bool $saved = false) : void {
+		$form = new CustomForm(function(Player $player, $data) use ($check) {
+			if ($data === null) {
+				self::ModuleInformation($player, $check);
+				return;
+			}
+			
+			unset($data[0]);
+		
+			foreach ($data as $subType => $amount) {
+				self::setData(self::CHECK . "." . strtolower($check->getName()) . ".pre-vl." . $subType, $amount);
+			}
+			
+			self::ChangePreVL($player, $check, true);
+		});
+
+		$form->setTitle($check->getName() . " PreVL");
+		$form->addLabel(($saved ? TextFormat::GREEN . "Modified successfully!" : "Modify the slider do you want to set.."));
+		foreach (self::getData(self::CHECK . "." . strtolower($check->getName()) . ".pre-vl") as $subType => $amount) {
+			$form->addSlider($check->getName() . " (" . strtoupper($subType) . ")", 0, 100, -1, intval(self::getData(self::CHECK . "." . strtolower($check->getName()) . ".pre-vl." . $subType)), $subType);
+		}
+		$player->sendForm($form);
+	}
+	
+	public static function TogglePunishment(Player $player, Check $check, bool $saved = false) : void {
+		$form = new SimpleForm(function(Player $player, $data) use ($check) {
+			if ($data === null) {
+				self::ModuleInformation($player, $check);
+				return;
+			}
+			
+			switch($data) {
+				case 0:
+					self::setData(self::CHECK . "." . strtolower($check->getName()) . ".punishment", strtoupper("kick"));
+					break;
+				case 1:
+					self::setData(self::CHECK . "." . strtolower($check->getName()) . ".punishment", strtoupper("ban"));
+					break;
+				case 2:
+					self::setData(self::CHECK . "." . strtolower($check->getName()) . ".punishment", strtoupper("flag"));
+					break;
+			}
+			self::TogglePunishment($player, $check, true);
+		});
+
+		$form->setTitle($check->getName() . " Punishment");
+		$form->setContent(($saved ? TextFormat::GREEN . "Toggled successfully!" : "Choose what do you want to toggle.."));
+		$form->addButton("Kick Mode\n" . (strtolower(self::getData(self::CHECK . "." . strtolower($check->getName()) . ".punishment")) === "kick" ? "Enabled" : "Disabled"));
+		$form->addButton("Ban Mode\n" . (strtolower(self::getData(self::CHECK . "." . strtolower($check->getName()) . ".punishment")) === "ban" ? "Enabled" : "Disabled"));
+		$form->addButton("Flag Mode\n" . (strtolower(self::getData(self::CHECK . "." . strtolower($check->getName()) . ".punishment")) === "flag" ? "Enabled" : "Disabled"));
 		$player->sendForm($form);
 	}
 }

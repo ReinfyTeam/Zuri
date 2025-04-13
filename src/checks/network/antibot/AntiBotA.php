@@ -47,10 +47,6 @@ class AntiBotA extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 0;
-	}
-
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof PlayerPreLoginEvent) {
 			$extraData = $event->getPlayerInfo()->getExtraData();

@@ -55,10 +55,6 @@ class KillAuraC extends Check {
 		return "C";
 	}
 
-	public function maxViolations() : int {
-		return 3;
-	}
-
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerInteractEvent) {
 			$this->interact = true;

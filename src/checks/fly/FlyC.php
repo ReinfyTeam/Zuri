@@ -51,10 +51,6 @@ class FlyC extends Check {
 		return "C";
 	}
 
-	public function maxViolations() : int {
-		return 1;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

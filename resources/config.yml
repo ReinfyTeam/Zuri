@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.2.5" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
+    version: "0.2.6" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -99,11 +99,18 @@ zuri:
     check:
         antibot:
             enable: true
+            pre-vl:
+                a: 0
+                b: 0
             maxvl: 1
             punishment: KICK
         autoclick:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 25
+                b: 1
+                c: 1
             punishment: KICK
             constants:
                   max-ticks: 5
@@ -115,10 +122,18 @@ zuri:
         antiimmobile:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 1
             punishment: BAN
         killaura:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 1
+                b: 5
+                c: 3
+                d: 1
+                e: 3
             punishment: KICK
             constants:
                   delta-pitch: 0
@@ -130,6 +145,11 @@ zuri:
         aimassist:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 10
+                b: 2
+                c: 10
+                d: 3
             constants:
                   min-yaw: 0
                   min-pitch: 0.01
@@ -142,16 +162,25 @@ zuri:
         wrongpitch:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 2
             punishment: KICK
         crasher:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 5
             punishment: BAN
             constants:
                   max-y: 500
         scaffold: # Todo: Improve in next versions.
             enable: false
             maxvl: 1
+            pre-vl:
+                a: 2
+                b: 10
+                c: 10
+                d: 1
             punishment: BAN
             constants:
                   box-range-x: 1.0
@@ -162,6 +191,8 @@ zuri:
                   limit-place-ticks: 20
         inventorycleaner:
             enable: true
+            pre-vl:
+               a: 1
             maxvl: 1
             punishment: KICK
             constants:
@@ -170,10 +201,15 @@ zuri:
         antivoid: # Todo: Improve in next versions.
             enable: false
             maxvl: 1
+            pre-vl:
+                a: 3
             punishment: KICK
         speed:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 4
+                b: 4
             punishment: KICK
             # Todo: Improve this more??
             constants:
@@ -204,6 +240,8 @@ zuri:
         cheststealer:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 1
             punishment: KICK
             constants:
                  diff-time: 0.1
@@ -211,14 +249,20 @@ zuri:
         instabreak:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 3
             punishment: KICK
         wrongmining:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 3
             punishment: BAN
         blockreach:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 5
             punishment: KICK
             constants:
                   max-creative-reach: 13
@@ -226,16 +270,25 @@ zuri:
         fillblock:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 1
             punishment: KICK
         spam:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 5
+                b: 3
             punishment: CAPTCHA
             constants:
                    max-violation-rate: 5
         reach:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 3
+                b: 3
+                c: 3
             punishment: KICK
             constants:
                  max-distance: 4.3
@@ -245,6 +298,10 @@ zuri:
         fly:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 1
+                b: 1
+                c: 1
             punishment: KICK
             constants:
                   max-ground-diff: 1
@@ -253,41 +310,57 @@ zuri:
             enable: false
             maxvl: 1
             punishment: KICK
+            pre-vl:
+                a: 3
         autoarmor:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 5
             punishment: KICK
         omnisprint: # Todo: Improve in next version, fix false-positive in certain moves..
             enable: false
             maxvl: 1
+            pre-vl:
+                a: 10
             punishment: KICK
             constants:
                  max-speed: 0.3
         chestaura: 
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 1
             punishment: KICK
             constants:
                   transaction-divisible: 3
         inventorymove:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 10
             punishment: KICK
             constants:
-                   move-sensitivity: 0.01
+                   move-sensitivity: 0.1
         airmovement:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 5
             punishment: KICK
             constants:
                  air-limit: 3.0
         phase:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 8
             punishment: KICK
         step: # Todo: Improve in next versions, fix false-positive in slabs...
             enable: false
             maxvl: 1
+            pre-vl:
+                a: 3
             punishment: KICK
             constants:
                    y-limit: 0.25
@@ -302,6 +375,10 @@ zuri:
         timer: 
             enable: false
             maxvl: 1
+            pre-vl:
+                a: 3
+                b: 3
+                c: 5
             punishment: KICK
             constants:
                  max-diff: 10
@@ -328,9 +405,17 @@ zuri:
             punishment: KICK
             constants:
                   max-pitch: 92
+        impossiblehit:
+            enable: true
+            maxvl: 1
+            pre-vl:
+                a: 1
+            punishment: KICK
         clicktp: # Todo: Improve in next versions. False-positive in laggy players...
             enable: false
             maxvl: 1
+            pre-vl:
+                a: 1
             punishment: FLAG
             constants:
                   max-distance: 40.0
@@ -343,20 +428,29 @@ zuri:
         spider: # Todo: Improve in next versions. Fix false-positive in climbable blocks...
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 5
             punishment: KICK
             constants:
                    limit-y-diff: 0.5
         fastladder: 
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 5
             punishment: KICK
         proxybot:
             enable: true
             maxvl: 0
+            pre-vl:
+                a: 0
             punishment: KICK
         editionfaker:
             enable: true
             maxvl: 0
+            pre-vl:
+                a: 0
+                b: 0
             punishment: KICK
             constants:
                 windows-10: "896928775"
@@ -375,6 +469,9 @@ zuri:
             enable: false
             maxvl: 1
             punishment: KICK
+            pre-vl:
+                a: 3
+                b: 3
             constants:
                  max-heal-amount: 3
                  max-healcount: 5
@@ -382,12 +479,16 @@ zuri:
         fastbow: # Todo: Improve in next versions, support for custom bows...
             enable: false
             maxvl: 1
+            pre-vl:
+                a: 4
             punishment: KICK
             constants:
                   max-hit-time: 0.65
         tower:
             enable: true
             maxvl: 5
+            pre-vl:
+                a: 5
             punishment: KICK
             constants:
                   margin-error: 0.8
@@ -395,7 +496,11 @@ zuri:
         networklimit:
             enable: false
             maxvl: 0
+            pre-vl:
+                a: 0
         glide:
             enable: true
             maxvl: 1
+            pre-vl:
+                a: 3
 ...

@@ -59,10 +59,6 @@ class InventoryCleaner extends Check {
 		return false;
 	}
 
-	public function maxViolations() : int {
-		return 1;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

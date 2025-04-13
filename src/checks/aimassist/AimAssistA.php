@@ -47,10 +47,6 @@ class AimAssistA extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 10;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

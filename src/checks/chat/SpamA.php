@@ -48,13 +48,6 @@ class SpamA extends Check {
 		return "A";
 	}
 
-	public function maxViolations() : int {
-		return 5;
-	}
-
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

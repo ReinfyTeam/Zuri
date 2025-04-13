@@ -47,10 +47,6 @@ class TimerC extends Check {
 		return "C";
 	}
 
-	public function maxViolations() : int {
-		return 5;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */
