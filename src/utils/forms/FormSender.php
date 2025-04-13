@@ -43,6 +43,7 @@ use ReinfyTeam\Zuri\ZuriAC;
 use function intval;
 use function is_bool;
 use function strtolower;
+use function strtoupper;
 
 final class FormSender extends ConfigManager {
 	use NotCloneable;
@@ -318,20 +319,20 @@ final class FormSender extends ConfigManager {
 		$form->addSlider("MaxVL", 0, 100, -1, intval(self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl")));
 		$player->sendForm($form);
 	}
-	
+
 	public static function ChangePreVL(Player $player, Check $check, bool $saved = false) : void {
 		$form = new CustomForm(function(Player $player, $data) use ($check) {
 			if ($data === null) {
 				self::ModuleInformation($player, $check);
 				return;
 			}
-			
+
 			unset($data[0]);
-		
+
 			foreach ($data as $subType => $amount) {
 				self::setData(self::CHECK . "." . strtolower($check->getName()) . ".pre-vl." . $subType, $amount);
 			}
-			
+
 			self::ChangePreVL($player, $check, true);
 		});
 
@@ -342,14 +343,14 @@ final class FormSender extends ConfigManager {
 		}
 		$player->sendForm($form);
 	}
-	
+
 	public static function TogglePunishment(Player $player, Check $check, bool $saved = false) : void {
 		$form = new SimpleForm(function(Player $player, $data) use ($check) {
 			if ($data === null) {
 				self::ModuleInformation($player, $check);
 				return;
 			}
-			
+
 			switch($data) {
 				case 0:
 					self::setData(self::CHECK . "." . strtolower($check->getName()) . ".punishment", strtoupper("kick"));

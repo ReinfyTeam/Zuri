@@ -45,7 +45,7 @@ class ClickTP extends Check {
 	public function getSubType() : string {
 		return "A";
 	}
-	
+
 	/**
 	 * @throws DiscordWebhookException
 	 */

@@ -75,7 +75,7 @@ abstract class Check extends ConfigManager {
 	public function enable() : bool {
 		return self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable", false);
 	}
-	
+
 	public function maxViolations() : int {
 		return self::getData(self::CHECK . "." . strtolower($this->getName()) . ".pre-vl." . strtolower($this->getSubType()), false);
 	}

@@ -33,7 +33,6 @@ namespace ReinfyTeam\Zuri\checks\chat;
 
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerChatEvent;
-use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;

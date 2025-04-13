@@ -46,7 +46,7 @@ class AimAssistC extends Check {
 	public function getSubType() : string {
 		return "C";
 	}
-	
+
 	/**
 	 * @throws DiscordWebhookException
 	 */
