@@ -119,12 +119,20 @@ class ZuriAC extends PluginBase {
 
 	private array $checks = [];
 
+	private const string MINIMUM_PHP_VERSION = "8.3.0";
+
 	public function onLoad() : void {
 		self::$instance = $this;
 		ConfigManager::checkConfig();
 
+	        $minimumVersion = self::MINIMUM_PHP_VERSION;
+                if (version_compare(PHP_VERSION, $minimumVersion, '<')) {
+                    $this->getLogger()->error("⚠️ You're running PHP " . PHP_VERSION . ", which is older than $minimumVersion. Please upgrade your PHP Installion to $minimumVersion or later! You may find PHP $minimumVersion builds at github.com/pmmp/PHP-Binaries/releases");
+                    $this->getServer()->shutdown();
+                }
+		
 		if (!Phar::running()) {
-			$this->getServer()->getLogger()->notice(ConfigManager::getData(config\ConfigPaths::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade checking performance. We recommended you to download phar plugin from poggit builds or github releases. Instead of using source-code from github.");
+	            $this->getServer()->getLogger()->notice(ConfigManager::getData(config\ConfigPaths::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade checking performance. We recommended you to download phar plugin from Poggit builds or Github releases. Instead of using source-code from Github.");
 		}
 	}
 
