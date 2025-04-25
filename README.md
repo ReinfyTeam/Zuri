@@ -1,7 +1,7 @@
 # Zuri Pocketmine-MP Anticheat 🛡️
 **Zuri** is an anticheat made to protect the server from any may unfair advantages from the players. A powerful anticheat made to destroy hackers from your server for PocketMine-MP.
 
-**Zuri** attempts to enforce "vanilla Minecraft" mechanics, as well as preventing players from abusing weaknesses in Minecraft or its protocol, making your server more safe. Organized in different sections, various checks are performed to test players doing, covering a wide range including flying and speeding, fighting hacks, fast block breaking and nukers, inventory hacks, chat spam and other types of malicious behaviour.
+**Zuri** attempts to enforce "vanilla Minecraft" mechanics, as well as preventing players from abusing weaknesses in Minecraft or its protocol, making your server more safe. Organized in different sections, various checks are performed to test players doing, covering a wide range including flying and speeding, combat hacks, fast block breaking and nukers, inventory hacks, chat spam and other types of malicious behaviour.
 
 > ⚠️ **Spoon or Fork of Pocketmine-MP are not supported.** Do not try to create an issue, it will closed automatically.
 
@@ -28,7 +28,11 @@ Also, adding :star: a **Star** is also appreciated. ✨
 - ✨ It is easy to use when it comes at the game, you can easily debug things, manage them all at the game, and **disable checks** according to your command. 
 - ❌ Limit players joining by their ip limit, you can change and configure on how many players can join with same ip address. *(optional)*
 - 🌟 It also checks the player if they are using a **Proxy or VPN** *(optional)*
+- ‼ It also have support for ProxyUDP. *(on development stage)*
 - 💥 You can manage plugin at the in-game using **Interactive UI** by using command! `/zuri ui`
+
+# The Origin of the Plugin
+This plugin is an inspirational and continued work of old anticheat plugin by 
 
 # Forks / Dependencies
 Here are the **dependencies** were used in the plugin:

@@ -33,9 +33,11 @@ $to = getcwd() . DIRECTORY_SEPARATOR . "build" . DIRECTORY_SEPARATOR;
 copyDirectory($from . "src", $to . "src");
 copyDirectory($from . "resources", $to . "resources");
 
-yaml_emit_file($to . "plugin.yml", (array) yaml_parse_file($from . "plugin.yml"));
+$pluginYml = yaml_parse_file($from . "plugin.yml");
 
-$outputPath = getcwd() . DIRECTORY_SEPARATOR . "Zuri.phar";
+yaml_emit_file($to . "plugin.yml", (array) $pluginYml);
+
+$outputPath = getcwd() . DIRECTORY_SEPARATOR . $pluginYml["name"] . ".phar";
 
 @unlink($outputPath);
 

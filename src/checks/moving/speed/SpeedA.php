@@ -57,7 +57,10 @@ class SpeedA extends Check {
 		$player = $playerAPI->getPlayer();
 		if ($packet instanceof PlayerAuthInputPacket) {
 			if (
-				$playerAPI->getAttackTicks() < 40 ||
+				$playerAPI->getAttackTicks() < 20 ||
+				$playerAPI->getProjectileAttackTicks() < 20 ||
+				$playerAPI->getBowShotTicks() < 20 ||
+				$playerAPI->getHurtTicks() < 10 ||
 				$playerAPI->getOnlineTime() <= 30 ||
 				!$playerAPI->isOnGround() ||
 				$playerAPI->isOnAdhesion() ||

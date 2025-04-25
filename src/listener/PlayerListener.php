@@ -342,6 +342,20 @@ class PlayerListener implements Listener {
 
 	public function onEntityDamage(EntityDamageEvent $event) : void {
 		$this->checkJustEvent($event);
+
+		if (($player = $event->getEntity()) instanceof Player) {
+			$playerAPI = PlayerAPI::getAPIPlayer($player);
+			if (
+				$event->getCause() === EntityDamageEvent::CAUSE_ENTITY_ATTACK ||
+				$event->getCause() === EntityDamageEvent::CAUSE_PROJECTILE ||
+				$event->getCause() === EntityDamageEvent::CAUSE_SUFFOCATION ||
+				$event->getCause() === EntityDamageEvent::CAUSE_VOID ||
+				$event->getCause() === EntityDamageEvent::CAUSE_FALLING_BLOCK
+			) {
+				return;
+			}
+			$playerAPI->setHurtTicks(microtime(true));
+		}
 	}
 
 	public function onEntityDamageByEntity(EntityDamageByEntityEvent $event) : void {

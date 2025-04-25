@@ -89,7 +89,7 @@ class PlayerAPI implements IPlayerAPI {
 	private float $deathTicks = 0.0;
 	private float $placingTicks = 0.0;
 	private float $bowShotTicks = 0.0;
-	// ??
+	private float $hurtTicks = 0.0;
 	private float $projectileAttackTicks = 0.0;
 	private float $lastMoveTick = 0.0;
 	private int $cps = 0;
@@ -235,7 +235,8 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getLastMoveTick() : float {
-		return $this->lastMoveTick;
+		return (microtime(true) - $this->lastMoveTick) * 20;
+		;
 	}
 
 	public function setProjectileAttackTicks(float $data) : void {
@@ -243,7 +244,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getProjectileAttackTicks() : float {
-		return $this->projectileAttackTicks;
+		return (microtime(true) - $this->projectileAttackTicks) * 20;
 	}
 
 
@@ -252,7 +253,15 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getBowShotTicks() : float {
-		return $this->bowShotTicks;
+		return (microtime(true) - $this->bowShotTicks) * 20;
+	}
+
+	public function setHurtTicks(float $data) : void {
+		$this->hurtTicks = $data;
+	}
+
+	public function getHurtTicks() : float {
+		return (microtime(true) - $this->bowShotTicks) * 20;
 	}
 
 	//On door
