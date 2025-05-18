@@ -395,16 +395,13 @@ class PlayerListener implements Listener {
 		}
 	}
 
-	public function onProjectileHitEntity(ProjectileHitEntityEvent $event) {
+	public function onProjectileHit(ProjectileHitEvent $event) {
 		$projectile = $event->getEntity();
-		$entity = $event->getEntityHit();
+		$player = $entity->getOwner();
 
-		if ($entity instanceof Player) {
-			$playerAPI = PlayerAPI::getAPIPlayer($entity);
+		if ($player !== null && $player instanceof Player) {
+			$playerAPI = PlayerAPI::getAPIPlayer($player);
 			if ($playerAPI->getPlayer() === null) {
-				return;
-			}
-			if (!$entity->isConnected() && !$entity->spawned) {
 				return;
 			}
 
