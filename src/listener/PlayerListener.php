@@ -293,17 +293,19 @@ class PlayerListener implements Listener {
 	}
 
 	public function onEntityTeleport(EntityTeleportEvent $event) : void {
-		$entity = $event->getEntity();
-		if (!$entity instanceof Player) {
+		
+		if (($entity = $event->getEntity()) instanceof Player) {
 			return;
 		}
-		$playerAPI = PlayerAPI::getAPIPlayer($entity);
-		if ($playerAPI->getPlayer() === null) {
+		
+		if (($playerAPI = PlayerAPI::getAPIPlayer($entity)) === null) {
 			return;
 		}
+		
 		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
 			return;
 		}
+		
 		$playerAPI->setTeleportTicks(microtime(true));
 	}
 
@@ -399,7 +401,7 @@ class PlayerListener implements Listener {
 		$projectile = $event->getEntity();
 		$player = $entity->getOwner();
 
-		if ($player !== null && $player instanceof Player) {
+		if ($player !== null && $player instanceof Player) { // this will fix ender pearl tp hack for now...
 			$playerAPI = PlayerAPI::getAPIPlayer($player);
 			if ($playerAPI->getPlayer() === null) {
 				return;
@@ -408,6 +410,7 @@ class PlayerListener implements Listener {
 			$playerAPI->setProjectileAttackTicks(microtime(true));
 		}
 	}
+
 
 	public function onPlayerDeath(PlayerDeathEvent $event) : void {
 		$player = $event->getPlayer();

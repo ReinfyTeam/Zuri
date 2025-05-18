@@ -59,6 +59,7 @@ class SpeedA extends Check {
 			if (
 				$playerAPI->getAttackTicks() < 20 ||
 				$playerAPI->getProjectileAttackTicks() < 20 ||
+				$playerAPI->getTeleportTicks() < 60 ||
 				$playerAPI->getBowShotTicks() < 20 ||
 				$playerAPI->getHurtTicks() < 40 ||
 				$playerAPI->getOnlineTime() <= 30 ||
