@@ -64,7 +64,7 @@ class ServerListener implements Listener {
 				return;
 			} // in-game
 			
-			if (isset($commandArguments[1]) && strlen($commandArguments[1]) < 3 && ($player = Server::getInstance()->getPlayerExact($commandArguments[1])) !== null) {
+			if (isset($commandArguments[1]) && ($player = Server::getInstance()->getPlayerExact($commandArguments[1])) !== null) {
 				(new PlayerTeleportByCommandEvent($player))->call();
 			} // console
 		}
