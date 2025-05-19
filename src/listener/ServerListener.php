@@ -54,6 +54,11 @@ use pocketmine\event\server\CommandEvent;
 class ServerListener implements Listener {
 	private array $ip = [];
 
+	/**
+	 * HACKK!! This is checking the teleport command if it is run by administrator / console.
+	 * This will prevent any malicious teleportation from player. This is BC breaking until solution is polished. Because somehow pocketmine does not have any implementation for checking of teleportation cause.
+	 * @See PlayerTeleportByCommandEvent::class for more details.
+	 */
 	public function onCommandEvent(CommandEvent $event) : void {
 		$commandArguments = explode(" ", $event->getCommand());
 		$commandSender = $event->getSender();
