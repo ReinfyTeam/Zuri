@@ -399,7 +399,7 @@ class PlayerListener implements Listener {
 
 	public function onProjectileHit(ProjectileHitEvent $event) {
 		$projectile = $event->getEntity();
-		$player = $projectile->getOwner();
+		$player = $projectile->getOwningEntity();
 
 		if ($player !== null && $player instanceof Player) { // this will fix ender pearl tp hack for now...
 			$playerAPI = PlayerAPI::getAPIPlayer($player);
