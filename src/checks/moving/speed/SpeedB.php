@@ -64,6 +64,7 @@ class SpeedB extends Check {
 				$playerAPI->getBowShotTicks() < 20 ||
 				$playerAPI->getHurtTicks() < 10 ||
 				$playerAPI->getSlimeBlockTicks() < 20 ||
+				$playerAPI->getTeleportCommandTicks() < 40 ||
 				$playerAPI->getTeleportTicks() < 60 ||
 				$playerAPI->isOnAdhesion() ||
 				(!$player->isOnGround() && $player->getInAirTicks() > 5) ||
