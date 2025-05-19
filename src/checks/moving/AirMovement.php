@@ -64,6 +64,7 @@ class AirMovement extends Check {
 				$playerAPI->getAttackTicks() > 100 &&
 				$playerAPI->getTeleportTicks() > 100 &&
 				$playerAPI->getSlimeBlockTicks() > 200 &&
+				$playerAPI->getBowShotTicks() < 20 &&
 				!$player->getAllowFlight() &&
 				!$playerAPI->isInLiquid() &&
 				!$playerAPI->isInWeb() &&
