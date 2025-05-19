@@ -40,16 +40,35 @@ use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\player\Player;
+use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\events\CaptchaEvent;
+use ReinfyTeam\Zuri\events\player\PlayerTeleportByCommandEvent;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\Discord;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use pocketmine\event\server\CommandEvent;
 
 class ServerListener implements Listener {
 	private array $ip = [];
+
+	public function onCommandEvent(CommandEvent $event) : void {
+		$commandArguments = explode(" ", $event->getCommand());
+		$commandSender = $event->getSender();
+		if (count($commandArguments) !== 0 && ($commandArguments[0] === "teleport" || $commandArguments[0] === "tp")) {
+			
+			if (isset($commandArguments[1]) && str_contains($commandArguments[1], "~") && $commandSender instanceof Player) {
+				(new PlayerTeleportByCommandEvent($commandSender))->call();
+				return;
+			} // in-game
+			
+			if (isset($commandArguments[1]) && strlen($commandArguments[1]) < 3 && ($player = Server::getInstance()->getPlayerExact($commandArguments[1])) !== null) {
+				(new PlayerTeleportByCommandEvent($player))->call();
+			} // console
+		}
+	}
 
 	public function onPlayerJoin(PlayerJoinEvent $event) : void {
 		$player = $event->getPlayer();

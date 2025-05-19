@@ -92,6 +92,7 @@ class PlayerAPI implements IPlayerAPI {
 	private float $hurtTicks = 0.0;
 	private float $projectileAttackTicks = 0.0;
 	private float $lastMoveTick = 0.0;
+	private float $teleportCommandTicks = 0.0;
 	private int $cps = 0;
 	private int $blocksBrokeASec = 0;
 	private int $blocksPlacedASec = 0;
@@ -258,6 +259,14 @@ class PlayerAPI implements IPlayerAPI {
 
 	public function setHurtTicks(float $data) : void {
 		$this->hurtTicks = $data;
+	}
+
+	public function getTeleportCommandTicks() : float {
+		return (microtime(true) - $this->teleportCommandTicks) * 20;
+	}
+	
+	public function setTeleportCommandTicks(float $data) : void {
+		$this->teleportCommandTicks = $data;
 	}
 
 	public function getHurtTicks() : float {
