@@ -16,6 +16,8 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
  * Unlike bukkit, there's something called "TeleportCause" which specifies what 
  * is the cause of the teleportation. Which is not implemented in PocketMine-MP.
  * This will fix some probably issues when Speed (A/B) detects as malicious behaivor.
+ *
+ * Also, i created this event so it can easily cancel by plugins.
  */
 class PlayerTeleportByCommandEvent extends PlayerEvent implements Cancellable{
 	use CancellableTrait;
