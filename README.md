@@ -39,6 +39,7 @@ Here are the **dependencies** were used in the plugin:
 
 - [FormAPI Fix](https://github.com/DavyCraft648/FormAPI-PM)
 - [Modified DiscordWebhookAPI](https://github.com/CortexPE/DiscordWebhookAPI/)
+- [AntiInstabreak by PMMP](https://github.com/pmmp/AntiInstabreak) (**Instabreak (A)**)
 
 Some are for fixes and some are modified for compability.
 
