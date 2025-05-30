@@ -19,3 +19,9 @@
 - [ ] Improve Reach detections. For 3.1 reach hacks.. (undetected for some reason)
 - [ ] Improve ProxyUDPSocket Client
 - [ ] Fix Speed (BC Breaking on /teleport command)
+- [ ] Add FakeGlide Detections
+- [ ] Add ItemLerp Detections
+- [ ] Add GhostHand Detections
+- [ ] Add Hitbox Detections
+- [ ] Add Motion Detections (like on BDS)
+- [ ] Add DeviceSpoofID Detections (disguising as different Device)
