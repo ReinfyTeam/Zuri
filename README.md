@@ -160,6 +160,8 @@ Some are for fixes and some are modified for compability.
      - **A:** Check if the player moving upwards straight while placing blocks check if the player is actually placing the block downwards.
 - **NetworkLimit** (BETA)
      - **A:** Limit players same ip to prevent malicious bots.
+- **AirJump** (BETA)
+     - **A:** Compare up distance and last data and calculate delta up distance.
 
 # Feedbacks and Issue's
 - 😁 Your feedback and reviews are highly appriciated, if you ever find a bug or false-positive in certain modules, you can create an issue in our [github repository](https://github.com/ReinfyTeam/Zuri/issues)!

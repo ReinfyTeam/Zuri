@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.2.6" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
+    version: "0.2.7" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -229,6 +229,7 @@ zuri:
                   jump-speed-limit: 4.19435
                   ice-walking-speed-limit: 2.09777
                   speed-effect-limit: 5.85535
+                  stairs-speed-limit: 0.80914
                   time-limit: 0.5
                   time-effect-limit: 0.2
                   wakling-distance-limit: 0.25754
@@ -237,6 +238,7 @@ zuri:
                   ice-walking-distance-limit: 0.00735
                   speed-effect-distance-limit: 0.49282
                   top-block-limit: 1.02384
+                  stairs-walking-distance-limit: 0.7130
         cheststealer:
             enable: true
             maxvl: 1
@@ -350,6 +352,9 @@ zuri:
             punishment: KICK
             constants:
                  air-limit: 3.0
+                 effect-amplifier: 1.4
+                 effect-multiplier: 2
+                 effect-const: 16
         phase:
             enable: true
             maxvl: 1
@@ -503,4 +508,9 @@ zuri:
             maxvl: 1
             pre-vl:
                 a: 3
+        airjump:
+            enable: true
+            maxvl: 1
+            pre-vl:
+                a: 2
 ...

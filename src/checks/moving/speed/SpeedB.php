@@ -90,7 +90,7 @@ class SpeedB extends Check {
 				$speedLimit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant("jump-speed-limit") : 0; // Jumping
 				$speedLimit += $playerAPI->isOnIce() ? $this->getConstant("ice-walking-speed-limit") : 0; // Ice walking limit
 				$speedLimit += $playerAPI->isTopBlock() ? $this->getConstant("top-block-limit") : 0; // Ice walking limit
-
+				$speedLimit += $playerAPI->isOnStairs() ? $this->getConstant("stairs-speed-limit") : 0; // Stairs walking limit
 				$timeLimit = $this->getConstant("time-limit");
 
 				// Calculate max distance must be the limit of blocks travelled.
@@ -98,6 +98,7 @@ class SpeedB extends Check {
 				$distanceLimit += $player->isSprinting() ? $this->getConstant("sprinting-distance-limit") : 0; // Sprinting
 				$distanceLimit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant("jump-distance-limit") : 0; // Jumping
 				$distanceLimit += $playerAPI->isOnIce() ? $this->getConstant("ice-walking-distance-limit") : 0; // Ice walking limit
+				$distanceLimit += $playerAPI->isOnStairs() ? $this->getConstant("stairs-walking-distance-limit") : 0; // Stairs walking limit
 
 				// Calculate speed potion deviation..
 				if (($effect = $player->getEffects()->get(VanillaEffects::SPEED())) !== null) {

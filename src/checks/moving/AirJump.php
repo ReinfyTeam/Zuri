@@ -31,14 +31,16 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\event\Event;
+use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
-class AirMovement extends Check {
+class AirJump extends Check {
 	public function getName() : string {
-		return "AirMovement";
+		return "AirJump";
 	}
 
 	public function getSubType() : string {
@@ -48,43 +50,46 @@ class AirMovement extends Check {
 	/**
 	 * @throws DiscordWebhookException
 	 */
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		$effects = [];
 		$player = $playerAPI->getPlayer();
 		if (!$player->spawned && !$player->isConnected()) {
 			return;
 		} // Effect::$effectInstance bug fix
-		foreach ($player->getEffects()->all() as $effect) {
-			$transtable = $effect->getType()->getName()->getText();
-			$effects[$transtable] = $effect->getEffectLevel() + 1;
-		}
-		$nLocation = $playerAPI->getNLocation();
-		if (!empty($nLocation)) {
+		if ($event instanceof PlayerMoveEvent) {
 			if (
-				$playerAPI->getAttackTicks() > 100 &&
-				$playerAPI->getTeleportTicks() > 100 &&
-				$playerAPI->getSlimeBlockTicks() > 200 &&
-				$playerAPI->getBowShotTicks() < 20 &&
-				!$player->getAllowFlight() &&
-				!$playerAPI->isInLiquid() &&
-				!$playerAPI->isInWeb() &&
-				!$playerAPI->isOnGround() &&
-				!$playerAPI->isOnAdhesion() &&
-				$player->isSurvival() &&
-				$playerAPI->getLastGroundY() !== 0.0 &&
-				$nLocation["to"]->getY() > $playerAPI->getLastGroundY() &&
-				$nLocation["to"]->getY() > $nLocation["from"]->getY() &&
-				$playerAPI->getOnlineTime() >= 30 &&
-				$playerAPI->getPing() < self::getData(self::PING_LAGGING)
+				$playerAPI->getJumpTicks() > 40 ||
+				!$player->isSurvival() ||
+				$playerAPI->getAttackTicks() < 40 ||
+				$playerAPI->getProjectileAttackTicks() < 20 ||
+				$playerAPI->getBowShotTicks() < 20 ||
+				$playerAPI->getHurtTicks() < 10 ||
+				$playerAPI->getSlimeBlockTicks() < 20 ||
+				$playerAPI->getTeleportCommandTicks() < 40 ||
+				$playerAPI->getTeleportTicks() < 60 ||
+				$playerAPI->isOnAdhesion() ||
+				($player->isOnGround() && $player->getInAirTicks() < 5) ||
+				$player->isFlying() ||
+				$player->getAllowFlight() ||
+				$player->hasNoClientPredictions() ||
+				!$playerAPI->isCurrentChunkIsLoaded() ||
+				BlockUtil::isGroundSolid($player) ||
+				$playerAPI->isGliding()
 			) {
-				$distance = $nLocation["to"]->getY() - $playerAPI->getLastGroundY();
-				$limit = $this->getConstant("air-limit");
-				$limit += isset($effects["potion.jump"]) ? ((($effects["potion.jump"] + $this->getConstant("effect-amplifier")) ** $this->getConstant("effect-multiplier")) / $this->getConstant("effect-const")) : 0;
-				if ($distance > $limit) {
-					$this->failed($playerAPI);
-				}
-				$this->debug($playerAPI, "distance=$distance, limit=$limit");
+				return;
 			}
+			
+			$upDistance = round(($event->getTo()->getY() - $event->getFrom()->getY()), 3);
+			$lastUpDistance = $playerAPI->getExternalData("lastUpDistance") ?? 0;
+			$delta = abs(round(($upDistance - $lastUpDistance), 3));
+			$limit = 0.825;
+			
+			if ($delta > $limit) { // what is this dumb check
+				$this->failed($playerAPI);
+			}
+			
+			$playerAPI->setExternalData("lastUpDistance", $upDistance);
+			$this->debug($playerAPI, "upDistance=$upDistance, lastUpDistance=$lastUpDistance, delta=$delta, limit=$limit");
 		}
 	}
 }
