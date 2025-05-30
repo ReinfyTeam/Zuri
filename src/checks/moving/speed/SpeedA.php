@@ -63,10 +63,9 @@ class SpeedA extends Check {
 				$playerAPI->getBowShotTicks() < 20 ||
 				$playerAPI->getHurtTicks() < 40 ||
 				$playerAPI->getTeleportCommandTicks() < 40 ||
-				$playerAPI->getOnlineTime() <= 30 ||
-				!$playerAPI->isOnGround() ||
 				$playerAPI->isOnAdhesion() ||
 				$player->getAllowFlight() ||
+				$player->getInAirTicks() > 40 ||
 				$player->isFlying() ||
 				$player->hasNoClientPredictions() ||
 				!$player->isSurvival() ||
