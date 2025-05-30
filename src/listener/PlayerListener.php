@@ -293,19 +293,18 @@ class PlayerListener implements Listener {
 	}
 
 	public function onEntityTeleport(EntityTeleportEvent $event) : void {
-		
 		if (($entity = $event->getEntity()) instanceof Player) {
 			return;
 		}
-		
+
 		if (($playerAPI = PlayerAPI::getAPIPlayer($entity)) === null) {
 			return;
 		}
-		
+
 		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
 			return;
 		}
-		
+
 		$playerAPI->setTeleportTicks(microtime(true));
 	}
 

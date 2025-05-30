@@ -264,7 +264,7 @@ class PlayerAPI implements IPlayerAPI {
 	public function getTeleportCommandTicks() : float {
 		return (microtime(true) - $this->teleportCommandTicks) * 20;
 	}
-	
+
 	public function setTeleportCommandTicks(float $data) : void {
 		$this->teleportCommandTicks = $data;
 	}

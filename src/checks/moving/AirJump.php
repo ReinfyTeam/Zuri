@@ -37,6 +37,8 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function abs;
+use function round;
 
 class AirJump extends Check {
 	public function getName() : string {
@@ -78,16 +80,16 @@ class AirJump extends Check {
 			) {
 				return;
 			}
-			
+
 			$upDistance = round(($event->getTo()->getY() - $event->getFrom()->getY()), 3);
 			$lastUpDistance = $playerAPI->getExternalData("lastUpDistance") ?? 0;
 			$delta = abs(round(($upDistance - $lastUpDistance), 3));
 			$limit = 0.825;
-			
+
 			if ($delta > $limit) { // what is this dumb check
 				$this->failed($playerAPI);
 			}
-			
+
 			$playerAPI->setExternalData("lastUpDistance", $upDistance);
 			$this->debug($playerAPI, "upDistance=$upDistance, lastUpDistance=$lastUpDistance, delta=$delta, limit=$limit");
 		}

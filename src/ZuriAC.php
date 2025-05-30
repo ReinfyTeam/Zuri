@@ -84,11 +84,12 @@ use ReinfyTeam\Zuri\checks\inventory\ChestAura;
 use ReinfyTeam\Zuri\checks\inventory\ChestStealer;
 use ReinfyTeam\Zuri\checks\inventory\InventoryCleaner;
 use ReinfyTeam\Zuri\checks\inventory\InventoryMove;
+use ReinfyTeam\Zuri\checks\moving\AirJump;
 use ReinfyTeam\Zuri\checks\moving\AirMovement;
 use ReinfyTeam\Zuri\checks\moving\AntiImmobile;
 use ReinfyTeam\Zuri\checks\moving\ClickTP;
+use ReinfyTeam\Zuri\checks\moving\FakeGlide;
 use ReinfyTeam\Zuri\checks\moving\FastLadder;
-use ReinfyTeam\Zuri\checks\moving\Glide;
 use ReinfyTeam\Zuri\checks\moving\Jesus;
 use ReinfyTeam\Zuri\checks\moving\OmniSprint;
 use ReinfyTeam\Zuri\checks\moving\Phase;
@@ -96,7 +97,6 @@ use ReinfyTeam\Zuri\checks\moving\speed\SpeedA;
 use ReinfyTeam\Zuri\checks\moving\speed\SpeedB;
 use ReinfyTeam\Zuri\checks\moving\Spider;
 use ReinfyTeam\Zuri\checks\moving\Step;
-use ReinfyTeam\Zuri\checks\moving\AirJump;
 use ReinfyTeam\Zuri\checks\moving\WrongPitch;
 use ReinfyTeam\Zuri\checks\network\antibot\AntiBotA;
 use ReinfyTeam\Zuri\checks\network\antibot\AntiBotB;
@@ -290,8 +290,8 @@ class ZuriAC extends PluginBase {
 
 		$this->checks[] = new SpeedB(); // Improve in next versions.
 
-		$this->checks[] = new Glide(); // Improve in next versions.
-		
+		$this->checks[] = new FakeGlide(); // Improve in next versions.
+
 		$this->checks[] = new AirJump(); // Improve in next versions.
 
 		// Network related

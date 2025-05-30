@@ -39,6 +39,7 @@ use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerQuitEvent;
+use pocketmine\event\server\CommandEvent;
 use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -49,7 +50,9 @@ use ReinfyTeam\Zuri\events\player\PlayerTeleportByCommandEvent;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\Discord;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
-use pocketmine\event\server\CommandEvent;
+use function count;
+use function explode;
+use function str_contains;
 
 class ServerListener implements Listener {
 	private array $ip = [];
@@ -63,12 +66,11 @@ class ServerListener implements Listener {
 		$commandArguments = explode(" ", $event->getCommand());
 		$commandSender = $event->getSender();
 		if (count($commandArguments) !== 0 && ($commandArguments[0] === "teleport" || $commandArguments[0] === "tp")) {
-			
 			if (isset($commandArguments[1]) && str_contains($commandArguments[1], "~") && $commandSender instanceof Player) {
 				(new PlayerTeleportByCommandEvent($commandSender))->call();
 				return;
 			} // in-game
-			
+
 			if (isset($commandArguments[1]) && ($player = Server::getInstance()->getPlayerByPrefix($commandArguments[1])) !== null) {
 				(new PlayerTeleportByCommandEvent($player))->call();
 			} // console

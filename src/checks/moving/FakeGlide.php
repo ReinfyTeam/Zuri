@@ -40,7 +40,7 @@ use function strpos;
 
 class Glide extends Check {
 	public function getName() : string {
-		return "Glide";
+		return "FakeGlide";
 	}
 
 	public function getSubType() : string {
