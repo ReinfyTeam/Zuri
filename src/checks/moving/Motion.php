@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\moving;
 
 use pocketmine\block\BlockTypeIds;
+use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
@@ -134,11 +135,11 @@ class Motion extends Check {
 						return;
 					}
 
-					$expectedVelocity = -0.08 / 0.02 - (-0.08 / 0.02) * exp(-0.02 * ($player->getInAirTicks() - $player->getStartAirTicks()));
+					$expectedVelocity = -0.08 / 0.02 - (-0.08 / 0.02) * exp(-0.02 * $player->getInAirTicks());
 					$jumpVelocity = (0.42 + ($player->getEffects()->get(VanillaEffects::JUMP_BOOST()) ? ($player->getEffects()->get(VanillaEffects::JUMP_BOOST())->getEffectLevel() / 10) : 0)) / 0.42;
-					$diff = (($speed->y - $expectedVelocity) ** 2) / $jumpVelocity;
+					$diff = (($speed->getY() - $expectedVelocity) ** 2) / $jumpVelocity;
 
-					if ($diff > 0.6 and $expectedVelocity < $speed->y) {
+					if ($diff > 0.6 and $expectedVelocity < $speed->getY()) {
 						if ($player->getInAirTicks() < 100) {
 							$player->setMotion(new Vector3(0, $expectedVelocity, 0)); // Correct the motion
 						} else {
