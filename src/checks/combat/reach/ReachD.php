@@ -32,21 +32,19 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\combat\reach;
 
 use pocketmine\event\entity\EntityDamageByEntityEvent;
-use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Event;
-use pocketmine\player\Player;
+use pocketmine\math\Vector3;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
-use ReinfyTeam\Zuri\utils\MathUtil;
 
-class ReachB extends Check {
+class ReachD extends Check {
 	public function getName() : string {
 		return "Reach";
 	}
 
 	public function getSubType() : string {
-		return "B";
+		return "D";
 	}
 
 	/**
@@ -54,19 +52,32 @@ class ReachB extends Check {
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
-			$cause = $event->getCause();
-			$entity = $event->getEntity();
-			$damager = $event->getDamager();
-			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player) {
-				$entityAPI = PlayerAPI::getAPIPlayer($entity);
-				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
-				$player = $entityAPI->getPlayer();
-				$damager = $damagerAPI->getPlayer();
-				if (MathUtil::XZDistanceSquared($entityAPI->getLocation()->asVector3(), $damager->getLocation()->asVector3()) > ($damager->isSurvival() ? $this->getConstant("survival-max-distance") : $this->getConstant("creative-max-distance"))) {
-					$this->failed($damagerAPI);
-				}
-				$this->debug($damagerAPI, "distance=" . MathUtil::XZDistanceSquared($player->getLocation()->asVector3(), $damager->getLocation()->asVector3()));
+			$player = $playerAPI->getPlayer();
+			$damagerPing = $damager->getNetworkSession()->getPing();
+			$playerPing = $player->getNetworkSession()->getPing();
+
+			$distance = $player->getEyePos()->distance(new Vector3($damager->getEyePos()->getX(), $player->getEyePos()->getY(), $damager->getEyePos()->getZ()));
+			$distance -= $damagerPing * $this->getConstant("default-eye-distance");
+			$distance -= $playerPing * $this->getConstant("default-eye-distance");
+			$limit = $this->getConstant("reach-eye-limit");
+
+			if ($player->isSprinting()) {
+				$distance -= $this->getConstant("sprinting-eye-distance");
+			} else {
+				$distance -= $this->getConstant("not-sprinting-eye-distance");
 			}
+
+			if ($damager->isSprinting()) {
+				$distance -= $this->getConstant("damager-sprinting-eye-distance");
+			} elseif (!$damager->isSprinting()) {
+				$distance -= $this->getConstant("not-sprinting-damager-eye-distance");
+			}
+
+			if ($distance > $limit) {
+				$this->failed($playerAPI);
+			}
+
+			$this->debug($playerAPI, "distance=$distance, limit=$limit");
 		}
 	}
 }

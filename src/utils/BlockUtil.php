@@ -384,6 +384,10 @@ class BlockUtil {
 		return self::isUnderBlock($location, [BlockTypeIds::SLIME], $down);
 	}
 
+	public static function getUnderBlock(Location $location, int $deep = 1) {
+		return $location->getWorld()->getBlockAt(abs($location->x), abs($location->y - $deep), abs($location->z));
+	}
+
 	public static function distance(Position $a, Position $b) {
 		return sqrt((($a->getX() - $b->getX()) ** 2) + (($a->getY() - $b->getY()) ** 2) + (($a->getZ() - $b->getZ()) ** 2));
 	}

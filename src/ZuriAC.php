@@ -76,6 +76,7 @@ use ReinfyTeam\Zuri\checks\combat\killaura\KillAuraE;
 use ReinfyTeam\Zuri\checks\combat\reach\ReachA;
 use ReinfyTeam\Zuri\checks\combat\reach\ReachB;
 use ReinfyTeam\Zuri\checks\combat\reach\ReachC;
+use ReinfyTeam\Zuri\checks\combat\reach\ReachD;
 use ReinfyTeam\Zuri\checks\fly\FlyA;
 use ReinfyTeam\Zuri\checks\fly\FlyB;
 use ReinfyTeam\Zuri\checks\fly\FlyC;
@@ -91,6 +92,7 @@ use ReinfyTeam\Zuri\checks\moving\ClickTP;
 use ReinfyTeam\Zuri\checks\moving\FakeGlide;
 use ReinfyTeam\Zuri\checks\moving\FastLadder;
 use ReinfyTeam\Zuri\checks\moving\Jesus;
+use ReinfyTeam\Zuri\checks\moving\Motion;
 use ReinfyTeam\Zuri\checks\moving\OmniSprint;
 use ReinfyTeam\Zuri\checks\moving\Phase;
 use ReinfyTeam\Zuri\checks\moving\speed\SpeedA;
@@ -231,13 +233,14 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new SpamB();
 
 		// Combat
-		$this->checks[] = new ReachA();
-		$this->checks[] = new ReachB();
-		$this->checks[] = new ReachC();
+		$this->checks[] = new ReachA(); // Improve in next versions..
+		$this->checks[] = new ReachB(); // Improve in next versions..
+		$this->checks[] = new ReachC(); // Improve in next versions..
+		$this->checks[] = new ReachD(); // Improve in next versions..
 
-		$this->checks[] = new AutoClickA();
-		$this->checks[] = new AutoClickB();
-		$this->checks[] = new AutoClickC();
+		$this->checks[] = new AutoClickA(); // Improve in next versions..
+		$this->checks[] = new AutoClickB(); // Improve in next versions..
+		$this->checks[] = new AutoClickC(); // Improve in next versions..
 
 		$this->checks[] = new KillAuraA();
 		$this->checks[] = new KillAuraB();
@@ -250,9 +253,9 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new FastBow();
 
 		// Fly
-		$this->checks[] = new FlyA();
+		$this->checks[] = new FlyA(); // Improve in next versions..
 		$this->checks[] = new FlyB();
-		$this->checks[] = new FlyC();
+		$this->checks[] = new FlyC(); // Improve in next versions..
 
 		// Inventory
 		$this->checks[] = new AutoArmor();
@@ -276,7 +279,7 @@ class ZuriAC extends PluginBase {
 
 		$this->checks[] = new Step();
 
-		$this->checks[] = new OmniSprint();
+		$this->checks[] = new OmniSprint(); // Improve in next versions..
 
 		$this->checks[] = new Jesus();
 
@@ -294,14 +297,16 @@ class ZuriAC extends PluginBase {
 
 		$this->checks[] = new AirJump(); // Improve in next versions.
 
+		$this->checks[] = new Motion(); // Improve in next versions.
+
 		// Network related
-		$this->checks[] = new AntiBotA();
-		$this->checks[] = new AntiBotB();
+		$this->checks[] = new AntiBotA(); // Improve in next versions..
+		$this->checks[] = new AntiBotB(); // Improve in next versions..
 
 		$this->checks[] = new EditionFakerA();
 		$this->checks[] = new EditionFakerB();
 
-		$this->checks[] = new ProxyBot();
+		$this->checks[] = new ProxyBot(); // Improve in next versions..
 	}
 
 	public static function Checks() : array {

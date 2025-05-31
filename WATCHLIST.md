@@ -23,5 +23,5 @@
 - [ ] Add ItemLerp Detections
 - [ ] Add GhostHand Detections
 - [ ] Add Hitbox Detections
-- [ ] Add Motion Detections (like on BDS)
+- [x] Add Motion Detections (correct the motion like on BDS)
 - [ ] Add DeviceSpoofID Detections (disguising as different Device)

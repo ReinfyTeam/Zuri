@@ -38,7 +38,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function strpos;
 
-class Glide extends Check {
+class FakeGlide extends Check {
 	public function getName() : string {
 		return "FakeGlide";
 	}

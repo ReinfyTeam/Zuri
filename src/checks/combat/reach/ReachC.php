@@ -48,10 +48,6 @@ class ReachC extends Check {
 		return "C";
 	}
 
-	public function maxViolations() : int {
-		return 3;
-	}
-
 	/**
 	 * @throws DiscordWebhookException
 	 */

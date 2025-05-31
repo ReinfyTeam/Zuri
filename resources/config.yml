@@ -8,7 +8,7 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
-    version: "0.2.7" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
+    version: "0.2.8" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"
     editionfaker:
@@ -291,12 +291,19 @@ zuri:
                 a: 3
                 b: 3
                 c: 3
+                d: 3
             punishment: KICK
             constants:
                  max-distance: 4.3
                  survival-max-distance: 4.0
                  creative-max-distance: 8.3
                  max-reach-eye-distance: 4.7
+                 default-eye-distance: 0.0041
+                 sprinting-eye-distance: 0.97
+                 not-sprinting-eye-distance: 0.87
+                 damager-sprinting-eye-distance: 0.77
+                 not-sprinting-damager-eye-distance: 0.67
+                 reach-eye-limit: 3.0
         fly:
             enable: true
             maxvl: 1
@@ -513,4 +520,9 @@ zuri:
             maxvl: 1
             pre-vl:
                 a: 2
+        motion:
+            enable: true
+            maxvl: 1
+            pre-vl:
+                a: 3
 ...
