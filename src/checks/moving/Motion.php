@@ -102,9 +102,7 @@ class Motion extends Check {
 			if ($player->isAlive() and !$player->isSpectator()) {
 				if (
 					$player->getInAirTicks() > 10 &&
-					!$player->isSleeping() &&
-					!$player->hasNoClientPredictions() &&
-					!$player->getAllowFlight()
+					!$player->isSleeping()
 				) {
 					$blockUnder = BlockUtil::getUnderBlock($location);
 
