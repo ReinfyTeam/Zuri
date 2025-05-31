@@ -55,8 +55,7 @@ class AntiVoid extends Check {
 			$playerAPI->isInWeb() ||
 			$playerAPI->getDeathTicks() < 100 ||
 			$playerAPI->getJumpTicks() < 60 ||
-			$playerAPI->getTeleportTicks() < 100 ||
-			$playerAPI->isOnGround()
+			$playerAPI->getTeleportCommandTicks() < 100
 		) {
 			return;
 		}
