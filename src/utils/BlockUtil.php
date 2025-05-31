@@ -385,7 +385,7 @@ class BlockUtil {
 	}
 
 	public static function getUnderBlock(Location $location, int $deep = 1) {
-		return $location->getWorld()->getBlockAt((int) abs($location->getX()), (int) abs($location->getY()) - $deep, (int) abs($location->getZ);
+		return $location->getWorld()->getBlockAt(abs((int) $location->getX()), abs((int) $location->getY()) - $deep, abs((int) $location->getZ);
 	}
 
 	public static function distance(Position $a, Position $b) {
