@@ -38,10 +38,10 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
-use function array_flip;
-use function array_intersect_key;
+use function array_intersect;
 use function count;
 use function intval;
+use function is_array;
 
 class FlyC extends Check {
 	public function getName() : string {
@@ -81,7 +81,7 @@ class FlyC extends Check {
 						$maxY = $player->getWorld()->getHighestBlockAt(intval($newPos->getX()), intval($newPos->getZ()));
 						$this->debug($playerAPI, "oldY=" . $oldPos->getY() . ", newY=" . $newPos->getY() . ", airTicks=" . $player->getInAirTicks() . ", surroundingBlocks=" . count($surroundingBlocks));
 						if ($newPos->getY() - 1 > $maxY) {
-							if (count(array_intersect_key(array_flip($surroundingBlocks), array_flip([
+							if (!is_array($surroundingBlocks) || count(array_intersect($surroundingBlocks, [
 								BlockTypeIds::OAK_FENCE,
 								BlockTypeIds::COBBLESTONE_WALL,
 								BlockTypeIds::ACACIA_FENCE,
@@ -108,7 +108,7 @@ class FlyC extends Check {
 								BlockTypeIds::HARDENED_GLASS_PANE,
 								BlockTypeIds::STAINED_GLASS_PANE,
 								BlockTypeIds::STAINED_HARDENED_GLASS_PANE
-							])) === 0)) {
+							])) === 0) {
 								$this->failed($playerAPI);
 							}
 						}
