@@ -130,7 +130,9 @@ class Phase extends Check {
 					BlockTypeIds::BEETROOTS,
 					BlockTypeIds::CAKE,
 					BlockTypeIds::CARROTS,
-					BlockTypeIds::FIRE
+					BlockTypeIds::FIRE,
+					BlockTypeIds::BAMBOO,
+					BlockTypeIds::BAMBOO_SAPLING,
 				]);
 
 				if (
