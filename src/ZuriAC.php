@@ -92,7 +92,6 @@ use ReinfyTeam\Zuri\checks\moving\ClickTP;
 use ReinfyTeam\Zuri\checks\moving\FakeGlide;
 use ReinfyTeam\Zuri\checks\moving\FastLadder;
 use ReinfyTeam\Zuri\checks\moving\Jesus;
-use ReinfyTeam\Zuri\checks\moving\Motion;
 use ReinfyTeam\Zuri\checks\moving\OmniSprint;
 use ReinfyTeam\Zuri\checks\moving\Phase;
 use ReinfyTeam\Zuri\checks\moving\speed\SpeedA;
@@ -296,8 +295,6 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new FakeGlide(); // Improve in next versions.
 
 		$this->checks[] = new AirJump(); // Improve in next versions.
-
-		$this->checks[] = new Motion(); // Improve in next versions.
 
 		// Network related
 		$this->checks[] = new AntiBotA(); // Improve in next versions..
