@@ -38,8 +38,9 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function array_flip;
+use function array_intersect_key;
 use function count;
-use function in_array;
 use function intval;
 
 class FlyC extends Check {
@@ -80,35 +81,34 @@ class FlyC extends Check {
 						$maxY = $player->getWorld()->getHighestBlockAt(intval($newPos->getX()), intval($newPos->getZ()));
 						$this->debug($playerAPI, "oldY=" . $oldPos->getY() . ", newY=" . $newPos->getY() . ", airTicks=" . $player->getInAirTicks() . ", surroundingBlocks=" . count($surroundingBlocks));
 						if ($newPos->getY() - 1 > $maxY) {
-							if (
-								!in_array(BlockTypeIds::OAK_FENCE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::COBBLESTONE_WALL, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::ACACIA_FENCE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::OAK_FENCE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::BIRCH_FENCE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::DARK_OAK_FENCE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::JUNGLE_FENCE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::NETHER_BRICK_FENCE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::SPRUCE_FENCE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::WARPED_FENCE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::MANGROVE_FENCE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::CRIMSON_FENCE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::CHERRY_FENCE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::ACACIA_FENCE_GATE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::OAK_FENCE_GATE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::BIRCH_FENCE_GATE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::DARK_OAK_FENCE_GATE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::JUNGLE_FENCE_GATE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::SPRUCE_FENCE_GATE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::WARPED_FENCE_GATE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::MANGROVE_FENCE_GATE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::CRIMSON_FENCE_GATE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::CHERRY_FENCE_GATE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::GLASS_PANE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::HARDENED_GLASS_PANE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::STAINED_GLASS_PANE, $surroundingBlocks, true)
-								|| !in_array(BlockTypeIds::STAINED_HARDENED_GLASS_PANE, $surroundingBlocks, true)
-							) {
+							if (count(array_intersect_key(array_flip($surroundingBlocks), array_flip([
+								BlockTypeIds::OAK_FENCE,
+								BlockTypeIds::COBBLESTONE_WALL,
+								BlockTypeIds::ACACIA_FENCE,
+								BlockTypeIds::BIRCH_FENCE,
+								BlockTypeIds::DARK_OAK_FENCE,
+								BlockTypeIds::JUNGLE_FENCE,
+								BlockTypeIds::NETHER_BRICK_FENCE,
+								BlockTypeIds::SPRUCE_FENCE,
+								BlockTypeIds::WARPED_FENCE,
+								BlockTypeIds::MANGROVE_FENCE,
+								BlockTypeIds::CRIMSON_FENCE,
+								BlockTypeIds::CHERRY_FENCE,
+								BlockTypeIds::ACACIA_FENCE_GATE,
+								BlockTypeIds::OAK_FENCE_GATE,
+								BlockTypeIds::BIRCH_FENCE_GATE,
+								BlockTypeIds::DARK_OAK_FENCE_GATE,
+								BlockTypeIds::JUNGLE_FENCE_GATE,
+								BlockTypeIds::SPRUCE_FENCE_GATE,
+								BlockTypeIds::WARPED_FENCE_GATE,
+								BlockTypeIds::MANGROVE_FENCE_GATE,
+								BlockTypeIds::CRIMSON_FENCE_GATE,
+								BlockTypeIds::CHERRY_FENCE_GATE,
+								BlockTypeIds::GLASS_PANE,
+								BlockTypeIds::HARDENED_GLASS_PANE,
+								BlockTypeIds::STAINED_GLASS_PANE,
+								BlockTypeIds::STAINED_HARDENED_GLASS_PANE
+							])) === 0)) {
 								$this->failed($playerAPI);
 							}
 						}

@@ -39,8 +39,8 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
 use function abs;
+use function array_flip;
 use function fmod;
-use function in_array;
 use function sqrt;
 
 class BlockUtil {
@@ -173,75 +173,61 @@ class BlockUtil {
 	public static function isUnderBlock(Location $location, array $id, int $down) : bool {
 		$posX = $location->getX();
 		$posZ = $location->getZ();
+
 		$fracX = (fmod($posX, 1.0) > 0.0) ? abs(fmod($posX, 1.0)) : (1.0 - abs(fmod($posX, 1.0)));
 		$fracZ = (fmod($posZ, 1.0) > 0.0) ? abs(fmod($posZ, 1.0)) : (1.0 - abs(fmod($posZ, 1.0)));
-		$blockX = $location->getX();
-		$blockY = $location->getY() - $down;
-		$blockZ = $location->getZ();
+
+		$blockX = (int) $location->getX();
+		$blockY = (int) $location->getY() - $down;
+		$blockZ = (int) $location->getZ();
 		$world = $location->getWorld();
 
-		if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ)->getTypeId(), $id, true)) {
+		// Flip the array once for fast lookup (#72)
+		$idMap = array_flip($id);
+
+		$check = static fn(int $x, int $y, int $z) => isset($idMap[$world->getBlockAt($x, $y, $z)->getTypeId()]);
+
+		if ($check($blockX, $blockY, $blockZ)) {
 			return true;
 		}
+
 		if ($fracX < 0.3) {
-			if (in_array($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ)->getTypeId(), $id, true)) {
+			if ($check($blockX - 1, $blockY, $blockZ)) {
 				return true;
 			}
+
 			if ($fracZ < 0.3) {
-				if (in_array($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
-					return true;
-				}
-				if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
-					return true;
-				}
-				if (in_array($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
-					return true;
-				}
+				return $check($blockX - 1, $blockY, $blockZ - 1) ||
+					   $check($blockX,     $blockY, $blockZ - 1) ||
+					   $check($blockX + 1, $blockY, $blockZ - 1);
 			} elseif ($fracZ > 0.7) {
-				if (in_array($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
-					return true;
-				}
-				if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
-					return true;
-				}
-				if (in_array($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
-					return true;
-				}
+				return $check($blockX - 1, $blockY, $blockZ + 1) ||
+					   $check($blockX,     $blockY, $blockZ + 1) ||
+					   $check($blockX + 1, $blockY, $blockZ + 1);
 			}
 		} elseif ($fracX > 0.7) {
-			if (in_array($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ)->getTypeId(), $id, true)) {
+			if ($check($blockX + 1, $blockY, $blockZ)) {
 				return true;
 			}
+
 			if ($fracZ < 0.3) {
-				if (in_array($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
-					return true;
-				}
-				if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
-					return true;
-				}
-				if (in_array($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
-					return true;
-				}
+				return $check($blockX - 1, $blockY, $blockZ - 1) ||
+					   $check($blockX,     $blockY, $blockZ - 1) ||
+					   $check($blockX + 1, $blockY, $blockZ - 1);
 			} elseif ($fracZ > 0.7) {
-				if (in_array($world->getBlockAt((int) $blockX - 1, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
-					return true;
-				}
-				if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
-					return true;
-				}
-				if (in_array($world->getBlockAt((int) $blockX + 1, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
-					return true;
-				}
+				return $check($blockX - 1, $blockY, $blockZ + 1) ||
+					   $check($blockX,     $blockY, $blockZ + 1) ||
+					   $check($blockX + 1, $blockY, $blockZ + 1);
 			}
 		} elseif ($fracZ < 0.3) {
-			if (in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ - 1)->getTypeId(), $id, true)) {
-				return true;
-			}
-		} elseif ($fracZ > 0.7 && in_array($world->getBlockAt((int) $blockX, (int) $blockY, (int) $blockZ + 1)->getTypeId(), $id, true)) {
-			return true;
+			return $check($blockX, $blockY, $blockZ - 1);
+		} elseif ($fracZ > 0.7) {
+			return $check($blockX, $blockY, $blockZ + 1);
 		}
+
 		return false;
 	}
+
 
 	public static function isOnStairs(Location $location, int $down) : bool {
 		static $stairs = [

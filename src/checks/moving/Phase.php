@@ -39,7 +39,8 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
-use function in_array;
+use function array_flip;
+use function array_keys;
 use function intval;
 
 class Phase extends Check {
@@ -63,7 +64,7 @@ class Phase extends Check {
 			}
 			$id = $world->getBlock($player->getLocation()->add(0, -1, 0))->getTypeId();
 			if ($world->getBlock($player->getLocation()->add(0, 1, 0))->isSolid() && $world->getBlock($player->getLocation()->add(0, -1, 0))->isSolid()) {
-				$skip = [
+				$skipFlipped = array_flip([
 					BlockTypeIds::SAND,
 					BlockTypeIds::GRAVEL,
 					BlockTypeIds::ANVIL,
@@ -86,23 +87,15 @@ class Phase extends Check {
 					BlockTypeIds::CRIMSON_WALL_SIGN,
 					BlockTypeIds::WARPED_WALL_SIGN,
 					BlockTypeIds::CHERRY_WALL_SIGN,
-					BlockTypeIds::ACACIA_SIGN,
-					BlockTypeIds::ACACIA_WALL_SIGN,
 					BlockTypeIds::BIRCH_SIGN,
-					BlockTypeIds::BIRCH_WALL_SIGN,
 					BlockTypeIds::DARK_OAK_SIGN,
-					BlockTypeIds::DARK_OAK_WALL_SIGN,
 					BlockTypeIds::JUNGLE_SIGN,
-					BlockTypeIds::JUNGLE_WALL_SIGN,
 					BlockTypeIds::OAK_SIGN,
-					BlockTypeIds::OAK_WALL_SIGN,
 					BlockTypeIds::SPRUCE_SIGN,
-					BlockTypeIds::SPRUCE_WALL_SIGN,
 					BlockTypeIds::MANGROVE_SIGN,
 					BlockTypeIds::CRIMSON_SIGN,
 					BlockTypeIds::WARPED_SIGN,
 					BlockTypeIds::CHERRY_SIGN,
-					BlockTypeIds::CHERRY_WALL_SIGN,
 					BlockTypeIds::GLASS_PANE,
 					BlockTypeIds::HARDENED_GLASS_PANE,
 					BlockTypeIds::STAINED_GLASS_PANE,
@@ -138,8 +131,22 @@ class Phase extends Check {
 					BlockTypeIds::CAKE,
 					BlockTypeIds::CARROTS,
 					BlockTypeIds::FIRE
-				];
-				if ($player->isSurvival() && !$playerAPI->isOnCarpet() && !$playerAPI->isOnPlate() && !$playerAPI->isOnDoor() && !$playerAPI->isOnSnow() && !$playerAPI->isOnPlant() && !$playerAPI->isOnAdhesion() && !$playerAPI->isOnStairs() && !$playerAPI->isInLiquid() && !$playerAPI->isInWeb() && !in_array($id, $skip, true) && !BlockUtil::isUnderBlock($event->getTo(), $skip, 0)) {
+				]);
+
+				if (
+					$player->isSurvival()
+					&& !$playerAPI->isOnCarpet()
+					&& !$playerAPI->isOnPlate()
+					&& !$playerAPI->isOnDoor()
+					&& !$playerAPI->isOnSnow()
+					&& !$playerAPI->isOnPlant()
+					&& !$playerAPI->isOnAdhesion()
+					&& !$playerAPI->isOnStairs()
+					&& !$playerAPI->isInLiquid()
+					&& !$playerAPI->isInWeb()
+					&& !isset($skipFlipped[$id])
+					&& !BlockUtil::isUnderBlock($event->getTo(), array_keys($skipFlipped), 0)
+				) {
 					$this->failed($playerAPI);
 					$x = intval($player->getLocation()->getX());
 					$z = intval($player->getLocation()->getZ());
