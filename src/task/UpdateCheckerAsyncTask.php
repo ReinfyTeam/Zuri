@@ -39,6 +39,7 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
 use function date;
 use function json_decode;
+use function round;
 use function strtotime;
 
 class UpdateCheckerAsyncTask extends AsyncTask {
@@ -49,46 +50,55 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 	}
 
 	public function onRun() : void {
-		$result = Internet::getURL("https://api.github.com/repos/ReinfyTeam/Zuri/releases/latest", 10, [], $err); // idk why i use github for this..
+		$result = Internet::getURL(
+			"https://api.github.com/repos/ReinfyTeam/Zuri/releases/latest",
+			10,
+			[],
+			$err
+		);
 		$this->setResult([$result ?? null, $err]);
 	}
 
 	public function onCompletion() : void {
 		$server = Server::getInstance();
-		$result = $this->getResult();
-		$ver = "";
-		$download_url = "";
-		$noUpdates = false;
-		if ($result[1] === null && $result[0] !== null) {
-			$json = json_decode($result[0]->getBody(), true);
-			if ($json !== false && $json !== null) {
-				if (($ver = $json["tag_name"]) !== "v" . $this->currentVersion) {
-					if ($json["prerelease"]) {
-						$ver = $ver . "-PRERELEASE";
-					}
-					$download_url = $json["assets"][0]["browser_download_url"];
-					$file_size = $json["assets"][0]["size"] / 1000; // to kb
-					$dlcount = $json["assets"][0]["download_count"];
-					$branch = $json["target_commitish"];
-					$publishTime = date('F j, o', strtotime($json["published_at"])); // Jan 1, 2000
-					$noUpdates = false;
-				} else {
-					$noUpdates = true;
-				}
-			}
-		} else {
-			$server->getLogger()->notice(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::RED . "An error occur while checking updates from github. " . $result[1] . ", Please check your internet connection, and try again.");
+		$prefix = ConfigManager::getData(ConfigPaths::PREFIX) . " ";
+
+		[$result, $error] = $this->getResult();
+
+		if ($error !== null || $result === null) {
+			$server->getLogger()->notice($prefix . TextFormat::RED . "An error occurred while checking updates from GitHub: {$error}. Please check your internet connection and try again.");
 			return;
 		}
 
-		if ($noUpdates) {
-			$server->getLogger()->notice(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::GREEN . "No updates found. Enjoy!");
-		} else {
-			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "A new latest version of Zuri is released! (" . $publishTime . ")");
-			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "Current Version: v" . $this->currentVersion);
-			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "Latest Version: " . $ver . " (" . $branch . ")");
-			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "Download Count: " . $dlcount);
-			$server->getLogger()->warning(ConfigManager::getData(ConfigPaths::PREFIX) . " " . TextFormat::AQUA . "Download: " . $download_url . " (" . $file_size . " KB)");
+		$json = json_decode($result->getBody(), true);
+		if ($json === null) {
+			$server->getLogger()->notice($prefix . TextFormat::RED . "Failed to decode update information.");
+			return;
 		}
+
+		$latestVersion = $json["tag_name"] ?? "";
+		$currentVersionTag = "v" . $this->currentVersion;
+
+		if ($latestVersion === $currentVersionTag) {
+			$server->getLogger()->notice($prefix . TextFormat::GREEN . "No updates found. Enjoy!");
+			return;
+		}
+
+		// Version mismatch - there is an update
+		$isPrerelease = $json["prerelease"] ?? false;
+		$versionLabel = $isPrerelease ? $latestVersion . " (PRE-RELEASE)" : $latestVersion;
+
+		$asset = $json["assets"][0] ?? null;
+		$downloadUrl = $asset["browser_download_url"] ?? "N/A";
+		$fileSizeKB = isset($asset["size"]) ? round($asset["size"] / 1000, 2) : "N/A";
+		$downloadCount = $asset["download_count"] ?? "N/A";
+		$branch = $json["target_commitish"] ?? "N/A";
+		$publishTime = isset($json["published_at"]) ? date('F j, Y', strtotime($json["published_at"])) : "N/A";
+
+		$server->getLogger()->warning($prefix . TextFormat::AQUA . "A new latest version of Zuri is released! ({$publishTime})");
+		$server->getLogger()->warning($prefix . TextFormat::AQUA . "Current Version: {$currentVersionTag}");
+		$server->getLogger()->warning($prefix . TextFormat::AQUA . "Latest Version: {$versionLabel} ({$branch})");
+		$server->getLogger()->warning($prefix . TextFormat::AQUA . "Download Count: {$downloadCount}");
+		$server->getLogger()->warning($prefix . TextFormat::AQUA . "Download: {$downloadUrl} ({$fileSizeKB} KB)");
 	}
 }

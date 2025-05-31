@@ -74,7 +74,6 @@ use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
 use function count;
-use function in_array;
 use function microtime;
 
 class PlayerListener implements Listener {
@@ -391,7 +390,7 @@ class PlayerListener implements Listener {
 			}
 			$playerAPI->setAttackTicks(microtime(true));
 		}
-		if (in_array($cause, [EntityDamageEvent::CAUSE_ENTITY_EXPLOSION, EntityDamageEvent::CAUSE_BLOCK_EXPLOSION], true)) {
+		if ($cause === EntityDamageEvent::CAUSE_ENTITY_EXPLOSION || $cause === EntityDamageEvent::CAUSE_BLOCK_EXPLOSION) {
 			PlayerAPI::getAPIPlayer($entity)->setAttackTicks(microtime(true));
 		}
 	}

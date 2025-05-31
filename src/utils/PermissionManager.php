@@ -56,28 +56,27 @@ use ReinfyTeam\Zuri\ZuriAC;
 
 	public function register(string $permission, int $permAccess, array $childPermission = []) : void {
 		$this->perm[] = $permission;
-		$perm = new PMPermission($permission, "Zuri Anticheat Custom Permission", $childPermission);
+
 		$permManager = PMPermissionManager::getInstance();
-		switch($permAccess) {
-			case PermissionManager::USER:
-				$p = PMPermissionManager::getInstance()->getPermission(DefaultPermissions::ROOT_USER);
-				$p->addChild($perm->getName(), true);
-				break;
-			case PermissionManager::OPERATOR:
-				$p = PMPermissionManager::getInstance()->getPermission(DefaultPermissions::ROOT_OPERATOR);
-				$p->addChild($perm->getName(), true);
-				break;
-			case PermissionManager::CONSOLE:
-				$p = PMPermissionManager::getInstance()->getPermission(DefaultPermissions::ROOT_CONSOLE);
-				$p->addChild($perm->getName(), true);
-				break;
-			case PermissionManager::NONE:
-				$p = PMPermissionManager::getInstance()->getPermission(DefaultPermissions::ROOT_USER);
-				$p->addChild($perm->getName(), false);
-				break;
+		$perm = new PMPermission($permission, "Zuri Anticheat Custom Permission", $childPermission);
+
+		$parentPermissionMap = [
+			PermissionManager::USER => [DefaultPermissions::ROOT_USER, true],
+			PermissionManager::OPERATOR => [DefaultPermissions::ROOT_OPERATOR, true],
+			PermissionManager::CONSOLE => [DefaultPermissions::ROOT_CONSOLE, true],
+			PermissionManager::NONE => [DefaultPermissions::ROOT_USER, false],
+		];
+
+		if (isset($parentPermissionMap[$permAccess])) {
+			[$root, $access] = $parentPermissionMap[$permAccess];
+			if (($parent = $permManager->getPermission($root)) !== null) {
+				$parent->addChild($permission, $access);
+			}
 		}
+
 		$permManager->addPermission($perm);
 	}
+
 
 	public function addPlayerPermissions(Player $player, array $permissions) : void {
 		if ($this->attachment === null) {

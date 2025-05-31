@@ -38,14 +38,9 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\Discord;
+use function array_filter;
 use function array_values;
-use function in_array;
 
-/**
- * API Documentation can be found in github wiki.
- * This should be only use for plugins.
- * @link https://github.com/ReinfyTeam/Zuri/wiki
- */
 final class API {
 	private static ConfigManager $config;
 
@@ -57,59 +52,42 @@ final class API {
 		if ($player instanceof Player) {
 			return PlayerAPI::getAPIPlayer($player);
 		}
-
-		$player = Server::getInstance()->getPlayerExact($player);
-		return PlayerAPI::getAPIPlayer($player);
+		$found = Server::getInstance()->getPlayerExact($player);
+		return PlayerAPI::getAPIPlayer($found);
 	}
 
 	public static function getModule(string $name, string $subType) : ?Check {
-		if (in_array($name, ZuriAC::Checks(), true)) {
-			return null;
-		}
-
 		foreach (ZuriAC::Checks() as $module) {
 			if ($module->getName() === $name && $module->getSubType() === $subType) {
 				return $module;
 			}
 		}
-
-		return $module;
+		return null;
 	}
 
 	public static function getAllChecks(bool $includeSubChecks = true) : array {
-		if ($includeSubChecks === false) {
-			$list = [];
+		if (!$includeSubChecks) {
+			$unique = [];
 			foreach (ZuriAC::Checks() as $module) {
-				if (!isset($list[$module->getName()])) {
-					$list[$module->getName()] = $module;
-				}
+				$unique[$module->getName()] ??= $module;
 			}
-			return array_values($list);
+			return array_values($unique);
 		}
-
 		return ZuriAC::Checks();
 	}
 
 	public static function getAllDisabledChecks(bool $includeSubChecks = true) : array {
-		$list = [];
-		foreach (self::getAllChecks($includeSubChecks) as $module) {
-			if (!$module->enable()) {
-				$list[] = $module;
-			}
-		}
-
-		return $list;
+		return array_filter(
+			self::getAllChecks($includeSubChecks),
+			static fn(Check $module) => !$module->enable()
+		);
 	}
 
 	public static function getAllEnabledChecks(bool $includeSubChecks = true) : array {
-		$list = [];
-		foreach (self::getAllChecks($includeSubChecks) as $module) {
-			if ($module->enable()) {
-				$list[] = $module;
-			}
-		}
-
-		return $list;
+		return array_filter(
+			self::getAllChecks($includeSubChecks),
+			static fn(Check $module) => $module->enable()
+		);
 	}
 
 	public static function getAllModules() : array {
@@ -117,51 +95,49 @@ final class API {
 	}
 
 	public static function getConfig() : ConfigManager {
-		if (self::$config === null) {
-			self::$config = new ConfigManager();
-		}
-
-		return self::$config;
+		return self::$config ??= new ConfigManager();
 	}
 
-	public static function allModulesInfo() : ?array {
-		foreach (ZuriAC::Checks() as $module) {
-			$result[$module->getName()] = ["name" => $module->getName(), "subType" => $module->getSubType(), "punishment" => $module->getPunishment(), "maxViolations" => $module->maxViolations()];
-		}
-
-		return $result;
-	}
-
-	public static function getModuleInfo(string $name, string $subType) : ?string {
-		if (in_array($name, ZuriAC::Checks(), true)) {
+	public static function allModuleInfo(string $name, string $subType) : ?array {
+		$module = self::getModule($name, $subType);
+		if ($module === null) {
 			return null;
 		}
 
-		return self::allModulesInfo()[$name];
+		return [
+			"name" => $module->getName(),
+			"subType" => $module->getSubType(),
+			"punishment" => $module->getPunishment(),
+			"maxViolations" => $module->maxViolations()
+		];
 	}
+
+
+	private static function getModuleInfoField(string $name, string $field) : mixed {
+		$info = self::allModulesInfo();
+		return $info[$name][$field] ?? null;
+	}
+
+	public static function getModule(string $name, string $subType) : ?Check {
+		$matches = array_values(array_filter(
+			ZuriAC::Checks(),
+			static fn(Check $module) : bool =>
+				$module->getName() === $name && $module->getSubType() === $subType
+		));
+		return $matches[0] ?? null;
+	}
+
 
 	public static function getSubTypeByModule(string $name) : ?string {
-		if (in_array($name, ZuriAC::Checks(), true)) {
-			return null;
-		}
-
-		return self::allModulesInfo()[$name]["subType"];
+		return self::getModuleInfoField($name, "subType");
 	}
 
-	public static function getMaxViolationByModule(string $name) : ?string {
-		if (in_array($name, ZuriAC::Checks(), true)) {
-			return null;
-		}
-
-		return self::allModulesInfo()[$name]["maxViolations"];
+	public static function getMaxViolationByModule(string $name) : ?int {
+		return self::getModuleInfoField($name, "maxViolations");
 	}
 
-	public function getPunishmentByModule(string $name) : ?array {
-		if (in_array($name, ZuriAC::Checks(), true)) {
-			return null;
-		}
-
-		return self::allModulesInfo()[$name]["punishment"];
+	public static function getPunishmentByModule(string $name) : ?array {
+		return self::getModuleInfoField($name, "punishment");
 	}
 
 	public static function getPluginInstance() : ZuriAC {
