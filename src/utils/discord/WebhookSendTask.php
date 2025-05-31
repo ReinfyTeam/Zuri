@@ -34,12 +34,12 @@ namespace ReinfyTeam\Zuri\utils\discord;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\thread\NonThreadSafeValue;
 use ReinfyTeam\Zuri\ZuriAC;
+use function array_flip;
 use function curl_close;
 use function curl_exec;
 use function curl_getinfo;
 use function curl_init;
 use function curl_setopt;
-use function in_array;
 use function json_encode;
 
 class WebhookSendTask extends AsyncTask {
@@ -64,9 +64,12 @@ class WebhookSendTask extends AsyncTask {
 	}
 
 	public function onCompletion() : void {
-		$response = $this->getResult();
-		if (!in_array($response[1], [200, 204], true)) {
-			ZuriAC::getInstance()->getLogger()->debug("[Discord] [ERROR]: An error occured while sending to discord ($response[1]): " . $response[0]);
+		[$responseBody, $responseCode] = $this->getResult();
+
+		if (!isset(array_flip([200, 204])[$responseCode])) {
+			ZuriAC::getInstance()->getLogger()->debug(
+				"[Discord] [ERROR]: An error occurred while sending to discord ({$responseCode}): {$responseBody}"
+			);
 		}
 	}
 }
