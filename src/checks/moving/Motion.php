@@ -98,7 +98,7 @@ class Motion extends Check {
 				$this->failed($playerAPI);
 			}
 
-			$speed = $newPos->subtract($player->getLocation())->divide($tickDiff);
+			$speed = $newPos->subtractVector($location)->divide($tickDiff);
 			if ($player->isAlive() and !$player->isSpectator()) {
 				if (
 					$player->getInAirTicks() > 10 &&
