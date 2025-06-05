@@ -56,20 +56,30 @@ class ReachA extends Check {
 	 */
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
-			$cause = $event->getCause();
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
-			$locEntity = $entity->getLocation();
-			$locDamager = $damager->getLocation();
-			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player && $entity instanceof Player) {
-				$playerAPI = PlayerAPI::getAPIPlayer($damager);
-				$player = $playerAPI->getPlayer();
+			
+			if ($damager instanceof Player && $entity instanceof Player) {
+				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
+				$playerAPI = PlayerAPI::getAPIPlayer($entity);
+				
+				if (
+					$playerAPI->getProjectileAttackTicks() < 20 ||
+					$damagerAPI->getProjectileAttackTicks() < 20 ||
+					$playerAPI->getBowShotTicks() < 20 ||
+					$damagerAPI->getBowShotTicks() < 20
+				) { // false-positive in projectiles
+					return;
+				}
+				
+				$locEntity = $entity->getLocation();
+				$locDamager = $damager->getLocation();
 				$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? abs($locEntity->getY() - $locDamager->getY()) : 0;
 				$distance = MathUtil::distance($locEntity, $locDamager) - $isPlayerTop;
-				$isSurvival = $player->getGameMode() === GameMode::SURVIVAL();
-				$this->debug($playerAPI, "isPlayerTop=$isPlayerTop, distance=$distance, isSurvival=$isSurvival");
-				if ($isSurvival && $distance > 4.3) {
-					$this->failed($playerAPI);
+				$isSurvival = $entity->getGameMode() === GameMode::SURVIVAL();
+				$this->debug($damagerAPI, "isPlayerTop=$isPlayerTop, distance=$distance, isSurvival=$isSurvival");
+				if ($isSurvival && $distance > $this->getConstant("survival-max-distance")) {
+					$this->failed($damagerAPI);
 				}
 			}
 		}

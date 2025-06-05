@@ -51,17 +51,28 @@ class ReachC extends Check {
 	/**
 	 * @throws DiscordWebhookException
 	 */
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			if (($victim = $event->getEntity()) instanceof Player && ($damager = $event->getDamager()) instanceof Player) {
+				$victimAPI = PlayerAPI::getAPIPlayer($damager);
+				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
+				
+				if (
+					$victimAPI->getProjectileAttackTicks() < 20 ||
+					$damagerAPI->getProjectileAttackTicks() < 20 ||
+					$victimAPI->getBowShotTicks() < 20 ||
+					$damagerAPI->getBowShotTicks() < 20
+				) { // false-positive in projectiles
+					return;
+				}
+				
 				$eyeHeight = $damager->getEyePos();
 				$cuboid = $victim->getBoundingBox();
 				// get the distance between the eye height and the cuboid
 				$distance = $eyeHeight->distance(new Vector3($cuboid->minX, $cuboid->minY, $cuboid->minZ));
-				$this->debug($playerAPI, "distance=$distance");
-
+				$this->debug($damagerAPI, "distance=$distance");
 				if ($distance > $this->getConstant("max-reach-eye-distance")) {
-					$this->failed($playerAPI);
+					$this->failed($damagerAPI);
 				}
 			}
 		}

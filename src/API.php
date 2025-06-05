@@ -56,15 +56,6 @@ final class API {
 		return PlayerAPI::getAPIPlayer($found);
 	}
 
-	public static function getModule(string $name, string $subType) : ?Check {
-		foreach (ZuriAC::Checks() as $module) {
-			if ($module->getName() === $name && $module->getSubType() === $subType) {
-				return $module;
-			}
-		}
-		return null;
-	}
-
 	public static function getAllChecks(bool $includeSubChecks = true) : array {
 		if (!$includeSubChecks) {
 			$unique = [];

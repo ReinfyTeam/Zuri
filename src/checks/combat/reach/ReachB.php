@@ -52,20 +52,33 @@ class ReachB extends Check {
 	/**
 	 * @throws DiscordWebhookException
 	 */
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
-			$cause = $event->getCause();
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
-			if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK && $damager instanceof Player) {
+			if ($damager instanceof Player && $entity instanceof Player) {
+				
 				$entityAPI = PlayerAPI::getAPIPlayer($entity);
 				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
+				
+				if (
+					$entityAPI->getProjectileAttackTicks() < 20 ||
+					$damagerAPI->getProjectileAttackTicks() < 20 ||
+					$entityAPI->getBowShotTicks() < 20 ||
+					$damagerAPI->getBowShotTicks() < 20
+				) { // false-positive in projectiles
+					return;
+				}
+				
+				
 				$player = $entityAPI->getPlayer();
 				$damager = $damagerAPI->getPlayer();
-				if (MathUtil::XZDistanceSquared($entityAPI->getLocation()->asVector3(), $damager->getLocation()->asVector3()) > ($damager->isSurvival() ? $this->getConstant("survival-max-distance") : $this->getConstant("creative-max-distance"))) {
+				$playerLoc = $player->getLocation();
+				$damagerLoc = $player->getLocation();
+				$this->debug($damagerAPI, "distance=" . MathUtil::XZDistanceSquared($playerLoc->asVector3(), $damagerLoc->asVector3()));
+				if (MathUtil::XZDistanceSquared($playerLoc->asVector3(), $damagerLoc->asVector3()) > ($damager->isSurvival() ? $this->getConstant("survival-max-distance") : $this->getConstant("creative-max-distance"))) {
 					$this->failed($damagerAPI);
 				}
-				$this->debug($damagerAPI, "distance=" . MathUtil::XZDistanceSquared($player->getLocation()->asVector3(), $damager->getLocation()->asVector3()));
 			}
 		}
 	}

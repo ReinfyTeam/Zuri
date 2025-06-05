@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\checks\combat\reach;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
 use pocketmine\math\Vector3;
+use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
@@ -50,34 +51,49 @@ class ReachD extends Check {
 	/**
 	 * @throws DiscordWebhookException
 	 */
-	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
+	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
-			$player = $playerAPI->getPlayer();
-			$damagerPing = $damager->getNetworkSession()->getPing();
-			$playerPing = $player->getNetworkSession()->getPing();
+			$damager = $event->getDamager();
+			$player = $event->getEntity();
+			
+			if ($player instanceof Player && $damager instanceof Player) {
+				
+				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
+				$playerAPI = PlayerAPI::getAPIPlayer($player);
+				
+				if (
+					$playerAPI->getProjectileAttackTicks() < 20 ||
+					$damagerAPI->getProjectileAttackTicks() < 20 ||
+					$playerAPI->getBowShotTicks() < 20 ||
+					$damagerAPI->getBowShotTicks() < 20
+				) { // false-positive in projectiles
+					return;
+				}
+				
+				$damagerPing = $damager->getNetworkSession()->getPing();
+				$playerPing = $player->getNetworkSession()->getPing();
+				$distance = $player->getEyePos()->distance(new Vector3($damager->getEyePos()->getX(), $player->getEyePos()->getY(), $damager->getEyePos()->getZ()));
+				$distance -= $damagerPing * $this->getConstant("default-eye-distance");
+				$distance -= $playerPing * $this->getConstant("default-eye-distance");
+				$limit = $this->getConstant("reach-eye-limit");
 
-			$distance = $player->getEyePos()->distance(new Vector3($damager->getEyePos()->getX(), $player->getEyePos()->getY(), $damager->getEyePos()->getZ()));
-			$distance -= $damagerPing * $this->getConstant("default-eye-distance");
-			$distance -= $playerPing * $this->getConstant("default-eye-distance");
-			$limit = $this->getConstant("reach-eye-limit");
+				if ($player->isSprinting()) {
+					$distance -= $this->getConstant("sprinting-eye-distance");
+				} else {
+					$distance -= $this->getConstant("not-sprinting-eye-distance");
+				}
 
-			if ($player->isSprinting()) {
-				$distance -= $this->getConstant("sprinting-eye-distance");
-			} else {
-				$distance -= $this->getConstant("not-sprinting-eye-distance");
+				if ($damager->isSprinting()) {
+					$distance -= $this->getConstant("damager-sprinting-eye-distance");
+				} elseif (!$damager->isSprinting()) {
+					$distance -= $this->getConstant("not-sprinting-damager-eye-distance");
+				}
+
+				$this->debug($damagerAPI, "distance=$distance, limit=$limit");
+				if ($distance > $limit) {
+					$this->failed($damagerAPI);
+				}
 			}
-
-			if ($damager->isSprinting()) {
-				$distance -= $this->getConstant("damager-sprinting-eye-distance");
-			} elseif (!$damager->isSprinting()) {
-				$distance -= $this->getConstant("not-sprinting-damager-eye-distance");
-			}
-
-			if ($distance > $limit) {
-				$this->failed($playerAPI);
-			}
-
-			$this->debug($playerAPI, "distance=$distance, limit=$limit");
 		}
 	}
 }

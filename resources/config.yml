@@ -295,9 +295,9 @@ zuri:
             punishment: KICK
             constants:
                  max-distance: 4.3
-                 survival-max-distance: 4.0
+                 survival-max-distance: 3.0
                  creative-max-distance: 8.3
-                 max-reach-eye-distance: 4.7
+                 max-reach-eye-distance: 3.0
                  default-eye-distance: 0.0041
                  sprinting-eye-distance: 0.97
                  not-sprinting-eye-distance: 0.87
