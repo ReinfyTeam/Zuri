@@ -64,6 +64,8 @@ class ReachA extends Check {
 				$playerAPI = PlayerAPI::getAPIPlayer($entity);
 				
 				if (
+					$damager->isSurvival() ||
+					$entity->isSurvival() ||
 					$playerAPI->getProjectileAttackTicks() < 40 ||
 					$damagerAPI->getProjectileAttackTicks() < 40 ||
 					$playerAPI->getBowShotTicks() < 40 ||
