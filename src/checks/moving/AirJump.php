@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri\checks\moving;
 
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\entity\effect\VanillaEffects;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
@@ -85,6 +86,10 @@ class AirJump extends Check {
 			$lastUpDistance = $playerAPI->getExternalData("lastUpDistance") ?? 0;
 			$delta = abs(round(($upDistance - $lastUpDistance), 3));
 			$limit = 0.852;
+			
+			if (($effect = $player->getEffects()->get(VanillaEffects::JUMP_BOOST())) !== null) {
+				$limit += round($limit * 0.742 / $effect->getEffectLevel(), 3);
+			}
 
 			if ($delta > $limit) { // what is this dumb check
 				$this->failed($playerAPI);
