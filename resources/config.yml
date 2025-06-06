@@ -142,8 +142,8 @@ zuri:
                   max-distance: 2
                   min-count: 1
                   max-range: 2.6
-        aimassist:
-            enable: true
+        aimassist: # Todo: Improve in next versions.
+            enable: false
             maxvl: 1
             pre-vl:
                 a: 10

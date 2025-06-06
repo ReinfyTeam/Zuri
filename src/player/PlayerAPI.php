@@ -270,7 +270,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getHurtTicks() : float {
-		return (microtime(true) - $this->bowShotTicks) * 20;
+		return (microtime(true) - $this->hurtTicks) * 20;
 	}
 
 	//On door

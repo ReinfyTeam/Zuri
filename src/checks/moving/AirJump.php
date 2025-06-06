@@ -65,7 +65,7 @@ class AirJump extends Check {
 				$playerAPI->getAttackTicks() < 40 ||
 				$playerAPI->getProjectileAttackTicks() < 20 ||
 				$playerAPI->getBowShotTicks() < 20 ||
-				$playerAPI->getHurtTicks() < 10 ||
+				$playerAPI->getHurtTicks() < 20 ||
 				$playerAPI->getSlimeBlockTicks() < 20 ||
 				$playerAPI->getTeleportCommandTicks() < 40 ||
 				$playerAPI->getTeleportTicks() < 60 ||
@@ -84,7 +84,7 @@ class AirJump extends Check {
 			$upDistance = round(($event->getTo()->getY() - $event->getFrom()->getY()), 3);
 			$lastUpDistance = $playerAPI->getExternalData("lastUpDistance") ?? 0;
 			$delta = abs(round(($upDistance - $lastUpDistance), 3));
-			$limit = 0.825;
+			$limit = 0.852;
 
 			if ($delta > $limit) { // what is this dumb check
 				$this->failed($playerAPI);
