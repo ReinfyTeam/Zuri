@@ -58,10 +58,10 @@ class ReachC extends Check {
 				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
 				
 				if (
-					$victimAPI->getProjectileAttackTicks() < 20 ||
-					$damagerAPI->getProjectileAttackTicks() < 20 ||
-					$victimAPI->getBowShotTicks() < 20 ||
-					$damagerAPI->getBowShotTicks() < 20
+					$victimAPI->getProjectileAttackTicks() < 40 ||
+					$damagerAPI->getProjectileAttackTicks() < 40 ||
+					$victimAPI->getBowShotTicks() < 40 ||
+					$damagerAPI->getBowShotTicks() < 40
 				) { // false-positive in projectiles
 					return;
 				}

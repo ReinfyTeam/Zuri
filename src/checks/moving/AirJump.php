@@ -88,7 +88,7 @@ class AirJump extends Check {
 			$limit = 0.852;
 			
 			if (($effect = $player->getEffects()->get(VanillaEffects::JUMP_BOOST())) !== null) {
-				$limit += round($limit * 0.742 / $effect->getEffectLevel(), 3);
+				$limit += round($limit * 1.4 / $effect->getEffectLevel(), 3);
 			}
 
 			if ($delta > $limit) { // what is this dumb check

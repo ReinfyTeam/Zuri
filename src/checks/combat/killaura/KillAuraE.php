@@ -59,18 +59,19 @@ class KillAuraE extends Check {
 			$damager = $event->getDamager();
 			$locDamager = $damager->getLocation();
 			if ($damager instanceof Player && $entity instanceof Player) {
-				$playerAPI = PlayerAPI::getAPIPlayer($damager);
-				$opAPI = PlayerAPI::getAPIPlayer($entity);
+				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
+				$victimAPI = PlayerAPI::getAPIPlayer($entity);
 
-				/**
-				 * this might be lazy but it may work, checks if the user has shot his bow and the other user got hit by projectile
-				 * tho this must be improved later, this is just an temporary solution.
-				 */
-				if ($playerAPI->getBowShotTicks() < 40 && $opAPI->getProjectileAttackTicks() < 40) {
+				if (
+					$victimAPI->getProjectileAttackTicks() < 40 ||
+					$damagerAPI->getProjectileAttackTicks() < 40 ||
+					$victimAPI->getBowShotTicks() < 40 ||
+					$damagerAPI->getBowShotTicks() < 40
+				) { // false-positive in projectiles
 					return;
 				}
 
-				$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
+				$delta = MathUtil::getDeltaDirectionVector($damagerAPI, 3);
 				$from = new Vector3($locDamager->getX(), $locDamager->getY() + $damager->getEyeHeight(), $locDamager->getZ());
 				$to = $damager->getLocation()->add($delta->getX(), $delta->getY() + $damager->getEyeHeight(), $delta->getZ());
 				$distance = MathUtil::distance($from, $to);
@@ -86,9 +87,9 @@ class KillAuraE extends Check {
 					}
 				}
 				if (!isset($entities[$entity->getId()])) {
-					$this->failed($playerAPI);
+					$this->failed($damagerAPI);
 				}
-				$this->debug($playerAPI, "delta=$delta, distance=$distance, entities=" . count($entities));
+				$this->debug($damagerAPI, "delta=$delta, distance=$distance, entities=" . count($entities));
 			}
 		}
 	}

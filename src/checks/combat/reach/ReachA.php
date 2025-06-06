@@ -64,10 +64,10 @@ class ReachA extends Check {
 				$playerAPI = PlayerAPI::getAPIPlayer($entity);
 				
 				if (
-					$playerAPI->getProjectileAttackTicks() < 20 ||
-					$damagerAPI->getProjectileAttackTicks() < 20 ||
-					$playerAPI->getBowShotTicks() < 20 ||
-					$damagerAPI->getBowShotTicks() < 20
+					$playerAPI->getProjectileAttackTicks() < 40 ||
+					$damagerAPI->getProjectileAttackTicks() < 40 ||
+					$playerAPI->getBowShotTicks() < 40 ||
+					$damagerAPI->getBowShotTicks() < 40
 				) { // false-positive in projectiles
 					return;
 				}
