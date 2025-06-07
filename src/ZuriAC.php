@@ -107,6 +107,7 @@ use ReinfyTeam\Zuri\checks\network\NetworkLimit;
 use ReinfyTeam\Zuri\checks\network\ProxyBot;
 use ReinfyTeam\Zuri\command\ZuriCommand;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\listener\PlayerListener;
 use ReinfyTeam\Zuri\listener\ServerListener;
 use ReinfyTeam\Zuri\network\ProxyUDPSocket;
@@ -135,7 +136,7 @@ class ZuriAC extends PluginBase {
 		}
 
 		if (!Phar::running()) {
-			$this->getServer()->getLogger()->notice(ConfigManager::getData(config\ConfigPaths::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade checking performance. We recommended you to download phar plugin from Poggit builds or Github releases. Instead of using source-code from Github.");
+			$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade checking performance. We recommended you to download phar plugin from Poggit builds or Github releases. Instead of using source-code from Github.");
 		}
 	}
 
@@ -148,19 +149,19 @@ class ZuriAC extends PluginBase {
 		$this->getScheduler()->scheduleRepeatingTask(new ServerTickTask($this), 20);
 		$this->getScheduler()->scheduleRepeatingTask(new CaptchaTask($this), 20);
 		$this->getServer()->getAsyncPool()->submitTask(new UpdateCheckerAsyncTask($this->getDescription()->getVersion()));
-		PermissionManager::getInstance()->register(ConfigManager::getData(config\ConfigPaths::PERMISSION_BYPASS_PERMISSION), PermissionManager::OPERATOR);
-		PermissionManager::getInstance()->register(ConfigManager::getData(config\ConfigPaths::ALERTS_PERMISSION), PermissionManager::OPERATOR);
+		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigPaths::PERMISSION_BYPASS_PERMISSION), PermissionManager::OPERATOR);
+		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigPaths::ALERTS_PERMISSION), PermissionManager::OPERATOR);
 		$this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
 		$this->getServer()->getPluginManager()->registerEvents(new ServerListener(), $this);
 		$this->getServer()->getCommandMap()->register("Zuri", new ZuriCommand());
 		$proxyUDPSocket = new ProxyUDPSocket();
-		if (ConfigManager::getData(config\ConfigPaths::PROXY_ENABLE)) {
-			$ip = ConfigManager::getData(config\ConfigPaths::PROXY_IP);
-			$port = ConfigManager::getData(config\ConfigPaths::PROXY_PORT);
+		if (ConfigManager::getData(ConfigPaths::PROXY_ENABLE)) {
+			$ip = ConfigManager::getData(ConfigPaths::PROXY_IP);
+			$port = ConfigManager::getData(ConfigPaths::PROXY_PORT);
 			try {
 				$proxyUDPSocket->bind(new InternetAddress($ip, $port));
 			} catch (Exception $exception) {
-				$this->getServer()->getLogger()->notice(ConfigManager::getData(config\ConfigPaths::PREFIX) . TextFormat::RED . " {$exception->getMessage()}, stopping proxy...");
+				$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::RED . " {$exception->getMessage()}, stopping proxy...");
 				return;
 			}
 		}
@@ -175,7 +176,7 @@ class ZuriAC extends PluginBase {
 			$this->checks = [];
 		}
 
-		if (ConfigManager::getData(config\ConfigPaths::NETWORK_LIMIT_ENABLE)) {
+		if (ConfigManager::getData(ConfigPaths::NETWORK_LIMIT_ENABLE)) {
 			$this->checks[] = new NetworkLimit; // Required to reload the modules if modified at the game!!!
 		}
 
