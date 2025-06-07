@@ -2,7 +2,7 @@
 
 - [x] AirJump Module
 - [ ] OmniSprint fix
-- [ ] Speed (A, B) fix
+- [x] Speed (A, B) fix
 - [ ] Improve Spider (A)
 - [ ] Update AimAssist (A, B, C, D)
 - [ ] Fix Timer (A)
@@ -15,8 +15,8 @@
 - [ ] Fix compensate issue on Instabreak (A) a.k.a. Bamboo Bug
 - [ ] Improve Flight modules (A, B, C)
 - [ ] Fix Autoclicker (A, B, C)
-- [ ] Fix Killaura (A, B, C) false-positive
-- [ ] Improve Reach detections. For 3.1 reach hacks.. (undetected for some reason)
+- [x] Fix Killaura (A, B, C) false-positive
+- [x] Improve Reach detections. For 3.1 reach hacks.. (undetected for some reason)
 - [ ] Improve ProxyUDPSocket Client
 - [ ] Fix Speed (BC Breaking on /teleport command)
 - [x] Add FakeGlide Detections
