@@ -6,7 +6,6 @@ version: 1.3.5-BETA
 website: "https://github.com/ReinfyTeam/Zuri/"
 src-namespace-prefix: ReinfyTeam\Zuri
 main: ReinfyTeam\Zuri\ZuriAC
-depends: [vosaka, vosaka-come-to-pmmp]
 api: 5.0.0
 permissions:
      zuri.command:
