@@ -53,7 +53,7 @@ class AntiImmobile extends Check {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
 			if ($player->hasNoClientPredictions()) {
-				if ($playerAPI->getTeleportCommandTicks() < 40 || $playerAPI->getOnlineTime() < 2) { // fix false positive when teleporting player when immobile is true
+				if ($playerAPI->getTeleportCommandTicks() < 40 || $playerAPI->getOnlineTime() < 2 || $playerAPI->recentlyCancelledEvent() < 40) { // fix false positive when teleporting player when immobile is true
 					return;
 				}
 				if ($event->getFrom()->getX() !== $event->getTo()->getX() || $event->getFrom()->getY() !== $event->getTo()->getY() || $event->getFrom()->getZ() !== $event->getTo()->getZ()) {

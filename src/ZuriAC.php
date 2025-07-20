@@ -125,9 +125,10 @@ class ZuriAC extends PluginBase {
 
 	private const string MINIMUM_PHP_VERSION = "8.3.0";
 
-	public function onLoad() : void {
+	protected function onLoad() : void {
 		self::$instance = $this;
 		ConfigManager::checkConfig();
+		VOsakaPMMP::init($this);
 
 		$minimumVersion = self::MINIMUM_PHP_VERSION;
 		if (version_compare(PHP_VERSION, $minimumVersion, '<')) {
@@ -144,7 +145,7 @@ class ZuriAC extends PluginBase {
 		return self::$instance;
 	}
 
-	public function onEnable() : void {
+	protected function onEnable() : void {
 		$this->loadChecks();
 		$this->getScheduler()->scheduleRepeatingTask(new ServerTickTask($this), 20);
 		$this->getScheduler()->scheduleRepeatingTask(new CaptchaTask($this), 20);

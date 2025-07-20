@@ -47,6 +47,7 @@ class AimAssistC extends Check {
 		return "C";
 	}
 
+
 	/**
 	 * @throws DiscordWebhookException
 	 */

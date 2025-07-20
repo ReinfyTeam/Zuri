@@ -71,7 +71,8 @@ class FlyC extends Check {
 				!$player->isSurvival() ||
 				!$playerAPI->isCurrentChunkIsLoaded() ||
 				BlockUtil::isGroundSolid($player) ||
-				$playerAPI->isGliding()
+				$playerAPI->isGliding() ||
+				$playerAPI->recentlyCancelledEvent() < 40
 			) { // additional checks
 				return;
 			}

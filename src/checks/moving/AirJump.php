@@ -31,9 +31,9 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
+use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
-use pocketmine\entity\effect\VanillaEffects;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
@@ -77,7 +77,8 @@ class AirJump extends Check {
 				$player->hasNoClientPredictions() ||
 				!$playerAPI->isCurrentChunkIsLoaded() ||
 				BlockUtil::isGroundSolid($player) ||
-				$playerAPI->isGliding()
+				$playerAPI->isGliding() ||
+				$playerAPI->recentlyCancelledEvent() < 40
 			) {
 				return;
 			}
@@ -86,7 +87,7 @@ class AirJump extends Check {
 			$lastUpDistance = $playerAPI->getExternalData("lastUpDistance") ?? 0;
 			$delta = abs(round(($upDistance - $lastUpDistance), 3));
 			$limit = 0.852;
-			
+
 			if (($effect = $player->getEffects()->get(VanillaEffects::JUMP_BOOST())) !== null) {
 				$limit += round($limit * 1.4 / $effect->getEffectLevel(), 3);
 			}

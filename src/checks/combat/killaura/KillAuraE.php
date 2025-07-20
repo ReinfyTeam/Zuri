@@ -66,7 +66,8 @@ class KillAuraE extends Check {
 					$victimAPI->getProjectileAttackTicks() < 40 ||
 					$damagerAPI->getProjectileAttackTicks() < 40 ||
 					$victimAPI->getBowShotTicks() < 40 ||
-					$damagerAPI->getBowShotTicks() < 40
+					$damagerAPI->getBowShotTicks() < 40 ||
+					$playerAPI->recentlyCancelledEvent() < 40
 				) { // false-positive in projectiles
 					return;
 				}

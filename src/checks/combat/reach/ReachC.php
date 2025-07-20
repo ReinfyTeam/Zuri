@@ -56,18 +56,19 @@ class ReachC extends Check {
 			if (($victim = $event->getEntity()) instanceof Player && ($damager = $event->getDamager()) instanceof Player) {
 				$victimAPI = PlayerAPI::getAPIPlayer($damager);
 				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
-				
+
 				if (
 					$damager->isSurvival() ||
 					$entity->isSurvival() ||
 					$victimAPI->getProjectileAttackTicks() < 40 ||
 					$damagerAPI->getProjectileAttackTicks() < 40 ||
 					$victimAPI->getBowShotTicks() < 40 ||
-					$damagerAPI->getBowShotTicks() < 40
+					$damagerAPI->getBowShotTicks() < 40 ||
+					$playerAPI->recentlyCancelledEvent() < 40
 				) { // false-positive in projectiles
 					return;
 				}
-				
+
 				$eyeHeight = $damager->getEyePos();
 				$cuboid = $victim->getBoundingBox();
 				// get the distance between the eye height and the cuboid

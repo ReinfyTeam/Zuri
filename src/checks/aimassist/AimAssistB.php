@@ -36,6 +36,7 @@ use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function fmod;
 
@@ -54,26 +55,28 @@ class AimAssistB extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$nLocation = $playerAPI->getNLocation();
-			if (!empty($nLocation)) {
-				$toYaw = $nLocation["to"]->getYaw();
-				$fromYaw = $nLocation["from"]->getYaw();
-				$abs = abs($toYaw - $fromYaw);
-				if ($abs >= 1 && fmod($abs, 0.1) == 0) {
-					if (fmod($abs, 1.0) == 0 || fmod($abs, 10.0) == 0 || fmod($abs, 30.0) == 0) {
-						$this->failed($playerAPI);
-						$this->debug($playerAPI, "toYaw=$toYaw, fromYaw=$fromYaw, abs=$abs");
+			ZuriAC::checkAsync(function () use ($playerAPI) {
+				if (!empty($nLocation)) {
+					$toYaw = $nLocation["to"]->getYaw();
+					$fromYaw = $nLocation["from"]->getYaw();
+					$abs = abs($toYaw - $fromYaw);
+					if ($abs >= 1 && fmod($abs, 0.1) == 0) {
+						if (fmod($abs, 1.0) == 0 || fmod($abs, 10.0) == 0 || fmod($abs, 30.0) == 0) {
+							$this->failed($playerAPI);
+							$this->debug($playerAPI, "toYaw=$toYaw, fromYaw=$fromYaw, abs=$abs");
+						}
+					}
+					$toPitch = $nLocation["to"]->getPitch();
+					$fromPitch = $nLocation["from"]->getPitch();
+					$abs2 = abs($toPitch - $fromPitch);
+					if ($abs2 >= 1 && fmod($abs2, 0.1) == 0) {
+						if (fmod($abs2, 1.0) == 0 || fmod($abs2, 10.0) == 0 || fmod($abs2, 30.0) == 0) {
+							$this->failed($playerAPI);
+							$this->debug($playerAPI, "toYaw=$toYaw, fromYaw=$fromYaw, abs=$abs, toPitch=$toPitch, fromPitch=$fromPitch, abs2=$abs2");
+						}
 					}
 				}
-				$toPitch = $nLocation["to"]->getPitch();
-				$fromPitch = $nLocation["from"]->getPitch();
-				$abs2 = abs($toPitch - $fromPitch);
-				if ($abs2 >= 1 && fmod($abs2, 0.1) == 0) {
-					if (fmod($abs2, 1.0) == 0 || fmod($abs2, 10.0) == 0 || fmod($abs2, 30.0) == 0) {
-						$this->failed($playerAPI);
-						$this->debug($playerAPI, "toYaw=$toYaw, fromYaw=$fromYaw, abs=$abs, toPitch=$toPitch, fromPitch=$fromPitch, abs2=$abs2");
-					}
-				}
-			}
+			});
 		}
 	}
 }

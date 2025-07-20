@@ -85,6 +85,7 @@ class PlayerListener implements Listener {
 	public function onDataPacketReceive(DataPacketReceiveEvent $event) : void {
 		$packet = $event->getPacket();
 		$player = $event->getOrigin()->getPlayer();
+
 		if ($player === null) {
 			return;
 		}
@@ -92,6 +93,11 @@ class PlayerListener implements Listener {
 			return;
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
+
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
+
 		$this->check($packet, $playerAPI);
 
 		if ($packet instanceof LevelSoundEventPacket) {
@@ -117,6 +123,11 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
+
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
+
 		$this->checkEvent($event, $playerAPI);
 		if ($playerAPI->isFlagged()) {
 			$event->cancel();
@@ -155,6 +166,9 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
 		$block = $event->getBlock();
 		if (!isset($this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())])) {
 			$this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())] = $block;
@@ -178,6 +192,9 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
 		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
 			return;
 		}
@@ -196,6 +213,9 @@ class PlayerListener implements Listener {
 		}
 		if (!$player->isConnected() && !$player->spawned) {
 			return;
+		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
 		}
 		$this->checkEvent($event, $playerAPI);
 		if ($playerAPI->isFlagged()) {
@@ -228,6 +248,9 @@ class PlayerListener implements Listener {
 		if (!$player->isConnected() && !$player->spawned) {
 			return;
 		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
 		$playerAPI->setPlacingTicks(microtime(true));
 		$this->checkEvent($event, $playerAPI);
 		if ($playerAPI->isFlagged()) {
@@ -250,6 +273,16 @@ class PlayerListener implements Listener {
 
 	public function onPlayerItemUse(PlayerItemUseEvent $event) : void {
 		$player = $event->getPlayer();
+		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		if ($playerAPI->getPlayer() === null) {
+			return;
+		}
+		if (!$player->isConnected() && !$player->spawned) {
+			return;
+		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
 		//TODO
 	}
 
@@ -262,6 +295,9 @@ class PlayerListener implements Listener {
 		}
 		if (!$player->isConnected() && !$player->spawned) {
 			return;
+		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
 		}
 		$this->checkEvent($event, $playerAPI);
 		foreach ($event->getTransaction()->getInventories() as $inventory) {
@@ -277,6 +313,9 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
 		$playerAPI->setInventoryOpen(true);
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -286,6 +325,9 @@ class PlayerListener implements Listener {
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if ($playerAPI->getPlayer() === null) {
 			return;
+		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
 		}
 		$playerAPI->setInventoryOpen(false);
 		$this->checkEvent($event, $playerAPI);
@@ -302,6 +344,10 @@ class PlayerListener implements Listener {
 
 		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
 			return;
+		}
+
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
 		}
 
 		$playerAPI->setTeleportTicks(microtime(true));
@@ -345,6 +391,9 @@ class PlayerListener implements Listener {
 
 		if (($player = $event->getEntity()) instanceof Player) {
 			$playerAPI = PlayerAPI::getAPIPlayer($player);
+			if ($event->isCancelled()) {
+				$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			}
 			if (
 				$event->getCause() === EntityDamageEvent::CAUSE_ENTITY_ATTACK ||
 				$event->getCause() === EntityDamageEvent::CAUSE_PROJECTILE ||
@@ -378,6 +427,9 @@ class PlayerListener implements Listener {
 		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
 			return;
 		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
 		$this->checkJustEvent($event);
 		if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK) {
 			//$event->setAttackCooldown(1);
@@ -405,6 +457,10 @@ class PlayerListener implements Listener {
 				return;
 			}
 
+			if ($event->isCancelled()) {
+				$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			}
+
 			$playerAPI->setProjectileAttackTicks(microtime(true));
 		}
 	}
@@ -418,6 +474,9 @@ class PlayerListener implements Listener {
 		}
 		if (!$player->isConnected() && !$player->spawned) {
 			return;
+		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
 		}
 		$playerAPI->setDeathTicks(microtime(true));
 	}
@@ -434,6 +493,9 @@ class PlayerListener implements Listener {
 		if ($playerAPI->isCaptcha()) {
 			return;
 		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
 		$this->checkEvent($event, $playerAPI);
 	}
 
@@ -445,6 +507,9 @@ class PlayerListener implements Listener {
 		}
 		if (!$player->isConnected() && !$player->spawned) {
 			return;
+		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
 		}
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -461,6 +526,9 @@ class PlayerListener implements Listener {
 		if (!$player->isConnected() && !$player->spawned) {
 			return;
 		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
 		$this->checkEvent($event, $playerAPI);
 	}
 
@@ -475,6 +543,9 @@ class PlayerListener implements Listener {
 		}
 		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
 			return;
+		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
 		}
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -491,6 +562,9 @@ class PlayerListener implements Listener {
 		if (!$player->isConnected() && !$player->spawned) {
 			return;
 		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
 		$playerAPI->setBowShotTicks(microtime(true));
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -504,6 +578,9 @@ class PlayerListener implements Listener {
 		if (!$player->isConnected() && !$player->spawned) {
 			return;
 		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
 		$this->checkEvent($event, $playerAPI);
 	}
 
@@ -516,6 +593,9 @@ class PlayerListener implements Listener {
 		}
 		if (!$player->isConnected() && !$player->spawned) {
 			return;
+		}
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
 		}
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -570,6 +650,9 @@ class PlayerListener implements Listener {
 	}
 
 	public function onProjectileLaunch(ProjectileLaunchEvent $event) : void {
+		if ($event->isCancelled()) {
+			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+		}
 		$this->checkJustEvent($event);
 	}
 }

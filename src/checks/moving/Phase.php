@@ -147,6 +147,7 @@ class Phase extends Check {
 					&& !$playerAPI->isInLiquid()
 					&& !$playerAPI->isInWeb()
 					&& !isset($skipFlipped[$id])
+					&& $playerAPI->recentlyCancelledEvent() > 40 // fix cancelled events false-flagging.
 					&& !BlockUtil::isUnderBlock($event->getTo(), array_keys($skipFlipped), 0)
 				) {
 					$this->failed($playerAPI);

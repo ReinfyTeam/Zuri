@@ -37,6 +37,7 @@ use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function microtime;
 use function round;
@@ -71,12 +72,15 @@ class SpeedB extends Check {
 				$player->isFlying() ||
 				$player->getAllowFlight() ||
 				$player->hasNoClientPredictions() ||
+				!$player->isSurvival() ||
 				!$playerAPI->isCurrentChunkIsLoaded() ||
 				BlockUtil::isGroundSolid($player) ||
-				$playerAPI->isGliding()
+				$playerAPI->isGliding() ||
+				$playerAPI->recentlyCancelledEvent() < 40
 			) {
 				return;
 			}
+
 
 			$time = $playerAPI->getExternalData("moveTimeA");
 			if ($time !== null) {
@@ -111,12 +115,14 @@ class SpeedB extends Check {
 
 				// If the time travelled is greater than the calculated time limit, fail immediately. Lag back? (is player is laggy?)
 				// If speed is on limit and the distance travelled limit is high.
-				if ($time > $timeLimit && $speed > $speedLimit && $distance > $distanceLimit && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
-					$this->failed($playerAPI);
-				}
-			}
+				ZuriAC::checkAsync(function () use ($playerAPI, $time, $timeLimit, $speed, $speedLimit, $distance, $distanceLimit) {
+					if ($time > $timeLimit && $speed > $speedLimit && $distance > $distanceLimit && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
+						$this->failed($playerAPI);
+					}
+				});
 
-			$playerAPI->setExternalData("moveTimeA", microtime(true));
+				$playerAPI->setExternalData("moveTimeA", microtime(true));
+			}
 		}
 	}
 }

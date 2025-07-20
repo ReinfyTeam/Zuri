@@ -62,7 +62,8 @@ class Spider extends Check {
 				$player->getAllowFlight() ||
 				$player->isFlying() ||
 				$player->hasNoClientPredictions() ||
-				!$playerAPI->isCurrentChunkIsLoaded()
+				!$playerAPI->isCurrentChunkIsLoaded() ||
+				$playerAPI->recentlyCancelledEvent() < 40
 			) {
 				return;
 			}

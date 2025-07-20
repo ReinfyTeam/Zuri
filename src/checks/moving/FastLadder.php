@@ -66,6 +66,27 @@ class FastLadder extends Check {
 
 			$diff = abs($newY - $lastY);
 
+			if (
+				$playerAPI->getJumpTicks() > 40 ||
+				!$player->isSurvival() ||
+				$playerAPI->getAttackTicks() < 40 ||
+				$playerAPI->getProjectileAttackTicks() < 20 ||
+				$playerAPI->getBowShotTicks() < 20 ||
+				$playerAPI->getHurtTicks() < 20 ||
+				$playerAPI->getSlimeBlockTicks() < 20 ||
+				$playerAPI->getTeleportCommandTicks() < 40 ||
+				$playerAPI->getTeleportTicks() < 60 ||
+				$player->isFlying() ||
+				$player->getAllowFlight() ||
+				$player->hasNoClientPredictions() ||
+				!$playerAPI->isCurrentChunkIsLoaded() ||
+				BlockUtil::isGroundSolid($player) ||
+				$playerAPI->isGliding() ||
+				$playerAPI->recentlyCancelledEvent() < 40
+			) {
+				return;
+			}
+
 			if ($checkLadderLastX || $checkLadderNewY) {
 				if ($diff > 0.5) { // impossible 0.6~
 					$this->failed($playerAPI);

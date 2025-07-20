@@ -96,6 +96,7 @@ abstract class Check extends ConfigManager {
 
 	/**
 	 * When multiple attempts of violations is within limit of < 0.5s.
+	 *
 	 * @throws DiscordWebhookException
 	 * @internal
 	 */

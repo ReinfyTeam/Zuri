@@ -69,7 +69,10 @@ class SpeedA extends Check {
 				$player->isFlying() ||
 				$player->hasNoClientPredictions() ||
 				!$player->isSurvival() ||
-				!$playerAPI->isCurrentChunkIsLoaded()
+				$player->isCreative() ||
+				$player->isSpectator() ||
+				!$playerAPI->isCurrentChunkIsLoaded() ||
+				$playerAPI->recentlyCancelledEvent() < 40
 			) {
 				return;
 			}
@@ -80,13 +83,19 @@ class SpeedA extends Check {
 			$frictionBlock = $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN));
 			$friction = $playerAPI->isOnGround() ? $frictionBlock->getFrictionFactor() : $this->getConstant("friction-factor");
 			$lastDistance = $playerAPI->getExternalData("lastDistanceXZ", $this->getConstant("xz-distance"));
+
 			$momentum = MathUtil::getMomentum($lastDistance, $friction);
 			$movement = MathUtil::getMovement($player, new Vector3(max(-1, min(1, $packet->getMoveVecZ())), 0, max(-1, min(1, $packet->getMoveVecX()))));
 			$effects = MathUtil::getEffectsMultiplier($player);
 			$acceleration = MathUtil::getAcceleration($movement, $effects, $friction, $player->isOnGround());
 
 			$expected = $momentum + $acceleration;
+			$expected += ($playerAPI->getJumpTicks() < 5 && BlockUtil::getBlockAbove($player)->isSolid()) ? $this->getConstant("jump-factor") : 0;
+			$expected += ($player->isOnGround()) ? $this->getConstant("ground-factor") : 0;
+			$expected += ($packet->getInputFlags()->get(PlayerAuthInputFlags::START_JUMPING) && $playerAPI->getLastMoveTick() > 5) ? $this->getConstant("lastjump-factor") : 0;
+			$expected += ($playerAPI->getJumpTicks() <= 20 && $playerAPI->isOnIce()) ? $this->getConstant("ice-factor") : 0;
 
+			// If the player is moving, calculate the knockback factor
 			if (abs($playerAPI->getMotion()->getX()) > 0 || abs($playerAPI->getMotion()->getZ()) > 0) {
 				$motionX = abs($playerAPI->getMotion()->getX());
 				$motionZ = abs($playerAPI->getMotion()->getZ());
@@ -99,14 +108,8 @@ class SpeedA extends Check {
 				$playerAPI->getMotion()->z = 0;
 			}
 
-			$expected += ($playerAPI->getJumpTicks() < 5 && BlockUtil::getBlockAbove($player)->isSolid()) ? $this->getConstant("jump-factor") : 0;
 			$expected += $playerAPI->getLastMoveTick() < 5 ? $this->getConstant("lastmove-factor") : 0;
-
 			$playerAPI->setExternalData("lastDistanceXZ", $expected);
-
-			$expected += ($player->isOnGround()) ? $this->getConstant("ground-factor") : 0;
-			$expected += ($packet->getInputFlags()->get(PlayerAuthInputFlags::START_JUMPING) && $playerAPI->getLastMoveTick() > 5) ? $this->getConstant("lastjump-factor") : 0;
-			$expected += ($playerAPI->getJumpTicks() <= 20 && $playerAPI->isOnIce()) ? $this->getConstant("ice-factor") : 0;
 
 			$dist = $previous->distance($next);
 			$distDiff = abs($dist - $expected);
@@ -115,6 +118,7 @@ class SpeedA extends Check {
 				$this->debug($playerAPI, "expected=$expected, distance=$distDiff");
 				$this->failed($playerAPI);
 			}
+			$playerAPI->setExternalData("lastDistanceXZ", $dist);
 		}
 	}
 }

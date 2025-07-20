@@ -55,23 +55,23 @@ class ReachD extends Check {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			$damager = $event->getDamager();
 			$player = $event->getEntity();
-			
+
 			if ($player instanceof Player && $damager instanceof Player) {
-				
 				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
 				$playerAPI = PlayerAPI::getAPIPlayer($player);
-				
+
 				if (
 					$damager->isSurvival() ||
 					$entity->isSurvival() ||
 					$playerAPI->getProjectileAttackTicks() < 40 ||
 					$damagerAPI->getProjectileAttackTicks() < 40 ||
 					$playerAPI->getBowShotTicks() < 40 ||
-					$damagerAPI->getBowShotTicks() < 40
+					$damagerAPI->getBowShotTicks() < 40 ||
+					$playerAPI->recentlyCancelledEvent() < 40
 				) { // false-positive in projectiles
 					return;
 				}
-				
+
 				$damagerPing = $damager->getNetworkSession()->getPing();
 				$playerPing = $player->getNetworkSession()->getPing();
 				$distance = $player->getEyePos()->distance(new Vector3($damager->getEyePos()->getX(), $player->getEyePos()->getY(), $damager->getEyePos()->getZ()));

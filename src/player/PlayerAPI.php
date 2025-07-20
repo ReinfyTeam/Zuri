@@ -200,6 +200,21 @@ class PlayerAPI implements IPlayerAPI {
 		$this->underBlock = $data;
 	}
 
+	public function setRecentlyCancelledEvent(int $tick) : bool {
+		return $this->eventCancelled = $tick;
+	}
+
+	public function isRecentlyCancelledEvent() : bool {
+		if ($this->eventCancelled === 0) {
+			return false;
+		}
+		if (abs($this->eventCancelled - microtime(true)) * 20 > 40) {
+			$this->eventCancelled = 0;
+			return false;
+		}
+		return true;
+	}
+
 	//Top block
 	public function isTopBlock() : bool {
 		return $this->topBlock;

@@ -32,7 +32,6 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\combat\reach;
 
 use pocketmine\event\entity\EntityDamageByEntityEvent;
-use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Event;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
@@ -57,22 +56,22 @@ class ReachB extends Check {
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
 			if ($damager instanceof Player && $entity instanceof Player) {
-				
 				$entityAPI = PlayerAPI::getAPIPlayer($entity);
 				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
-				
+
 				if (
 					$damager->isSurvival() ||
 					$entity->isSurvival() ||
 					$entityAPI->getProjectileAttackTicks() < 40 ||
 					$damagerAPI->getProjectileAttackTicks() < 40 ||
 					$entityAPI->getBowShotTicks() < 40 ||
-					$damagerAPI->getBowShotTicks() < 40
+					$damagerAPI->getBowShotTicks() < 40 ||
+					$playerAPI->recentlyCancelledEvent() < 40
 				) { // false-positive in projectiles
 					return;
 				}
-				
-				
+
+
 				$player = $entityAPI->getPlayer();
 				$damager = $damagerAPI->getPlayer();
 				$playerLoc = $player->getLocation();

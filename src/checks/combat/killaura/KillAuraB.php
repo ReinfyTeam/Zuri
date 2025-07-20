@@ -58,7 +58,8 @@ class KillAuraB extends Check {
 				!$player->getAllowFlight() ||
 				$playerAPI->getAttackTicks() < 100 ||
 				$playerAPI->getTeleportTicks() < 100 ||
-				$player->isSurvival()
+				$player->isSurvival() ||
+				$playerAPI->recentlyCancelledEvent() < 40
 			) {
 				return;
 			}

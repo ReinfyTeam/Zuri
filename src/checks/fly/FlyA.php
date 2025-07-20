@@ -64,7 +64,8 @@ class FlyA extends Check {
 			!$player->isSurvival() ||
 			!$playerAPI->isCurrentChunkIsLoaded() ||
 			BlockUtil::isGroundSolid($player) ||
-			$playerAPI->isGliding()
+			$playerAPI->isGliding() ||
+			$playerAPI->recentlyCancelledEvent() < 40
 		) {
 			$playerAPI->unsetExternalData("lastYNoGroundF");
 			$playerAPI->unsetExternalData("lastTimeF");

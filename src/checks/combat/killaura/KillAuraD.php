@@ -59,7 +59,8 @@ class KillAuraD extends Check {
 			$playerAPI->isDigging() ||
 			$playerAPI->getPlacingTicks() < 100 ||
 			$playerAPI->getAttackTicks() < 20 ||
-			!$player->isSurvival()
+			!$player->isSurvival() ||
+			$playerAPI->recentlyCancelledEvent() < 40
 		) {
 			return;
 		}
