@@ -22,7 +22,7 @@ jobs:
      - name: Run build.php
        run: "php -dphar.readonly=0 tools/build.php"
      - name: Upload build artifact
-       uses: actions/upload-artifact@v4
+       uses: actions/upload-artifact@v5
        with:
           name: Zuri.phar
           path: Zuri.phar
