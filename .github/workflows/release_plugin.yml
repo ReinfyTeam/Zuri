@@ -23,7 +23,7 @@ jobs:
        run: "php php-cs-fixer fix src"
      - name: Run build.php
        run: "php -dphar.readonly=0 tools/build.php"
-     - uses: ChanTsune/release-with-commit@v3.0.0
+     - uses: ChanTsune/release-with-commit@v4.0.0
        id: create_release
        continue-on-error: true
        with:
