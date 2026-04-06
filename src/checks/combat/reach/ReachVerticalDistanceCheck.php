@@ -41,49 +41,55 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
 
-class ReachA extends Check {
+class ReachVerticalDistanceCheck extends Check {
+	/**
+	 * Returns the root check name used for configuration lookup.
+	 */
 	public function getName() : string {
 		return "Reach";
 	}
 
+	/**
+	 * Returns the subtype key used by alerts and punishments.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Evaluates vertical-adjusted combat reach after damage events.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkJustEvent(Event $event) : void {
-		if ($event instanceof EntityDamageByEntityEvent) {
-			$entity = $event->getEntity();
-			$damager = $event->getDamager();
+		if (!$event instanceof EntityDamageByEntityEvent) {
+			return;
+		}
 
-			if ($damager instanceof Player && $entity instanceof Player) {
-				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
-				$playerAPI = PlayerAPI::getAPIPlayer($entity);
+		$victim = $event->getEntity();
+		$damager = $event->getDamager();
+		if (!$damager instanceof Player || !$victim instanceof Player) {
+			return;
+		}
 
-				if (
-					$damager->isSurvival() ||
-					$entity->isSurvival() ||
-					$playerAPI->getProjectileAttackTicks() < 40 ||
-					$damagerAPI->getProjectileAttackTicks() < 40 ||
-					$playerAPI->getBowShotTicks() < 40 ||
-					$damagerAPI->getBowShotTicks() < 40 ||
-					$playerAPI->recentlyCancelledEvent() < 40
-				) { // false-positive in projectiles
-					return;
-				}
+		$damagerAPI = PlayerAPI::getAPIPlayer($damager);
+		$victimAPI = PlayerAPI::getAPIPlayer($victim);
+		if (ReachCombatGate::shouldSkip($damager, $victim, $damagerAPI, $victimAPI)) {
+			return;
+		}
 
-				$locEntity = $entity->getLocation();
-				$locDamager = $damager->getLocation();
-				$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? abs($locEntity->getY() - $locDamager->getY()) : 0;
-				$distance = MathUtil::distance($locEntity, $locDamager) - $isPlayerTop;
-				$isSurvival = $entity->getGameMode() === GameMode::SURVIVAL();
-				$this->debug($damagerAPI, "isPlayerTop=$isPlayerTop, distance=$distance, isSurvival=$isSurvival");
-				if ($isSurvival && $distance > $this->getConstant("survival-max-distance")) {
-					$this->failed($damagerAPI);
-				}
-			}
+		$victimLocation = $victim->getLocation();
+		$damagerLocation = $damager->getLocation();
+		$verticalAdjustment = $victimLocation->getY() > $damagerLocation->getY()
+			? abs($victimLocation->getY() - $damagerLocation->getY())
+			: 0.0;
+
+		$distance = MathUtil::distance($victimLocation, $damagerLocation) - $verticalAdjustment;
+		$isVictimSurvival = $victim->getGameMode() === GameMode::SURVIVAL();
+		$this->debug($damagerAPI, "verticalAdjustment={$verticalAdjustment}, distance={$distance}, isVictimSurvival={$isVictimSurvival}");
+
+		if ($isVictimSurvival && $distance > (float) $this->getConstant("survival-max-distance")) {
+			$this->failed($damagerAPI);
 		}
 	}
 }
