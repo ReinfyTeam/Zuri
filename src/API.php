@@ -37,6 +37,7 @@ use pocketmine\utils\Config;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\events\api\CheckStateChangeEvent;
 use ReinfyTeam\Zuri\utils\discord\Discord;
 use function array_filter;
 use function array_values;
@@ -53,6 +54,9 @@ final class API {
 			return PlayerAPI::getAPIPlayer($player);
 		}
 		$found = Server::getInstance()->getPlayerExact($player);
+		if ($found === null) {
+			return null;
+		}
 		return PlayerAPI::getAPIPlayer($found);
 	}
 
@@ -85,6 +89,41 @@ final class API {
 		return ZuriAC::Checks();
 	}
 
+	public static function getCheck(string $name, ?string $subType = null) : ?Check {
+		if ($subType !== null) {
+			return self::getModule($name, $subType);
+		}
+
+		$checks = self::getChecksByName($name);
+		return $checks[0] ?? null;
+	}
+
+	public static function getChecksByName(string $name) : array {
+		return array_values(array_filter(
+			ZuriAC::Checks(),
+			static fn(Check $module) : bool => $module->getName() === $name
+		));
+	}
+
+	public static function setCheckEnabled(string $name, bool $enabled, ?string $subType = null) : bool {
+		$plugin = self::getPluginInstance();
+		$event = new CheckStateChangeEvent($name, $subType, $enabled);
+		$event->call();
+		if ($event->isCancelled()) {
+			return false;
+		}
+
+		return $plugin->setCheckEnabled($event->getCheckName(), $event->getSubType(), $event->isEnabled());
+	}
+
+	public static function reloadChecks() : void {
+		self::getPluginInstance()->reloadChecks();
+	}
+
+	public static function rebuildCheckBuckets() : void {
+		self::getPluginInstance()->rebuildCheckBuckets();
+	}
+
 	public static function getConfig() : ConfigManager {
 		return self::$config ??= new ConfigManager();
 	}
@@ -105,8 +144,17 @@ final class API {
 
 
 	private static function getModuleInfoField(string $name, string $field) : mixed {
-		$info = self::allModulesInfo();
-		return $info[$name][$field] ?? null;
+		$module = self::getCheck($name);
+		if ($module === null) {
+			return null;
+		}
+
+		return match ($field) {
+			"subType" => $module->getSubType(),
+			"maxViolations" => $module->maxViolations(),
+			"punishment" => $module->getPunishment(),
+			default => null,
+		};
 	}
 
 	public static function getModule(string $name, string $subType) : ?Check {
@@ -127,8 +175,38 @@ final class API {
 		return self::getModuleInfoField($name, "maxViolations");
 	}
 
-	public static function getPunishmentByModule(string $name) : ?array {
+	public static function getPunishmentByModule(string $name) : ?string {
 		return self::getModuleInfoField($name, "punishment");
+	}
+
+	public static function setPlayerFlagged(string|Player $player, bool $flagged = true) : bool {
+		$apiPlayer = self::getPlayer($player);
+		if ($apiPlayer === null) {
+			return false;
+		}
+
+		$apiPlayer->setFlagged($flagged);
+		return true;
+	}
+
+	public static function setPlayerDebug(string|Player $player, bool $debug = true) : bool {
+		$apiPlayer = self::getPlayer($player);
+		if ($apiPlayer === null) {
+			return false;
+		}
+
+		$apiPlayer->setDebug($debug);
+		return true;
+	}
+
+	public static function setPlayerCaptcha(string|Player $player, bool $captcha = true) : bool {
+		$apiPlayer = self::getPlayer($player);
+		if ($apiPlayer === null) {
+			return false;
+		}
+
+		$apiPlayer->setCaptcha($captcha);
+		return true;
 	}
 
 	public static function getPluginInstance() : ZuriAC {

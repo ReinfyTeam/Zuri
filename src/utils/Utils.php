@@ -49,7 +49,6 @@ use function is_array;
 use function is_string;
 use function mt_getrandmax;
 use function mt_rand;
-use function sqrt;
 use function str_replace;
 
 class Utils {
@@ -101,7 +100,7 @@ class Utils {
 
 	// Grabbed from PMMP LOL
 	public static function calculatePossibleKnockback(Player $player, float $x, float $z, float $force = Living::DEFAULT_KNOCKBACK_FORCE, ?float $verticalLimit = Living::DEFAULT_KNOCKBACK_VERTICAL_LIMIT) : ?Vector3 {
-		$f = sqrt($x * $x + $z * $z);
+		$f = MathUtil::horizontalLength($x, $z);
 		if ($f <= 0) {
 			return null;
 		}

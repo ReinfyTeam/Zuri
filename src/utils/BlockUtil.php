@@ -41,7 +41,6 @@ use pocketmine\world\Position;
 use function abs;
 use function array_flip;
 use function fmod;
-use function sqrt;
 
 class BlockUtil {
 	public static function getBlockAbove(Player $player) : ?Block {
@@ -375,6 +374,6 @@ class BlockUtil {
 	}
 
 	public static function distance(Position $a, Position $b) {
-		return sqrt((($a->getX() - $b->getX()) ** 2) + (($a->getY() - $b->getY()) ** 2) + (($a->getZ() - $b->getZ()) ** 2));
+		return MathUtil::distance($a->asVector3(), $b->asVector3());
 	}
 }

@@ -56,6 +56,7 @@ abstract class Check extends ConfigManager {
 	/** @var array<string, float> */
 	private static array $asyncThrottle = [];
 
+	private ?bool $enabledOverride = null;
 	private ?bool $enabledCache = null;
 	private ?string $punishmentCache = null;
 	private ?int $maxViolationsCache = null;
@@ -87,7 +88,7 @@ abstract class Check extends ConfigManager {
 		}
 
 		self::$asyncThrottle[$key] = $now + $minInterval;
-		Server::getInstance()->getAsyncPool()->submitTask(new CheckAsyncTask(static::class, $playerName, $payload));
+		CheckAsyncTask::dispatch(static::class, $playerName, $payload);
 	}
 
 	public function replaceText(PlayerAPI $player, string $text, string $reason = "", string $subType = "") : string {
@@ -98,7 +99,26 @@ abstract class Check extends ConfigManager {
 		return $this->punishmentCache ??= strtolower(self::getData(self::CHECK . "." . strtolower($this->getName()) . ".punishment", "FLAG"));
 	}
 
+	public function setEnabledOverride(?bool $enabled) : void {
+		$this->enabledOverride = $enabled;
+		$this->enabledCache = null;
+	}
+
+	public function getEnabledOverride() : ?bool {
+		return $this->enabledOverride;
+	}
+
+	public function resetCaches() : void {
+		$this->enabledCache = null;
+		$this->punishmentCache = null;
+		$this->maxViolationsCache = null;
+		$this->constantCache = [];
+	}
+
 	public function enable() : bool {
+		if ($this->enabledOverride !== null) {
+			return $this->enabledOverride;
+		}
 		return $this->enabledCache ??= self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable", false);
 	}
 

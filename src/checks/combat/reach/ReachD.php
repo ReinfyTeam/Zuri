@@ -36,8 +36,8 @@ use pocketmine\event\Event;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
-use function sqrt;
 
 class ReachD extends Check {
 	public function getName() : string {
@@ -83,8 +83,8 @@ class ReachD extends Check {
 		}
 
 		if (
-			(bool) ($payload["damagerSurvival"] ?? false) ||
-			(bool) ($payload["victimSurvival"] ?? false) ||
+			!(bool) ($payload["damagerSurvival"] ?? false) ||
+			!(bool) ($payload["victimSurvival"] ?? false) ||
 			(int) ($payload["victimProjectileTicks"] ?? 0) < 40 ||
 			(int) ($payload["damagerProjectileTicks"] ?? 0) < 40 ||
 			(int) ($payload["victimBowTicks"] ?? 0) < 40 ||
@@ -95,7 +95,7 @@ class ReachD extends Check {
 			return [];
 		}
 
-		$distance = self::calculateDistance(
+		$distance = MathUtil::distanceFromComponents(
 			(float) ($payload["damagerEyeX"] ?? 0.0),
 			(float) ($payload["damagerEyeY"] ?? 0.0),
 			(float) ($payload["damagerEyeZ"] ?? 0.0),
@@ -122,8 +122,8 @@ class ReachD extends Check {
 	}
 
 	private function shouldSkip(Player $damager, Player $victim, PlayerAPI $damagerAPI, PlayerAPI $victimAPI) : bool {
-		return $damager->isSurvival() ||
-			$victim->isSurvival() ||
+		return !$damager->isSurvival() ||
+			!$victim->isSurvival() ||
 			$victimAPI->getProjectileAttackTicks() < 40 ||
 			$damagerAPI->getProjectileAttackTicks() < 40 ||
 			$victimAPI->getBowShotTicks() < 40 ||
@@ -163,7 +163,7 @@ class ReachD extends Check {
 	}
 
 	private function evaluateSync(Player $damager, Player $victim, PlayerAPI $damagerAPI) : void {
-		$distance = self::calculateDistance(
+		$distance = MathUtil::distanceFromComponents(
 			$damager->getEyePos()->getX(),
 			$damager->getEyePos()->getY(),
 			$damager->getEyePos()->getZ(),
@@ -181,9 +181,5 @@ class ReachD extends Check {
 		if ($distance > $limit) {
 			$this->failed($damagerAPI);
 		}
-	}
-
-	private static function calculateDistance(float $fromX, float $fromY, float $fromZ, float $toX, float $toY, float $toZ) : float {
-		return sqrt((($toX - $fromX) ** 2) + (($toY - $fromY) ** 2) + (($toZ - $fromZ) ** 2));
-	}
+}
 }

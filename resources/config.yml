@@ -40,11 +40,14 @@ zuri:
         ip: 127.0.0.1
         port: 19132
     alerts:
+        # Sends console and staff alerts whenever a check reaches its pre-violation or punishment threshold.
         message: "{prefix} §f{player_name} §7failed §f{module} §7(§c{subtype}§7) §7VL §2{realViolation}"
         enable: true
+        # When enabled, only players with the permission below will see alert messages.
         admin: false #This will cause the in-game cheat detector to send it to the person with the permissions below
         permission: "zuri.admin"
     ban:
+        # Commands are dispatched from the console after a ban decision is confirmed.
         commands:
             - 'ban "{player_name}" Unfair Advantage'
         message: "{prefix} §f{player_name} §chas been banned from server for hacking or abuse."
@@ -55,6 +58,7 @@ zuri:
         message: "{prefix} §f{player_name} §7suspected using §f{module} §7(§c{subtype}§7) §7PRE-VL §2{violation}"
     kick:
         kickmessage: "§fYou have been kicked from the server."
+        # This message is used for staff notifications and is separate from the player-facing kick UI.
         message: "{prefix} §f{player_name} §chas been kicked from server for hacking or abuse."
         enable: true
         # If this is enabled, this will be used. DISABLING THIS, THE FALL BACK KICK WHICH LEADS MANY BUGS, PLAYERS CANNOT BE KICKED ETC.. SO, PLEASE DO NOT DISABLE KICK COMMAND MODE FEATURE.
@@ -63,13 +67,16 @@ zuri:
               list:
                  - 'kick "{player_name}" Unfair Advantage'
     warning:
+              # Warning is a soft action used by login and captcha flows before a punishment is applied.
               enable: true
               message: "{prefix} §l§7[§eWARNING§7] §r§f{player_name} §7is tried using §f{module} §7(§c{subtype}§7)"
     debug:
+        # Debug mode prints calculation details for the selected player only.
         enable: true # Allow debugging checks: (/zuri debug)
         log-admin: true # Send to admin their data... Might to cause lag if enabled... Only works if player is in debug mode!
         log-server: false # Log to server, Might to cause lag if enabled... Only works if player is in debug mode also!
     captcha:
+        # Captcha is used to pause a player until they complete a verification challenge.
         enable: true
         text: "{prefix} §cType §b{code} §cto get rid of mute!"
         message: true
@@ -77,15 +84,18 @@ zuri:
         title: false
         randomize: false #If it enable <message, tip, title> must disable
         code:
+            # Longer codes are harder to guess but slightly more annoying for legitimate players.
             length: 5
     #Custom permissions
     permissions:
         bypass:
+            # Players with this permission are exempt from most detections and punishments.
             enable: true
             permission: "zuri.bypass"
     # Discord Webhook: The instructions of how to use this feature is on github. Please refer to the instruction first.
     # You can find all instructions on github wiki. You can modify webhook send embeds in "webhook.yml".
     discord:
+        # Sends ban, kick, detection, and lag alerts to Discord when enabled.
         enable: false # Should discord webhooks are enabled in the server?
     chat:
         spam:
@@ -294,11 +304,14 @@ zuri:
                 d: 3
             punishment: KICK
             constants:
+                  # When true, Reach (D) is evaluated in the LibVapmPMMP worker instead of the main tick path.
+                  # Keep this enabled on busy servers if you want the heavier distance math moved off the main flow.
                  max-distance: 4.3
                  survival-max-distance: 3.0
                  creative-max-distance: 8.3
                  max-reach-eye-distance: 3.0
-                  async-enabled: false
+                  # Requires LibVapmPMMP support through the plugin bootstrap.
+                  async-enabled: true
                  default-eye-distance: 0.0041
                  sprinting-eye-distance: 0.97
                  not-sprinting-eye-distance: 0.87

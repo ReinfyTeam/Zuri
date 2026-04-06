@@ -98,6 +98,22 @@ class MathUtil {
 		return $lastDistance * $friction * 0.91;
 	}
 
+	public static function distanceFromComponents(float $fromX, float $fromY, float $fromZ, float $toX, float $toY, float $toZ) : float {
+		return sqrt((($toX - $fromX) ** 2) + (($toY - $fromY) ** 2) + (($toZ - $fromZ) ** 2));
+	}
+
+	public static function horizontalLength(float $x, float $z) : float {
+		return sqrt(($x * $x) + ($z * $z));
+	}
+
+	public static function ticksSince(float $timestamp) : float {
+		return (microtime(true) - $timestamp) * 20;
+	}
+
+	public static function isRecent(float $timestamp, float $maxTicks) : bool {
+		return abs(self::ticksSince($timestamp)) <= $maxTicks;
+	}
+
 	public static function getAcceleration(float $movement, float $effectMultiplier, float $friction, bool $onGround) : float {
 		if (!$onGround) {
 			return 0.02 * $movement;

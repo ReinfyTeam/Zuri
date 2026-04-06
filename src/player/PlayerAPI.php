@@ -40,11 +40,11 @@ use pocketmine\player\Player;
 use pocketmine\player\SurvivalBlockBreakHandler;
 use ReflectionException;
 use ReflectionProperty;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
 use function count;
 use function microtime;
 use function spl_object_id;
-use function sqrt;
 
 class PlayerAPI implements IPlayerAPI {
 	/** @var PlayerAPI[] */
@@ -138,7 +138,7 @@ class PlayerAPI implements IPlayerAPI {
 		$motion = $this->getPlayer()->getMotion();
 		$isGliding = $this->getPlayer()->isGliding();
 		$isFalling = $motion->y < 0; // Check player is falling when motion y falls down...
-		$horizontalSpeed = sqrt($motion->x ** 2 + $motion->z ** 2); // Check horizontal speed if it is on threshold
+		$horizontalSpeed = MathUtil::distanceFromComponents(0.0, 0.0, 0.0, $motion->x, 0.0, $motion->z); // Check horizontal speed if it is on threshold
 
 		if ($isFalling && $horizontalSpeed > 0.5 || $isGliding) { // Check flags if were accurate also...
 			return true;
@@ -208,7 +208,7 @@ class PlayerAPI implements IPlayerAPI {
 		if ($this->eventCancelled === 0) {
 			return false;
 		}
-		if (abs($this->eventCancelled - microtime(true)) * 20 > 40) {
+		if (!MathUtil::isRecent($this->eventCancelled, 40)) {
 			$this->eventCancelled = 0;
 			return false;
 		}
@@ -251,8 +251,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getLastMoveTick() : float {
-		return (microtime(true) - $this->lastMoveTick) * 20;
-		;
+		return MathUtil::ticksSince($this->lastMoveTick);
 	}
 
 	public function setProjectileAttackTicks(float $data) : void {
@@ -260,7 +259,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getProjectileAttackTicks() : float {
-		return (microtime(true) - $this->projectileAttackTicks) * 20;
+		return MathUtil::ticksSince($this->projectileAttackTicks);
 	}
 
 
@@ -269,7 +268,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getBowShotTicks() : float {
-		return (microtime(true) - $this->bowShotTicks) * 20;
+		return MathUtil::ticksSince($this->bowShotTicks);
 	}
 
 	public function setHurtTicks(float $data) : void {
@@ -277,7 +276,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getTeleportCommandTicks() : float {
-		return (microtime(true) - $this->teleportCommandTicks) * 20;
+		return MathUtil::ticksSince($this->teleportCommandTicks);
 	}
 
 	public function setTeleportCommandTicks(float $data) : void {
@@ -285,7 +284,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getHurtTicks() : float {
-		return (microtime(true) - $this->hurtTicks) * 20;
+		return MathUtil::ticksSince($this->hurtTicks);
 	}
 
 	//On door
@@ -564,7 +563,7 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Teleport ticks
 	public function getTeleportTicks() : float {
-		return (microtime(true) - $this->teleportTicks) * 20;
+		return MathUtil::ticksSince($this->teleportTicks);
 	}
 
 	public function setTeleportTicks(float $data) : void {
@@ -573,7 +572,7 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Jump ticks
 	public function getJumpTicks() : float {
-		return (microtime(true) - $this->jumpTicks) * 20;
+		return MathUtil::ticksSince($this->jumpTicks);
 	}
 
 	public function setJumpTicks(float $data) : void {
@@ -582,7 +581,7 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Attack ticks
 	public function getAttackTicks() : float {
-		return (microtime(true) - $this->attackTicks) * 20;
+		return MathUtil::ticksSince($this->attackTicks);
 	}
 
 	public function setAttackTicks(float $data) : void {
@@ -591,7 +590,7 @@ class PlayerAPI implements IPlayerAPI {
 
 	//On slime block ticks
 	public function getSlimeBlockTicks() : float {
-		return (microtime(true) - $this->slimeBlockTicks) * 20;
+		return MathUtil::ticksSince($this->slimeBlockTicks);
 	}
 
 	public function setSlimeBlockTicks(float $data) : void {
@@ -600,7 +599,7 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Death ticks
 	public function getDeathTicks() : float {
-		return (microtime(true) - $this->deathTicks) * 20;
+		return MathUtil::ticksSince($this->deathTicks);
 	}
 
 	public function setDeathTicks(float $data) : void {
@@ -609,7 +608,7 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Placing ticks
 	public function getPlacingTicks() : float {
-		return (microtime(true) - $this->placingTicks) * 20;
+		return MathUtil::ticksSince($this->placingTicks);
 	}
 
 	public function setPlacingTicks(float $data) : void {
@@ -633,7 +632,7 @@ class PlayerAPI implements IPlayerAPI {
 	public function addViolation(string $supplier, int|float $amount = 1) : void {
 		if (isset($this->violations[$supplier])) {
 			foreach ($this->violations[$supplier] as $index => $time) {
-				if (abs($time - microtime(true)) * 20 > 40) {
+				if (!MathUtil::isRecent($time, 40)) {
 					unset($this->violations[$supplier][$index]);
 				}
 			}
@@ -659,7 +658,7 @@ class PlayerAPI implements IPlayerAPI {
 	public function addRealViolation(string $supplier, int|float $amount = 1) : void {
 		if (isset($this->realViolations[$supplier])) {
 			foreach ($this->realViolations[$supplier] as $index => $time) {
-				if (abs($time - microtime(true)) * 20 > 300) {
+				if (!MathUtil::isRecent($time, 300)) {
 					unset($this->realViolations[$supplier][$index]);
 				}
 			}

@@ -51,6 +51,6 @@ class CheckFailedEvent extends APIEvent {
 	}
 
 	public function getSubType() : string {
-		return $this->supplier;
+		return $this->subType;
 	}
 }

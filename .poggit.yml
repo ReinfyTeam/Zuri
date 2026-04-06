@@ -7,4 +7,6 @@ projects:
     path: ""
     lint: false
     icon: "icon.png"
+    virions:
+      - LibVapmPMMP
 ...

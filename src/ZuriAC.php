@@ -118,6 +118,7 @@ use ReinfyTeam\Zuri\task\ServerTickTask;
 use ReinfyTeam\Zuri\task\UpdateCheckerAsyncTask;
 use ReinfyTeam\Zuri\utils\InternetAddress;
 use ReinfyTeam\Zuri\utils\PermissionManager;
+use vennv\vapm\VapmPMMP;
 use function version_compare;
 
 class ZuriAC extends PluginBase {
@@ -128,12 +129,11 @@ class ZuriAC extends PluginBase {
 	private array $eventChecks = [];
 	private array $justEventChecks = [];
 
-	private const string MINIMUM_PHP_VERSION = "8.3.0";
+	private const MINIMUM_PHP_VERSION = "8.3.0";
 
 	protected function onLoad() : void {
 		self::$instance = $this;
 		ConfigManager::checkConfig();
-		VOsakaPMMP::init($this);
 
 		$minimumVersion = self::MINIMUM_PHP_VERSION;
 		if (version_compare(PHP_VERSION, $minimumVersion, '<')) {
@@ -150,7 +150,16 @@ class ZuriAC extends PluginBase {
 		return self::$instance;
 	}
 
+	public function reloadChecks() : void {
+		$this->loadChecks();
+	}
+
+	public function rebuildCheckBuckets() : void {
+		$this->buildCheckBuckets();
+	}
+
 	protected function onEnable() : void {
+		VapmPMMP::init($this);
 		$this->loadChecks();
 		$this->getScheduler()->scheduleRepeatingTask(new ServerTickTask($this), 20);
 		$this->getScheduler()->scheduleRepeatingTask(new CaptchaTask($this), 20);
@@ -360,5 +369,28 @@ class ZuriAC extends PluginBase {
 
 	public static function JustEventChecks() : array {
 		return ZuriAC::getInstance()->justEventChecks;
+	}
+
+	public function setCheckEnabled(string $name, ?string $subType, bool $enabled) : bool {
+		$changed = false;
+		foreach ($this->checks as $check) {
+			if ($check->getName() !== $name) {
+				continue;
+			}
+
+			if ($subType !== null && $check->getSubType() !== $subType) {
+				continue;
+			}
+
+			$check->setEnabledOverride($enabled);
+			$check->resetCaches();
+			$changed = true;
+		}
+
+		if ($changed) {
+			$this->buildCheckBuckets();
+		}
+
+		return $changed;
 	}
 }

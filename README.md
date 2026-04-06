@@ -1,7 +1,7 @@
 # Zuri Pocketmine-MP Anticheat 🛡️
 **Zuri** is an anticheat made to protect the server from any may unfair advantages from the players. A powerful anticheat made to destroy hackers from your server for PocketMine-MP.
 
-**Zuri** attempts to enforce "vanilla Minecraft" mechanics, as well as preventing players from abusing weaknesses in Minecraft or its protocol, making your server more safe. Organized in different sections, various checks are performed to test players doing, covering a wide range including flying and speeding, combat hacks, fast block breaking and nukers, inventory hacks, chat spam and other types of malicious behaviour.
+**Zuri** attempts to enforce "vanilla Minecraft" mechanics, as well as preventing players from abusing weaknesses in Minecraft or its protocol, making your server more safe. Organized in different sections, various checks are performed to test player behavior across movement, combat, block interaction, inventory handling, chat abuse, and packet consistency. The plugin is designed to combine fast main-thread checks with heavier calculations that can be offloaded when needed, so servers can keep detection active without turning every event into a lag spike.
 
 > ⚠️ **Spoon or Fork of Pocketmine-MP are not supported.** Do not try to create an issue, it will closed automatically.
 
@@ -21,18 +21,25 @@ Also, adding :star: a **Star** is also appreciated. ✨
 > Zuri can catch hacker efficiently, with over **40+ check modules**. Unlike other **$100 Anticheat**, it is more systematic, lightweight, and easy to configure. It's too good right? 🤦
 
 # Features
-- This plugin has total of 40+ checks that can catch hacker more efficient! 😏
+- This plugin has total of 40+ checks that cover the most common public cheat categories, including speed, fly, reach, scaffold, timer, and packet manipulation.
 - You can easily configure everything in the config. ✅
-  - Configure easily the max violations and checks and more! ⚙️
+   - Configure easily the max violations, punishment type, thresholds, bypass rules, and module constants without editing source code.
 - It is more **lightweight** compared to paid anticheat. You don't have to struggle about the performance, with this anticheat, it can possible block them all easily! 💰
-- ✨ It is easy to use when it comes at the game, you can easily debug things, manage them all at the game, and **disable checks** according to your command. 
+   - The checks are split so the simple ones stay direct while heavier calculations can be evaluated separately when the feature is enabled.
+- ✨ It is easy to use when it comes at the game, you can easily debug things, manage them all at the game, and **disable checks** according to your command.
+   - This is useful when a server owner wants to test a module, reduce false positives, or temporarily isolate a problem during maintenance.
 - ❌ Limit players joining by their ip limit, you can change and configure on how many players can join with same ip address. *(optional)*
+   - This helps reduce duplicate account flooding and simple bot joins from the same network.
 - 🌟 It also checks the player if they are using a **Proxy or VPN** *(optional)*
+   - This can be used to block suspicious network sources before they reach gameplay checks.
 - ‼ It also have support for ProxyUDP. *(on development stage)*
+   - That is intended for environments that need proxy-aware packet handling beyond standard player checks.
 - 💥 You can manage plugin at the in-game using **Interactive UI** by using command! `/zuri ui`
+   - The UI is meant for quick inspection and administrative control without requiring the console.
 
 # The Origin of the Plugin
 This plugin is an inspirational and continued work of old anticheat plugin by 
+The project keeps the same goal as the original line of work: detect obvious cheats early, keep the codebase configurable, and leave room for future checks as Minecraft and client behavior evolve. The current codebase also introduces a public API surface and event hooks so other plugins can react to, inspect, or extend anticheat behavior.
 
 # Forks / Dependencies
 Here are the **dependencies** were used in the plugin:
@@ -42,11 +49,14 @@ Here are the **dependencies** were used in the plugin:
 - [AntiInstabreak by PMMP](https://github.com/pmmp/AntiInstabreak) (**Instabreak (A)**)
 
 Some are for fixes and some are modified for compability.
+These libraries cover the parts that are outside the anticheat core itself, such as forms, webhook delivery, and specific block-break detection support. Async handling now also uses [LibVapmPMMP](https://github.com/VennDev/LibVapmPMMP) as the thread/coroutine backend for heavier check evaluation, which keeps more expensive checks away from the normal event path when the feature is enabled.
 
 # Current Modules
 **BETA** - means to be in testing, and to be optimize in the next version. <br>
 **DISABLED** - means the code is not working or has a false-positive in certain methods. <br>
 **OPTIONAL** - means this is optional optimization checks for certain purposes. <br>
+
+Every module below is grouped by the type of behavior it watches so server owners can quickly understand what part of the game is being monitored. Some checks only flag when they see repeated suspicious behavior, while others can punish immediately when a limit is crossed.
 
 - **AimAssist** (BETA)
     - **A:** Check if the player yaw is normalized and valid on the auth input.
@@ -166,5 +176,7 @@ Some are for fixes and some are modified for compability.
 
 # Feedbacks and Issue's
 - 😁 Your feedback and reviews are highly appriciated, if you ever find a bug or false-positive in certain modules, you can create an issue in our [github repository](https://github.com/ReinfyTeam/Zuri/issues)!
+   - Please include the module name, subtype, server version, and what the player was doing so the issue can be reproduced faster.
 - 👍 You can also view [Frequently asked questions article](https://github.com/ReinfyTeam/Zuri/wiki/Well-Known-Issues) about common encountered issues to our plugin, be sure to read that before creating an issue!
+   - This is especially useful for lag-related detections, teleport behavior, and other cases where server conditions can affect the result.
 > Please wait for the developer response to the issue since we have high amount of task and issue that we to do fix also ;)
