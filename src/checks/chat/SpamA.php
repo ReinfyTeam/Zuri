@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\chat;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerChatEvent;
 use ReinfyTeam\Zuri\checks\Check;
@@ -52,33 +53,33 @@ class SpamA extends Check {
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerChatEvent) {
-			$chatTick = $playerAPI->getExternalData("SpamATick");
+			$chatTick = $playerAPI->getExternalData(CacheData::SPAM_A_TICK);
 			if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
 				return;
 			}
-			$violationChat = $playerAPI->getExternalData("ViolationSpamA");
+			$violationChat = $playerAPI->getExternalData(CacheData::SPAM_A_VIOLATION);
 			if (!$event->isCancelled()) {
 				if ($chatTick !== null || $violationChat !== null) {
 					$diff = microtime(true) - $chatTick;
 					if ($diff <= self::getData(self::CHAT_SPAM_DELAY)) {
 						if ($violationChat <= $this->getConstant("max-violation-rate")) {
 							$playerAPI->getPlayer()->sendMessage($this->replaceText($playerAPI, self::getData(self::CHAT_SPAM_TEXT), $this->getName(), $this->getSubType()));
-							$playerAPI->setExternalData("SpamATick", microtime(true));
-							$playerAPI->setExternalData("ViolationSpamA", $violationChat + 1);
+							$playerAPI->setExternalData(CacheData::SPAM_A_TICK, microtime(true));
+							$playerAPI->setExternalData(CacheData::SPAM_A_VIOLATION, $violationChat + 1);
 							$this->failed($playerAPI);
 						} else {
-							$playerAPI->setExternalData("SpamATick", microtime(true));
-							$playerAPI->setExternalData("ViolationSpamA", 0);
+							$playerAPI->setExternalData(CacheData::SPAM_A_TICK, microtime(true));
+							$playerAPI->setExternalData(CacheData::SPAM_A_VIOLATION, 0);
 						}
 						$event->cancel();
 					} else {
-						$playerAPI->setExternalData("SpamATick", microtime(true));
-						$playerAPI->setExternalData("ViolationSpamA", 0);
+						$playerAPI->setExternalData(CacheData::SPAM_A_TICK, microtime(true));
+						$playerAPI->setExternalData(CacheData::SPAM_A_VIOLATION, 0);
 					}
 					$this->debug($playerAPI, "diff=$diff, chatTick=$chatTick, violationChat=$violationChat");
 				} else {
-					$playerAPI->setExternalData("SpamATick", microtime(true));
-					$playerAPI->setExternalData("ViolationSpamA", 0);
+					$playerAPI->setExternalData(CacheData::SPAM_A_TICK, microtime(true));
+					$playerAPI->setExternalData(CacheData::SPAM_A_VIOLATION, 0);
 				}
 			}
 		}

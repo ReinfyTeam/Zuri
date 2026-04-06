@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
@@ -56,14 +57,14 @@ class InvalidPackets extends Check {
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof MovePlayerPacket) { // i dont know how i did this.
-			$speed = $playerAPI->getExternalData("tickPackets") - $playerAPI->getExternalData("lastPacketTick");
+			$speed = $playerAPI->getExternalData(CacheData::INVALID_PACKETS_TICK_PACKETS) - $playerAPI->getExternalData(CacheData::INVALID_PACKETS_LAST_PACKET_TICK);
 			if ($speed < $this->getConstant("max-packet-speed")) {
 				$this->debug($playerAPI, "packetSpeed=$speed");
 				$this->failed($playerAPI);
 			}
-			$playerAPI->setExternalData("lastPacketTick", $playerAPI->getExternalData("tickPackets"));
+			$playerAPI->setExternalData(CacheData::INVALID_PACKETS_LAST_PACKET_TICK, $playerAPI->getExternalData(CacheData::INVALID_PACKETS_TICK_PACKETS));
 		} elseif ($packet instanceof PlayerAuthInputPacket) {
-			$playerAPI->setExternalData("tickPackets", $playerAPI->getExternalData("tickPackets") + 1);
+			$playerAPI->setExternalData(CacheData::INVALID_PACKETS_TICK_PACKETS, $playerAPI->getExternalData(CacheData::INVALID_PACKETS_TICK_PACKETS) + 1);
 		}
 	}
 }

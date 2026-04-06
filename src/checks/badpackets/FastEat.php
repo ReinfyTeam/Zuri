@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerItemConsumeEvent;
 use pocketmine\item\ConsumableItem;
@@ -59,9 +60,9 @@ class FastEat extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof ActorEventPacket) {
 			if ($packet->eventId === ActorEvent::EATING_ITEM) {
-				$lastTick = $playerAPI->getExternalData("lastTickP");
+				$lastTick = $playerAPI->getExternalData(CacheData::FASTEAT_LAST_TICK);
 				if ($lastTick === null) {
-					$playerAPI->setExternalData("lastTickP", microtime(true));
+					$playerAPI->setExternalData(CacheData::FASTEAT_LAST_TICK, microtime(true));
 				}
 				$this->debug($playerAPI, "lastTick=$lastTick");
 			}
@@ -74,14 +75,14 @@ class FastEat extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerItemConsumeEvent) {
 			if ($event->getItem() instanceof ConsumableItem && $event->getItem() instanceof Food) {
-				$lastTick = $playerAPI->getExternalData("lastTickP");
+				$lastTick = $playerAPI->getExternalData(CacheData::FASTEAT_LAST_TICK);
 				if ($lastTick !== null) {
 					$diff = microtime(true) - $lastTick;
 					$ping = $playerAPI->getPing();
 					if ($diff < $this->getConstant("timediff-limit") && $ping < self::getData(self::PING_LAGGING)) {
 						$event->cancel();
 						$this->failed($playerAPI);
-						$playerAPI->unsetExternalData("lastTickP");
+						$playerAPI->unsetExternalData(CacheData::FASTEAT_LAST_TICK);
 					}
 					$this->debug($playerAPI, "lastTick=$lastTick, diff=$diff");
 				}

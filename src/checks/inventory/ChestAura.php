@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\inventory;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\Event;
 use pocketmine\event\inventory\InventoryCloseEvent;
 use pocketmine\event\inventory\InventoryOpenEvent;
@@ -55,11 +56,11 @@ class ChestAura extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-		$countTransaction = $playerAPI->getExternalData("countTransaction");
-		$timeOpenChest = $playerAPI->getExternalData("timeOpenChest");
+		$countTransaction = $playerAPI->getExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION);
+		$timeOpenChest = $playerAPI->getExternalData(CacheData::CHESTAURA_TIME_OPEN_CHEST);
 		if ($event instanceof InventoryOpenEvent) {
 			if ($timeOpenChest === null && !($event->getInventory() instanceof PlayerCraftingInventory)) {
-				$playerAPI->setExternalData("timeOpenChest", microtime(true));
+				$playerAPI->setExternalData(CacheData::CHESTAURA_TIME_OPEN_CHEST, microtime(true));
 			}
 			$this->debug($playerAPI, "countTransaction=$countTransaction, timeOpenChest=$timeOpenChest");
 		}
@@ -69,8 +70,8 @@ class ChestAura extends Check {
 				if ($timeDiff < $countTransaction / $this->getConstant("transaction-divisible")) {
 					$this->failed($playerAPI);
 				}
-				$playerAPI->unsetExternalData("timeOpenChest");
-				$playerAPI->unsetExternalData("countTransaction");
+				$playerAPI->unsetExternalData(CacheData::CHESTAURA_TIME_OPEN_CHEST);
+				$playerAPI->unsetExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION);
 				$this->debug($playerAPI, "timediff=$timeDiff");
 			}
 		}
@@ -79,9 +80,9 @@ class ChestAura extends Check {
 			foreach ($transaction->getInventories() as $inventory) {
 				if ($inventory instanceof PlayerInventory) {
 					if ($countTransaction !== null && $timeOpenChest !== null) {
-						$playerAPI->setExternalData("countTransaction", $countTransaction + 1);
+						$playerAPI->setExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION, $countTransaction + 1);
 					} else {
-						$playerAPI->setExternalData("countTransaction", 0);
+						$playerAPI->setExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION, 0);
 					}
 				}
 			}

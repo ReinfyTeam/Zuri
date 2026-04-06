@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\velocity;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
@@ -16,8 +17,8 @@ use function max;
 use function microtime;
 
 class VelocityA extends Check {
-	private const HIT_AT_KEY = "VelocityA.hitAt";
-	private const BUFFER_KEY = "VelocityA.buffer";
+	private const HIT_AT_KEY = CacheData::VELOCITY_A_HIT_AT;
+	private const BUFFER_KEY = CacheData::VELOCITY_A_BUFFER;
 
 	public function getName() : string {
 		return "Velocity";

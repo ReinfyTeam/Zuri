@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\entity\projectile\Arrow;
 use pocketmine\event\entity\ProjectileLaunchEvent;
 use pocketmine\event\Event;
@@ -62,7 +63,7 @@ class FastThrow extends Check {
 				$playerAPI = PlayerAPI::getAPIPlayer($entity);
 				$projectile = $event->getEntity();
 				if (!$projectile instanceof Arrow) { // ignore for Arrows
-					$lastUse = $playerAPI->getExternalData("lastUseFT");
+					$lastUse = $playerAPI->getExternalData(CacheData::FASTTHROW_LAST_USE);
 					if ($lastUse !== null) {
 						$diff = microtime(true) - $lastUse; // by ticks
 						$this->debug($playerAPI, "diff=$diff");
@@ -70,9 +71,9 @@ class FastThrow extends Check {
 							$event->cancel(); // cancel the event for safety
 							$this->failed($playerAPI);
 						}
-						$playerAPI->unsetExternalData("lastUseFT");
+						$playerAPI->unsetExternalData(CacheData::FASTTHROW_LAST_USE);
 					} else {
-						$playerAPI->setExternalData("lastUseFT", microtime(true));
+						$playerAPI->setExternalData(CacheData::FASTTHROW_LAST_USE, microtime(true));
 					}
 				}
 			}

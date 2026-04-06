@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets\regen;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\Event;
@@ -61,19 +62,19 @@ class RegenB extends Check {
 			if (!in_array($event->getRegainReason(), [EntityDamageEvent::CAUSE_MAGIC, EntityDamageEvent::CAUSE_CUSTOM], true)) {
 				$tick = (double) Server::getInstance()->getTick();
 				$tps = Server::getInstance()->getTicksPerSecond();
-				$lastHealthTick = $playerAPI->getExternalData("lastHealthTickB") ?? 0;
+				$lastHealthTick = $playerAPI->getExternalData(CacheData::REGEN_B_LAST_HEALTH_TICK) ?? 0;
 				$healAmount = $event->getAmount();
 				$this->debug($playerAPI, "tick=$tick, tps=$tps, lastHealthTick=$lastHealthTick, healAmount=$healAmount");
 				if ($tps > 0.0 && $lastHealthTick != -1.0) {
 					$diffTicks = $tick - $lastHealthTick; // server ticks since last health regain
 					$delta = $diffTicks / $tps; // seconds since last health regain
-					$healCount = $playerAPI->getExternalData("healCountB") ?? 0;
-					$healTime = $playerAPI->getExternalData("healTimeB") ?? 0;
+					$healCount = $playerAPI->getExternalData(CacheData::REGEN_B_HEAL_COUNT) ?? 0;
+					$healTime = $playerAPI->getExternalData(CacheData::REGEN_B_HEAL_TIME) ?? 0;
 					$this->debug($playerAPI, "diffTicks=$diffTicks, delta=$delta, healCount=$healCount, healTime=$healTime");
 					if ($delta < 10) {
-						$playerAPI->setExternalData("healCountB", $healCount + $healAmount);
-						$playerAPI->setExternalData("healTimeB", $healTime + $delta);
-						$healCount = $playerAPI->getExternalData("healCountB");
+						$playerAPI->setExternalData(CacheData::REGEN_B_HEAL_COUNT, $healCount + $healAmount);
+						$playerAPI->setExternalData(CacheData::REGEN_B_HEAL_TIME, $healTime + $delta);
+						$healCount = $playerAPI->getExternalData(CacheData::REGEN_B_HEAL_COUNT);
 						if ($healCount >= $this->getConstant("max-healcount")) {
 							if ($healTime !== 0 && $healCount !== 0) {
 								$healRate = (float) $healCount / (float) $healTime;
@@ -85,13 +86,13 @@ class RegenB extends Check {
 								}
 							}
 
-							$playerAPI->setExternalData("healCountB", 0);
-							$playerAPI->setExternalData("healTimeB", 0);
+							$playerAPI->setExternalData(CacheData::REGEN_B_HEAL_COUNT, 0);
+							$playerAPI->setExternalData(CacheData::REGEN_B_HEAL_TIME, 0);
 						}
 					}
 				}
 
-				$playerAPI->setExternalData("lastHealthTickB", $tick);
+				$playerAPI->setExternalData(CacheData::REGEN_B_LAST_HEALTH_TICK, $tick);
 			}
 		}
 	}

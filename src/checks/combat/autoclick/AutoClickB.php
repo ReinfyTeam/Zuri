@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\autoclick;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
@@ -60,8 +61,8 @@ class AutoClickB extends Check {
 				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
 					"type" => "AutoClickB",
 					"placingTicks" => $playerAPI->getPlacingTicks(),
-					"ticks" => $playerAPI->getExternalData("clicksTicks2"),
-					"lastClick" => $playerAPI->getExternalData("lastClick"),
+					"ticks" => $playerAPI->getExternalData(CacheData::AUTOCLICK_B_TICKS),
+					CacheData::AUTOCLICK_B_LAST_CLICK => $playerAPI->getExternalData(CacheData::AUTOCLICK_B_LAST_CLICK),
 					"diffTime" => (float) $this->getConstant("diff-time"),
 					"diffTicks" => (int) $this->getConstant("diff-ticks"),
 					"now" => microtime(true),
@@ -81,20 +82,20 @@ class AutoClickB extends Check {
 		}
 
 		$ticks = $payload["ticks"] ?? null;
-		$lastClick = $payload["lastClick"] ?? null;
+		$lastClick = $payload[CacheData::AUTOCLICK_B_LAST_CLICK] ?? null;
 		if ($ticks === null || $lastClick === null) {
-			return ["set" => ["clicksTicks2" => 0, "lastClick" => $payload["now"] ?? microtime(true)]];
+			return ["set" => [CacheData::AUTOCLICK_B_TICKS => 0, CacheData::AUTOCLICK_B_LAST_CLICK => $payload["now"] ?? microtime(true)]];
 		}
 
 		$diff = (float) ($payload["now"] ?? microtime(true)) - (float) $lastClick;
 		if ($diff > (float) ($payload["diffTime"] ?? 0.0)) {
-			$result = ["unset" => ["clicksTicks2", "lastClick"], "debug" => "diff={$diff}, lastClick={$lastClick}, ticks={$ticks}"];
+			$result = ["unset" => [CacheData::AUTOCLICK_B_TICKS, CacheData::AUTOCLICK_B_LAST_CLICK], "debug" => "diff={$diff}, lastClick={$lastClick}, ticks={$ticks}"];
 			if ((int) $ticks >= (int) ($payload["diffTicks"] ?? 0)) {
 				$result["failed"] = true;
 			}
 			return $result;
 		}
 
-		return ["set" => ["clicksTicks2" => (int) $ticks + 1, "lastClick" => $lastClick], "debug" => "lastClick={$lastClick}, ticks={$ticks}"];
+		return ["set" => [CacheData::AUTOCLICK_B_TICKS => (int) $ticks + 1, CacheData::AUTOCLICK_B_LAST_CLICK => $lastClick], "debug" => "lastClick={$lastClick}, ticks={$ticks}"];
 	}
 }

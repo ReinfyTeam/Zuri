@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\Event;
 use pocketmine\Server;
@@ -55,26 +56,26 @@ class FastBow extends Check {
 		if ($event instanceof EntityShootBowEvent) {
 			$tick = (double) Server::getInstance()->getTick();
 			$tps = Server::getInstance()->getTicksPerSecond();
-			$shootFirstTick = $playerAPI->getExternalData("shootFirstTickA");
-			$hsTimeSum = $playerAPI->getExternalData("hsTimeSum") ?? 0;
-			$currentHsIndex = $playerAPI->getExternalData("currentHsIndex") ?? 0;
-			$hsTimeList = $playerAPI->getExternalData("hsTimeList") ?? [];
+			$shootFirstTick = $playerAPI->getExternalData(CacheData::FASTBOW_SHOOT_FIRST_TICK);
+			$hsTimeSum = $playerAPI->getExternalData(CacheData::FASTBOW_HS_TIME_SUM) ?? 0;
+			$currentHsIndex = $playerAPI->getExternalData(CacheData::FASTBOW_CURRENT_HS_INDEX) ?? 0;
+			$hsTimeList = $playerAPI->getExternalData(CacheData::FASTBOW_HS_TIME_LIST) ?? [];
 
 			if ($shootFirstTick == -1) {
-				$playerAPI->setExternalData("shootFirstTickA", $tick - 30);
+				$playerAPI->setExternalData(CacheData::FASTBOW_SHOOT_FIRST_TICK, $tick - 30);
 			}
 
 			$tickDiff = $tick - $shootFirstTick; // server ticks since last hit
 			$delta = $tickDiff / $tps; // seconds since last hit
-			$playerAPI->setExternalData("hsTimeList", array_merge($hsTimeList, [$currentHsIndex => $delta])); // merge the new array to a new another one..
-			$hsTimeList = $playerAPI->getExternalData("hsTimeList"); // update again the list..
-			$playerAPI->setExternalData("hsTimeSum", $hsTimeSum - $hsTimeList[$currentHsIndex] + $delta);
-			$playerAPI->setExternalData("currentHsIndex", $currentHsIndex + 1);
+			$playerAPI->setExternalData(CacheData::FASTBOW_HS_TIME_LIST, array_merge($hsTimeList, [$currentHsIndex => $delta])); // merge the new array to a new another one..
+			$hsTimeList = $playerAPI->getExternalData(CacheData::FASTBOW_HS_TIME_LIST); // update again the list..
+			$playerAPI->setExternalData(CacheData::FASTBOW_HS_TIME_SUM, $hsTimeSum - $hsTimeList[$currentHsIndex] + $delta);
+			$playerAPI->setExternalData(CacheData::FASTBOW_CURRENT_HS_INDEX, $currentHsIndex + 1);
 			if ($currentHsIndex >= 5) {
-				$playerAPI->setExternalData("currentHsIndex", 0);
+				$playerAPI->setExternalData(CacheData::FASTBOW_CURRENT_HS_INDEX, 0);
 			}
-			$playerAPI->setExternalData("hsHitTime", $hsTimeSum / 5);
-			$hsHitTime = $playerAPI->getExternalData("hsHitTime");
+			$playerAPI->setExternalData(CacheData::FASTBOW_HS_HIT_TIME, $hsTimeSum / 5);
+			$hsHitTime = $playerAPI->getExternalData(CacheData::FASTBOW_HS_HIT_TIME);
 			$this->debug($playerAPI, "tick=$tick, tickDiff=$tickDiff, tps=$tps, shootFirstTick=$shootFirstTick, hsTimeSum=$hsTimeSum, currentHsIndex=$currentHsIndex, delta=$delta, hsHitTime=$hsHitTime");
 			if ($hsHitTime < $this->getConstant("max-hit-time")) { // idk how i made this..
 				$this->failed($playerAPI);

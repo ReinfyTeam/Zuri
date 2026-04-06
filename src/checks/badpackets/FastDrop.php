@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerDropItemEvent;
 use ReinfyTeam\Zuri\checks\Check;
@@ -56,7 +57,7 @@ class FastDrop extends Check {
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerDropItemEvent) {
-			$lastTick = $playerAPI->getExternalData("lastTickD");
+			$lastTick = $playerAPI->getExternalData(CacheData::FASTDROP_LAST_TICK);
 			$currentTick = microtime(true);
 			if ($lastTick !== null) {
 				$diff = $currentTick - $lastTick;
@@ -67,7 +68,7 @@ class FastDrop extends Check {
 				}
 				$this->debug($playerAPI, "lastTick=$lastTick, diff=$diff");
 			}
-			$playerAPI->setExternalData("lastTickD", $currentTick);
+			$playerAPI->setExternalData(CacheData::FASTDROP_LAST_TICK, $currentTick);
 		}
 	}
 }

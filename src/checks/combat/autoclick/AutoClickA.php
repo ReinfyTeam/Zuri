@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\autoclick;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
@@ -58,9 +59,9 @@ class AutoClickA extends Check {
 				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
 					"type" => "AutoClickA",
 					"isDigging" => $playerAPI->isDigging(),
-					"ticks" => $playerAPI->getExternalData("ticksClick"),
-					"avgSpeed" => $playerAPI->getExternalData("avgSpeed"),
-					"avgDeviation" => $playerAPI->getExternalData("avgDeviation"),
+					"ticks" => $playerAPI->getExternalData(CacheData::AUTOCLICK_A_TICKS),
+					CacheData::AUTOCLICK_A_AVG_SPEED => $playerAPI->getExternalData(CacheData::AUTOCLICK_A_AVG_SPEED),
+					CacheData::AUTOCLICK_A_AVG_DEVIATION => $playerAPI->getExternalData(CacheData::AUTOCLICK_A_AVG_DEVIATION),
 					"maxTicks" => (int) $this->getConstant("max-ticks"),
 					"maxDeviation" => (float) $this->getConstant("max-deviation"),
 				]);
@@ -74,14 +75,14 @@ class AutoClickA extends Check {
 		}
 
 		$ticks = $payload["ticks"] ?? null;
-		$avgSpeed = $payload["avgSpeed"] ?? null;
-		$avgDeviation = $payload["avgDeviation"] ?? null;
+		$avgSpeed = $payload[CacheData::AUTOCLICK_A_AVG_SPEED] ?? null;
+		$avgDeviation = $payload[CacheData::AUTOCLICK_A_AVG_DEVIATION] ?? null;
 		if ($ticks === null || $avgSpeed === null || $avgDeviation === null) {
-			return ["set" => ["avgSpeed" => 0, "avgDeviation" => 0, "ticksClick" => 0]];
+			return ["set" => [CacheData::AUTOCLICK_A_AVG_SPEED => 0, CacheData::AUTOCLICK_A_AVG_DEVIATION => 0, CacheData::AUTOCLICK_A_TICKS => 0]];
 		}
 
 		if ((bool) ($payload["isDigging"] ?? false) || (int) $ticks > (int) ($payload["maxTicks"] ?? 0)) {
-			return ["unset" => ["ticksClick", "avgSpeed", "avgDeviation"]];
+			return ["unset" => [CacheData::AUTOCLICK_A_TICKS, CacheData::AUTOCLICK_A_AVG_SPEED, CacheData::AUTOCLICK_A_AVG_DEVIATION]];
 		}
 
 		$speed = (int) $ticks * 50;
@@ -90,9 +91,9 @@ class AutoClickA extends Check {
 		$newAvgDeviation = (((float) $avgDeviation * 9) + $deviation) / 10;
 		$result = [
 			"set" => [
-				"ticksClick" => (int) $ticks + 1,
-				"avgSpeed" => $newAvgSpeed,
-				"avgDeviation" => $newAvgDeviation,
+				CacheData::AUTOCLICK_A_TICKS => (int) $ticks + 1,
+				CacheData::AUTOCLICK_A_AVG_SPEED => $newAvgSpeed,
+				CacheData::AUTOCLICK_A_AVG_DEVIATION => $newAvgDeviation,
 			],
 			"debug" => "avgDeviation={$avgDeviation}, speed={$speed}, deviation={$deviation}, ticksClick={$ticks}, avgSpeed={$avgSpeed}",
 		];

@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets\timer;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
@@ -53,7 +54,7 @@ class TimerC extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
 			"type" => $packet instanceof PlayerAuthInputPacket ? "auth" : ($packet instanceof MovePlayerPacket ? "move" : "other"),
-			"delay" => $playerAPI->getExternalData("DelayCounter"),
+			"delay" => $playerAPI->getExternalData(CacheData::TIMER_C_DELAY_COUNTER),
 			"noClientPredictions" => $playerAPI->getPlayer()->hasNoClientPredictions(),
 			"alive" => $playerAPI->getPlayer()->isAlive(),
 		]);
@@ -65,17 +66,17 @@ class TimerC extends Check {
 
 		if ($type === "auth") {
 			if ($delay === null) {
-				return ["set" => ["DelayCounter" => 0]];
+				return ["set" => [CacheData::TIMER_C_DELAY_COUNTER => 0]];
 			}
-			return ["set" => ["DelayCounter" => (int) $delay + 1]];
+			return ["set" => [CacheData::TIMER_C_DELAY_COUNTER => (int) $delay + 1]];
 		}
 
 		if ($type === "move") {
 			$delay = (int) ($delay ?? 0);
 			if ((bool) ($payload["noClientPredictions"] ?? false) && (bool) ($payload["alive"] ?? false) && $delay < 2) {
-				return ["set" => ["DelayCounter" => 0], "failed" => true, "debug" => "delay={$delay}"];
+				return ["set" => [CacheData::TIMER_C_DELAY_COUNTER => 0], "failed" => true, "debug" => "delay={$delay}"];
 			}
-			return ["set" => ["DelayCounter" => 0]];
+			return ["set" => [CacheData::TIMER_C_DELAY_COUNTER => 0]];
 		}
 
 		return [];

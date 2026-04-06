@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockplace\scaffold;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\DataPacket;
@@ -58,7 +59,7 @@ class ScaffoldB extends Check {
 		if ($event instanceof BlockPlaceEvent) {
 			$pitch = abs($playerAPI->getLocation()->getPitch());
 			$distanceY = $event->getBlockAgainst()->getPosition()->getY() < $playerAPI->getLocation()->getY();
-			$oldPitch = $playerAPI->getExternalData("oldPitchB") ?? 0;
+			$oldPitch = $playerAPI->getExternalData(CacheData::SCAFFOLD_B_OLD_PITCH) ?? 0;
 			$this->debug($playerAPI, "oldPitch=$oldPitch distanceY=$distanceY, newPitch=$pitch, ping=" . $playerAPI->getPing());
 			if (
 				$pitch < $this->getConstant("suspecious-pitch-limit") && // is this has good calculation enough?
@@ -68,7 +69,7 @@ class ScaffoldB extends Check {
 			) {
 				$this->failed($playerAPI);
 			}
-			$playerAPI->setExternalData("oldPitchB", $pitch); // patching new pitch here..
+			$playerAPI->setExternalData(CacheData::SCAFFOLD_B_OLD_PITCH, $pitch); // patching new pitch here..
 		}
 	}
 }

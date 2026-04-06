@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\inventory;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use ReinfyTeam\Zuri\checks\Check;
@@ -63,8 +64,8 @@ class InventoryCleaner extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$ticks = $playerAPI->getExternalData("ticksTransaction");
-		$transaction = $playerAPI->getExternalData("transaction");
+		$ticks = $playerAPI->getExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION);
+		$transaction = $playerAPI->getExternalData(CacheData::INVENTORYCLEANER_TRANSACTION);
 		if ($packet instanceof InventoryTransactionPacket) {
 			if ($packet->trData->getTypeId() === 0) {
 				if ($ticks !== null && $transaction !== null) {
@@ -73,14 +74,14 @@ class InventoryCleaner extends Check {
 						if ($transaction > $this->getConstant("max-transaction")) {
 							$this->failed($playerAPI);
 						}
-						$playerAPI->unsetExternalData("ticksTransaction");
-						$playerAPI->unsetExternalData("transaction");
+						$playerAPI->unsetExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION);
+						$playerAPI->unsetExternalData(CacheData::INVENTORYCLEANER_TRANSACTION);
 					} else {
-						$playerAPI->setExternalData("transaction", $transaction + 1);
+						$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, $transaction + 1);
 					}
 				} else {
-					$playerAPI->setExternalData("ticksTransaction", microtime(true));
-					$playerAPI->setExternalData("transaction", 0);
+					$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION, microtime(true));
+					$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, 0);
 				}
 				$this->debug($playerAPI, "ticks=$ticks, transaction=$transaction");
 			}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockplace\scaffold;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
 use pocketmine\math\Vector3;
@@ -16,10 +17,10 @@ use function max;
 use function microtime;
 
 class ScaffoldF extends Check {
-	private const BUFFER_KEY = "ScaffoldF.buffer";
-	private const LAST_PLACE_AT_KEY = "ScaffoldF.lastPlaceAt";
-	private const LAST_BLOCK_KEY = "ScaffoldF.lastBlock";
-	private const LAST_PLAYER_KEY = "ScaffoldF.lastPlayer";
+	private const BUFFER_KEY = CacheData::SCAFFOLD_F_BUFFER;
+	private const LAST_PLACE_AT_KEY = CacheData::SCAFFOLD_F_LAST_PLACE_AT;
+	private const LAST_BLOCK_KEY = CacheData::SCAFFOLD_F_LAST_BLOCK;
+	private const LAST_PLAYER_KEY = CacheData::SCAFFOLD_F_LAST_PLAYER;
 
 	public function getName() : string {
 		return "Scaffold";

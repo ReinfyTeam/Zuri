@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving\noslow;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
@@ -14,7 +15,7 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function max;
 
 class NoSlowA extends Check {
-	private const BUFFER_KEY = "NoSlowA.buffer";
+	private const BUFFER_KEY = CacheData::NOSLOW_A_BUFFER;
 
 	public function getName() : string {
 		return "NoSlow";

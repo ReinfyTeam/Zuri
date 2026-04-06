@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets\timer;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\Server;
@@ -58,7 +59,7 @@ class TimerA extends Check {
 				"tps" => Server::getInstance()->getTicksPerSecond(),
 				"ping" => $playerAPI->getPing(),
 				"packetTick" => $packet->getTick(),
-				"timerATick" => $playerAPI->getExternalData("TimerATick"),
+				"timerATick" => $playerAPI->getExternalData(CacheData::TIMER_A_TICK),
 				"laggingPing" => self::getData(self::PING_LAGGING),
 				"maxDiff" => (float) $this->getConstant("max-diff"),
 			]);
@@ -75,7 +76,7 @@ class TimerA extends Check {
 
 		$set = [];
 		if ($tps < 19 && $ping < $laggingPing) {
-			$set["TimerATick"] = $tps - $packetTick;
+			$set[CacheData::TIMER_A_TICK] = $tps - $packetTick;
 		}
 
 		if ($delayTicks !== null) {

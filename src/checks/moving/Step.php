@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
@@ -71,7 +72,7 @@ class Step extends Check {
 			) {
 				return;
 			}
-			$lastY = $playerAPI->getExternalData("lastY");
+			$lastY = $playerAPI->getExternalData(CacheData::STEP_LAST_Y);
 			$locationPlayer = $player->getLocation();
 			$limit = $this->getConstant("y-limit");
 			if ($lastY !== null) {
@@ -81,10 +82,10 @@ class Step extends Check {
 				if ($diff > $limit) {
 					$this->failed($playerAPI);
 				}
-				$playerAPI->unsetExternalData("lastY");
+				$playerAPI->unsetExternalData(CacheData::STEP_LAST_Y);
 				$this->debug($playerAPI, "lastY=$lastY, limit=$limit, diff=$diff");
 			} else {
-				$playerAPI->setExternalData("lastY", $locationPlayer->getY());
+				$playerAPI->setExternalData(CacheData::STEP_LAST_Y, $locationPlayer->getY());
 			}
 		}
 	}

@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\inventory;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use ReinfyTeam\Zuri\checks\Check;
@@ -51,8 +52,8 @@ class ChestStealer extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$ticks = $playerAPI->getExternalData("ticksN");
-		$lastTime = $playerAPI->getExternalData("lastTimeN");
+		$ticks = $playerAPI->getExternalData(CacheData::CHESTSTEALER_TICKS);
+		$lastTime = $playerAPI->getExternalData(CacheData::CHESTSTEALER_LAST_TIME);
 		if ($packet instanceof InventoryTransactionPacket) {
 			if ($packet->trData->getTypeId() === 0) {
 				if ($ticks !== null && $lastTime !== null) {
@@ -61,14 +62,14 @@ class ChestStealer extends Check {
 						if ($ticks > $this->getConstant("diff-ticks")) {
 							$this->failed($playerAPI);
 						}
-						$playerAPI->unsetExternalData("ticksN");
-						$playerAPI->unsetExternalData("lastTimeN");
+						$playerAPI->unsetExternalData(CacheData::CHESTSTEALER_TICKS);
+						$playerAPI->unsetExternalData(CacheData::CHESTSTEALER_LAST_TIME);
 					} else {
-						$playerAPI->setExternalData("ticksN", $ticks + 1);
+						$playerAPI->setExternalData(CacheData::CHESTSTEALER_TICKS, $ticks + 1);
 					}
 				} else {
-					$playerAPI->setExternalData("ticksN", 0);
-					$playerAPI->setExternalData("lastTimeN", microtime(true));
+					$playerAPI->setExternalData(CacheData::CHESTSTEALER_TICKS, 0);
+					$playerAPI->setExternalData(CacheData::CHESTSTEALER_LAST_TIME, microtime(true));
 				}
 				$this->debug($playerAPI, "ticks=$ticks, lastTime=$lastTime");
 			}

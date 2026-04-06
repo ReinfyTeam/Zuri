@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\reach;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
 use pocketmine\player\Player;
@@ -15,7 +16,7 @@ use function max;
 use function min;
 
 class ReachE extends Check {
-	private const BUFFER_KEY = "ReachE.buffer";
+	private const BUFFER_KEY = CacheData::REACH_E_BUFFER;
 
 	public function getName() : string {
 		return "Reach";

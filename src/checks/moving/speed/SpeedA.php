@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving\speed;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\DataPacket;
@@ -95,7 +96,7 @@ class SpeedA extends Check {
 				"onIce" => $playerAPI->isOnIce(),
 				"blockAboveSolid" => BlockUtil::getBlockAbove($player)->isSolid(),
 				"startJumping" => $packet->getInputFlags()->get(PlayerAuthInputFlags::START_JUMPING),
-				"lastDistanceXZ" => $playerAPI->getExternalData("lastDistanceXZ", $this->getConstant("xz-distance")),
+				CacheData::SPEED_A_LAST_DISTANCE_XZ => $playerAPI->getExternalData(CacheData::SPEED_A_LAST_DISTANCE_XZ, $this->getConstant("xz-distance")),
 				"motionX" => $playerAPI->getMotion()->getX(),
 				"motionZ" => $playerAPI->getMotion()->getZ(),
 				"friction" => $playerAPI->isOnGround() ? $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN))->getFrictionFactor() : $this->getConstant("friction-factor"),
@@ -124,7 +125,7 @@ class SpeedA extends Check {
 		$next = new Vector3((float) ($payload["toX"] ?? 0), 0, (float) ($payload["toZ"] ?? 0));
 		$constants = $payload["constants"] ?? [];
 		$friction = (float) ($payload["friction"] ?? 0.91);
-		$lastDistance = (float) ($payload["lastDistanceXZ"] ?? ($constants["xz-distance"] ?? 0));
+		$lastDistance = (float) ($payload[CacheData::SPEED_A_LAST_DISTANCE_XZ] ?? ($constants["xz-distance"] ?? 0));
 		$momentum = MathUtil::getMomentum($lastDistance, $friction);
 		$movement = MathUtil::getMovementSnapshot((bool) ($payload["sprinting"] ?? false), (bool) ($payload["sneaking"] ?? false), (bool) ($payload["usingItem"] ?? false), (int) ($payload["swiftSneakLevel"] ?? 0));
 		$effects = MathUtil::getEffectsMultiplierSnapshot((int) ($constants["speedLevel"] ?? 0), (int) ($constants["slownessLevel"] ?? 0));
@@ -143,7 +144,7 @@ class SpeedA extends Check {
 		$expected += ((float) ($payload["lastMoveTick"] ?? 0) < 5) ? (float) ($constants["lastmove-factor"] ?? 0) : 0;
 		$dist = $previous->distance($next);
 		$distDiff = abs($dist - $expected);
-		$result = ["set" => ["lastDistanceXZ" => $dist]];
+		$result = ["set" => [CacheData::SPEED_A_LAST_DISTANCE_XZ => $dist]];
 		if ($dist > $expected && $distDiff > (float) ($payload["threshold"] ?? 0.0)) {
 			$result["failed"] = true;
 			$result["debug"] = "expected={$expected}, distance={$distDiff}";

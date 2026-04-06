@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets\timer;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
@@ -57,8 +58,8 @@ class TimerB extends Check {
 				"type" => "TimerB",
 				"alive" => $playerAPI->getPlayer()->isAlive(),
 				"currentTime" => microtime(true) * 1000,
-				"lastTime" => $playerAPI->getExternalData("TimerLastA"),
-				"balance" => $playerAPI->getExternalData("TimerBalanceA", 0),
+				"lastTime" => $playerAPI->getExternalData(CacheData::TIMER_A_LAST_TIME),
+				"balance" => $playerAPI->getExternalData(CacheData::TIMER_A_BALANCE, 0),
 				"diffBalance" => (float) $this->getConstant("diff-balance"),
 			]);
 		}
@@ -66,7 +67,7 @@ class TimerB extends Check {
 
 	public static function evaluateAsync(array $payload) : array {
 		if (!(bool) ($payload["alive"] ?? false)) {
-			return ["set" => ["TimerBalanceA" => 0], "unset" => ["TimerLastA"],];
+			return ["set" => [CacheData::TIMER_A_BALANCE => 0], "unset" => [CacheData::TIMER_A_LAST_TIME],];
 		}
 
 		$currentTime = (float) ($payload["currentTime"] ?? 0.0);
@@ -75,21 +76,21 @@ class TimerB extends Check {
 		$diffBalance = (float) ($payload["diffBalance"] ?? 0.0);
 
 		if ($lastTime === null) {
-			return ["set" => ["TimerLastA" => $currentTime, "TimerBalanceA" => $balance]];
+			return ["set" => [CacheData::TIMER_A_LAST_TIME => $currentTime, CacheData::TIMER_A_BALANCE => $balance]];
 		}
 
 		$timeDiff = round(($currentTime - (float) $lastTime) / 50, 2);
 		$newBalance = ($balance - 1) + $timeDiff;
 		$result = [
 			"set" => [
-				"TimerLastA" => $currentTime,
-				"TimerBalanceA" => $newBalance,
+				CacheData::TIMER_A_LAST_TIME => $currentTime,
+				CacheData::TIMER_A_BALANCE => $newBalance,
 			],
 		];
 
 		if ($newBalance <= $diffBalance) {
 			$result["failed"] = true;
-			$result["set"]["TimerBalanceA"] = 0;
+			$result["set"][CacheData::TIMER_A_BALANCE] = 0;
 		}
 
 		return $result;

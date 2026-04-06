@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving\speed;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
@@ -60,16 +61,16 @@ class AntiVoid extends Check {
 		) {
 			return;
 		}
-		$lastY = $playerAPI->getExternalData("lastYB");
-		$playerAPI->setExternalData("lastYB", $playerAPI->getPlayer()->getLocation()->getY());
+		$lastY = $playerAPI->getExternalData(CacheData::ANTIVOID_LAST_Y);
+		$playerAPI->setExternalData(CacheData::ANTIVOID_LAST_Y, $playerAPI->getPlayer()->getLocation()->getY());
 		if ($lastY !== null && $playerAPI->isOnGround()) {
 			if ($lastY < $playerAPI->getPlayer()->getLocation()->getY()) {
 				$this->failed($playerAPI);
 			}
-			$playerAPI->unsetExternalData("lastYB");
+			$playerAPI->unsetExternalData(CacheData::ANTIVOID_LAST_Y);
 		}
 
-		$lastYB = $playerAPI->getExternalData("lastYB");
+		$lastYB = $playerAPI->getExternalData(CacheData::ANTIVOID_LAST_Y);
 		$this->debug($playerAPI, "lastY=$lastY, lastYB=$lastYB");
 	}
 }

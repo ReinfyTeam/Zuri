@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\autoclick;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
@@ -74,8 +75,8 @@ class AutoClickC extends Check {
 					"attackTicks" => $playerAPI->getAttackTicks(),
 					"isSurvival" => $playerAPI->getPlayer()->isSurvival(),
 					"canDamagable" => $this->canDamagable,
-					"ticks" => $playerAPI->getExternalData("clicksTicks3"),
-					"lastClick" => $playerAPI->getExternalData("lastClick3"),
+					"ticks" => $playerAPI->getExternalData(CacheData::AUTOCLICK_C_TICKS),
+					CacheData::AUTOCLICK_C_LAST_CLICK => $playerAPI->getExternalData(CacheData::AUTOCLICK_C_LAST_CLICK),
 					"animationDiffTime" => (float) $this->getConstant("animation-diff-time"),
 					"animationDiffTicks" => (int) $this->getConstant("animation-diff-ticks"),
 					"now" => microtime(true),
@@ -100,20 +101,20 @@ class AutoClickC extends Check {
 		}
 
 		$ticks = $payload["ticks"] ?? null;
-		$lastClick = $payload["lastClick"] ?? null;
+		$lastClick = $payload[CacheData::AUTOCLICK_C_LAST_CLICK] ?? null;
 		if ($ticks === null || $lastClick === null) {
-			return ["set" => ["clicksTicks3" => 0, "lastClick3" => $payload["now"] ?? microtime(true)]];
+			return ["set" => [CacheData::AUTOCLICK_C_TICKS => 0, CacheData::AUTOCLICK_C_LAST_CLICK => $payload["now"] ?? microtime(true)]];
 		}
 
 		$diff = (float) ($payload["now"] ?? microtime(true)) - (float) $lastClick;
 		if ($diff > (float) ($payload["animationDiffTime"] ?? 0.0)) {
-			$result = ["unset" => ["clicksTicks3", "lastClick3"]];
+			$result = ["unset" => [CacheData::AUTOCLICK_C_TICKS, CacheData::AUTOCLICK_C_LAST_CLICK]];
 			if ((int) $ticks > (int) ($payload["animationDiffTicks"] ?? 0)) {
 				$result["failed"] = true;
 			}
 			return $result;
 		}
 
-		return ["set" => ["clicksTicks3" => (int) $ticks + 1, "lastClick3" => $lastClick]];
+		return ["set" => [CacheData::AUTOCLICK_C_TICKS => (int) $ticks + 1, CacheData::AUTOCLICK_C_LAST_CLICK => $lastClick]];
 	}
 }

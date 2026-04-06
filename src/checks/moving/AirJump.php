@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
@@ -84,7 +85,7 @@ class AirJump extends Check {
 			}
 
 			$upDistance = round(($event->getTo()->getY() - $event->getFrom()->getY()), 3);
-			$lastUpDistance = $playerAPI->getExternalData("lastUpDistance") ?? 0;
+			$lastUpDistance = $playerAPI->getExternalData(CacheData::AIRJUMP_LAST_UP_DISTANCE) ?? 0;
 			$delta = abs(round(($upDistance - $lastUpDistance), 3));
 			$limit = 0.852;
 
@@ -96,7 +97,7 @@ class AirJump extends Check {
 				$this->failed($playerAPI);
 			}
 
-			$playerAPI->setExternalData("lastUpDistance", $upDistance);
+			$playerAPI->setExternalData(CacheData::AIRJUMP_LAST_UP_DISTANCE, $upDistance);
 			$this->debug($playerAPI, "upDistance=$upDistance, lastUpDistance=$lastUpDistance, delta=$delta, limit=$limit");
 		}
 	}

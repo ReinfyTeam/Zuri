@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\rotation;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
@@ -14,10 +15,10 @@ use function fmod;
 use function max;
 
 class RotationB extends Check {
-	private const LAST_YAW = "RotationB.lastYaw";
-	private const LAST_PITCH = "RotationB.lastPitch";
-	private const LAST_DELTA_YAW = "RotationB.lastDeltaYaw";
-	private const BUFFER = "RotationB.buffer";
+	private const LAST_YAW = CacheData::ROTATION_B_LAST_YAW;
+	private const LAST_PITCH = CacheData::ROTATION_B_LAST_PITCH;
+	private const LAST_DELTA_YAW = CacheData::ROTATION_B_LAST_DELTA_YAW;
+	private const BUFFER = CacheData::ROTATION_B_BUFFER;
 
 	public function getName() : string {
 		return "Rotation";

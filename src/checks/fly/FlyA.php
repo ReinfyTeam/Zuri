@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\fly;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
@@ -68,8 +69,8 @@ class FlyA extends Check {
 			"gliding" => $playerAPI->isGliding(),
 			"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
 			"currentY" => (int) $player->getLocation()->getY(),
-			"lastYNoGround" => $playerAPI->getExternalData("lastYNoGroundF"),
-			"lastTime" => $playerAPI->getExternalData("lastTimeF"),
+			"lastYNoGround" => $playerAPI->getExternalData(CacheData::FLY_A_LAST_Y_NO_GROUND),
+			"lastTime" => $playerAPI->getExternalData(CacheData::FLY_A_LAST_TIME),
 			"now" => microtime(true),
 			"maxGroundDiff" => (float) $this->getConstant("max-ground-diff"),
 		]);
@@ -95,7 +96,7 @@ class FlyA extends Check {
 			(bool) ($payload["gliding"] ?? false) ||
 			(bool) ($payload["recentlyCancelled"] ?? false)
 		) {
-			return ["unset" => ["lastYNoGroundF", "lastTimeF"]];
+			return ["unset" => [CacheData::FLY_A_LAST_Y_NO_GROUND, CacheData::FLY_A_LAST_TIME]];
 		}
 
 		$lastYNoGround = $payload["lastYNoGround"] ?? null;
@@ -106,10 +107,10 @@ class FlyA extends Check {
 			if ($diff > (float) ($payload["maxGroundDiff"] ?? 0.0) && (int) ($payload["currentY"] ?? 0) === (int) $lastYNoGround) {
 				$result["failed"] = true;
 			}
-			$result["unset"] = ["lastYNoGroundF", "lastTimeF"];
+			$result["unset"] = [CacheData::FLY_A_LAST_Y_NO_GROUND, CacheData::FLY_A_LAST_TIME];
 			return $result;
 		}
 
-		return ["set" => ["lastYNoGroundF" => (int) ($payload["currentY"] ?? 0), "lastTimeF" => (float) ($payload["now"] ?? microtime(true))]];
+		return ["set" => [CacheData::FLY_A_LAST_Y_NO_GROUND => (int) ($payload["currentY"] ?? 0), CacheData::FLY_A_LAST_TIME => (float) ($payload["now"] ?? microtime(true))]];
 	}
 }

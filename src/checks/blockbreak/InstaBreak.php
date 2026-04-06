@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockbreak;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\block\BlockBreakEvent;
@@ -52,10 +53,10 @@ class InstaBreak extends Check {
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-		$breakTimes = $playerAPI->getExternalData("breakTimes");
+		$breakTimes = $playerAPI->getExternalData(CacheData::INSTABREAK_BREAK_TIMES);
 		if ($event instanceof PlayerInteractEvent) {
 			if ($event->getAction() === PlayerInteractEvent::LEFT_CLICK_BLOCK) {
-				$playerAPI->setExternalData("breakTimes", floor(microtime(true) * 20));
+				$playerAPI->setExternalData(CacheData::INSTABREAK_BREAK_TIMES, floor(microtime(true) * 20));
 			}
 		}
 		if ($event instanceof BlockBreakEvent) {
@@ -91,7 +92,7 @@ class InstaBreak extends Check {
 					return;
 				}
 				$this->debug($playerAPI, "expectedTime=$expectedTime, hasMiningFatugue=" . $playerAPI->getPlayer()->getEffects()->has(VanillaEffects::MINING_FATIGUE()) . ", expectedTime=$expectedTime, actualTime=$actualTime");
-				$playerAPI->unsetExternalData("breakTimes");
+				$playerAPI->unsetExternalData(CacheData::INSTABREAK_BREAK_TIMES);
 			}
 		}
 	}

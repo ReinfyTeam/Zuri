@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving\speed;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
@@ -81,8 +82,8 @@ class SpeedB extends Check {
 			}
 
 			$now = microtime(true);
-			$time = $playerAPI->getExternalData("moveTimeA");
-			$playerAPI->setExternalData("moveTimeA", $now);
+			$time = $playerAPI->getExternalData(CacheData::SPEED_B_MOVE_TIME);
+			$playerAPI->setExternalData(CacheData::SPEED_B_MOVE_TIME, $now);
 			if ($time === null) {
 				return;
 			}

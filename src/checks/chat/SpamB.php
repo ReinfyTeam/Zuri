@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\chat;
 
+use ReinfyTeam\Zuri\cache\CacheData;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerChatEvent;
 use ReinfyTeam\Zuri\checks\Check;
@@ -53,7 +54,7 @@ class SpamB extends Check {
 		if ($event instanceof PlayerChatEvent) {
 			if (!$event->isCancelled()) {
 				$message = $event->getMessage();
-				$lastMessage = $playerAPI->getExternalData("lastMessage");
+				$lastMessage = $playerAPI->getExternalData(CacheData::SPAM_B_LAST_MESSAGE);
 				if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
 					return;
 				}
@@ -94,7 +95,7 @@ class SpamB extends Check {
 						$event->cancel();
 					}
 				}
-				$playerAPI->setExternalData("lastMessage", $message);
+				$playerAPI->setExternalData(CacheData::SPAM_B_LAST_MESSAGE, $message);
 			}
 		}
 	}
