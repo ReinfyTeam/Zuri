@@ -34,7 +34,6 @@ namespace ReinfyTeam\Zuri\checks\combat\autoclick;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
-use ReflectionException;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
@@ -54,34 +53,52 @@ class AutoClickA extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$ticks = $playerAPI->getExternalData("ticksClick");
-		$avgSpeed = $playerAPI->getExternalData("avgSpeed");
-		$avgDeviation = $playerAPI->getExternalData("avgDeviation");
 		if ($packet instanceof LevelSoundEventPacket) {
 			if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
-				$playerAPI->setExternalData("ticksClick", 0);
-				if ($ticks !== null && $avgSpeed !== null && $avgDeviation !== null) {
-					if ($playerAPI->isDigging() || $ticks > $this->getConstant("max-ticks")) {
-						$playerAPI->unsetExternalData("ticksClick");
-						$playerAPI->unsetExternalData("avgSpeed");
-						$playerAPI->unsetExternalData("avgDeviation");
-						return;
-					} else {
-						$playerAPI->setExternalData("ticksClick", $ticks + 1);
-					}
-					$speed = $ticks * 50;
-					$playerAPI->setExternalData("avgSpeed", (($avgSpeed * 14) + $speed) / 15);
-					$deviation = abs($speed - $playerAPI->getExternalData("avgSpeed"));
-					$playerAPI->setExternalData("avgDeviation", (($avgDeviation * 9) + $deviation) / 10);
-					if ($playerAPI->getExternalData("avgDeviation") < $this->getConstant("max-deviation")) {
-						$this->failed($playerAPI);
-					}
-					$this->debug($playerAPI, "avgDeviation=$avgDeviation, speed=$speed, deviation=$deviation, ticksClick=$ticks, avgSpeed=$avgSpeed");
-				} else {
-					$playerAPI->setExternalData("avgSpeed", 0);
-					$playerAPI->setExternalData("avgDeviation", 0);
-				}
+				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
+					"type" => "AutoClickA",
+					"isDigging" => $playerAPI->isDigging(),
+					"ticks" => $playerAPI->getExternalData("ticksClick"),
+					"avgSpeed" => $playerAPI->getExternalData("avgSpeed"),
+					"avgDeviation" => $playerAPI->getExternalData("avgDeviation"),
+					"maxTicks" => (int) $this->getConstant("max-ticks"),
+					"maxDeviation" => (float) $this->getConstant("max-deviation"),
+				]);
 			}
 		}
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (!isset($payload["type"]) || $payload["type"] !== "AutoClickA") {
+			return [];
+		}
+
+		$ticks = $payload["ticks"] ?? null;
+		$avgSpeed = $payload["avgSpeed"] ?? null;
+		$avgDeviation = $payload["avgDeviation"] ?? null;
+		if ($ticks === null || $avgSpeed === null || $avgDeviation === null) {
+			return ["set" => ["avgSpeed" => 0, "avgDeviation" => 0, "ticksClick" => 0]];
+		}
+
+		if ((bool) ($payload["isDigging"] ?? false) || (int) $ticks > (int) ($payload["maxTicks"] ?? 0)) {
+			return ["unset" => ["ticksClick", "avgSpeed", "avgDeviation"]];
+		}
+
+		$speed = (int) $ticks * 50;
+		$newAvgSpeed = (((float) $avgSpeed * 14) + $speed) / 15;
+		$deviation = abs($speed - $newAvgSpeed);
+		$newAvgDeviation = (((float) $avgDeviation * 9) + $deviation) / 10;
+		$result = [
+			"set" => [
+				"ticksClick" => (int) $ticks + 1,
+				"avgSpeed" => $newAvgSpeed,
+				"avgDeviation" => $newAvgDeviation,
+			],
+			"debug" => "avgDeviation={$avgDeviation}, speed={$speed}, deviation={$deviation}, ticksClick={$ticks}, avgSpeed={$avgSpeed}",
+		];
+		if ($newAvgDeviation < (float) ($payload["maxDeviation"] ?? 0.0)) {
+			$result["failed"] = true;
+		}
+		return $result;
 	}
 }

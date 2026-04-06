@@ -51,22 +51,33 @@ class TimerC extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ( $packet instanceof PlayerAuthInputPacket ) {
-			// From Esoteric
-			$delay = $playerAPI->getExternalData("DelayCounter");
-			if ($delay === null) {
-				$playerAPI->setExternalData("DelayCounter", 0);
-				return;
-			}
-			$playerAPI->setExternalData("DelayCounter", $delay + 1);
-		} elseif ( $packet instanceof MovePlayerPacket ) {
-			$delay = $playerAPI->getExternalData("DelayCounter");
-			if ( $delay < 2 && $playerAPI->getPlayer()->hasNoClientPredictions() && $playerAPI->getPlayer()->isAlive()) {
-				$this->debug($playerAPI, "delay=$delay");
-				$this->failed($playerAPI);
-			}
+		$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
+			"type" => $packet instanceof PlayerAuthInputPacket ? "auth" : ($packet instanceof MovePlayerPacket ? "move" : "other"),
+			"delay" => $playerAPI->getExternalData("DelayCounter"),
+			"noClientPredictions" => $playerAPI->getPlayer()->hasNoClientPredictions(),
+			"alive" => $playerAPI->getPlayer()->isAlive(),
+		]);
+	}
 
-			$playerAPI->setExternalData("DelayCounter", 0);
+	public static function evaluateAsync(array $payload) : array {
+		$type = (string) ($payload["type"] ?? "other");
+		$delay = $payload["delay"] ?? null;
+
+		if ($type === "auth") {
+			if ($delay === null) {
+				return ["set" => ["DelayCounter" => 0]];
+			}
+			return ["set" => ["DelayCounter" => (int) $delay + 1]];
 		}
+
+		if ($type === "move") {
+			$delay = (int) ($delay ?? 0);
+			if ((bool) ($payload["noClientPredictions"] ?? false) && (bool) ($payload["alive"] ?? false) && $delay < 2) {
+				return ["set" => ["DelayCounter" => 0], "failed" => true, "debug" => "delay={$delay}"];
+			}
+			return ["set" => ["DelayCounter" => 0]];
+		}
+
+		return [];
 	}
 }

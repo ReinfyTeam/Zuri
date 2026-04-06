@@ -57,7 +57,6 @@ class KillAuraE extends Check {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			$entity = $event->getEntity();
 			$damager = $event->getDamager();
-			$locDamager = $damager->getLocation();
 			if ($damager instanceof Player && $entity instanceof Player) {
 				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
 				$victimAPI = PlayerAPI::getAPIPlayer($entity);
@@ -72,27 +71,59 @@ class KillAuraE extends Check {
 				) { // false-positive in projectiles
 					return;
 				}
-
 				$delta = MathUtil::getDeltaDirectionVector($damagerAPI, 3);
-				$from = new Vector3($locDamager->getX(), $locDamager->getY() + $damager->getEyeHeight(), $locDamager->getZ());
-				$to = $damager->getLocation()->add($delta->getX(), $delta->getY() + $damager->getEyeHeight(), $delta->getZ());
-				$distance = MathUtil::distance($from, $to);
-				$vector = $to->subtract($from->x, $from->y, $from->z)->normalize()->multiply(1);
 				$entities = [];
-				for ($i = 0; $i <= $distance; ++$i) {
-					$from = $from->add($vector->x, $vector->y, $vector->z);
-					foreach ($damager->getWorld()->getEntities() as $target) {
-						$distanceA = new Vector3($from->x, $from->y, $from->z);
-						if ($target->getPosition()->distance($distanceA) <= $this->getConstant("max-range")) {
-							$entities[$target->getId()] = $target;
-						}
-					}
+				foreach ($damager->getWorld()->getEntities() as $target) {
+					$entities[] = [
+						"id" => $target->getId(),
+						"x" => $target->getPosition()->getX(),
+						"y" => $target->getPosition()->getY(),
+						"z" => $target->getPosition()->getZ(),
+					];
 				}
-				if (!isset($entities[$entity->getId()])) {
-					$this->failed($damagerAPI);
-				}
-				$this->debug($damagerAPI, "delta=$delta, distance=$distance, entities=" . count($entities));
+				$this->dispatchAsyncCheck($damager->getName(), [
+					"type" => "KillAuraE",
+					"victimId" => $entity->getId(),
+					"locX" => $damager->getLocation()->getX(),
+					"locY" => $damager->getLocation()->getY(),
+					"locZ" => $damager->getLocation()->getZ(),
+					"eyeHeight" => $damager->getEyeHeight(),
+					"deltaX" => $delta->getX(),
+					"deltaY" => $delta->getY(),
+					"deltaZ" => $delta->getZ(),
+					"maxRange" => $this->getConstant("max-range"),
+					"entities" => $entities,
+				]);
 			}
 		}
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "KillAuraE") {
+			return [];
+		}
+
+		$from = new Vector3((float) ($payload["locX"] ?? 0), (float) ($payload["locY"] ?? 0) + (float) ($payload["eyeHeight"] ?? 0), (float) ($payload["locZ"] ?? 0));
+		$delta = new Vector3((float) ($payload["deltaX"] ?? 0), (float) ($payload["deltaY"] ?? 0) + (float) ($payload["eyeHeight"] ?? 0), (float) ($payload["deltaZ"] ?? 0));
+		$to = $from->add($delta->getX(), $delta->getY(), $delta->getZ());
+		$distance = MathUtil::distance($from, $to);
+		$vector = $to->subtract($from->x, $from->y, $from->z)->normalize()->multiply(1);
+		$entities = [];
+		for ($i = 0; $i <= $distance; ++$i) {
+			$from = $from->add($vector->x, $vector->y, $vector->z);
+			foreach (($payload["entities"] ?? []) as $target) {
+				$distanceA = new Vector3($from->x, $from->y, $from->z);
+				if (sqrt((($target["x"] - $distanceA->getX()) ** 2) + (($target["y"] - $distanceA->getY()) ** 2) + (($target["z"] - $distanceA->getZ()) ** 2)) <= (float) ($payload["maxRange"] ?? 0)) {
+					$entities[(int) $target["id"]] = true;
+				}
+			}
+		}
+
+		$debug = "distance={$distance}, entities=" . count($entities);
+		if (!isset($entities[(int) ($payload["victimId"] ?? -1)])) {
+			return ["failed" => true, "debug" => $debug];
+		}
+
+		return ["debug" => $debug];
 	}
 }

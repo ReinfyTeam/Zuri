@@ -70,40 +70,77 @@ class KillAuraC extends Check {
 		}
 
 		$player = $playerAPI->getPlayer();
-		$locPlayer = $player->getLocation();
 
 		if (
 			$playerAPI->getProjectileAttackTicks() < 40 ||
 			$playerAPI->getBowShotTicks() < 40 ||
-			$playerAPI->recentlyCancelledEvent() < 40
+			$playerAPI->isRecentlyCancelledEvent()
 		) { // false-positive in projectiles
 			return;
 		}
+		if ($packet instanceof InventoryTransactionPacket) {
+			if ($packet->trData instanceof UseItemOnEntityTransactionData) {
+				$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
+				$entities = [];
+				foreach ($player->getWorld()->getEntities() as $target) {
+					$entities[] = [
+						"id" => $target->getId(),
+						"x" => $target->getPosition()->getX(),
+						"y" => $target->getPosition()->getY(),
+						"z" => $target->getPosition()->getZ(),
+					];
+				}
+				$this->dispatchAsyncCheck($player->getName(), [
+					"type" => "KillAuraC",
+					"playerId" => $player->getId(),
+					"pitch" => $player->getLocation()->getPitch(),
+					"locX" => $player->getLocation()->getX(),
+					"locY" => $player->getLocation()->getY(),
+					"locZ" => $player->getLocation()->getZ(),
+					"eyeHeight" => $player->getEyeHeight(),
+					"deltaX" => $delta->getX(),
+					"deltaY" => $delta->getY(),
+					"deltaZ" => $delta->getZ(),
+					"maxDistance" => $this->getConstant("max-distance"),
+					"suspiciousPitch" => $this->getConstant("suspecious-pitch"),
+					"suspiciousCount" => $this->getConstant("suspecious-count"),
+					"targetBlockAir" => $player->getTargetBlock(10)->getTypeId() === BlockTypeIds::AIR,
+					"entities" => $entities,
+				]);
+			}
+		}
+	}
 
-		$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
-		$from = new Vector3($locPlayer->getX(), $locPlayer->getY() + $player->getEyeHeight(), $locPlayer->getZ());
-		$to = $player->getLocation()->add($delta->getX(), $delta->getY() + $player->getEyeHeight(), $delta->getZ());
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "KillAuraC") {
+			return [];
+		}
+
+		if ((float) ($payload["pitch"] ?? 0) >= (float) ($payload["suspiciousPitch"] ?? 0)) {
+			return [];
+		}
+
+		$from = new Vector3((float) ($payload["locX"] ?? 0), (float) ($payload["locY"] ?? 0) + (float) ($payload["eyeHeight"] ?? 0), (float) ($payload["locZ"] ?? 0));
+		$delta = new Vector3((float) ($payload["deltaX"] ?? 0), (float) ($payload["deltaY"] ?? 0) + (float) ($payload["eyeHeight"] ?? 0), (float) ($payload["deltaZ"] ?? 0));
+		$to = $from->add($delta->getX(), $delta->getY(), $delta->getZ());
 		$distance = MathUtil::distance($from, $to);
 		$vector = $to->subtract($from->x, $from->y, $from->z)->normalize()->multiply(1);
 		$entities = [];
 		for ($i = 0; $i <= $distance; ++$i) {
 			$from = $from->add($vector->x, $vector->y, $vector->z);
-			foreach ($player->getWorld()->getEntities() as $target) {
+			foreach (($payload["entities"] ?? []) as $target) {
 				$distanceA = new Vector3($from->x, $from->y, $from->z);
-				if ($target->getPosition()->distance($distanceA) <= $this->getConstant("max-distance") && $target->getId() !== $player->getId()) {
-					$entities[$target->getId()] = $target;
+				if (sqrt((($target["x"] - $distanceA->getX()) ** 2) + (($target["y"] - $distanceA->getY()) ** 2) + (($target["z"] - $distanceA->getZ()) ** 2)) <= (float) ($payload["maxDistance"] ?? 0)) {
+					$entities[(int) $target["id"]] = true;
 				}
 			}
 		}
-		if ($packet instanceof InventoryTransactionPacket) {
-			if ($packet->trData instanceof UseItemOnEntityTransactionData) {
-				if ($locPlayer->getPitch() < $this->getConstant("suspecious-pitch")) {
-					if (count($entities) < $this->getConstant("suspecious-count") && $player->getTargetBlock(10)->getTypeId() !== BlockTypeIds::AIR) {
-						$this->failed($playerAPI);
-					}
-				}
-				$this->debug($playerAPI, "delta=$delta, distance=$distance, entities=" . count($entities));
-			}
+
+		$debug = "distance={$distance}, entities=" . count($entities);
+		if (count($entities) < (int) ($payload["suspiciousCount"] ?? 0) && !(bool) ($payload["targetBlockAir"] ?? true)) {
+			return ["failed" => true, "debug" => $debug];
 		}
+
+		return ["debug" => $debug];
 	}
 }

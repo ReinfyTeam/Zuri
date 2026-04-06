@@ -53,20 +53,38 @@ class TimerA extends Check {
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
-			$tps = Server::getInstance()->getTicksPerSecond();
+			$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
+				"type" => "TimerA",
+				"tps" => Server::getInstance()->getTicksPerSecond(),
+				"ping" => $playerAPI->getPing(),
+				"packetTick" => $packet->getTick(),
+				"timerATick" => $playerAPI->getExternalData("TimerATick"),
+				"laggingPing" => self::getData(self::PING_LAGGING),
+				"maxDiff" => (float) $this->getConstant("max-diff"),
+			]);
+		}
+	}
 
-			if ($tps < 19 && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
-				$playerAPI->setExternalData("TimerATick", $tps - $packet->getTick());
-			}
+	public static function evaluateAsync(array $payload) : array {
+		$tps = (float) ($payload["tps"] ?? 20.0);
+		$ping = (int) ($payload["ping"] ?? 0);
+		$packetTick = (int) ($payload["packetTick"] ?? 0);
+		$delayTicks = $payload["timerATick"] ?? null;
+		$laggingPing = (int) ($payload["laggingPing"] ?? 0);
+		$maxDiff = (float) ($payload["maxDiff"] ?? 0.0);
 
-			$delayTicks = $playerAPI->getExternalData("TimerATick");
+		$set = [];
+		if ($tps < 19 && $ping < $laggingPing) {
+			$set["TimerATick"] = $tps - $packetTick;
+		}
 
-			if ($delayTicks !== null) {
-				$tickDiff = $delayTicks - $packet->getTick();
-				if ( $tickDiff >= ($this->getConstant("max-diff") + (abs(20 - $tps) * 2)) ) {
-					$this->failed($playerAPI);
-				}
+		if ($delayTicks !== null) {
+			$tickDiff = $delayTicks - $packetTick;
+			if ($tickDiff >= ($maxDiff + (abs(20 - $tps) * 2))) {
+				return ["set" => $set, "failed" => true];
 			}
 		}
+
+		return ["set" => $set];
 	}
 }

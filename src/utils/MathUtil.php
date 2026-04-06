@@ -61,6 +61,24 @@ class MathUtil {
 		return $movement;
 	}
 
+	public static function getMovementSnapshot(bool $sprinting, bool $sneaking, bool $usingItem, int $swiftSneakLevel) : float {
+		$movement = 1.0;
+
+		if ($sprinting) {
+			$movement = 1.3;
+		}
+
+		if ($sneaking) {
+			$movement = max(0.3, min(1.0, 0.3 + (0.15 * $swiftSneakLevel)));
+		}
+
+		if ($usingItem) {
+			$movement = 0.2;
+		}
+
+		return $movement;
+	}
+
 	public static function getEffectsMultiplier(Player $player) : float {
 		$effects = $player->getEffects();
 		$speed = $effects->get(VanillaEffects::SPEED());
@@ -70,6 +88,10 @@ class MathUtil {
 		$slowness = $slowness != null ? $slowness->getEffectLevel() : 0;
 
 		return (1 + 0.2 * $speed) * (1 - 0.15 * $slowness);
+	}
+
+	public static function getEffectsMultiplierSnapshot(int $speedLevel, int $slownessLevel) : float {
+		return (1 + 0.2 * $speedLevel) * (1 - 0.15 * $slownessLevel);
 	}
 
 	public static function getMomentum(float $lastDistance, float $friction) : float {

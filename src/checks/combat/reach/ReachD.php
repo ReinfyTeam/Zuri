@@ -33,11 +33,11 @@ namespace ReinfyTeam\Zuri\checks\combat\reach;
 
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
-use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function sqrt;
 
 class ReachD extends Check {
 	public function getName() : string {
@@ -54,48 +54,136 @@ class ReachD extends Check {
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			$damager = $event->getDamager();
-			$player = $event->getEntity();
+			$victim = $event->getEntity();
 
-			if ($player instanceof Player && $damager instanceof Player) {
+			if ($victim instanceof Player && $damager instanceof Player) {
 				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
-				$playerAPI = PlayerAPI::getAPIPlayer($player);
+				$victimAPI = PlayerAPI::getAPIPlayer($victim);
 
-				if (
-					$damager->isSurvival() ||
-					$entity->isSurvival() ||
-					$playerAPI->getProjectileAttackTicks() < 40 ||
-					$damagerAPI->getProjectileAttackTicks() < 40 ||
-					$playerAPI->getBowShotTicks() < 40 ||
-					$damagerAPI->getBowShotTicks() < 40 ||
-					$playerAPI->recentlyCancelledEvent() < 40
-				) { // false-positive in projectiles
+				if ($this->shouldSkip($damager, $victim, $damagerAPI, $victimAPI)) { // false-positive in projectiles
 					return;
 				}
 
-				$damagerPing = $damager->getNetworkSession()->getPing();
-				$playerPing = $player->getNetworkSession()->getPing();
-				$distance = $player->getEyePos()->distance(new Vector3($damager->getEyePos()->getX(), $player->getEyePos()->getY(), $damager->getEyePos()->getZ()));
-				$distance -= $damagerPing * $this->getConstant("default-eye-distance");
-				$distance -= $playerPing * $this->getConstant("default-eye-distance");
-				$limit = $this->getConstant("reach-eye-limit");
-
-				if ($player->isSprinting()) {
-					$distance -= $this->getConstant("sprinting-eye-distance");
-				} else {
-					$distance -= $this->getConstant("not-sprinting-eye-distance");
+				$useAsync = (bool) ($this->getConstant("async-enabled") ?? false);
+				if ($useAsync) {
+					$payload = $this->buildAsyncPayload($damager, $victim, $damagerAPI);
+					$payload["_minInterval"] = 0.05;
+					$this->dispatchAsyncCheck($damager->getName(), $payload);
+					return;
 				}
 
-				if ($damager->isSprinting()) {
-					$distance -= $this->getConstant("damager-sprinting-eye-distance");
-				} elseif (!$damager->isSprinting()) {
-					$distance -= $this->getConstant("not-sprinting-damager-eye-distance");
-				}
-
-				$this->debug($damagerAPI, "distance=$distance, limit=$limit");
-				if ($distance > $limit) {
-					$this->failed($damagerAPI);
-				}
+				$this->evaluateSync($damager, $victim, $damagerAPI);
 			}
 		}
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "ReachD") {
+			return [];
+		}
+
+		if (
+			(bool) ($payload["damagerSurvival"] ?? false) ||
+			(bool) ($payload["victimSurvival"] ?? false) ||
+			(int) ($payload["victimProjectileTicks"] ?? 0) < 40 ||
+			(int) ($payload["damagerProjectileTicks"] ?? 0) < 40 ||
+			(int) ($payload["victimBowTicks"] ?? 0) < 40 ||
+			(int) ($payload["damagerBowTicks"] ?? 0) < 40 ||
+			(bool) ($payload["victimRecentlyCancelled"] ?? false) ||
+			(bool) ($payload["damagerRecentlyCancelled"] ?? false)
+		) {
+			return [];
+		}
+
+		$distance = self::calculateDistance(
+			(float) ($payload["damagerEyeX"] ?? 0.0),
+			(float) ($payload["damagerEyeY"] ?? 0.0),
+			(float) ($payload["damagerEyeZ"] ?? 0.0),
+			(float) ($payload["victimEyeX"] ?? 0.0),
+			(float) ($payload["victimEyeY"] ?? 0.0),
+			(float) ($payload["victimEyeZ"] ?? 0.0)
+		);
+		$distance -= (int) ($payload["damagerPing"] ?? 0) * (float) ($payload["defaultEyeDistance"] ?? 0.0);
+		$distance -= (int) ($payload["victimPing"] ?? 0) * (float) ($payload["defaultEyeDistance"] ?? 0.0);
+		$distance -= (bool) ($payload["victimSprinting"] ?? false)
+			? (float) ($payload["victimSprintingDistance"] ?? 0.0)
+			: (float) ($payload["victimNotSprintingDistance"] ?? 0.0);
+		$distance -= (bool) ($payload["damagerSprinting"] ?? false)
+			? (float) ($payload["damagerSprintingDistance"] ?? 0.0)
+			: (float) ($payload["damagerNotSprintingDistance"] ?? 0.0);
+
+		$limit = (float) ($payload["limit"] ?? 3.0);
+		$debug = "distance={$distance}, limit={$limit}";
+		if ($distance > $limit) {
+			return ["failed" => true, "debug" => $debug];
+		}
+
+		return ["debug" => $debug];
+	}
+
+	private function shouldSkip(Player $damager, Player $victim, PlayerAPI $damagerAPI, PlayerAPI $victimAPI) : bool {
+		return $damager->isSurvival() ||
+			$victim->isSurvival() ||
+			$victimAPI->getProjectileAttackTicks() < 40 ||
+			$damagerAPI->getProjectileAttackTicks() < 40 ||
+			$victimAPI->getBowShotTicks() < 40 ||
+			$damagerAPI->getBowShotTicks() < 40 ||
+			$victimAPI->isRecentlyCancelledEvent() ||
+			$damagerAPI->isRecentlyCancelledEvent();
+	}
+
+	private function buildAsyncPayload(Player $damager, Player $victim, PlayerAPI $damagerAPI) : array {
+		return [
+			"type" => "ReachD",
+			"damagerEyeX" => $damager->getEyePos()->getX(),
+			"damagerEyeY" => $damager->getEyePos()->getY(),
+			"damagerEyeZ" => $damager->getEyePos()->getZ(),
+			"victimEyeX" => $victim->getEyePos()->getX(),
+			"victimEyeY" => $victim->getEyePos()->getY(),
+			"victimEyeZ" => $victim->getEyePos()->getZ(),
+			"damagerPing" => $damager->getNetworkSession()->getPing(),
+			"victimPing" => $victim->getNetworkSession()->getPing(),
+			"defaultEyeDistance" => (float) ($this->getConstant("default-eye-distance") ?? 0.0041),
+			"victimSprintingDistance" => (float) ($this->getConstant("sprinting-eye-distance") ?? 0.97),
+			"victimNotSprintingDistance" => (float) ($this->getConstant("not-sprinting-eye-distance") ?? 0.87),
+			"damagerSprintingDistance" => (float) ($this->getConstant("damager-sprinting-eye-distance") ?? 0.77),
+			"damagerNotSprintingDistance" => (float) ($this->getConstant("not-sprinting-damager-eye-distance") ?? 0.67),
+			"damagerSprinting" => $damager->isSprinting(),
+			"victimSprinting" => $victim->isSprinting(),
+			"limit" => (float) ($this->getConstant("reach-eye-limit") ?? 3.0),
+			"damagerSurvival" => $damager->isSurvival(),
+			"victimSurvival" => $victim->isSurvival(),
+			"victimProjectileTicks" => $victimAPI->getProjectileAttackTicks(),
+			"damagerProjectileTicks" => $damagerAPI->getProjectileAttackTicks(),
+			"victimBowTicks" => $victimAPI->getBowShotTicks(),
+			"damagerBowTicks" => $damagerAPI->getBowShotTicks(),
+			"victimRecentlyCancelled" => $victimAPI->isRecentlyCancelledEvent(),
+			"damagerRecentlyCancelled" => $damagerAPI->isRecentlyCancelledEvent(),
+		];
+	}
+
+	private function evaluateSync(Player $damager, Player $victim, PlayerAPI $damagerAPI) : void {
+		$distance = self::calculateDistance(
+			$damager->getEyePos()->getX(),
+			$damager->getEyePos()->getY(),
+			$damager->getEyePos()->getZ(),
+			$victim->getEyePos()->getX(),
+			$victim->getEyePos()->getY(),
+			$victim->getEyePos()->getZ()
+		);
+		$distance -= $damager->getNetworkSession()->getPing() * (float) $this->getConstant("default-eye-distance");
+		$distance -= $victim->getNetworkSession()->getPing() * (float) $this->getConstant("default-eye-distance");
+		$distance -= $victim->isSprinting() ? (float) $this->getConstant("sprinting-eye-distance") : (float) $this->getConstant("not-sprinting-eye-distance");
+		$distance -= $damager->isSprinting() ? (float) $this->getConstant("damager-sprinting-eye-distance") : (float) $this->getConstant("not-sprinting-damager-eye-distance");
+		$limit = (float) $this->getConstant("reach-eye-limit");
+
+		$this->debug($damagerAPI, "distance={$distance}, limit={$limit}");
+		if ($distance > $limit) {
+			$this->failed($damagerAPI);
+		}
+	}
+
+	private static function calculateDistance(float $fromX, float $fromY, float $fromZ, float $toX, float $toY, float $toZ) : float {
+		return sqrt((($toX - $fromX) ** 2) + (($toY - $fromY) ** 2) + (($toZ - $fromZ) ** 2));
 	}
 }

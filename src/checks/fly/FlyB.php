@@ -51,23 +51,30 @@ class FlyB extends Check {
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof UpdateAdventureSettingsPacket) {
-			$player = $playerAPI->getPlayer();
-			if (!$player->isCreative() && !$player->isSpectator() && !$player->getAllowFlight()) {
-				switch ($packet->flags) {
-					case 614:
-					case 615:
-					case 103:
-					case 102:
-					case 38:
-					case 39:
-						$this->failed($playerAPI);
-						break;
-				}
-				if ((($packet->flags >> 9) & 0x01 === 1) || (($packet->flags >> 7) & 0x01 === 1) || (($packet->flags >> 6) & 0x01 === 1)) {
-					$this->failed($playerAPI);
-				}
-				$this->debug($playerAPI, "packetFlags=" . $packet->flags);
-			}
+			$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
+				"type" => "FlyB",
+				"creative" => $playerAPI->getPlayer()->isCreative(),
+				"spectator" => $playerAPI->getPlayer()->isSpectator(),
+				"allowFlight" => $playerAPI->getPlayer()->getAllowFlight(),
+				"flags" => $packet->flags,
+			]);
 		}
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "FlyB") {
+			return [];
+		}
+
+		if ((bool) ($payload["creative"] ?? false) || (bool) ($payload["spectator"] ?? false) || (bool) ($payload["allowFlight"] ?? false)) {
+			return [];
+		}
+
+		$flags = (int) ($payload["flags"] ?? 0);
+		if (in_array($flags, [614, 615, 103, 102, 38, 39], true) || (($flags >> 9) & 0x01 === 1) || (($flags >> 7) & 0x01 === 1) || (($flags >> 6) & 0x01 === 1)) {
+			return ["failed" => true, "debug" => "packetFlags={$flags}"];
+		}
+
+		return ["debug" => "packetFlags={$flags}"];
 	}
 }

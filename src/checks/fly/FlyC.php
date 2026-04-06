@@ -60,62 +60,94 @@ class FlyC extends Check {
 			$player = $playerAPI->getPlayer();
 			$oldPos = $event->getFrom();
 			$newPos = $event->getTo();
-			$surroundingBlocks = BlockUtil::getSurroundingBlocks($player);
-			if (
-				$playerAPI->getAttackTicks() < 40 ||
-				$playerAPI->isInWeb() ||
-				$playerAPI->isOnGround() ||
-				$playerAPI->isOnAdhesion() ||
-				$player->getAllowFlight() ||
-				$player->hasNoClientPredictions() ||
-				!$player->isSurvival() ||
-				!$playerAPI->isCurrentChunkIsLoaded() ||
-				BlockUtil::isGroundSolid($player) ||
-				$playerAPI->isGliding() ||
-				$playerAPI->recentlyCancelledEvent() < 40
-			) { // additional checks
-				return;
-			}
-			if (!$player->isCreative() && !$player->isSpectator() && !$player->getAllowFlight()) {
-				if ($oldPos->getY() <= $newPos->getY()) {
-					if ($player->getInAirTicks() > $this->getConstant("max-air-ticks")) {
-						$maxY = $player->getWorld()->getHighestBlockAt(intval($newPos->getX()), intval($newPos->getZ()));
-						$this->debug($playerAPI, "oldY=" . $oldPos->getY() . ", newY=" . $newPos->getY() . ", airTicks=" . $player->getInAirTicks() . ", surroundingBlocks=" . count($surroundingBlocks));
-						if ($newPos->getY() - 1 > $maxY) {
-							if (!is_array($surroundingBlocks) || count(array_intersect($surroundingBlocks, [
-								BlockTypeIds::OAK_FENCE,
-								BlockTypeIds::COBBLESTONE_WALL,
-								BlockTypeIds::ACACIA_FENCE,
-								BlockTypeIds::BIRCH_FENCE,
-								BlockTypeIds::DARK_OAK_FENCE,
-								BlockTypeIds::JUNGLE_FENCE,
-								BlockTypeIds::NETHER_BRICK_FENCE,
-								BlockTypeIds::SPRUCE_FENCE,
-								BlockTypeIds::WARPED_FENCE,
-								BlockTypeIds::MANGROVE_FENCE,
-								BlockTypeIds::CRIMSON_FENCE,
-								BlockTypeIds::CHERRY_FENCE,
-								BlockTypeIds::ACACIA_FENCE_GATE,
-								BlockTypeIds::OAK_FENCE_GATE,
-								BlockTypeIds::BIRCH_FENCE_GATE,
-								BlockTypeIds::DARK_OAK_FENCE_GATE,
-								BlockTypeIds::JUNGLE_FENCE_GATE,
-								BlockTypeIds::SPRUCE_FENCE_GATE,
-								BlockTypeIds::WARPED_FENCE_GATE,
-								BlockTypeIds::MANGROVE_FENCE_GATE,
-								BlockTypeIds::CRIMSON_FENCE_GATE,
-								BlockTypeIds::CHERRY_FENCE_GATE,
-								BlockTypeIds::GLASS_PANE,
-								BlockTypeIds::HARDENED_GLASS_PANE,
-								BlockTypeIds::STAINED_GLASS_PANE,
-								BlockTypeIds::STAINED_HARDENED_GLASS_PANE
-							])) === 0) {
-								$this->failed($playerAPI);
-							}
+			$this->dispatchAsyncCheck($player->getName(), [
+				"type" => "FlyC",
+				"attackTicks" => $playerAPI->getAttackTicks(),
+				"inWeb" => $playerAPI->isInWeb(),
+				"onGround" => $playerAPI->isOnGround(),
+				"onAdhesion" => $playerAPI->isOnAdhesion(),
+				"allowFlight" => $player->getAllowFlight(),
+				"noClientPredictions" => $player->hasNoClientPredictions(),
+				"survival" => $player->isSurvival(),
+				"chunkLoaded" => $playerAPI->isCurrentChunkIsLoaded(),
+				"groundSolid" => BlockUtil::isGroundSolid($player),
+				"gliding" => $playerAPI->isGliding(),
+				"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
+				"creative" => $player->isCreative(),
+				"spectator" => $player->isSpectator(),
+				"inAirTicks" => $player->getInAirTicks(),
+				"oldY" => $oldPos->getY(),
+				"newY" => $newPos->getY(),
+				"maxAirTicks" => (int) $this->getConstant("max-air-ticks"),
+				"maxY" => $player->getWorld()->getHighestBlockAt((int) $newPos->getX(), (int) $newPos->getZ()),
+				"surroundingBlocks" => BlockUtil::getSurroundingBlocks($player),
+			]);
+		}
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "FlyC") {
+			return [];
+		}
+
+		if (
+			(int) ($payload["attackTicks"] ?? 0) < 40 ||
+			(bool) ($payload["inWeb"] ?? false) ||
+			(bool) ($payload["onGround"] ?? false) ||
+			(bool) ($payload["onAdhesion"] ?? false) ||
+			(bool) ($payload["allowFlight"] ?? false) ||
+			(bool) ($payload["noClientPredictions"] ?? false) ||
+			!(bool) ($payload["survival"] ?? false) ||
+			!(bool) ($payload["chunkLoaded"] ?? false) ||
+			(bool) ($payload["groundSolid"] ?? false) ||
+			(bool) ($payload["gliding"] ?? false) ||
+			(bool) ($payload["recentlyCancelled"] ?? false)
+		) {
+			return [];
+		}
+
+		if (!(bool) ($payload["creative"] ?? false) && !(bool) ($payload["spectator"] ?? false) && !(bool) ($payload["allowFlight"] ?? false)) {
+			if ((float) ($payload["oldY"] ?? 0) <= (float) ($payload["newY"] ?? 0)) {
+				if ((int) ($payload["inAirTicks"] ?? 0) > (int) ($payload["maxAirTicks"] ?? 0)) {
+					$surroundingBlocks = $payload["surroundingBlocks"] ?? [];
+					$maxY = (int) ($payload["maxY"] ?? 0);
+					$newY = (float) ($payload["newY"] ?? 0);
+					if ($newY - 1 > $maxY) {
+						if (!is_array($surroundingBlocks) || count(array_intersect($surroundingBlocks, [
+							BlockTypeIds::OAK_FENCE,
+							BlockTypeIds::COBBLESTONE_WALL,
+							BlockTypeIds::ACACIA_FENCE,
+							BlockTypeIds::BIRCH_FENCE,
+							BlockTypeIds::DARK_OAK_FENCE,
+							BlockTypeIds::JUNGLE_FENCE,
+							BlockTypeIds::NETHER_BRICK_FENCE,
+							BlockTypeIds::SPRUCE_FENCE,
+							BlockTypeIds::WARPED_FENCE,
+							BlockTypeIds::MANGROVE_FENCE,
+							BlockTypeIds::CRIMSON_FENCE,
+							BlockTypeIds::CHERRY_FENCE,
+							BlockTypeIds::ACACIA_FENCE_GATE,
+							BlockTypeIds::OAK_FENCE_GATE,
+							BlockTypeIds::BIRCH_FENCE_GATE,
+							BlockTypeIds::DARK_OAK_FENCE_GATE,
+							BlockTypeIds::JUNGLE_FENCE_GATE,
+							BlockTypeIds::SPRUCE_FENCE_GATE,
+							BlockTypeIds::WARPED_FENCE_GATE,
+							BlockTypeIds::MANGROVE_FENCE_GATE,
+							BlockTypeIds::CRIMSON_FENCE_GATE,
+							BlockTypeIds::CHERRY_FENCE_GATE,
+							BlockTypeIds::GLASS_PANE,
+							BlockTypeIds::HARDENED_GLASS_PANE,
+							BlockTypeIds::STAINED_GLASS_PANE,
+							BlockTypeIds::STAINED_HARDENED_GLASS_PANE
+						])) === 0) {
+							return ["failed" => true];
 						}
 					}
 				}
 			}
 		}
+
+		return [];
 	}
 }

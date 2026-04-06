@@ -53,22 +53,44 @@ class KillAuraB extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();
-			if (
-				!$player->isFlying() ||
-				!$player->getAllowFlight() ||
-				$playerAPI->getAttackTicks() < 100 ||
-				$playerAPI->getTeleportTicks() < 100 ||
-				$player->isSurvival() ||
-				$playerAPI->recentlyCancelledEvent() < 40
-			) {
-				return;
-			}
-			$deltaPitch = cos($packet->getPitch());
-			$deltaYaw = cos($packet->getYaw());
-			if ($deltaPitch === $this->getConstant("delta-pitch") and $deltaYaw === $this->getConstant("delta-yaw")) {
-				$this->failed($playerAPI);
-			}
-			$this->debug($playerAPI, "deltaPitch=$deltaPitch, deltaYaw=$deltaYaw");
+			$this->dispatchAsyncCheck($player->getName(), [
+				"type" => "KillAuraB",
+				"flying" => $player->isFlying(),
+				"allowFlight" => $player->getAllowFlight(),
+				"attackTicks" => $playerAPI->getAttackTicks(),
+				"teleportTicks" => $playerAPI->getTeleportTicks(),
+				"survival" => $player->isSurvival(),
+				"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
+				"pitch" => $packet->getPitch(),
+				"yaw" => $packet->getYaw(),
+				"deltaPitch" => $this->getConstant("delta-pitch"),
+				"deltaYaw" => $this->getConstant("delta-yaw"),
+			]);
 		}
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "KillAuraB") {
+			return [];
+		}
+
+		if (
+			!(bool) ($payload["flying"] ?? false) ||
+			!(bool) ($payload["allowFlight"] ?? false) ||
+			(int) ($payload["attackTicks"] ?? 0) < 100 ||
+			(int) ($payload["teleportTicks"] ?? 0) < 100 ||
+			(bool) ($payload["survival"] ?? false) ||
+			(bool) ($payload["recentlyCancelled"] ?? false)
+		) {
+			return [];
+		}
+
+		$deltaPitch = cos((float) ($payload["pitch"] ?? 0.0));
+		$deltaYaw = cos((float) ($payload["yaw"] ?? 0.0));
+		if ($deltaPitch === (float) ($payload["deltaPitch"] ?? 0.0) && $deltaYaw === (float) ($payload["deltaYaw"] ?? 0.0)) {
+			return ["failed" => true, "debug" => "deltaPitch={$deltaPitch}, deltaYaw={$deltaYaw}"];
+		}
+
+		return ["debug" => "deltaPitch={$deltaPitch}, deltaYaw={$deltaYaw}"];
 	}
 }

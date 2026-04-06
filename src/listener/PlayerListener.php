@@ -86,17 +86,12 @@ class PlayerListener implements Listener {
 		$packet = $event->getPacket();
 		$player = $event->getOrigin()->getPlayer();
 
-		if ($player === null) {
-			return;
-		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if ($player === null || !$this->isPlayerReady($player)) {
 			return;
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 
-		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
-		}
+		$this->markRecentlyCancelled($event, $playerAPI);
 
 		$this->check($packet, $playerAPI);
 
@@ -117,16 +112,11 @@ class PlayerListener implements Listener {
 	public function onPlayerMove(PlayerMoveEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if (!$player->isConnected() && !$player->spawned) {
-			return;
-		}
-		if ($playerAPI->getPlayer() === null) {
+		if ($playerAPI->getPlayer() === null || !$this->isPlayerReady($player)) {
 			return;
 		}
 
-		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
-		}
+		$this->markRecentlyCancelled($event, $playerAPI);
 
 		$this->checkEvent($event, $playerAPI);
 		if ($playerAPI->isFlagged()) {
@@ -159,21 +149,17 @@ class PlayerListener implements Listener {
 
 	public function onPlayerInteract(PlayerInteractEvent $event) : void {
 		$player = $event->getPlayer();
-		if (!$player->isConnected() && !$player->spawned) {
-			return;
-		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if ($playerAPI->getPlayer() === null) {
+		if ($playerAPI->getPlayer() === null || !$this->isPlayerReady($player)) {
 			return;
 		}
-		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
-		}
+		$this->markRecentlyCancelled($event, $playerAPI);
 		$block = $event->getBlock();
-		if (!isset($this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())])) {
-			$this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())] = $block;
+		$key = $this->getPlayerKey($player);
+		if (!isset($this->blockInteracted[$key])) {
+			$this->blockInteracted[$key] = $block;
 		} else {
-			unset($this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())]);
+			unset($this->blockInteracted[$key]);
 		}
 
 		if ($playerAPI->isFlagged()) {
@@ -189,15 +175,10 @@ class PlayerListener implements Listener {
 			return;
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($entity);
-		if ($playerAPI->getPlayer() === null) {
+		if ($playerAPI->getPlayer() === null || !$this->isPlayerReady($entity)) {
 			return;
 		}
-		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
-		}
-		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
-			return;
-		}
+		$this->markRecentlyCancelled($event, $playerAPI);
 		$playerAPI->getMotion()->x += abs($event->getVector()->getX());
 		$playerAPI->getMotion()->z += abs($event->getVector()->getZ());
 	}
@@ -208,22 +189,19 @@ class PlayerListener implements Listener {
 		$z = $block->getPosition()->getZ();
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if ($playerAPI->getPlayer() === null) {
+		if ($playerAPI->getPlayer() === null || !$this->isPlayerReady($player)) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
-			return;
-		}
-		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
-		}
+		$this->markRecentlyCancelled($event, $playerAPI);
 		$this->checkEvent($event, $playerAPI);
 		if ($playerAPI->isFlagged()) {
 			$event->cancel();
 			$playerAPI->setFlagged(false);
 		}
 		if (isset($this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())])) {
-			$blockInteracted = $this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())];
+			$key = $this->getPlayerKey($player);
+			if (isset($this->blockInteracted[$key])) {
+				$blockInteracted = $this->blockInteracted[$key];
 			$xI = $blockInteracted->getPosition()->getX();
 			$zI = $blockInteracted->getPosition()->getZ();
 			if ((int) $x != (int) $xI && (int) $z != (int) $zI) {
@@ -232,6 +210,7 @@ class PlayerListener implements Listener {
 			} else {
 				$playerAPI->setBlocksBrokeASec(0);
 				unset($this->blockInteracted[($player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid())]);
+				unset($this->blockInteracted[$key]);
 			}
 		}
 	}
@@ -242,15 +221,10 @@ class PlayerListener implements Listener {
 		$z = $block->getPosition()->getZ();
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if ($playerAPI->getPlayer() === null) {
+		if ($playerAPI->getPlayer() === null || !$this->isPlayerReady($player)) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
-			return;
-		}
-		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
-		}
+		$this->markRecentlyCancelled($event, $playerAPI);
 		$playerAPI->setPlacingTicks(microtime(true));
 		$this->checkEvent($event, $playerAPI);
 		if ($playerAPI->isFlagged()) {
@@ -258,7 +232,9 @@ class PlayerListener implements Listener {
 			$playerAPI->setFlagged(false);
 		}
 		if (isset($this->blockInteracted[$player->getXuid()])) {
-			$blockInteracted = $this->blockInteracted[$player->getXuid()];
+			$key = $this->getPlayerKey($player);
+			if (isset($this->blockInteracted[$key])) {
+				$blockInteracted = $this->blockInteracted[$key];
 			$xI = $blockInteracted->getPosition()->getX();
 			$zI = $blockInteracted->getPosition()->getZ();
 			if ((int) $x != (int) $xI && (int) $z != (int) $zI) {
@@ -267,6 +243,7 @@ class PlayerListener implements Listener {
 			} else {
 				$playerAPI->setBlocksPlacedASec(0);
 				unset($this->blockInteracted[$player->getXuid()]);
+				unset($this->blockInteracted[$key]);
 			}
 		}
 	}
@@ -616,43 +593,51 @@ class PlayerListener implements Listener {
 	}
 
 	private function checkEvent(Event $event, PlayerAPI $player) : void {
-		$playerAPI = PlayerAPI::getAPIPlayer($player->getPlayer());
-		if (($player = $playerAPI->getPlayer()) === null || !$player->isOnline() || !$player->spawned) {
+		if (($p = $player->getPlayer()) === null || !$p->isOnline() || !$p->spawned) {
 			return;
 		}
 
-		foreach (ZuriAC::Checks() as $class) {
-			if ($class->enable()) {
-				$class->checkEvent($event, $playerAPI);
-			}
+		foreach (ZuriAC::EventChecks() as $class) {
+			$class->checkEvent($event, $player);
 		}
 	}
 
 	private function check(DataPacket $packet, PlayerAPI $player) : void {
-		$playerAPI = PlayerAPI::getAPIPlayer($player->getPlayer());
-		if (($player = $playerAPI->getPlayer()) === null || !$player->isOnline() || !$player->spawned) {
+		if (($p = $player->getPlayer()) === null || !$p->isOnline() || !$p->spawned) {
 			return;
 		}
 
-		foreach (ZuriAC::Checks() as $class) {
-			if ($class->enable()) {
-				$class->check($packet, $playerAPI);
-			}
+		foreach (ZuriAC::PacketChecks() as $class) {
+			$class->check($packet, $player);
 		}
 	}
 
 	private function checkJustEvent(Event $event) : void {
-		foreach (ZuriAC::Checks() as $class) {
-			if ($class->enable()) {
-				$class->checkJustEvent($event);
-			}
+		foreach (ZuriAC::JustEventChecks() as $class) {
+			$class->checkJustEvent($event);
 		}
 	}
 
 	public function onProjectileLaunch(ProjectileLaunchEvent $event) : void {
+		$projectile = $event->getEntity();
+		$player = $projectile->getOwningEntity();
+		if ($player instanceof Player) {
+			$this->markRecentlyCancelled($event, PlayerAPI::getAPIPlayer($player));
+		}
+		$this->checkJustEvent($event);
+	}
+
+	private function isPlayerReady(Player $player) : bool {
+		return $player->isConnected() || $player->spawned;
+	}
+
+	private function getPlayerKey(Player $player) : string {
+		return $player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid();
+	}
+
+	private function markRecentlyCancelled(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event->isCancelled()) {
 			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
 		}
-		$this->checkJustEvent($event);
 	}
 }

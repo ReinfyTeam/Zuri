@@ -34,10 +34,10 @@ namespace ReinfyTeam\Zuri\checks\moving\speed;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\math\Vector3;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
-use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function microtime;
 use function round;
@@ -72,57 +72,138 @@ class SpeedB extends Check {
 				$player->isFlying() ||
 				$player->getAllowFlight() ||
 				$player->hasNoClientPredictions() ||
-				!$player->isSurvival() ||
 				!$playerAPI->isCurrentChunkIsLoaded() ||
 				BlockUtil::isGroundSolid($player) ||
 				$playerAPI->isGliding() ||
-				$playerAPI->recentlyCancelledEvent() < 40
+				$playerAPI->isRecentlyCancelledEvent()
 			) {
 				return;
 			}
 
-
+			$now = microtime(true);
 			$time = $playerAPI->getExternalData("moveTimeA");
-			if ($time !== null) {
-				$distance = round(BlockUtil::distance($event->getFrom(), $event->getTo()), 5); // Round precision of 5
-				$timeDiff = abs($time - microtime(true));
-				$speed = round($distance / $timeDiff, 5); // Round precision of 5; s = d/t
-
-				// Calculate the possible speed limit
-				$speedLimit = $this->getConstant("walking-speed-limit"); // Walking
-				$speedLimit += $player->isSprinting() ? $this->getConstant("sprinting-speed-limit") : 0; // Sprinting
-				$speedLimit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant("jump-speed-limit") : 0; // Jumping
-				$speedLimit += $playerAPI->isOnIce() ? $this->getConstant("ice-walking-speed-limit") : 0; // Ice walking limit
-				$speedLimit += $playerAPI->isTopBlock() ? $this->getConstant("top-block-limit") : 0; // Ice walking limit
-				$speedLimit += $playerAPI->isOnStairs() ? $this->getConstant("stairs-speed-limit") : 0; // Stairs walking limit
-				$timeLimit = $this->getConstant("time-limit");
-
-				// Calculate max distance must be the limit of blocks travelled.
-				$distanceLimit = $this->getConstant("wakling-distance-limit"); // Walking
-				$distanceLimit += $player->isSprinting() ? $this->getConstant("sprinting-distance-limit") : 0; // Sprinting
-				$distanceLimit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant("jump-distance-limit") : 0; // Jumping
-				$distanceLimit += $playerAPI->isOnIce() ? $this->getConstant("ice-walking-distance-limit") : 0; // Ice walking limit
-				$distanceLimit += $playerAPI->isOnStairs() ? $this->getConstant("stairs-walking-distance-limit") : 0; // Stairs walking limit
-
-				// Calculate speed potion deviation..
-				if (($effect = $player->getEffects()->get(VanillaEffects::SPEED())) !== null) {
-					$speedLimit += $this->getConstant("speed-effect-limit") * $effect->getEffectLevel();
-					$timeLimit += $this->getConstant("time-effect-limit") * $effect->getEffectLevel();
-					$distanceLimit += $this->getConstant("speed-effect-distance-limit") * $effect->getEffectLevel();
-				}
-
-				$this->debug($playerAPI, "timeDiff=$timeDiff, speed=$speed, distance=$distance, speedLimit=$speedLimit, distanceLimit=$distanceLimit, timeLimit=$timeLimit");
-
-				// If the time travelled is greater than the calculated time limit, fail immediately. Lag back? (is player is laggy?)
-				// If speed is on limit and the distance travelled limit is high.
-				ZuriAC::checkAsync(function () use ($playerAPI, $time, $timeLimit, $speed, $speedLimit, $distance, $distanceLimit) {
-					if ($time > $timeLimit && $speed > $speedLimit && $distance > $distanceLimit && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) {
-						$this->failed($playerAPI);
-					}
-				});
-
-				$playerAPI->setExternalData("moveTimeA", microtime(true));
+			$playerAPI->setExternalData("moveTimeA", $now);
+			if ($time === null) {
+				return;
 			}
+
+			$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
+				"type" => "SpeedB",
+				"fromX" => $event->getFrom()->getX(),
+				"fromY" => $event->getFrom()->getY(),
+				"fromZ" => $event->getFrom()->getZ(),
+				"toX" => $event->getTo()->getX(),
+				"toY" => $event->getTo()->getY(),
+				"toZ" => $event->getTo()->getZ(),
+				"time" => $time,
+				"now" => $now,
+				"attackTicks" => $playerAPI->getAttackTicks(),
+				"projectileAttackTicks" => $playerAPI->getProjectileAttackTicks(),
+				"bowShotTicks" => $playerAPI->getBowShotTicks(),
+				"hurtTicks" => $playerAPI->getHurtTicks(),
+				"slimeTicks" => $playerAPI->getSlimeBlockTicks(),
+				"teleportCommandTicks" => $playerAPI->getTeleportCommandTicks(),
+				"onlineTime" => $playerAPI->getOnlineTime(),
+				"onAdhesion" => $playerAPI->isOnAdhesion(),
+				"onGround" => $player->isOnGround(),
+				"flying" => $player->isFlying(),
+				"allowFlight" => $player->getAllowFlight(),
+				"noClientPredictions" => $player->hasNoClientPredictions(),
+				"survival" => $player->isSurvival(),
+				"chunkLoaded" => $playerAPI->isCurrentChunkIsLoaded(),
+				"groundSolid" => BlockUtil::isGroundSolid($player),
+				"gliding" => $playerAPI->isGliding(),
+				"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
+				"sprinting" => $player->isSprinting(),
+				"jumpTicks" => $playerAPI->getJumpTicks(),
+				"onIce" => $playerAPI->isOnIce(),
+				"topBlock" => $playerAPI->isTopBlock(),
+				"onStairs" => $playerAPI->isOnStairs(),
+				"speedEffectLevel" => ($effect = $player->getEffects()->get(VanillaEffects::SPEED())) !== null ? $effect->getEffectLevel() : 0,
+				"ping" => $playerAPI->getPing(),
+				"constants" => [
+					"walking-speed-limit" => $this->getConstant("walking-speed-limit"),
+					"sprinting-speed-limit" => $this->getConstant("sprinting-speed-limit"),
+					"jump-speed-limit" => $this->getConstant("jump-speed-limit"),
+					"ice-walking-speed-limit" => $this->getConstant("ice-walking-speed-limit"),
+					"top-block-limit" => $this->getConstant("top-block-limit"),
+					"stairs-speed-limit" => $this->getConstant("stairs-speed-limit"),
+					"time-limit" => $this->getConstant("time-limit"),
+					"wakling-distance-limit" => $this->getConstant("wakling-distance-limit"),
+					"sprinting-distance-limit" => $this->getConstant("sprinting-distance-limit"),
+					"jump-distance-limit" => $this->getConstant("jump-distance-limit"),
+					"ice-walking-distance-limit" => $this->getConstant("ice-walking-distance-limit"),
+					"stairs-walking-distance-limit" => $this->getConstant("stairs-walking-distance-limit"),
+					"speed-effect-limit" => $this->getConstant("speed-effect-limit"),
+					"time-effect-limit" => $this->getConstant("time-effect-limit"),
+					"speed-effect-distance-limit" => $this->getConstant("speed-effect-distance-limit"),
+					"pingLagging" => self::getData(self::PING_LAGGING),
+				]
+			]);
 		}
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "SpeedB") {
+			return [];
+		}
+
+		if (!(bool) ($payload["survival"] ?? false) || !(bool) ($payload["onGround"] ?? false) || !(bool) ($payload["chunkLoaded"] ?? false)) {
+			return [];
+		}
+
+		if (
+			(int) ($payload["attackTicks"] ?? 0) < 40 ||
+			(int) ($payload["projectileAttackTicks"] ?? 0) < 20 ||
+			(int) ($payload["bowShotTicks"] ?? 0) < 20 ||
+			(int) ($payload["hurtTicks"] ?? 0) < 10 ||
+			(int) ($payload["slimeTicks"] ?? 0) < 20 ||
+			(int) ($payload["teleportCommandTicks"] ?? 0) < 40 ||
+			(float) ($payload["onlineTime"] ?? 0) < 2 ||
+			(bool) ($payload["onAdhesion"] ?? false) ||
+			(bool) ($payload["flying"] ?? false) ||
+			(bool) ($payload["allowFlight"] ?? false) ||
+			(bool) ($payload["noClientPredictions"] ?? false) ||
+			(bool) ($payload["groundSolid"] ?? false) ||
+			(bool) ($payload["gliding"] ?? false) ||
+			(bool) ($payload["recentlyCancelled"] ?? false)
+		) {
+			return [];
+		}
+
+		$time = (float) ($payload["time"] ?? 0.0);
+		$now = (float) ($payload["now"] ?? microtime(true));
+		$timeDiff = abs($time - $now);
+		$from = new Vector3((float) ($payload["fromX"] ?? 0.0), (float) ($payload["fromY"] ?? 0.0), (float) ($payload["fromZ"] ?? 0.0));
+		$to = new Vector3((float) ($payload["toX"] ?? 0.0), (float) ($payload["toY"] ?? 0.0), (float) ($payload["toZ"] ?? 0.0));
+		$distance = round(BlockUtil::distance($from, $to), 5);
+		$speed = round($distance / max($timeDiff, 0.00001), 5);
+
+		$constants = $payload["constants"] ?? [];
+		$speedLimit = (float) ($constants["walking-speed-limit"] ?? 0);
+		$speedLimit += (bool) ($payload["sprinting"] ?? false) ? (float) ($constants["sprinting-speed-limit"] ?? 0) : 0;
+		$speedLimit += (int) ($payload["jumpTicks"] ?? 0) < 40 ? (float) ($constants["jump-speed-limit"] ?? 0) : 0;
+		$speedLimit += (bool) ($payload["onIce"] ?? false) ? (float) ($constants["ice-walking-speed-limit"] ?? 0) : 0;
+		$speedLimit += (bool) ($payload["topBlock"] ?? false) ? (float) ($constants["top-block-limit"] ?? 0) : 0;
+		$speedLimit += (bool) ($payload["onStairs"] ?? false) ? (float) ($constants["stairs-speed-limit"] ?? 0) : 0;
+		$timeLimit = (float) ($constants["time-limit"] ?? 0);
+		$distanceLimit = (float) ($constants["wakling-distance-limit"] ?? 0);
+		$distanceLimit += (bool) ($payload["sprinting"] ?? false) ? (float) ($constants["sprinting-distance-limit"] ?? 0) : 0;
+		$distanceLimit += (int) ($payload["jumpTicks"] ?? 0) < 40 ? (float) ($constants["jump-distance-limit"] ?? 0) : 0;
+		$distanceLimit += (bool) ($payload["onIce"] ?? false) ? (float) ($constants["ice-walking-distance-limit"] ?? 0) : 0;
+		$distanceLimit += (bool) ($payload["onStairs"] ?? false) ? (float) ($constants["stairs-walking-distance-limit"] ?? 0) : 0;
+		$effectLevel = (int) ($payload["speedEffectLevel"] ?? 0);
+		if ($effectLevel > 0) {
+			$speedLimit += (float) ($constants["speed-effect-limit"] ?? 0) * $effectLevel;
+			$timeLimit += (float) ($constants["time-effect-limit"] ?? 0) * $effectLevel;
+			$distanceLimit += (float) ($constants["speed-effect-distance-limit"] ?? 0) * $effectLevel;
+		}
+
+		$debug = "timeDiff={$timeDiff}, speed={$speed}, distance={$distance}, speedLimit={$speedLimit}, distanceLimit={$distanceLimit}, timeLimit={$timeLimit}";
+		if ($timeDiff > $timeLimit && $speed > $speedLimit && $distance > $distanceLimit && (int) ($payload["ping"] ?? 0) < (int) ($constants["pingLagging"] ?? 0)) {
+			return ["failed" => true, "debug" => $debug];
+		}
+
+		return ["debug" => $debug];
 	}
 }

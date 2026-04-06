@@ -72,53 +72,82 @@ class SpeedA extends Check {
 				$player->isCreative() ||
 				$player->isSpectator() ||
 				!$playerAPI->isCurrentChunkIsLoaded() ||
-				$playerAPI->recentlyCancelledEvent() < 40
+				$playerAPI->isRecentlyCancelledEvent()
 			) {
 				return;
 			}
 
-			$previous = new Vector3($player->getPosition()->getX(), 0, $player->getPosition()->getZ());
-			$next = new Vector3($packet->getPosition()->getX(), 0, $packet->getPosition()->getZ());
-
-			$frictionBlock = $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN));
-			$friction = $playerAPI->isOnGround() ? $frictionBlock->getFrictionFactor() : $this->getConstant("friction-factor");
-			$lastDistance = $playerAPI->getExternalData("lastDistanceXZ", $this->getConstant("xz-distance"));
-
-			$momentum = MathUtil::getMomentum($lastDistance, $friction);
-			$movement = MathUtil::getMovement($player, new Vector3(max(-1, min(1, $packet->getMoveVecZ())), 0, max(-1, min(1, $packet->getMoveVecX()))));
-			$effects = MathUtil::getEffectsMultiplier($player);
-			$acceleration = MathUtil::getAcceleration($movement, $effects, $friction, $player->isOnGround());
-
-			$expected = $momentum + $acceleration;
-			$expected += ($playerAPI->getJumpTicks() < 5 && BlockUtil::getBlockAbove($player)->isSolid()) ? $this->getConstant("jump-factor") : 0;
-			$expected += ($player->isOnGround()) ? $this->getConstant("ground-factor") : 0;
-			$expected += ($packet->getInputFlags()->get(PlayerAuthInputFlags::START_JUMPING) && $playerAPI->getLastMoveTick() > 5) ? $this->getConstant("lastjump-factor") : 0;
-			$expected += ($playerAPI->getJumpTicks() <= 20 && $playerAPI->isOnIce()) ? $this->getConstant("ice-factor") : 0;
-
-			// If the player is moving, calculate the knockback factor
-			if (abs($playerAPI->getMotion()->getX()) > 0 || abs($playerAPI->getMotion()->getZ()) > 0) {
-				$motionX = abs($playerAPI->getMotion()->getX());
-				$motionZ = abs($playerAPI->getMotion()->getZ());
-				$knockback = $motionX * $motionX + $motionZ * $motionZ;
-
-				$knockback *= $this->getConstant("knockback-factor");
-				$expected += $knockback;
-
-				$playerAPI->getMotion()->x = 0;
-				$playerAPI->getMotion()->z = 0;
-			}
-
-			$expected += $playerAPI->getLastMoveTick() < 5 ? $this->getConstant("lastmove-factor") : 0;
-			$playerAPI->setExternalData("lastDistanceXZ", $expected);
-
-			$dist = $previous->distance($next);
-			$distDiff = abs($dist - $expected);
-
-			if ($dist > $expected && $distDiff > $this->getConstant("threshold")) {
-				$this->debug($playerAPI, "expected=$expected, distance=$distDiff");
-				$this->failed($playerAPI);
-			}
-			$playerAPI->setExternalData("lastDistanceXZ", $dist);
+			$this->dispatchAsyncCheck($player->getName(), [
+				"type" => "SpeedA",
+				"fromX" => $player->getPosition()->getX(),
+				"fromZ" => $player->getPosition()->getZ(),
+				"toX" => $packet->getPosition()->getX(),
+				"toZ" => $packet->getPosition()->getZ(),
+				"moveVecX" => $packet->getMoveVecX(),
+				"moveVecZ" => $packet->getMoveVecZ(),
+				"sprinting" => $player->isSprinting(),
+				"sneaking" => $player->isSneaking(),
+				"usingItem" => $player->isUsingItem(),
+				"swiftSneakLevel" => $player->getArmorInventory()->getLeggings()->getEnchantmentLevel(\pocketmine\item\enchantment\VanillaEnchantments::SWIFT_SNEAK()),
+				"onGround" => $player->isOnGround(),
+				"jumpTicks" => $playerAPI->getJumpTicks(),
+				"lastMoveTick" => $playerAPI->getLastMoveTick(),
+				"onIce" => $playerAPI->isOnIce(),
+				"blockAboveSolid" => BlockUtil::getBlockAbove($player)->isSolid(),
+				"startJumping" => $packet->getInputFlags()->get(PlayerAuthInputFlags::START_JUMPING),
+				"lastDistanceXZ" => $playerAPI->getExternalData("lastDistanceXZ", $this->getConstant("xz-distance")),
+				"motionX" => $playerAPI->getMotion()->getX(),
+				"motionZ" => $playerAPI->getMotion()->getZ(),
+				"friction" => $playerAPI->isOnGround() ? $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN))->getFrictionFactor() : $this->getConstant("friction-factor"),
+				"threshold" => $this->getConstant("threshold"),
+				"constants" => [
+					"xz-distance" => $this->getConstant("xz-distance"),
+					"jump-factor" => $this->getConstant("jump-factor"),
+					"ground-factor" => $this->getConstant("ground-factor"),
+					"lastjump-factor" => $this->getConstant("lastjump-factor"),
+					"ice-factor" => $this->getConstant("ice-factor"),
+					"knockback-factor" => $this->getConstant("knockback-factor"),
+					"lastmove-factor" => $this->getConstant("lastmove-factor"),
+					"speedLevel" => (($effect = $player->getEffects()->get(\pocketmine\entity\effect\VanillaEffects::SPEED())) !== null) ? $effect->getEffectLevel() : 0,
+					"slownessLevel" => (($effect = $player->getEffects()->get(\pocketmine\entity\effect\VanillaEffects::SLOWNESS())) !== null) ? $effect->getEffectLevel() : 0,
+				],
+			]);
 		}
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "SpeedA") {
+			return [];
+		}
+
+		$previous = new Vector3((float) ($payload["fromX"] ?? 0), 0, (float) ($payload["fromZ"] ?? 0));
+		$next = new Vector3((float) ($payload["toX"] ?? 0), 0, (float) ($payload["toZ"] ?? 0));
+		$constants = $payload["constants"] ?? [];
+		$friction = (float) ($payload["friction"] ?? 0.91);
+		$lastDistance = (float) ($payload["lastDistanceXZ"] ?? ($constants["xz-distance"] ?? 0));
+		$momentum = MathUtil::getMomentum($lastDistance, $friction);
+		$movement = MathUtil::getMovementSnapshot((bool) ($payload["sprinting"] ?? false), (bool) ($payload["sneaking"] ?? false), (bool) ($payload["usingItem"] ?? false), (int) ($payload["swiftSneakLevel"] ?? 0));
+		$effects = MathUtil::getEffectsMultiplierSnapshot((int) ($constants["speedLevel"] ?? 0), (int) ($constants["slownessLevel"] ?? 0));
+		$acceleration = MathUtil::getAcceleration($movement, $effects, $friction, (bool) ($payload["onGround"] ?? false));
+		$expected = $momentum + $acceleration;
+		$expected += ((int) ($payload["jumpTicks"] ?? 0) < 5 && (bool) ($payload["blockAboveSolid"] ?? false)) ? (float) ($constants["jump-factor"] ?? 0) : 0;
+		$expected += (bool) ($payload["onGround"] ?? false) ? (float) ($constants["ground-factor"] ?? 0) : 0;
+		$expected += ((bool) ($payload["startJumping"] ?? false) && (float) ($payload["lastMoveTick"] ?? 0) > 5) ? (float) ($constants["lastjump-factor"] ?? 0) : 0;
+		$expected += ((int) ($payload["jumpTicks"] ?? 0) <= 20 && (bool) ($payload["onIce"] ?? false)) ? (float) ($constants["ice-factor"] ?? 0) : 0;
+		$motionX = abs((float) ($payload["motionX"] ?? 0));
+		$motionZ = abs((float) ($payload["motionZ"] ?? 0));
+		if ($motionX > 0 || $motionZ > 0) {
+			$knockback = (($motionX * $motionX) + ($motionZ * $motionZ)) * (float) ($constants["knockback-factor"] ?? 0);
+			$expected += $knockback;
+		}
+		$expected += ((float) ($payload["lastMoveTick"] ?? 0) < 5) ? (float) ($constants["lastmove-factor"] ?? 0) : 0;
+		$dist = $previous->distance($next);
+		$distDiff = abs($dist - $expected);
+		$result = ["set" => ["lastDistanceXZ" => $dist]];
+		if ($dist > $expected && $distDiff > (float) ($payload["threshold"] ?? 0.0)) {
+			$result["failed"] = true;
+			$result["debug"] = "expected={$expected}, distance={$distDiff}";
+		}
+		return $result;
 	}
 }

@@ -53,33 +53,45 @@ class TimerB extends Check {
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
-			$player = $playerAPI->getPlayer();
-			if (!$player->isAlive()) {
-				$playerAPI->setExternalData("TimerLastA", null);
-				$playerAPI->setExternalData("TimerBalanceA", 0);
-				return;
-			}
-
-			$currentTime = microtime(true) * 1000;
-			$lastTime = $playerAPI->getExternalData("TimerLastA");
-			if ($lastTime === null) {
-				$playerAPI->setExternalData("TimerLastA", $currentTime);
-				return;
-			}
-
-			// Esoteric Method
-			// convert the time difference into ticks (round this value to detect lower timer values).
-			$timeDiff = round(($currentTime - $lastTime) / 50, 2);
-			$timeBalance = $playerAPI->getExternalData("TimerBalanceA");
-			// there should be a one tick difference between two packets
-			$playerAPI->setExternalData("TimerBalanceA", $timeBalance - 1);
-			$playerAPI->setExternalData("TimerBalanceA", $timeBalance + $timeDiff);
-			$newBalance = $playerAPI->getExternalData("TimerBalanceA");
-			if ( $newBalance <= $this->getConstant("diff-balance") ) {
-				$this->failed($playerAPI);
-				$playerAPI->setExternalData("TimerBalanceA", 0);
-			}
-			$playerAPI->setExternalData("TimerLastA", $currentTime);
+			$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
+				"type" => "TimerB",
+				"alive" => $playerAPI->getPlayer()->isAlive(),
+				"currentTime" => microtime(true) * 1000,
+				"lastTime" => $playerAPI->getExternalData("TimerLastA"),
+				"balance" => $playerAPI->getExternalData("TimerBalanceA", 0),
+				"diffBalance" => (float) $this->getConstant("diff-balance"),
+			]);
 		}
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (!(bool) ($payload["alive"] ?? false)) {
+			return ["set" => ["TimerBalanceA" => 0], "unset" => ["TimerLastA"],];
+		}
+
+		$currentTime = (float) ($payload["currentTime"] ?? 0.0);
+		$lastTime = $payload["lastTime"] ?? null;
+		$balance = (float) ($payload["balance"] ?? 0.0);
+		$diffBalance = (float) ($payload["diffBalance"] ?? 0.0);
+
+		if ($lastTime === null) {
+			return ["set" => ["TimerLastA" => $currentTime, "TimerBalanceA" => $balance]];
+		}
+
+		$timeDiff = round(($currentTime - (float) $lastTime) / 50, 2);
+		$newBalance = ($balance - 1) + $timeDiff;
+		$result = [
+			"set" => [
+				"TimerLastA" => $currentTime,
+				"TimerBalanceA" => $newBalance,
+			],
+		];
+
+		if ($newBalance <= $diffBalance) {
+			$result["failed"] = true;
+			$result["set"]["TimerBalanceA"] = 0;
+		}
+
+		return $result;
 	}
 }

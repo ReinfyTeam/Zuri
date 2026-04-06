@@ -52,40 +52,64 @@ class FlyA extends Check {
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
+		$this->dispatchAsyncCheck($player->getName(), [
+			"type" => "FlyA",
+			"attackTicks" => $playerAPI->getAttackTicks(),
+			"onlineTime" => $playerAPI->getOnlineTime(),
+			"jumpTicks" => $playerAPI->getJumpTicks(),
+			"inWeb" => $playerAPI->isInWeb(),
+			"onGround" => $playerAPI->isOnGround(),
+			"onAdhesion" => $playerAPI->isOnAdhesion(),
+			"allowFlight" => $player->getAllowFlight(),
+			"noClientPredictions" => $player->hasNoClientPredictions(),
+			"survival" => $player->isSurvival(),
+			"chunkLoaded" => $playerAPI->isCurrentChunkIsLoaded(),
+			"groundSolid" => BlockUtil::isGroundSolid($player),
+			"gliding" => $playerAPI->isGliding(),
+			"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
+			"currentY" => (int) $player->getLocation()->getY(),
+			"lastYNoGround" => $playerAPI->getExternalData("lastYNoGroundF"),
+			"lastTime" => $playerAPI->getExternalData("lastTimeF"),
+			"now" => microtime(true),
+			"maxGroundDiff" => (float) $this->getConstant("max-ground-diff"),
+		]);
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "FlyA") {
+			return [];
+		}
+
 		if (
-			$playerAPI->getAttackTicks() < 40 ||
-			$playerAPI->getOnlineTime() <= 30 ||
-			$playerAPI->getJumpTicks() < 40 ||
-			$playerAPI->isInWeb() ||
-			$playerAPI->isOnGround() ||
-			$playerAPI->isOnAdhesion() ||
-			$player->getAllowFlight() ||
-			$player->hasNoClientPredictions() ||
-			!$player->isSurvival() ||
-			!$playerAPI->isCurrentChunkIsLoaded() ||
-			BlockUtil::isGroundSolid($player) ||
-			$playerAPI->isGliding() ||
-			$playerAPI->recentlyCancelledEvent() < 40
+			(int) ($payload["attackTicks"] ?? 0) < 40 ||
+			(float) ($payload["onlineTime"] ?? 0) <= 30 ||
+			(int) ($payload["jumpTicks"] ?? 0) < 40 ||
+			(bool) ($payload["inWeb"] ?? false) ||
+			(bool) ($payload["onGround"] ?? false) ||
+			(bool) ($payload["onAdhesion"] ?? false) ||
+			(bool) ($payload["allowFlight"] ?? false) ||
+			(bool) ($payload["noClientPredictions"] ?? false) ||
+			!(bool) ($payload["survival"] ?? false) ||
+			!(bool) ($payload["chunkLoaded"] ?? false) ||
+			(bool) ($payload["groundSolid"] ?? false) ||
+			(bool) ($payload["gliding"] ?? false) ||
+			(bool) ($payload["recentlyCancelled"] ?? false)
 		) {
-			$playerAPI->unsetExternalData("lastYNoGroundF");
-			$playerAPI->unsetExternalData("lastTimeF");
-			return;
+			return ["unset" => ["lastYNoGroundF", "lastTimeF"]];
 		}
-		$lastYNoGround = $playerAPI->getExternalData("lastYNoGroundF");
-		$lastTime = $playerAPI->getExternalData("lastTimeF");
+
+		$lastYNoGround = $payload["lastYNoGround"] ?? null;
+		$lastTime = $payload["lastTime"] ?? null;
 		if ($lastYNoGround !== null && $lastTime !== null) {
-			$diff = microtime(true) - $lastTime;
-			if ($diff > $this->getConstant("max-ground-diff")) {
-				if ((int) $player->getLocation()->getY() == $lastYNoGround) {
-					$this->failed($playerAPI);
-				}
-				$playerAPI->unsetExternalData("lastYNoGroundF");
-				$playerAPI->unsetExternalData("lastTimeF");
+			$diff = (float) ($payload["now"] ?? microtime(true)) - (float) $lastTime;
+			$result = ["debug" => "diff={$diff}, lastTime={$lastTime}, lastYNoGround={$lastYNoGround}"];
+			if ($diff > (float) ($payload["maxGroundDiff"] ?? 0.0) && (int) ($payload["currentY"] ?? 0) === (int) $lastYNoGround) {
+				$result["failed"] = true;
 			}
-			$this->debug($playerAPI, "diff=$diff, lastTime=$lastTime, lastYNoGround=$lastYNoGround");
-		} else {
-			$playerAPI->setExternalData("lastYNoGroundF", (int) $player->getLocation()->getY());
-			$playerAPI->setExternalData("lastTimeF", microtime(true));
+			$result["unset"] = ["lastYNoGroundF", "lastTimeF"];
+			return $result;
 		}
+
+		return ["set" => ["lastYNoGroundF" => (int) ($payload["currentY"] ?? 0), "lastTimeF" => (float) ($payload["now"] ?? microtime(true))]];
 	}
 }

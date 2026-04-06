@@ -55,28 +55,46 @@ class AutoClickB extends Check {
 		if ($playerAPI->getPlacingTicks() < 100) {
 			return;
 		}
-		$ticks = $playerAPI->getExternalData("clicksTicks2");
-		$lastClick = $playerAPI->getExternalData("lastClick");
 		if ($packet instanceof LevelSoundEventPacket) {
 			if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
-				if ($ticks !== null && $lastClick !== null) {
-					$diff = microtime(true) - $lastClick;
-					if ($diff > $this->getConstant("diff-time")) {
-						if ($ticks >= $this->getConstant("diff-ticks")) {
-							$this->failed($playerAPI);
-						}
-						$this->debug($playerAPI, "diff=$diff, lastClick=$lastClick, ticks=$ticks");
-						$playerAPI->unsetExternalData("clicksTicks2");
-						$playerAPI->unsetExternalData("lastClick");
-					} else {
-						$playerAPI->setExternalData("clicksTicks2", $ticks + 1);
-					}
-					$this->debug($playerAPI, "lastClick=$lastClick, ticks=$ticks");
-				} else {
-					$playerAPI->setExternalData("clicksTicks2", 0);
-					$playerAPI->setExternalData("lastClick", microtime(true));
-				}
+				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
+					"type" => "AutoClickB",
+					"placingTicks" => $playerAPI->getPlacingTicks(),
+					"ticks" => $playerAPI->getExternalData("clicksTicks2"),
+					"lastClick" => $playerAPI->getExternalData("lastClick"),
+					"diffTime" => (float) $this->getConstant("diff-time"),
+					"diffTicks" => (int) $this->getConstant("diff-ticks"),
+					"now" => microtime(true),
+				]);
 			}
 		}
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "AutoClickB") {
+			return [];
+		}
+
+		$placingTicks = (int) ($payload["placingTicks"] ?? 0);
+		if ($placingTicks < 100) {
+			return [];
+		}
+
+		$ticks = $payload["ticks"] ?? null;
+		$lastClick = $payload["lastClick"] ?? null;
+		if ($ticks === null || $lastClick === null) {
+			return ["set" => ["clicksTicks2" => 0, "lastClick" => $payload["now"] ?? microtime(true)]];
+		}
+
+		$diff = (float) ($payload["now"] ?? microtime(true)) - (float) $lastClick;
+		if ($diff > (float) ($payload["diffTime"] ?? 0.0)) {
+			$result = ["unset" => ["clicksTicks2", "lastClick"], "debug" => "diff={$diff}, lastClick={$lastClick}, ticks={$ticks}"];
+			if ((int) $ticks >= (int) ($payload["diffTicks"] ?? 0)) {
+				$result["failed"] = true;
+			}
+			return $result;
+		}
+
+		return ["set" => ["clicksTicks2" => (int) $ticks + 1, "lastClick" => $lastClick], "debug" => "lastClick={$lastClick}, ticks={$ticks}"];
 	}
 }

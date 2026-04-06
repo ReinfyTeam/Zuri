@@ -298,6 +298,7 @@ zuri:
                  survival-max-distance: 3.0
                  creative-max-distance: 8.3
                  max-reach-eye-distance: 3.0
+                  async-enabled: false
                  default-eye-distance: 0.0041
                  sprinting-eye-distance: 0.97
                  not-sprinting-eye-distance: 0.87

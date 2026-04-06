@@ -35,7 +35,6 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
-use ReflectionException;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
@@ -66,36 +65,55 @@ class AutoClickC extends Check {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (
-			$playerAPI->isDigging() ||
-			$playerAPI->getPlacingTicks() < 100 ||
-			$playerAPI->getAttackTicks() < 40 ||
-			!$playerAPI->getPlayer()->isSurvival() ||
-			!$this->canDamagable
-		) {
-			return;
-		}
-		$ticks = $playerAPI->getExternalData("clicksTicks3");
-		$lastClick = $playerAPI->getExternalData("lastClick3");
 		if ($packet instanceof AnimatePacket) {
 			if ($packet->action === AnimatePacket::ACTION_SWING_ARM) {
-				if ($ticks !== null && $lastClick !== null) {
-					$diff = microtime(true) - $lastClick;
-					if ($diff > $this->getConstant("animation-diff-time")) {
-						if ($ticks > $this->getConstant("animation-diff-ticks")) {
-							$this->failed($playerAPI);
-						}
-						$playerAPI->unsetExternalData("clicksTicks3");
-						$playerAPI->unsetExternalData("lastClick3");
-					} else {
-						$playerAPI->setExternalData("clicksTicks3", $ticks + 1);
-					}
-				} else {
-					$playerAPI->setExternalData("clicksTicks3", 0);
-					$playerAPI->setExternalData("lastClick3", microtime(true));
-				}
+				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
+					"type" => "AutoClickC",
+					"isDigging" => $playerAPI->isDigging(),
+					"placingTicks" => $playerAPI->getPlacingTicks(),
+					"attackTicks" => $playerAPI->getAttackTicks(),
+					"isSurvival" => $playerAPI->getPlayer()->isSurvival(),
+					"canDamagable" => $this->canDamagable,
+					"ticks" => $playerAPI->getExternalData("clicksTicks3"),
+					"lastClick" => $playerAPI->getExternalData("lastClick3"),
+					"animationDiffTime" => (float) $this->getConstant("animation-diff-time"),
+					"animationDiffTicks" => (int) $this->getConstant("animation-diff-ticks"),
+					"now" => microtime(true),
+				]);
 			}
-			$this->debug($playerAPI, "ticks=$ticks, lastClick=$lastClick");
 		}
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "AutoClickC") {
+			return [];
+		}
+
+		if (
+			(bool) ($payload["isDigging"] ?? false) ||
+			(int) ($payload["placingTicks"] ?? 0) < 100 ||
+			(int) ($payload["attackTicks"] ?? 0) < 40 ||
+			!(bool) ($payload["isSurvival"] ?? false) ||
+			!(bool) ($payload["canDamagable"] ?? false)
+		) {
+			return [];
+		}
+
+		$ticks = $payload["ticks"] ?? null;
+		$lastClick = $payload["lastClick"] ?? null;
+		if ($ticks === null || $lastClick === null) {
+			return ["set" => ["clicksTicks3" => 0, "lastClick3" => $payload["now"] ?? microtime(true)]];
+		}
+
+		$diff = (float) ($payload["now"] ?? microtime(true)) - (float) $lastClick;
+		if ($diff > (float) ($payload["animationDiffTime"] ?? 0.0)) {
+			$result = ["unset" => ["clicksTicks3", "lastClick3"]];
+			if ((int) $ticks > (int) ($payload["animationDiffTicks"] ?? 0)) {
+				$result["failed"] = true;
+			}
+			return $result;
+		}
+
+		return ["set" => ["clicksTicks3" => (int) $ticks + 1, "lastClick3" => $lastClick]];
 	}
 }

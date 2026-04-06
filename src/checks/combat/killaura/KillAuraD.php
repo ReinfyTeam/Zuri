@@ -55,23 +55,40 @@ class KillAuraD extends Check {
 		if (($player = $playerAPI->getPlayer()) === null) {
 			return;
 		}
-		if (
-			$playerAPI->isDigging() ||
-			$playerAPI->getPlacingTicks() < 100 ||
-			$playerAPI->getAttackTicks() < 20 ||
-			!$player->isSurvival() ||
-			$playerAPI->recentlyCancelledEvent() < 40
-		) {
-			return;
-		}
 		if ($packet instanceof AnimatePacket) {
-			$this->debug($playerAPI, "isDigging=" . $playerAPI->isDigging() . ", placingTicks=" . $playerAPI->getPlacingTicks() . ", attackTicks=" . $playerAPI->getAttackTicks() . ", isSurvival=" . $playerAPI->getPlayer()->isSurvival());
-			if (
-				$packet->action !== AnimatePacket::ACTION_SWING_ARM &&
-				$playerAPI->getAttackTicks() > 40
-			) {
-				$this->failed($playerAPI);
-			}
+			$this->dispatchAsyncCheck($player->getName(), [
+				"type" => "KillAuraD",
+				"isDigging" => $playerAPI->isDigging(),
+				"placingTicks" => $playerAPI->getPlacingTicks(),
+				"attackTicks" => $playerAPI->getAttackTicks(),
+				"survival" => $player->isSurvival(),
+				"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
+				"action" => $packet->action,
+			]);
 		}
+	}
+
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "KillAuraD") {
+			return [];
+		}
+
+		if (
+			(bool) ($payload["isDigging"] ?? false) ||
+			(int) ($payload["placingTicks"] ?? 0) < 100 ||
+			(int) ($payload["attackTicks"] ?? 0) < 20 ||
+			!(bool) ($payload["survival"] ?? false) ||
+			(bool) ($payload["recentlyCancelled"] ?? false)
+		) {
+			return [];
+		}
+
+		$action = (int) ($payload["action"] ?? -1);
+		$debug = "isDigging=" . ((bool) ($payload["isDigging"] ?? false) ? "true" : "false") . ", placingTicks=" . (int) ($payload["placingTicks"] ?? 0) . ", attackTicks=" . (int) ($payload["attackTicks"] ?? 0) . ", isSurvival=" . ((bool) ($payload["survival"] ?? false) ? "true" : "false");
+		if ($action !== AnimatePacket::ACTION_SWING_ARM && (int) ($payload["attackTicks"] ?? 0) > 40) {
+			return ["failed" => true, "debug" => $debug];
+		}
+
+		return ["debug" => $debug];
 	}
 }

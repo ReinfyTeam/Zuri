@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\checks;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\events\api\CheckFailedEvent;
@@ -42,6 +43,7 @@ use ReinfyTeam\Zuri\events\KickEvent;
 use ReinfyTeam\Zuri\events\ServerLagEvent;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\task\ServerTickTask;
+use ReinfyTeam\Zuri\task\CheckAsyncTask;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 use ReinfyTeam\Zuri\ZuriAC;
@@ -51,6 +53,14 @@ use function microtime;
 use function strtolower;
 
 abstract class Check extends ConfigManager {
+	/** @var array<string, float> */
+	private static array $asyncThrottle = [];
+
+	private ?bool $enabledCache = null;
+	private ?string $punishmentCache = null;
+	private ?int $maxViolationsCache = null;
+	private array $constantCache = [];
+
 	public abstract function getName() : string;
 
 	public abstract function getSubType() : string;
@@ -64,24 +74,43 @@ abstract class Check extends ConfigManager {
 	public function checkJustEvent(Event $event) : void {
 	}
 
+	protected function dispatchAsyncCheck(string $playerName, array $payload) : void {
+		$now = microtime(true);
+		$key = $playerName . ":" . static::class;
+		$minInterval = (float) ($payload["_minInterval"] ?? 0.02);
+		if (isset($payload["_minInterval"])) {
+			unset($payload["_minInterval"]);
+		}
+
+		if ((self::$asyncThrottle[$key] ?? 0.0) > $now) {
+			return;
+		}
+
+		self::$asyncThrottle[$key] = $now + $minInterval;
+		Server::getInstance()->getAsyncPool()->submitTask(new CheckAsyncTask(static::class, $playerName, $payload));
+	}
+
 	public function replaceText(PlayerAPI $player, string $text, string $reason = "", string $subType = "") : string {
 		return ReplaceText::replace($player, $text, $reason, $subType);
 	}
 
 	public function getPunishment() : string {
-		return strtolower(self::getData(self::CHECK . "." . strtolower($this->getName()) . ".punishment", "FLAG"));
+		return $this->punishmentCache ??= strtolower(self::getData(self::CHECK . "." . strtolower($this->getName()) . ".punishment", "FLAG"));
 	}
 
 	public function enable() : bool {
-		return self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable", false);
+		return $this->enabledCache ??= self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable", false);
 	}
 
 	public function maxViolations() : int {
-		return self::getData(self::CHECK . "." . strtolower($this->getName()) . ".pre-vl." . strtolower($this->getSubType()), false);
+		return $this->maxViolationsCache ??= self::getData(self::CHECK . "." . strtolower($this->getName()) . ".pre-vl." . strtolower($this->getSubType()), false);
 	}
 
 	public function getConstant(string $name) : mixed {
-		return self::getData(self::CHECK . "." . strtolower($this->getName()) . ".constants." . $name);
+		if (isset($this->constantCache[$name])) {
+			return $this->constantCache[$name];
+		}
+		return $this->constantCache[$name] = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".constants." . $name);
 	}
 
 	public function getAllSubTypes() : string {

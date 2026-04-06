@@ -35,6 +35,8 @@ use Exception;
 use Phar;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
+use ReflectionMethod;
+use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\checks\aimassist\AimAssistA;
 use ReinfyTeam\Zuri\checks\aimassist\AimAssistB;
 use ReinfyTeam\Zuri\checks\aimassist\AimAssistC;
@@ -122,6 +124,9 @@ class ZuriAC extends PluginBase {
 	private static ZuriAC $instance;
 
 	private array $checks = [];
+	private array $packetChecks = [];
+	private array $eventChecks = [];
+	private array $justEventChecks = [];
 
 	private const string MINIMUM_PHP_VERSION = "8.3.0";
 
@@ -175,6 +180,9 @@ class ZuriAC extends PluginBase {
 	public function loadChecks() : void {
 		if (!empty($this->checks)) {
 			$this->checks = [];
+			$this->packetChecks = [];
+			$this->eventChecks = [];
+			$this->justEventChecks = [];
 		}
 
 		if (ConfigManager::getData(ConfigPaths::NETWORK_LIMIT_ENABLE)) {
@@ -306,9 +314,51 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new EditionFakerB();
 
 		$this->checks[] = new ProxyBot(); // Improve in next versions..
+
+		$this->buildCheckBuckets();
+	}
+
+	private function buildCheckBuckets() : void {
+		$this->packetChecks = [];
+		$this->eventChecks = [];
+		$this->justEventChecks = [];
+
+		foreach ($this->checks as $check) {
+			if (!$check->enable()) {
+				continue;
+			}
+
+			if ($this->isMethodOverridden($check, "check")) {
+				$this->packetChecks[] = $check;
+			}
+
+			if ($this->isMethodOverridden($check, "checkEvent")) {
+				$this->eventChecks[] = $check;
+			}
+
+			if ($this->isMethodOverridden($check, "checkJustEvent")) {
+				$this->justEventChecks[] = $check;
+			}
+		}
+	}
+
+	private function isMethodOverridden(Check $check, string $method) : bool {
+		return (new ReflectionMethod($check, $method))->getDeclaringClass()->getName() !== Check::class;
 	}
 
 	public static function Checks() : array {
 		return ZuriAC::getInstance()->checks;
+	}
+
+	public static function PacketChecks() : array {
+		return ZuriAC::getInstance()->packetChecks;
+	}
+
+	public static function EventChecks() : array {
+		return ZuriAC::getInstance()->eventChecks;
+	}
+
+	public static function JustEventChecks() : array {
+		return ZuriAC::getInstance()->justEventChecks;
 	}
 }
