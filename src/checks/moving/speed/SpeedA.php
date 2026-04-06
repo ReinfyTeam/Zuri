@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving\speed;
 
-use ReinfyTeam\Zuri\cache\CacheData;
+use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\DataPacket;

@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets\regen;
 
-use ReinfyTeam\Zuri\cache\CacheData;
+use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\Event;

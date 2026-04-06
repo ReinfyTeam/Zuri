@@ -31,7 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockbreak;
 
-use ReinfyTeam\Zuri\cache\CacheData;
+use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\block\BlockBreakEvent;

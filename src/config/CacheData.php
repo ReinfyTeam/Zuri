@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\cache;
+namespace ReinfyTeam\Zuri\config;
 
 final class CacheData {
 	private function __construct() {
