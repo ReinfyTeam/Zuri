@@ -46,6 +46,7 @@ use ReinfyTeam\Zuri\checks\badpackets\FastDrop;
 use ReinfyTeam\Zuri\checks\badpackets\FastEat;
 use ReinfyTeam\Zuri\checks\badpackets\FastThrow;
 use ReinfyTeam\Zuri\checks\badpackets\ImpossiblePitch;
+use ReinfyTeam\Zuri\checks\badpackets\inputspoof\InputSpoofA;
 use ReinfyTeam\Zuri\checks\badpackets\InvalidPackets;
 use ReinfyTeam\Zuri\checks\badpackets\MessageSpoof;
 use ReinfyTeam\Zuri\checks\badpackets\regen\RegenA;
@@ -54,6 +55,7 @@ use ReinfyTeam\Zuri\checks\badpackets\SelfHit;
 use ReinfyTeam\Zuri\checks\badpackets\timer\TimerA;
 use ReinfyTeam\Zuri\checks\badpackets\timer\TimerB;
 use ReinfyTeam\Zuri\checks\badpackets\timer\TimerC;
+use ReinfyTeam\Zuri\checks\badpackets\timer\TimerD;
 use ReinfyTeam\Zuri\checks\blockbreak\InstaBreak;
 use ReinfyTeam\Zuri\checks\blockbreak\WrongMining;
 use ReinfyTeam\Zuri\checks\blockinteract\BlockReach;
@@ -62,6 +64,8 @@ use ReinfyTeam\Zuri\checks\blockplace\scaffold\ScaffoldA;
 use ReinfyTeam\Zuri\checks\blockplace\scaffold\ScaffoldB;
 use ReinfyTeam\Zuri\checks\blockplace\scaffold\ScaffoldC;
 use ReinfyTeam\Zuri\checks\blockplace\scaffold\ScaffoldD;
+use ReinfyTeam\Zuri\checks\blockplace\scaffold\ScaffoldE;
+use ReinfyTeam\Zuri\checks\blockplace\scaffold\ScaffoldF;
 use ReinfyTeam\Zuri\checks\blockplace\Tower;
 use ReinfyTeam\Zuri\checks\chat\SpamA;
 use ReinfyTeam\Zuri\checks\chat\SpamB;
@@ -79,6 +83,10 @@ use ReinfyTeam\Zuri\checks\combat\reach\ReachA;
 use ReinfyTeam\Zuri\checks\combat\reach\ReachB;
 use ReinfyTeam\Zuri\checks\combat\reach\ReachC;
 use ReinfyTeam\Zuri\checks\combat\reach\ReachD;
+use ReinfyTeam\Zuri\checks\combat\reach\ReachE;
+use ReinfyTeam\Zuri\checks\combat\rotation\RotationA;
+use ReinfyTeam\Zuri\checks\combat\rotation\RotationB;
+use ReinfyTeam\Zuri\checks\combat\velocity\VelocityA;
 use ReinfyTeam\Zuri\checks\fly\FlyA;
 use ReinfyTeam\Zuri\checks\fly\FlyB;
 use ReinfyTeam\Zuri\checks\fly\FlyC;
@@ -94,6 +102,7 @@ use ReinfyTeam\Zuri\checks\moving\ClickTP;
 use ReinfyTeam\Zuri\checks\moving\FakeGlide;
 use ReinfyTeam\Zuri\checks\moving\FastLadder;
 use ReinfyTeam\Zuri\checks\moving\Jesus;
+use ReinfyTeam\Zuri\checks\moving\noslow\NoSlowA;
 use ReinfyTeam\Zuri\checks\moving\OmniSprint;
 use ReinfyTeam\Zuri\checks\moving\Phase;
 use ReinfyTeam\Zuri\checks\moving\speed\SpeedA;
@@ -221,9 +230,12 @@ class ZuriAC extends PluginBase {
 
 		$this->checks[] = new InvalidPackets();
 
+		$this->checks[] = new InputSpoofA();
+
 		$this->checks[] = new TimerA();
 		$this->checks[] = new TimerB();
 		$this->checks[] = new TimerC();
+		$this->checks[] = new TimerD();
 
 		$this->checks[] = new RegenA();
 		$this->checks[] = new RegenB();
@@ -245,6 +257,8 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new ScaffoldB();
 		$this->checks[] = new ScaffoldC();
 		$this->checks[] = new ScaffoldD();
+		$this->checks[] = new ScaffoldE();
+		$this->checks[] = new ScaffoldF();
 
 		// Chat
 		$this->checks[] = new SpamA();
@@ -255,6 +269,10 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new ReachB(); // Improve in next versions..
 		$this->checks[] = new ReachC(); // Improve in next versions..
 		$this->checks[] = new ReachD(); // Improve in next versions..
+		$this->checks[] = new ReachE();
+
+		$this->checks[] = new RotationA();
+		$this->checks[] = new RotationB();
 
 		$this->checks[] = new AutoClickA(); // Improve in next versions..
 		$this->checks[] = new AutoClickB(); // Improve in next versions..
@@ -267,6 +285,8 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new KillAuraE();
 
 		$this->checks[] = new ImposibleHit();
+
+		$this->checks[] = new VelocityA();
 
 		$this->checks[] = new FastBow();
 
@@ -298,6 +318,8 @@ class ZuriAC extends PluginBase {
 		$this->checks[] = new Step();
 
 		$this->checks[] = new OmniSprint(); // Improve in next versions..
+
+		$this->checks[] = new NoSlowA();
 
 		$this->checks[] = new Jesus();
 

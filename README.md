@@ -71,6 +71,8 @@ Every module below is grouped by the type of behavior it watches so server owner
    - **A:** Check if the player pitch is valid.
 - **InvalidPackets**
    - **A:** Check the packet consistency is balance against the auth input and move event.
+- **InputSpoof**
+   - **A:** Detect invalid or spoofed movement vector values in PlayerAuthInput packets.
 - **MessageSpoof**
    - **A:** Checks if the message exceeds the minecraft chat limit.
 - **SelfHit**
@@ -82,6 +84,7 @@ Every module below is grouped by the type of behavior it watches so server owner
    - **A:** Check the packet time consistency if it is balanced.
    - **B:** Check the ticks between packet is balanced.
    - **C:** Check MovePlayerPacket is stable or has delay with PlayerAuthInputPacket.
+   - **D:** Correlate auth-input ticks and real-time drift to detect sustained timer acceleration patterns.
 - **Instabreak** 
    - **A:** Check the block break information and calculate the possible expected time to break the block.
 - **WrongMining**
@@ -99,6 +102,8 @@ Every module below is grouped by the type of behavior it watches so server owner
    - **A:** Check ticks consistency of the bow and calculate the time difference of the last shoot.
 - **ImpossibleHit**
     - **A:** Check if the player has any opening chest or eating a food while hitting the entity.
+- **Velocity** (BETA)
+   - **A:** Detect suspicious anti-knockback style movement after recent combat hits.
 - **Autoclick**
     - **A:** Check the average speed of ticks clicked and calculate the average deviation.
     - **B:** Check the last ticks clicked per hit.
@@ -109,10 +114,15 @@ Every module below is grouped by the type of behavior it watches so server owner
     - **C:** Check multiple entities were in combat by player has a valid distance to attack the another entity.
     - **D:** Check player if it is actually hand has swingging animation or not.
     - **E:** Checks the range of the entities if it is valid.
+- **Rotation** (BETA)
+   - **A:** Detect repeated fixed-step combat rotation patterns commonly used by aim-assist style clients.
+   - **B:** Detect repeated combat yaw snap patterns with near-locked pitch changes.
 - **Reach**
     - **A:** Check distance between the player, check also if the player is in top.
     - **B:** Check distance squared between the player. Check also gamemode for possible reach distance.
     - **C:** Check eye height and cuboid if it is actually hitting the player legitable.
+    - **D:** Correlate eye-to-eye distance with sprint and ping compensation, with optional async evaluation.
+    - **E:** Detect out-of-bounds eye-to-hitbox edge reach with stability and ping gating.
 - **Fly**
     - **A:** Check if the player is moving the air upwards.
     - **B:** Check bad packet flags exploit affects the fly ability.
@@ -141,6 +151,8 @@ Every module below is grouped by the type of behavior it watches so server owner
      - **A:** Check the player is walking through water.
 - **Omnisprint** (DISABLED)
      - **A:** Check keys input by the player.
+- **NoSlow** (BETA)
+   - **A:** Detect abnormal movement speed while using consumables, bows, and similar slowdown states.
 - **Phase**
      - **A:** Check if the player stucks at the block, teleport when to a safe place.
 - **Speed**
@@ -163,6 +175,8 @@ Every module below is grouped by the type of behavior it watches so server owner
      - **B:** Check pitch if it is valid when placing blocks.
      - **C:** Check pitch if it is valid and the block distance is valid.
      - **D:** Check if the hand item is null while placing blocks.
+   - **E:** Detect fast expansion bridging patterns with abnormal player-to-block and sequential block distances.
+   - **F:** Detect fast block expansion where block advancement exceeds player movement progression.
 - **Tower** (BETA)
      - **A:** Check if the player moving upwards straight while placing blocks check if the player is actually placing the block downwards.
 - **NetworkLimit** (BETA)

@@ -129,6 +129,27 @@ zuri:
                   diff-time: 2
                   animation-diff-time: 2
                   animation-ticks: 15
+        rotation:
+            enable: true
+            maxvl: 1
+            pre-vl:
+                a: 4
+                b: 4
+            punishment: KICK
+            constants:
+                  combat-window-ticks: 20
+                  min-delta-yaw: 1.2
+                  max-delta-yaw: 45.0
+                  min-delta-pitch: 0.15
+                  max-delta-pitch: 25.0
+                  yaw-step-epsilon: 0.04
+                  pitch-step-epsilon: 0.04
+                  buffer-limit: 5
+                  snap-min-delta-yaw: 3.25
+                  snap-max-delta-pitch: 0.35
+                  snap-repeat-epsilon: 0.08
+                  snap-buffer-limit: 6
+                  max-ping: 200
         antiimmobile:
             enable: true
             maxvl: 1
@@ -191,6 +212,8 @@ zuri:
                 b: 10
                 c: 10
                 d: 1
+                e: 2
+                f: 2
             punishment: BAN
             constants:
                   box-range-x: 1.0
@@ -199,6 +222,17 @@ zuri:
                   suspecious-pitch-limit: 45
                   max-place-distance: 1.25
                   limit-place-ticks: 20
+                  max-horizontal-distance-squared: 5.0
+                  max-sequential-distance: 1.9
+                  max-place-interval: 0.25
+                  expansion-buffer-limit: 3
+                  expansion-max-ping: 200
+                  ghost-max-place-interval: 0.2
+                  ghost-min-block-step: 1.35
+                  ghost-max-player-step-squared: 0.05
+                  ghost-min-player-block-distance-squared: 2.1
+                  ghost-buffer-limit: 3
+                  ghost-max-ping: 200
         inventorycleaner:
             enable: true
             pre-vl:
@@ -302,6 +336,7 @@ zuri:
                 b: 3
                 c: 3
                 d: 3
+                e: 3
             punishment: KICK
             constants:
                   # When true, Reach (D) is evaluated in the LibVapmPMMP worker instead of the main tick path.
@@ -318,6 +353,12 @@ zuri:
                  damager-sprinting-eye-distance: 0.77
                  not-sprinting-damager-eye-distance: 0.67
                  reach-eye-limit: 3.0
+                 edge-reach-limit: 3.15
+                 edge-ping-compensation: 0.0015
+                 edge-buffer-limit: 3
+                 edge-max-ping: 220
+                 edge-min-teleport-ticks: 20
+                 edge-min-stability-ticks: 20
         fly:
             enable: true
             maxvl: 1
@@ -349,6 +390,16 @@ zuri:
             punishment: KICK
             constants:
                  max-speed: 0.3
+        noslow: # BETA: Detects abnormal speed while using consumables, bows, and similar items.
+            enable: true
+            maxvl: 1
+            pre-vl:
+                a: 4
+            punishment: KICK
+            constants:
+                 max-xz-distance-squared: 0.095
+                 buffer-limit: 4
+                 max-ping: 200
         chestaura: 
             enable: true
             maxvl: 1
@@ -405,10 +456,16 @@ zuri:
                 a: 3
                 b: 3
                 c: 5
+                d: 4
             punishment: KICK
             constants:
                  max-diff: 10
                  diff-balance: -5
+                 drift-expected-ms-per-tick: 50
+                 drift-max-tick-jump: 4
+                 drift-max-negative: 28
+                 drift-warmup-samples: 6
+                 drift-buffer-limit: 3
         fasteat: 
             enable: true
             maxvl: 1
@@ -437,6 +494,18 @@ zuri:
             pre-vl:
                 a: 1
             punishment: KICK
+        velocity: # BETA: Detects anti-knockback style behavior after recent combat hits.
+            enable: true
+            maxvl: 1
+            pre-vl:
+                a: 3
+            punishment: KICK
+            constants:
+                  min-response-distance-squared: 0.003
+                  start-observe-ticks: 1
+                  max-observe-ticks: 8
+                  buffer-limit: 3
+                  max-ping: 200
         clicktp: # Todo: Improve in next versions. False-positive in laggy players...
             enable: false
             maxvl: 1
@@ -491,6 +560,15 @@ zuri:
             punishment: KICK
             constants:
                   max-packet-speed: 2
+        inputspoof:
+            enable: true
+            maxvl: 1
+            pre-vl:
+                a: 1
+            punishment: KICK
+            constants:
+                  max-axis: 1.2
+                  max-vector-length: 1.6
         regen: # Todo: Improve in next versions, some false-positive in certain heal events...
             enable: false
             maxvl: 1
