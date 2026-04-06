@@ -15,11 +15,11 @@ use function fmod;
 use function max;
 
 class RotationA extends Check {
-	private const LAST_YAW = CacheData::ROTATION_A_LAST_YAW;
-	private const LAST_PITCH = CacheData::ROTATION_A_LAST_PITCH;
-	private const LAST_DELTA_YAW = CacheData::ROTATION_A_LAST_DELTA_YAW;
-	private const LAST_DELTA_PITCH = CacheData::ROTATION_A_LAST_DELTA_PITCH;
-	private const BUFFER = CacheData::ROTATION_A_BUFFER;
+	private const string LAST_YAW = CacheData::ROTATION_A_LAST_YAW;
+	private const string LAST_PITCH = CacheData::ROTATION_A_LAST_PITCH;
+	private const string LAST_DELTA_YAW = CacheData::ROTATION_A_LAST_DELTA_YAW;
+	private const string LAST_DELTA_PITCH = CacheData::ROTATION_A_LAST_DELTA_PITCH;
+	private const string BUFFER = CacheData::ROTATION_A_BUFFER;
 
 	public function getName() : string {
 		return "Rotation";

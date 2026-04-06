@@ -51,7 +51,7 @@ class AirMovement extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$effects = [];
 		$player = $playerAPI->getPlayer();
-		if (!$player->spawned && !$player->isConnected()) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		} // Effect::$effectInstance bug fix
 		foreach ($player->getEffects()->all() as $effect) {

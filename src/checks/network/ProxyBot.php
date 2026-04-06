@@ -36,6 +36,7 @@ use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\utils\Internet;
 use ReinfyTeam\Zuri\checks\Check;
 use function json_decode;
+use function strtolower;
 
 class ProxyBot extends Check {
 	public function getName() : string {
@@ -49,14 +50,14 @@ class ProxyBot extends Check {
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof PlayerPreLoginEvent) {
 			$ip = $event->getIp();
-			$err = $ip;
-			$request = Internet::getUrl("https://proxycheck.io/v2/" . $ip, 10, ["Content-Type: application/json"], $err);
+			$err = null;
+			$request = Internet::getUrl("https://proxycheck.io/v2/" . $ip, 5, ["Content-Type: application/json"], $err);
 
-			if ( $err === null ) {
+			if ($request !== null && $err === null) {
 				$data = json_decode($request->getBody(), true, 16, JSON_PARTIAL_OUTPUT_ON_ERROR);
 
 				if (($data["status"] ?? null) !== "error" && isset($data[$ip])) {
-					$proxy = ($result[$ip]["proxy"] ?? null) === "yes";
+					$proxy = strtolower((string) ($data[$ip]["proxy"] ?? "no")) === "yes";
 					if ($proxy) {
 						$this->warn($event->getPlayerInfo()->getUsername());
 						$event->setKickFlag(0, self::getData(self::ANTIBOT_MESSAGE));

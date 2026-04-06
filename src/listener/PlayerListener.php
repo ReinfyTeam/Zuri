@@ -80,7 +80,7 @@ class PlayerListener implements Listener {
 	private array $blockInteracted = [];
 	private array $clicksData = [];
 
-	const int DELTAL_TIME_CLICK = 1;
+	private const int DELTAL_TIME_CLICK = 1;
 
 	public function onDataPacketReceive(DataPacketReceiveEvent $event) : void {
 		$packet = $event->getPacket();
@@ -202,6 +202,7 @@ class PlayerListener implements Listener {
 			$key = $this->getPlayerKey($player);
 			if (isset($this->blockInteracted[$key])) {
 				$blockInteracted = $this->blockInteracted[$key];
+			}
 			$xI = $blockInteracted->getPosition()->getX();
 			$zI = $blockInteracted->getPosition()->getZ();
 			if ((int) $x != (int) $xI && (int) $z != (int) $zI) {
@@ -235,6 +236,7 @@ class PlayerListener implements Listener {
 			$key = $this->getPlayerKey($player);
 			if (isset($this->blockInteracted[$key])) {
 				$blockInteracted = $this->blockInteracted[$key];
+			}
 			$xI = $blockInteracted->getPosition()->getX();
 			$zI = $blockInteracted->getPosition()->getZ();
 			if ((int) $x != (int) $xI && (int) $z != (int) $zI) {
@@ -254,7 +256,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		}
 		if ($event->isCancelled()) {
@@ -270,7 +272,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		}
 		if ($event->isCancelled()) {
@@ -311,15 +313,14 @@ class PlayerListener implements Listener {
 	}
 
 	public function onEntityTeleport(EntityTeleportEvent $event) : void {
-		if (($entity = $event->getEntity()) instanceof Player) {
+		$entity = $event->getEntity();
+		if (!$entity instanceof Player) {
 			return;
 		}
 
-		if (($playerAPI = PlayerAPI::getAPIPlayer($entity)) === null) {
-			return;
-		}
+		$playerAPI = PlayerAPI::getAPIPlayer($entity);
 
-		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
+		if (!$playerAPI->getPlayer()->isConnected() || !$playerAPI->getPlayer()->isOnline()) {
 			return;
 		}
 
@@ -336,7 +337,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		}
 		$playerAPI->setJumpTicks(microtime(true));
@@ -349,7 +350,7 @@ class PlayerListener implements Listener {
 	public function onPlayerJoin(PlayerJoinEvent $event) : void {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		}
 		if ($playerAPI->getPlayer() === null) {
@@ -401,7 +402,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
+		if (!$playerAPI->getPlayer()->isConnected() || !$playerAPI->getPlayer()->isOnline()) {
 			return;
 		}
 		if ($event->isCancelled()) {
@@ -449,7 +450,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		}
 		if ($event->isCancelled()) {
@@ -464,7 +465,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		}
 		if ($playerAPI->isCaptcha()) {
@@ -482,7 +483,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		}
 		if ($event->isCancelled()) {
@@ -500,7 +501,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		}
 		if ($event->isCancelled()) {
@@ -518,7 +519,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$playerAPI->getPlayer()->isConnected() && !$playerAPI->getPlayer()->spawned) {
+		if (!$playerAPI->getPlayer()->isConnected() || !$playerAPI->getPlayer()->isOnline()) {
 			return;
 		}
 		if ($event->isCancelled()) {
@@ -536,7 +537,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		}
 		if ($event->isCancelled()) {
@@ -552,7 +553,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		}
 		if ($event->isCancelled()) {
@@ -568,7 +569,7 @@ class PlayerListener implements Listener {
 		if ($playerAPI->getPlayer() === null) {
 			return;
 		}
-		if (!$player->isConnected() && !$player->spawned) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		}
 		if ($event->isCancelled()) {
@@ -593,7 +594,7 @@ class PlayerListener implements Listener {
 	}
 
 	private function checkEvent(Event $event, PlayerAPI $player) : void {
-		if (($p = $player->getPlayer()) === null || !$p->isOnline() || !$p->spawned) {
+		if (($p = $player->getPlayer()) === null || !$p->isOnline() || !$p->isConnected()) {
 			return;
 		}
 
@@ -603,7 +604,7 @@ class PlayerListener implements Listener {
 	}
 
 	private function check(DataPacket $packet, PlayerAPI $player) : void {
-		if (($p = $player->getPlayer()) === null || !$p->isOnline() || !$p->spawned) {
+		if (($p = $player->getPlayer()) === null || !$p->isOnline() || !$p->isConnected()) {
 			return;
 		}
 
@@ -628,7 +629,7 @@ class PlayerListener implements Listener {
 	}
 
 	private function isPlayerReady(Player $player) : bool {
-		return $player->isConnected() || $player->spawned;
+		return $player->isConnected() && $player->isOnline();
 	}
 
 	private function getPlayerKey(Player $player) : string {

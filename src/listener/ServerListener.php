@@ -52,7 +52,10 @@ use ReinfyTeam\Zuri\utils\discord\Discord;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function count;
 use function explode;
+use function ltrim;
+use function strtolower;
 use function str_contains;
+use function trim;
 
 class ServerListener implements Listener {
 	private array $ip = [];
@@ -63,9 +66,15 @@ class ServerListener implements Listener {
 	 * @See PlayerTeleportByCommandEvent::class for more details.
 	 */
 	public function onCommandEvent(CommandEvent $event) : void {
-		$commandArguments = explode(" ", $event->getCommand());
+		$rawCommand = trim($event->getCommand());
+		if ($rawCommand === "") {
+			return;
+		}
+
+		$commandArguments = explode(" ", $rawCommand);
+		$commandName = strtolower(ltrim($commandArguments[0] ?? "", "/"));
 		$commandSender = $event->getSender();
-		if (count($commandArguments) !== 0 && ($commandArguments[0] === "teleport" || $commandArguments[0] === "tp")) {
+		if (count($commandArguments) !== 0 && ($commandName === "teleport" || $commandName === "tp")) {
 			if (isset($commandArguments[1]) && str_contains($commandArguments[1], "~") && $commandSender instanceof Player) {
 				(new PlayerTeleportByCommandEvent($commandSender))->call();
 				return;

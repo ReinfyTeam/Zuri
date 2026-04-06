@@ -51,10 +51,9 @@ class AutoArmor extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($playerAPI->isInventoryOpen() && $playerAPI->isTransactionArmorInventory()) {
+		if ($playerAPI->isTransactionArmorInventory() && !$playerAPI->isInventoryOpen()) {
 			$this->failed($playerAPI);
-		} else {
-			$playerAPI->setTransactionArmorInventory(false);
 		}
+		$playerAPI->setTransactionArmorInventory(false);
 	}
 }

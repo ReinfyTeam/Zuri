@@ -17,10 +17,10 @@ use function max;
 use function microtime;
 
 class ScaffoldF extends Check {
-	private const BUFFER_KEY = CacheData::SCAFFOLD_F_BUFFER;
-	private const LAST_PLACE_AT_KEY = CacheData::SCAFFOLD_F_LAST_PLACE_AT;
-	private const LAST_BLOCK_KEY = CacheData::SCAFFOLD_F_LAST_BLOCK;
-	private const LAST_PLAYER_KEY = CacheData::SCAFFOLD_F_LAST_PLAYER;
+	private const string BUFFER_KEY = CacheData::SCAFFOLD_F_BUFFER;
+	private const string LAST_PLACE_AT_KEY = CacheData::SCAFFOLD_F_LAST_PLACE_AT;
+	private const string LAST_BLOCK_KEY = CacheData::SCAFFOLD_F_LAST_BLOCK;
+	private const string LAST_PLAYER_KEY = CacheData::SCAFFOLD_F_LAST_PLAYER;
 
 	public function getName() : string {
 		return "Scaffold";

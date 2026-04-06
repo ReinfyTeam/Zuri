@@ -37,10 +37,10 @@ use pocketmine\event\inventory\InventoryCloseEvent;
 use pocketmine\event\inventory\InventoryOpenEvent;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\inventory\PlayerCraftingInventory;
-use pocketmine\inventory\PlayerInventory;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function max;
 use function microtime;
 
 class ChestAura extends Check {
@@ -56,35 +56,35 @@ class ChestAura extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-		$countTransaction = $playerAPI->getExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION);
-		$timeOpenChest = $playerAPI->getExternalData(CacheData::CHESTAURA_TIME_OPEN_CHEST);
 		if ($event instanceof InventoryOpenEvent) {
-			if ($timeOpenChest === null && !($event->getInventory() instanceof PlayerCraftingInventory)) {
+			if (!($event->getInventory() instanceof PlayerCraftingInventory)) {
 				$playerAPI->setExternalData(CacheData::CHESTAURA_TIME_OPEN_CHEST, microtime(true));
+				$playerAPI->setExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION, 0);
 			}
-			$this->debug($playerAPI, "countTransaction=$countTransaction, timeOpenChest=$timeOpenChest");
+			return;
 		}
+
+		$timeOpenChest = $playerAPI->getExternalData(CacheData::CHESTAURA_TIME_OPEN_CHEST);
+		$countTransaction = (int) $playerAPI->getExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION, 0);
+
 		if ($event instanceof InventoryCloseEvent) {
-			if ($timeOpenChest !== null && $countTransaction !== null) {
-				$timeDiff = microtime(true) - $timeOpenChest;
-				if ($timeDiff < $countTransaction / $this->getConstant("transaction-divisible")) {
+			if ($timeOpenChest !== null) {
+				$timeDiff = microtime(true) - (float) $timeOpenChest;
+				$rate = $countTransaction / max(0.001, $timeDiff);
+				$this->debug($playerAPI, "timeDiff={$timeDiff}, count={$countTransaction}, rate={$rate}");
+				if ($countTransaction >= 6 && $rate > (float) $this->getConstant("transaction-divisible")) {
 					$this->failed($playerAPI);
 				}
-				$playerAPI->unsetExternalData(CacheData::CHESTAURA_TIME_OPEN_CHEST);
-				$playerAPI->unsetExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION);
-				$this->debug($playerAPI, "timediff=$timeDiff");
 			}
+			$playerAPI->unsetExternalData(CacheData::CHESTAURA_TIME_OPEN_CHEST);
+			$playerAPI->unsetExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION);
+			return;
 		}
+
 		if ($event instanceof InventoryTransactionEvent) {
-			$transaction = $event->getTransaction();
-			foreach ($transaction->getInventories() as $inventory) {
-				if ($inventory instanceof PlayerInventory) {
-					if ($countTransaction !== null && $timeOpenChest !== null) {
-						$playerAPI->setExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION, $countTransaction + 1);
-					} else {
-						$playerAPI->setExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION, 0);
-					}
-				}
+			if ($timeOpenChest !== null) {
+				$playerAPI->setExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION, $countTransaction + 1);
+				$this->debug($playerAPI, "count=" . ($countTransaction + 1));
 			}
 		}
 	}

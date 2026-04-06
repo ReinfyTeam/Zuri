@@ -57,7 +57,7 @@ class AirJump extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		$effects = [];
 		$player = $playerAPI->getPlayer();
-		if (!$player->spawned && !$player->isConnected()) {
+		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		} // Effect::$effectInstance bug fix
 		if ($event instanceof PlayerMoveEvent) {

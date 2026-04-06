@@ -41,6 +41,7 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function ceil;
 use function floor;
+use function max;
 use function microtime;
 
 class InstaBreak extends Check {
@@ -65,16 +66,11 @@ class InstaBreak extends Check {
 					$event->cancel();
 					return;
 				}
-				if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
+				if (!$playerAPI->getPlayer()->isConnected() || !$playerAPI->getPlayer()->isOnline()) {
 					return;
 				}
 				$target = $event->getBlock();
-
-				// pocketmine seems to not compensate for bamboo break time
-				// we'll ignore this so long.
-				if ($target->getTypeId() === BlockTypeIds::BAMBOO) {
-					return;
-				}
+				$isBamboo = $target->getTypeId() === BlockTypeIds::BAMBOO;
 
 				$item = $event->getItem();
 				$expectedTime = ceil($target->getBreakInfo()->getBreakTime($item) * 20);
@@ -85,6 +81,9 @@ class InstaBreak extends Check {
 					$expectedTime *= 1 + (0.3 * $miningFatigue->getEffectLevel());
 				}
 				$expectedTime -= 1;
+				if ($isBamboo) {
+					$expectedTime = max(2, $expectedTime - 2);
+				}
 				$actualTime = ceil(microtime(true) * 20) - $breakTimes;
 				if ($actualTime < $expectedTime) {
 					$this->failed($playerAPI);

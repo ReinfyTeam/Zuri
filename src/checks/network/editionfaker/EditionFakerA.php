@@ -36,6 +36,9 @@ use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use ReinfyTeam\Zuri\checks\Check;
 use function in_array;
+use function str_contains;
+use function strlen;
+use function strtolower;
 use function strtoupper;
 
 class EditionFakerA extends Check {
@@ -71,24 +74,46 @@ class EditionFakerA extends Check {
 			$playerInfo = $event->getPlayerInfo();
 			$extraData = $playerInfo->getExtraData();
 			$nickname = $playerInfo->getUsername();
+			$deviceOs = $extraData["DeviceOS"] ?? null;
+			$deviceModel = (string) ($extraData["DeviceModel"] ?? "");
+			$deviceId = (string) ($extraData["DeviceId"] ?? "");
+			$thirdPartyName = strtolower((string) ($extraData["ThirdPartyName"] ?? ""));
 
-			if (!(in_array($extraData["DeviceOS"], self::DEVICE_OS_LIST, true))) {
+			if (!in_array($deviceOs, self::DEVICE_OS_LIST, true)) {
 				$this->warn($nickname);
 				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
 				return;
 			}
 
-			if (!(in_array($extraData["DeviceOS"], self::NULL_MODELS, true)) && $extraData["DeviceModel"] === "") {
+			if (!in_array($deviceOs, self::NULL_MODELS, true) && $deviceModel === "") {
 				$this->warn($nickname);
 				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
 				return;
 			}
 
-			if ($extraData["DeviceOS"] === DeviceOS::IOS) {
+			if (strlen($deviceId) < 8) {
 				$this->warn($nickname);
-				if ($extraData["DeviceId"] !== strtoupper($extraData["DeviceId"])) {
+				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
+				return;
+			}
+
+			if (str_contains($thirdPartyName, "lunar") && $deviceOs !== DeviceOS::WINDOWS_10 && $deviceOs !== DeviceOS::WIN32) {
+				$this->warn($nickname);
+				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
+				return;
+			}
+
+			if ($deviceOs === DeviceOS::IOS) {
+				if ($deviceId !== strtoupper($deviceId)) {
+					$this->warn($nickname);
 					$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
+					return;
 				}
+			}
+
+			if (str_contains(strtolower($deviceModel), "lunar") && $deviceOs !== DeviceOS::WINDOWS_10 && $deviceOs !== DeviceOS::WIN32) {
+				$this->warn($nickname);
+				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
 			}
 		}
 	}

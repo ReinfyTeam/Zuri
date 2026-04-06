@@ -74,6 +74,7 @@ class PlayerAPI implements IPlayerAPI {
 	private bool $onSnow = false;
 	private bool $sniffing = false;
 	private bool $inLiquid = false;
+	private bool $onGround = false;
 	private bool $onStairs = false;
 	private bool $onIce = false;
 	private bool $debug = false;
@@ -93,6 +94,7 @@ class PlayerAPI implements IPlayerAPI {
 	private float $projectileAttackTicks = 0.0;
 	private float $lastMoveTick = 0.0;
 	private float $teleportCommandTicks = 0.0;
+	private float $eventCancelled = 0.0;
 	private int $cps = 0;
 	private int $blocksBrokeASec = 0;
 	private int $blocksPlacedASec = 0;
@@ -105,7 +107,7 @@ class PlayerAPI implements IPlayerAPI {
 	private string $captchaCode = "nocode";
 
 	public function __construct(private readonly Player $player) {
-		// no-op
+		$this->onGround = $player->isOnGround();
 	}
 
 	public function getPlayer() : Player {
@@ -334,17 +336,11 @@ class PlayerAPI implements IPlayerAPI {
 
 	//On ground
 	public function isOnGround() : bool {
-		if ($this->getPlayer() === null) {
-			return false;
-		}
-		return $this->getPlayer()->onGround;
+		return $this->onGround;
 	}
 
 	public function setOnGround(bool $data) : void {
-		if ($this->getPlayer() === null) {
-			return;
-		}
-		$this->getPlayer()->onGround = $data;
+		$this->onGround = $data;
 	}
 
 	//Sniffing
@@ -493,9 +489,9 @@ class PlayerAPI implements IPlayerAPI {
 
 	//Ping
 	public function getPing() : float {
-		if (!$this->getPlayer()->isConnected() && !$this->getPlayer()->spawned) {
+		if (!$this->getPlayer()->isConnected() || !$this->getPlayer()->isOnline()) {
 			return 0.0;
-		} // always check first if player is currently connected before initilizing the main ping. This fixes the player if it is currently connected and ping has been initilized as well. Also, checking first player if its spawn is necessary to do checking after player is spawned as well.
+		} // always check first if player is currently connected before initilizing the main ping. This fixes the player if it is currently connected and ping has been initilized as well.
 
 		return $this->getPlayer()->getNetworkSession()->getPing() === null ? 0.0 : $this->getPlayer()->getNetworkSession()->getPing(); // TODO: 0.0 frrr ping?
 	}

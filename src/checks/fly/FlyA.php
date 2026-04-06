@@ -33,10 +33,12 @@ namespace ReinfyTeam\Zuri\checks\fly;
 
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function abs;
 use function microtime;
 
 class FlyA extends Check {
@@ -52,12 +54,19 @@ class FlyA extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
+		if (!$packet instanceof PlayerAuthInputPacket) {
+			return;
+		}
+
 		$player = $playerAPI->getPlayer();
 		$this->dispatchAsyncCheck($player->getName(), [
 			"type" => "FlyA",
 			"attackTicks" => $playerAPI->getAttackTicks(),
 			"onlineTime" => $playerAPI->getOnlineTime(),
 			"jumpTicks" => $playerAPI->getJumpTicks(),
+			"teleportTicks" => $playerAPI->getTeleportTicks(),
+			"teleportCommandTicks" => $playerAPI->getTeleportCommandTicks(),
+			"hurtTicks" => $playerAPI->getHurtTicks(),
 			"inWeb" => $playerAPI->isInWeb(),
 			"onGround" => $playerAPI->isOnGround(),
 			"onAdhesion" => $playerAPI->isOnAdhesion(),
@@ -68,7 +77,7 @@ class FlyA extends Check {
 			"groundSolid" => BlockUtil::isGroundSolid($player),
 			"gliding" => $playerAPI->isGliding(),
 			"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
-			"currentY" => (int) $player->getLocation()->getY(),
+			"currentY" => (float) $player->getLocation()->getY(),
 			"lastYNoGround" => $playerAPI->getExternalData(CacheData::FLY_A_LAST_Y_NO_GROUND),
 			"lastTime" => $playerAPI->getExternalData(CacheData::FLY_A_LAST_TIME),
 			"now" => microtime(true),
@@ -85,6 +94,9 @@ class FlyA extends Check {
 			(int) ($payload["attackTicks"] ?? 0) < 40 ||
 			(float) ($payload["onlineTime"] ?? 0) <= 30 ||
 			(int) ($payload["jumpTicks"] ?? 0) < 40 ||
+			(int) ($payload["teleportTicks"] ?? 0) < 60 ||
+			(int) ($payload["teleportCommandTicks"] ?? 0) < 60 ||
+			(int) ($payload["hurtTicks"] ?? 0) < 20 ||
 			(bool) ($payload["inWeb"] ?? false) ||
 			(bool) ($payload["onGround"] ?? false) ||
 			(bool) ($payload["onAdhesion"] ?? false) ||
@@ -104,13 +116,14 @@ class FlyA extends Check {
 		if ($lastYNoGround !== null && $lastTime !== null) {
 			$diff = (float) ($payload["now"] ?? microtime(true)) - (float) $lastTime;
 			$result = ["debug" => "diff={$diff}, lastTime={$lastTime}, lastYNoGround={$lastYNoGround}"];
-			if ($diff > (float) ($payload["maxGroundDiff"] ?? 0.0) && (int) ($payload["currentY"] ?? 0) === (int) $lastYNoGround) {
+			$currentY = (float) ($payload["currentY"] ?? 0.0);
+			if ($diff > (float) ($payload["maxGroundDiff"] ?? 0.0) && abs($currentY - (float) $lastYNoGround) <= 0.001) {
 				$result["failed"] = true;
 			}
 			$result["unset"] = [CacheData::FLY_A_LAST_Y_NO_GROUND, CacheData::FLY_A_LAST_TIME];
 			return $result;
 		}
 
-		return ["set" => [CacheData::FLY_A_LAST_Y_NO_GROUND => (int) ($payload["currentY"] ?? 0), CacheData::FLY_A_LAST_TIME => (float) ($payload["now"] ?? microtime(true))]];
+		return ["set" => [CacheData::FLY_A_LAST_Y_NO_GROUND => (float) ($payload["currentY"] ?? 0.0), CacheData::FLY_A_LAST_TIME => (float) ($payload["now"] ?? microtime(true))]];
 	}
 }

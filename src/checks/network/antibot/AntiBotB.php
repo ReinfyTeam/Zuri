@@ -37,10 +37,22 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function explode;
-use function strtoupper;
+use function str_contains;
+use function strtolower;
 
 class AntiBotB extends Check {
+	private const array SUSPICIOUS_CLIENT_SIGNATURES = [
+		"toolbox",
+		"horion",
+		"zephyr",
+		"fate",
+		"cheat",
+		"modmenu",
+		"mod menu",
+		"inject",
+		"hacked",
+	];
+
 	public function getName() : string {
 		return "AntiBot";
 	}
@@ -52,11 +64,22 @@ class AntiBotB extends Check {
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof PlayerPreLoginEvent) {
 			$extraData = $event->getPlayerInfo()->getExtraData();
-			if ($extraData["DeviceOS"] === DeviceOS::ANDROID) {
-				$model = explode(" ", $extraData["DeviceModel"], 2)[0];
-				if ($model !== strtoupper($model) && $model !== "") {
+			if (($extraData["DeviceOS"] ?? null) === DeviceOS::ANDROID) {
+				$model = strtolower((string) ($extraData["DeviceModel"] ?? ""));
+				$thirdParty = strtolower((string) ($extraData["ThirdPartyName"] ?? ""));
+
+				foreach (self::SUSPICIOUS_CLIENT_SIGNATURES as $signature) {
+					if (str_contains($model, $signature) || str_contains($thirdParty, $signature)) {
+						$this->warn($event->getPlayerInfo()->getUsername());
+						$event->setKickFlag(0, self::getData(self::ANTIBOT_MESSAGE));
+						return;
+					}
+				}
+
+				if (str_contains($thirdParty, "lunar") && ($extraData["DeviceOS"] ?? null) !== DeviceOS::WINDOWS_10 && ($extraData["DeviceOS"] ?? null) !== DeviceOS::WIN32) {
 					$this->warn($event->getPlayerInfo()->getUsername());
 					$event->setKickFlag(0, self::getData(self::ANTIBOT_MESSAGE));
+					return;
 				}
 			}
 		}

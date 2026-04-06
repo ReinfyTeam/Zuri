@@ -35,8 +35,10 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use ReinfyTeam\Zuri\checks\Check;
-use function explode;
-use function strtoupper;
+use function is_string;
+use function preg_match;
+use function strlen;
+use function trim;
 
 class AntiBotA extends Check {
 	public function getName() : string {
@@ -50,9 +52,10 @@ class AntiBotA extends Check {
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof PlayerPreLoginEvent) {
 			$extraData = $event->getPlayerInfo()->getExtraData();
-			if ($extraData["DeviceOS"] === DeviceOS::ANDROID) {
-				$model = explode(" ", $extraData["DeviceModel"], 2)[0];
-				if ($model !== strtoupper($model) && $model !== "") {
+			if (($extraData["DeviceOS"] ?? null) === DeviceOS::ANDROID) {
+				$model = trim((string) ($extraData["DeviceModel"] ?? ""));
+				$deviceId = (string) ($extraData["DeviceId"] ?? "");
+				if ($model === "" || strlen($deviceId) < 8 || !is_string($model) || preg_match('/[^\x20-\x7E]/', $model) === 1) {
 					$this->warn($event->getPlayerInfo()->getUsername());
 					$event->setKickFlag(0, self::getData(self::ANTIBOT_MESSAGE));
 				}

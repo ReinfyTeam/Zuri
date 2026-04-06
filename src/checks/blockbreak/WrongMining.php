@@ -51,7 +51,7 @@ class WrongMining extends Check {
 		$isCreative = $playerAPI->getPlayer()->isCreative() ? 10 : 0;
 		if ($playerAPI->actionBreakingSpecial() && (($playerAPI->getNumberBlocksAllowBreak() + $isCreative) < $playerAPI->getBlocksBrokeASec())) {
 			$this->failed($playerAPI);
-			if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
+			if (!$playerAPI->getPlayer()->isConnected() || !$playerAPI->getPlayer()->isOnline()) {
 				return;
 			}
 			$playerAPI->setActionBreakingSpecial(false);

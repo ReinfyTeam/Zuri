@@ -59,7 +59,7 @@ class Phase extends Check {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $event->getPlayer();
 			$world = $player->getWorld();
-			if (!$player->isConnected() || !$player->spawned) {
+			if (!$player->isConnected() || !$player->isOnline()) {
 				return;
 			}
 			$id = $world->getBlock($player->getLocation()->add(0, -1, 0))->getTypeId();

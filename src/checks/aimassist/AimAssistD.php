@@ -35,6 +35,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
 
 class AimAssistD extends Check {
@@ -54,6 +55,10 @@ class AimAssistD extends Check {
 				!$player->isSurvival() ||
 				$playerAPI->getAttackTicks() > 100 ||
 				$playerAPI->getTeleportTicks() < 100 ||
+				$playerAPI->getTeleportCommandTicks() < 100 ||
+				$playerAPI->getHurtTicks() < 20 ||
+				$playerAPI->isRecentlyCancelledEvent() ||
+				$playerAPI->getPing() > self::getData(self::PING_LAGGING) ||
 				$player->isFlying() ||
 				$player->getAllowFlight()
 			) {
@@ -62,12 +67,12 @@ class AimAssistD extends Check {
 
 			$nLocation = $playerAPI->getNLocation();
 			if (!empty($nLocation)) {
-				$abs = abs($nLocation["to"]->getYaw() - $nLocation["from"]->getYaw());
-				$abs2 = abs($nLocation["to"]->getPitch() - $nLocation["from"]->getPitch());
-				if ($abs > $this->getConstant("min-abs-yaw") && $abs < $this->getConstant("max-abs-yaw") && $abs2 > $this->getConstant("min-abs-pitch") && $abs2 < $this->getConstant("max-abs-pitch")) {
+				$yawDiff = MathUtil::angleDiff($nLocation["from"]->getYaw(), $nLocation["to"]->getYaw());
+				$pitchDiff = abs($nLocation["to"]->getPitch() - $nLocation["from"]->getPitch());
+				if ($yawDiff > $this->getConstant("min-abs-yaw") && $yawDiff < $this->getConstant("max-abs-yaw") && $pitchDiff > $this->getConstant("min-abs-pitch") && $pitchDiff < $this->getConstant("max-abs-pitch")) {
 					$this->failed($playerAPI);
 				}
-				$this->debug($playerAPI, "abs=$abs, abs2=$abs2");
+				$this->debug($playerAPI, "yawDiff={$yawDiff}, pitchDiff={$pitchDiff}");
 			}
 		}
 	}

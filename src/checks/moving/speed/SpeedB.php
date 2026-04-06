@@ -65,6 +65,7 @@ class SpeedB extends Check {
 				$playerAPI->getProjectileAttackTicks() < 20 ||
 				$playerAPI->getBowShotTicks() < 20 ||
 				$playerAPI->getHurtTicks() < 10 ||
+				$playerAPI->getTeleportTicks() < 60 ||
 				$playerAPI->getSlimeBlockTicks() < 20 ||
 				$playerAPI->getTeleportCommandTicks() < 40 ||
 				$playerAPI->getOnlineTime() < 2 ||
@@ -102,6 +103,7 @@ class SpeedB extends Check {
 				"projectileAttackTicks" => $playerAPI->getProjectileAttackTicks(),
 				"bowShotTicks" => $playerAPI->getBowShotTicks(),
 				"hurtTicks" => $playerAPI->getHurtTicks(),
+				"teleportTicks" => $playerAPI->getTeleportTicks(),
 				"slimeTicks" => $playerAPI->getSlimeBlockTicks(),
 				"teleportCommandTicks" => $playerAPI->getTeleportCommandTicks(),
 				"onlineTime" => $playerAPI->getOnlineTime(),
@@ -158,6 +160,7 @@ class SpeedB extends Check {
 			(int) ($payload["projectileAttackTicks"] ?? 0) < 20 ||
 			(int) ($payload["bowShotTicks"] ?? 0) < 20 ||
 			(int) ($payload["hurtTicks"] ?? 0) < 10 ||
+			(int) ($payload["teleportTicks"] ?? 0) < 60 ||
 			(int) ($payload["slimeTicks"] ?? 0) < 20 ||
 			(int) ($payload["teleportCommandTicks"] ?? 0) < 40 ||
 			(float) ($payload["onlineTime"] ?? 0) < 2 ||

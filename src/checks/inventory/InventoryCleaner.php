@@ -64,27 +64,41 @@ class InventoryCleaner extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$ticks = $playerAPI->getExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION);
-		$transaction = $playerAPI->getExternalData(CacheData::INVENTORYCLEANER_TRANSACTION);
-		if ($packet instanceof InventoryTransactionPacket) {
-			if ($packet->trData->getTypeId() === 0) {
-				if ($ticks !== null && $transaction !== null) {
-					$diff = microtime(true) - $ticks;
-					if ($diff > $this->getConstant("diff-ticks")) {
-						if ($transaction > $this->getConstant("max-transaction")) {
-							$this->failed($playerAPI);
-						}
-						$playerAPI->unsetExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION);
-						$playerAPI->unsetExternalData(CacheData::INVENTORYCLEANER_TRANSACTION);
-					} else {
-						$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, $transaction + 1);
-					}
-				} else {
-					$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION, microtime(true));
-					$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, 0);
-				}
-				$this->debug($playerAPI, "ticks=$ticks, transaction=$transaction");
-			}
+		if (!$packet instanceof InventoryTransactionPacket || $packet->trData->getTypeId() !== 0) {
+			return;
+		}
+
+		if (!$playerAPI->isInventoryOpen()) {
+			$playerAPI->unsetExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION);
+			$playerAPI->unsetExternalData(CacheData::INVENTORYCLEANER_TRANSACTION);
+			return;
+		}
+
+		$start = $playerAPI->getExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION);
+		$transaction = (int) $playerAPI->getExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, 0);
+		$now = microtime(true);
+
+		if ($start === null) {
+			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION, $now);
+			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, 1);
+			return;
+		}
+
+		$diff = $now - (float) $start;
+		if ($diff > (float) $this->getConstant("diff-ticks")) {
+			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION, $now);
+			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, 1);
+			return;
+		}
+
+		$transaction++;
+		$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, $transaction);
+		$this->debug($playerAPI, "transaction={$transaction}, diff={$diff}");
+
+		if ($transaction > (int) $this->getConstant("max-transaction")) {
+			$this->failed($playerAPI);
+			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION, $now);
+			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, 0);
 		}
 	}
 }

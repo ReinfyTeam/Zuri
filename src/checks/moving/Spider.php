@@ -56,14 +56,18 @@ class Spider extends Check {
 			$player = $playerAPI->getPlayer();
 
 			if (
+				!$player->isSurvival() ||
 				$playerAPI->getAttackTicks() < 40 ||
+				$playerAPI->getHurtTicks() < 20 ||
+				$playerAPI->getTeleportTicks() < 60 ||
+				$playerAPI->getTeleportCommandTicks() < 60 ||
 				$playerAPI->isInWeb() ||
 				$playerAPI->isOnAdhesion() ||
 				$player->getAllowFlight() ||
 				$player->isFlying() ||
 				$player->hasNoClientPredictions() ||
 				!$playerAPI->isCurrentChunkIsLoaded() ||
-				$playerAPI->recentlyCancelledEvent() < 40
+				$playerAPI->isRecentlyCancelledEvent()
 			) {
 				return;
 			}
@@ -77,7 +81,7 @@ class Spider extends Check {
 			$north = $player->getWorld()->getBlock($player->getPosition()->north())->isSolid() && $player->getWorld()->getBlock($player->getPosition()->north()->up())->isSolid();
 			$onLadder = $player->getWorld()->getBlock($player->getPosition())->getTypeId() === BlockTypeIds::LADDER;
 
-			if ($west || $south || $east || $north && !$onLadder) { // diagonals are solid and the player is not on ladder..
+			if (($west || $south || $east || $north) && !$onLadder) { // diagonals are solid and the player is not on ladder..
 				$diff = abs($newY - $oldY);
 				if ($newY > $oldY) { // if bigger newY > oldY
 					if ($diff > $this->getConstant("limit-y-diff")) { // impossible :O y update 0.6~?

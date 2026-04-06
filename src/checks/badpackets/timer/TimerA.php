@@ -39,6 +39,7 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
+use function max;
 
 class TimerA extends Check {
 	public function getName() : string {
@@ -59,33 +60,85 @@ class TimerA extends Check {
 				"tps" => Server::getInstance()->getTicksPerSecond(),
 				"ping" => $playerAPI->getPing(),
 				"packetTick" => $packet->getTick(),
-				"timerATick" => $playerAPI->getExternalData(CacheData::TIMER_A_TICK),
+				"lastTick" => $playerAPI->getExternalData(CacheData::TIMER_A_TICK),
+				"lastTime" => $playerAPI->getExternalData(CacheData::TIMER_A_LAST_TIME),
+				"balance" => $playerAPI->getExternalData(CacheData::TIMER_A_BALANCE, 0.0),
 				"laggingPing" => self::getData(self::PING_LAGGING),
 				"maxDiff" => (float) $this->getConstant("max-diff"),
+				"now" => microtime(true),
 			]);
 		}
 	}
 
 	public static function evaluateAsync(array $payload) : array {
+		if (($payload["type"] ?? null) !== "TimerA") {
+			return [];
+		}
+
 		$tps = (float) ($payload["tps"] ?? 20.0);
 		$ping = (int) ($payload["ping"] ?? 0);
 		$packetTick = (int) ($payload["packetTick"] ?? 0);
-		$delayTicks = $payload["timerATick"] ?? null;
+		$lastTick = $payload["lastTick"] ?? null;
+		$lastTime = $payload["lastTime"] ?? null;
+		$balance = (float) ($payload["balance"] ?? 0.0);
 		$laggingPing = (int) ($payload["laggingPing"] ?? 0);
 		$maxDiff = (float) ($payload["maxDiff"] ?? 0.0);
+		$now = (float) ($payload["now"] ?? microtime(true));
 
-		$set = [];
-		if ($tps < 19 && $ping < $laggingPing) {
-			$set[CacheData::TIMER_A_TICK] = $tps - $packetTick;
+		if ($packetTick <= 0) {
+			return [];
 		}
 
-		if ($delayTicks !== null) {
-			$tickDiff = $delayTicks - $packetTick;
-			if ($tickDiff >= ($maxDiff + (abs(20 - $tps) * 2))) {
-				return ["set" => $set, "failed" => true];
-			}
+		if ($ping >= $laggingPing || $tps < 18.0) {
+			return [
+				"set" => [
+					CacheData::TIMER_A_TICK => $packetTick,
+					CacheData::TIMER_A_LAST_TIME => $now,
+					CacheData::TIMER_A_BALANCE => 0.0,
+				],
+			];
 		}
 
-		return ["set" => $set];
+		if ($lastTick === null || $lastTime === null) {
+			return [
+				"set" => [
+					CacheData::TIMER_A_TICK => $packetTick,
+					CacheData::TIMER_A_LAST_TIME => $now,
+					CacheData::TIMER_A_BALANCE => 0.0,
+				],
+			];
+		}
+
+		$tickJump = $packetTick - (int) $lastTick;
+		if ($tickJump <= 0 || $tickJump > 20) {
+			return [
+				"set" => [
+					CacheData::TIMER_A_TICK => $packetTick,
+					CacheData::TIMER_A_LAST_TIME => $now,
+					CacheData::TIMER_A_BALANCE => 0.0,
+				],
+			];
+		}
+
+		$elapsedMs = max(1.0, ($now - (float) $lastTime) * 1000.0);
+		$expectedMs = $tickJump * 50.0;
+		$driftMs = $expectedMs - $elapsedMs;
+		$newBalance = max(0.0, $balance + $driftMs);
+		$tolerance = abs(20.0 - $tps) * 4.0;
+		$result = [
+			"set" => [
+				CacheData::TIMER_A_TICK => $packetTick,
+				CacheData::TIMER_A_LAST_TIME => $now,
+				CacheData::TIMER_A_BALANCE => $newBalance,
+			],
+			"debug" => "tickJump={$tickJump}, elapsedMs={$elapsedMs}, expectedMs={$expectedMs}, driftMs={$driftMs}, balance={$newBalance}",
+		];
+
+		if ($newBalance > ($maxDiff + $tolerance)) {
+			$result["failed"] = true;
+			$result["set"][CacheData::TIMER_A_BALANCE] = $newBalance * 0.35;
+		}
+
+		return $result;
 	}
 }

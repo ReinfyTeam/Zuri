@@ -37,6 +37,7 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function ceil;
+use function fmod;
 use function max;
 use function min;
 use function sqrt;
@@ -104,6 +105,22 @@ class MathUtil {
 
 	public static function horizontalLength(float $x, float $z) : float {
 		return sqrt(($x * $x) + ($z * $z));
+	}
+
+	public static function wrapAngleTo180(float $angle) : float {
+		$wrapped = fmod($angle, 360.0);
+		if ($wrapped >= 180.0) {
+			$wrapped -= 360.0;
+		}
+		if ($wrapped < -180.0) {
+			$wrapped += 360.0;
+		}
+
+		return $wrapped;
+	}
+
+	public static function angleDiff(float $from, float $to) : float {
+		return abs(self::wrapAngleTo180($to - $from));
 	}
 
 	public static function ticksSince(float $timestamp) : float {

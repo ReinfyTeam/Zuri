@@ -17,8 +17,8 @@ use function max;
 use function microtime;
 
 class VelocityA extends Check {
-	private const HIT_AT_KEY = CacheData::VELOCITY_A_HIT_AT;
-	private const BUFFER_KEY = CacheData::VELOCITY_A_BUFFER;
+	private const string HIT_AT_KEY = CacheData::VELOCITY_A_HIT_AT;
+	private const string BUFFER_KEY = CacheData::VELOCITY_A_BUFFER;
 
 	public function getName() : string {
 		return "Velocity";

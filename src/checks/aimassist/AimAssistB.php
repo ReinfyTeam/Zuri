@@ -36,8 +36,9 @@ use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
-use function fmod;
+use function round;
 
 class AimAssistB extends Check {
 	public function getName() : string {
@@ -53,6 +54,18 @@ class AimAssistB extends Check {
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
+			$player = $playerAPI->getPlayer();
+			if (
+				!$player->isSurvival() ||
+				$playerAPI->getAttackTicks() > 20 ||
+				$playerAPI->getTeleportTicks() < 100 ||
+				$playerAPI->getTeleportCommandTicks() < 100 ||
+				$playerAPI->isRecentlyCancelledEvent() ||
+				$playerAPI->getPing() > self::getData(self::PING_LAGGING)
+			) {
+				return;
+			}
+
 			$nLocation = $playerAPI->getNLocation();
 			if (!empty($nLocation)) {
 				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
@@ -73,22 +86,30 @@ class AimAssistB extends Check {
 
 		$toYaw = (float) ($payload["toYaw"] ?? 0.0);
 		$fromYaw = (float) ($payload["fromYaw"] ?? 0.0);
-		$abs = abs($toYaw - $fromYaw);
-		if ($abs >= 1 && fmod($abs, 0.1) == 0) {
-			if (fmod($abs, 1.0) == 0 || fmod($abs, 10.0) == 0 || fmod($abs, 30.0) == 0) {
-				return ["failed" => true, "debug" => "toYaw={$toYaw}, fromYaw={$fromYaw}, abs={$abs}"];
+		$yawDiff = MathUtil::angleDiff($fromYaw, $toYaw);
+		if ($yawDiff >= 1.0 && self::isQuantizedStep($yawDiff)) {
+			if (self::isApproxMultiple($yawDiff, 1.0) || self::isApproxMultiple($yawDiff, 10.0) || self::isApproxMultiple($yawDiff, 30.0)) {
+				return ["failed" => true, "debug" => "toYaw={$toYaw}, fromYaw={$fromYaw}, yawDiff={$yawDiff}"];
 			}
 		}
 
 		$toPitch = (float) ($payload["toPitch"] ?? 0.0);
 		$fromPitch = (float) ($payload["fromPitch"] ?? 0.0);
-		$abs2 = abs($toPitch - $fromPitch);
-		if ($abs2 >= 1 && fmod($abs2, 0.1) == 0) {
-			if (fmod($abs2, 1.0) == 0 || fmod($abs2, 10.0) == 0 || fmod($abs2, 30.0) == 0) {
-				return ["failed" => true, "debug" => "toYaw={$toYaw}, fromYaw={$fromYaw}, abs={$abs}, toPitch={$toPitch}, fromPitch={$fromPitch}, abs2={$abs2}"];
+		$pitchDiff = abs($toPitch - $fromPitch);
+		if ($pitchDiff >= 1.0 && self::isQuantizedStep($pitchDiff)) {
+			if (self::isApproxMultiple($pitchDiff, 1.0) || self::isApproxMultiple($pitchDiff, 10.0) || self::isApproxMultiple($pitchDiff, 30.0)) {
+				return ["failed" => true, "debug" => "toYaw={$toYaw}, fromYaw={$fromYaw}, yawDiff={$yawDiff}, toPitch={$toPitch}, fromPitch={$fromPitch}, pitchDiff={$pitchDiff}"];
 			}
 		}
 
 		return [];
+	}
+
+	private static function isApproxMultiple(float $value, float $step) : bool {
+		return abs($value - (round($value / $step) * $step)) <= 0.0001;
+	}
+
+	private static function isQuantizedStep(float $value) : bool {
+		return self::isApproxMultiple($value, 0.1);
 	}
 }

@@ -61,15 +61,31 @@ class OmniSprint extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		if ($packet instanceof PlayerAuthInputPacket) {
+			if (
+				!$player->isSurvival() ||
+				$playerAPI->getTeleportTicks() < 40 ||
+				$playerAPI->getTeleportCommandTicks() < 40 ||
+				$playerAPI->getHurtTicks() < 20 ||
+				$player->hasNoClientPredictions() ||
+				$playerAPI->isRecentlyCancelledEvent()
+			) {
+				unset($this->check[spl_object_id($playerAPI)]);
+				return;
+			}
+
 			if ($packet->getInputMode() === InputMode::MOUSE_KEYBOARD || $packet->getInputMode() === InputMode::TOUCHSCREEN) { // for windows and mobile, ios only..
-				$left = ($packet->getInputFlags() & (1 << PlayerAuthInputFlags::LEFT)) !== 0;
-				$right = ($packet->getInputFlags() & (1 << PlayerAuthInputFlags::RIGHT)) !== 0;
-				$down = ($packet->getInputFlags() & (1 << PlayerAuthInputFlags::DOWN)) !== 0;
-				if ($down || $right || $left) {
-					if (!$player->isSprinting() && isset($this->check[spl_object_id($playerAPI)])) {
+				$inputFlags = $packet->getInputFlags();
+				$left = $inputFlags->get(PlayerAuthInputFlags::LEFT);
+				$right = $inputFlags->get(PlayerAuthInputFlags::RIGHT);
+				$down = $inputFlags->get(PlayerAuthInputFlags::DOWN);
+				$up = $inputFlags->get(PlayerAuthInputFlags::UP);
+				if ($down || $right || $left || $up) {
+					$movingFast = isset($this->check[spl_object_id($playerAPI)]);
+					$invalidSprint = $player->isSprinting() && ($down || (($left || $right) && !$up));
+					if ($invalidSprint && $movingFast) {
 						$this->failed($playerAPI);
 					}
-					$this->debug($playerAPI, "inputFlag=" . $packet->getInputFlags() . ", inputMode=" . $packet->getInputMode() . ", check=" . isset($this->check[spl_object_id($playerAPI)]));
+					$this->debug($playerAPI, "inputMode=" . $packet->getInputMode() . ", left=" . ($left ? "1" : "0") . ", right=" . ($right ? "1" : "0") . ", down=" . ($down ? "1" : "0") . ", up=" . ($up ? "1" : "0") . ", movingFast=" . $movingFast . ", invalidSprint=" . $invalidSprint);
 				}
 			}
 		}
@@ -78,6 +94,16 @@ class OmniSprint extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $playerAPI->getPlayer();
+			if (
+				!$player->isSurvival() ||
+				$playerAPI->getTeleportTicks() < 40 ||
+				$playerAPI->getTeleportCommandTicks() < 40 ||
+				$playerAPI->isRecentlyCancelledEvent()
+			) {
+				unset($this->check[spl_object_id($playerAPI)]);
+				return;
+			}
+
 			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > $this->getConstant("max-speed") && !$player->getEffects()->has(VanillaEffects::SPEED())) {
 				$this->check[spl_object_id($playerAPI)] = true; // moving too fast?
 			} else {

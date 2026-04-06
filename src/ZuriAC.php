@@ -73,7 +73,10 @@ use ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickA;
 use ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickB;
 use ReinfyTeam\Zuri\checks\combat\autoclick\AutoClickC;
 use ReinfyTeam\Zuri\checks\combat\FastBow;
+use ReinfyTeam\Zuri\checks\combat\GhostHand;
+use ReinfyTeam\Zuri\checks\combat\Hitbox;
 use ReinfyTeam\Zuri\checks\combat\ImposibleHit;
+use ReinfyTeam\Zuri\checks\combat\ItemLerp;
 use ReinfyTeam\Zuri\checks\combat\killaura\KillAuraA;
 use ReinfyTeam\Zuri\checks\combat\killaura\KillAuraB;
 use ReinfyTeam\Zuri\checks\combat\killaura\KillAuraC;
@@ -112,6 +115,7 @@ use ReinfyTeam\Zuri\checks\moving\Step;
 use ReinfyTeam\Zuri\checks\moving\WrongPitch;
 use ReinfyTeam\Zuri\checks\network\antibot\AntiBotA;
 use ReinfyTeam\Zuri\checks\network\antibot\AntiBotB;
+use ReinfyTeam\Zuri\checks\network\editionfaker\DeviceSpoofID;
 use ReinfyTeam\Zuri\checks\network\editionfaker\EditionFakerA;
 use ReinfyTeam\Zuri\checks\network\editionfaker\EditionFakerB;
 use ReinfyTeam\Zuri\checks\network\NetworkLimit;
@@ -138,7 +142,7 @@ class ZuriAC extends PluginBase {
 	private array $eventChecks = [];
 	private array $justEventChecks = [];
 
-	private const MINIMUM_PHP_VERSION = "8.3.0";
+	private const string MINIMUM_PHP_VERSION = "8.4.0";
 
 	protected function onLoad() : void {
 		self::$instance = $this;
@@ -286,6 +290,12 @@ class ZuriAC extends PluginBase {
 
 		$this->checks[] = new ImposibleHit();
 
+		$this->checks[] = new GhostHand();
+
+		$this->checks[] = new Hitbox();
+
+		$this->checks[] = new ItemLerp();
+
 		$this->checks[] = new VelocityA();
 
 		$this->checks[] = new FastBow();
@@ -343,6 +353,7 @@ class ZuriAC extends PluginBase {
 
 		$this->checks[] = new EditionFakerA();
 		$this->checks[] = new EditionFakerB();
+		$this->checks[] = new DeviceSpoofID();
 
 		$this->checks[] = new ProxyBot(); // Improve in next versions..
 

@@ -55,7 +55,7 @@ class SpamB extends Check {
 			if (!$event->isCancelled()) {
 				$message = $event->getMessage();
 				$lastMessage = $playerAPI->getExternalData(CacheData::SPAM_B_LAST_MESSAGE);
-				if (!$playerAPI->getPlayer()->spawned && !$playerAPI->getPlayer()->isConnected()) {
+				if (!$playerAPI->getPlayer()->isConnected() || !$playerAPI->getPlayer()->isOnline()) {
 					return;
 				}
 				if ($lastMessage !== null) {

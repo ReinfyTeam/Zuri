@@ -37,8 +37,8 @@ use function gettype;
 use function is_int;
 
 class SimpleForm extends Form {
-	const IMAGE_TYPE_PATH = 0;
-	const IMAGE_TYPE_URL = 1;
+	public const int IMAGE_TYPE_PATH = 0;
+	public const int IMAGE_TYPE_URL = 1;
 
 	private string $content = "";
 

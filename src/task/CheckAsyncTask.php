@@ -36,7 +36,7 @@ class CheckAsyncTask {
 			}
 
 			$player = Server::getInstance()->getPlayerExact($playerName);
-			if ($player === null || !$player->isOnline() || !$player->spawned) {
+			if ($player === null || !$player->isOnline() || !$player->isConnected()) {
 				return;
 			}
 

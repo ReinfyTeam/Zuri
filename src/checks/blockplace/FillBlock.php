@@ -56,7 +56,7 @@ class FillBlock extends Check {
 		if ($playerAPI->actionPlacingSpecial() && (($playerAPI->getNumberBlocksAllowPlace() + $isCreative) < $playerAPI->getBlocksPlacedASec())) {
 			$this->failed($playerAPI);
 			$player = $playerAPI->getPlayer();
-			if (!$player->spawned && !$player->isConnected()) {
+			if (!$player->isConnected() || !$player->isOnline()) {
 				return;
 			}
 			$playerAPI->setActionPlacingSpecial(false);

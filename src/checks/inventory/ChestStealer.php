@@ -52,27 +52,39 @@ class ChestStealer extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$ticks = $playerAPI->getExternalData(CacheData::CHESTSTEALER_TICKS);
+		if (!$packet instanceof InventoryTransactionPacket || $packet->trData->getTypeId() !== 0) {
+			return;
+		}
+
+		if (!$playerAPI->isInventoryOpen()) {
+			$playerAPI->unsetExternalData(CacheData::CHESTSTEALER_TICKS);
+			$playerAPI->unsetExternalData(CacheData::CHESTSTEALER_LAST_TIME);
+			return;
+		}
+
+		$now = microtime(true);
+		$streak = (int) $playerAPI->getExternalData(CacheData::CHESTSTEALER_TICKS, 0);
 		$lastTime = $playerAPI->getExternalData(CacheData::CHESTSTEALER_LAST_TIME);
-		if ($packet instanceof InventoryTransactionPacket) {
-			if ($packet->trData->getTypeId() === 0) {
-				if ($ticks !== null && $lastTime !== null) {
-					$diff = microtime(true) - $lastTime;
-					if ($diff > $this->getConstant("diff-time")) {
-						if ($ticks > $this->getConstant("diff-ticks")) {
-							$this->failed($playerAPI);
-						}
-						$playerAPI->unsetExternalData(CacheData::CHESTSTEALER_TICKS);
-						$playerAPI->unsetExternalData(CacheData::CHESTSTEALER_LAST_TIME);
-					} else {
-						$playerAPI->setExternalData(CacheData::CHESTSTEALER_TICKS, $ticks + 1);
-					}
-				} else {
-					$playerAPI->setExternalData(CacheData::CHESTSTEALER_TICKS, 0);
-					$playerAPI->setExternalData(CacheData::CHESTSTEALER_LAST_TIME, microtime(true));
-				}
-				$this->debug($playerAPI, "ticks=$ticks, lastTime=$lastTime");
-			}
+		if ($lastTime === null) {
+			$playerAPI->setExternalData(CacheData::CHESTSTEALER_TICKS, 0);
+			$playerAPI->setExternalData(CacheData::CHESTSTEALER_LAST_TIME, $now);
+			return;
+		}
+
+		$diff = $now - (float) $lastTime;
+		if ($diff <= (float) $this->getConstant("diff-time")) {
+			$streak++;
+		} else {
+			$streak = 0;
+		}
+
+		$playerAPI->setExternalData(CacheData::CHESTSTEALER_TICKS, $streak);
+		$playerAPI->setExternalData(CacheData::CHESTSTEALER_LAST_TIME, $now);
+		$this->debug($playerAPI, "streak={$streak}, diff={$diff}");
+
+		if ($streak > (int) $this->getConstant("diff-ticks")) {
+			$this->failed($playerAPI);
+			$playerAPI->setExternalData(CacheData::CHESTSTEALER_TICKS, 0);
 		}
 	}
 }

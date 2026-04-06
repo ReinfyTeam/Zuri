@@ -63,6 +63,9 @@ class FlyC extends Check {
 			$this->dispatchAsyncCheck($player->getName(), [
 				"type" => "FlyC",
 				"attackTicks" => $playerAPI->getAttackTicks(),
+				"teleportTicks" => $playerAPI->getTeleportTicks(),
+				"teleportCommandTicks" => $playerAPI->getTeleportCommandTicks(),
+				"hurtTicks" => $playerAPI->getHurtTicks(),
 				"inWeb" => $playerAPI->isInWeb(),
 				"onGround" => $playerAPI->isOnGround(),
 				"onAdhesion" => $playerAPI->isOnAdhesion(),
@@ -92,6 +95,9 @@ class FlyC extends Check {
 
 		if (
 			(int) ($payload["attackTicks"] ?? 0) < 40 ||
+			(int) ($payload["teleportTicks"] ?? 0) < 60 ||
+			(int) ($payload["teleportCommandTicks"] ?? 0) < 60 ||
+			(int) ($payload["hurtTicks"] ?? 0) < 20 ||
 			(bool) ($payload["inWeb"] ?? false) ||
 			(bool) ($payload["onGround"] ?? false) ||
 			(bool) ($payload["onAdhesion"] ?? false) ||

@@ -52,6 +52,18 @@ class InventoryMove extends Check {
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
+			$player = $playerAPI->getPlayer();
+			if (
+				!$player->isSurvival() ||
+				$playerAPI->getTeleportTicks() < 40 ||
+				$playerAPI->getTeleportCommandTicks() < 40 ||
+				$playerAPI->getHurtTicks() < 20 ||
+				$playerAPI->isGliding() ||
+				$playerAPI->isRecentlyCancelledEvent()
+			) {
+				return;
+			}
+
 			$moveSensitivity = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo());
 			$this->debug($playerAPI, "isOpen=" . $playerAPI->isInventoryOpen() . ", moveSensitivity=$moveSensitivity");
 			if ($playerAPI->isInventoryOpen() && $moveSensitivity > $this->getConstant("move-sensitivity")) {

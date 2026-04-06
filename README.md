@@ -24,6 +24,8 @@ Also, adding :star: a **Star** is also appreciated. ✨
 - This plugin has total of 40+ checks that cover the most common public cheat categories, including speed, fly, reach, scaffold, timer, and packet manipulation.
 - You can easily configure everything in the config. ✅
    - Configure easily the max violations, punishment type, thresholds, bypass rules, and module constants without editing source code.
+- You can switch ready tuning presets for combat-sensitive detections (`custom`, `low-latency`, `high-latency`) from `zuri.tuning-presets.active`.
+   - This is useful when your server has either very stable low ping PvP traffic or mixed high-latency public traffic.
 - It is more **lightweight** compared to paid anticheat. You don't have to struggle about the performance, with this anticheat, it can possible block them all easily! 💰
    - The checks are split so the simple ones stay direct while heavier calculations can be evaluated separately when the feature is enabled.
 - ✨ It is easy to use when it comes at the game, you can easily debug things, manage them all at the game, and **disable checks** according to your command.
@@ -102,6 +104,12 @@ Every module below is grouped by the type of behavior it watches so server owner
    - **A:** Check ticks consistency of the bow and calculate the time difference of the last shoot.
 - **ImpossibleHit**
     - **A:** Check if the player has any opening chest or eating a food while hitting the entity.
+- **GhostHand**
+   - **A:** Detect hits that pass through solid block lines between damager and target.
+- **Hitbox**
+   - **A:** Detect invalid aim alignment and off-hitbox attack vectors during combat.
+- **ItemLerp**
+   - **A:** Detect repeated attacks immediately after held-slot swaps that mimic item-lerp abuse.
 - **Velocity** (BETA)
    - **A:** Detect suspicious anti-knockback style movement after recent combat hits.
 - **Autoclick**
@@ -168,6 +176,8 @@ Every module below is grouped by the type of behavior it watches so server owner
 - **EditionFaker**
      - **A:** Check if the player has a valid platform.
      - **B:** Check device title id if it is valid.
+- **DeviceSpoofID**
+   - **A:** Validate device-id entropy and pattern consistency to catch spoofed client identities.
 - **ProxyBot** (OPTIONAL)
      - **A:** Check player if it is using proxy, tor or other internet exploit ip services.
 - **Scaffold** (BETA)

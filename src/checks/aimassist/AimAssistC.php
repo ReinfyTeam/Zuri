@@ -36,6 +36,7 @@ use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
 
 class AimAssistC extends Check {
@@ -58,6 +59,10 @@ class AimAssistC extends Check {
 				!$player->isSurvival() ||
 				$playerAPI->getAttackTicks() > 20 ||
 				$playerAPI->getTeleportTicks() < 100 ||
+				$playerAPI->getTeleportCommandTicks() < 100 ||
+				$playerAPI->getHurtTicks() < 20 ||
+				$playerAPI->isRecentlyCancelledEvent() ||
+				$playerAPI->getPing() > self::getData(self::PING_LAGGING) ||
 				$player->isFlying() ||
 				$player->getAllowFlight()
 			) {
@@ -65,12 +70,12 @@ class AimAssistC extends Check {
 			}
 			$nLocation = $playerAPI->getNLocation();
 			if (!empty($nLocation)) {
-				$abs = abs($nLocation["from"]->getYaw() - $nLocation["to"]->getYaw());
-				$abs2 = abs($nLocation["from"]->getPitch() - $nLocation["to"]->getPitch());
-				if ($abs > $this->getConstant("min-yaw") && $abs < $this->getConstant("min-pitch") && $abs2 > $this->getConstant("max-pitch")) {
+				$yawDiff = MathUtil::angleDiff($nLocation["from"]->getYaw(), $nLocation["to"]->getYaw());
+				$pitchDiff = abs($nLocation["from"]->getPitch() - $nLocation["to"]->getPitch());
+				if ($yawDiff > $this->getConstant("min-yaw") && $pitchDiff > $this->getConstant("min-pitch") && $pitchDiff < $this->getConstant("max-pitch")) {
 					$this->failed($playerAPI);
 				}
-				$this->debug($playerAPI, "abs=$abs, abs2=$abs2");
+				$this->debug($playerAPI, "yawDiff={$yawDiff}, pitchDiff={$pitchDiff}");
 			}
 		}
 	}
