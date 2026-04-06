@@ -37,10 +37,6 @@ Also, adding :star: a **Star** is also appreciated. ✨
 - 💥 You can manage plugin at the in-game using **Interactive UI** by using command! `/zuri ui`
    - The UI is meant for quick inspection and administrative control without requiring the console.
 
-# The Origin of the Plugin
-This plugin is an inspirational and continued work of old anticheat plugin by 
-The project keeps the same goal as the original line of work: detect obvious cheats early, keep the codebase configurable, and leave room for future checks as Minecraft and client behavior evolve. The current codebase also introduces a public API surface and event hooks so other plugins can react to, inspect, or extend anticheat behavior.
-
 # Forks / Dependencies
 Here are the **dependencies** were used in the plugin:
 
