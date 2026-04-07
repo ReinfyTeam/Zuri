@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1c4b6c705004e093a6655f67bcb5dd08",
+    "content-hash": "cd2afe3b55c4ed0482c312694c716ecc",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -1139,28 +1139,35 @@
             "time": "2026-02-24T17:51:06+00:00"
         },
         {
-            "name": "vennv/vapm",
+            "name": "vennv/vapm-pmmp",
             "version": "2.5.6",
             "source": {
                 "type": "git",
-                "url": "https://github.com/VennDev/Vapm.git",
-                "reference": "44b7dc770e0299dfd8d99ffab6a35010b3391992"
+                "url": "https://github.com/VennDev/LibVapmPMMP.git",
+                "reference": "46926aeb4e82bbe202ebcf08305f6f06a404e378"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/VennDev/Vapm/zipball/44b7dc770e0299dfd8d99ffab6a35010b3391992",
-                "reference": "44b7dc770e0299dfd8d99ffab6a35010b3391992",
+                "url": "https://api.github.com/repos/VennDev/LibVapmPMMP/zipball/46926aeb4e82bbe202ebcf08305f6f06a404e378",
+                "reference": "46926aeb4e82bbe202ebcf08305f6f06a404e378",
                 "shasum": ""
             },
             "require": {
                 "composer-runtime-api": "^2.0",
                 "php": ">=8.2",
-                "php-64bit": "*"
+                "php-64bit": "*",
+                "pocketmine/pocketmine-mp": "^5.17.0"
             },
             "require-dev": {
                 "phpstan/phpstan": "*"
             },
             "type": "library",
+            "extra": {
+                "virion": {
+                    "spec": "3.0",
+                    "namespace-root": "vennv\\vapm"
+                }
+            },
             "autoload": {
                 "files": [
                     "src/vennv/vapm/io/functions.php",
@@ -1181,14 +1188,18 @@
                 }
             ],
             "keywords": [
-                "Vapm",
-                "asynchronous"
+                "LibVapmPMMP",
+                "Thread",
+                "asynchronous",
+                "lib-vapm-pmmp",
+                "process",
+                "vapm-pmmp"
             ],
             "support": {
-                "issues": "https://github.com/VennDev/Vapm/issues",
-                "source": "https://github.com/VennDev/Vapm/tree/2.5.6"
+                "issues": "https://github.com/VennDev/LibVapmPMMP/issues",
+                "source": "https://github.com/VennDev/LibVapmPMMP/tree/2.5.6"
             },
-            "time": "2024-09-02T05:38:10+00:00"
+            "time": "2024-09-02T05:40:25+00:00"
         }
     ],
     "packages-dev": [],

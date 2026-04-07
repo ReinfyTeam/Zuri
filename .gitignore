@@ -9,3 +9,7 @@ vendor/*
 
 # VSCode Workspace files
 .vscode/
+
+# Build binary files
+tools/bin/*
+output.phar

@@ -43,6 +43,7 @@ runCommand("composer install --no-dev --prefer-dist --no-interaction --working-d
 @unlink($outputPath);
 
 $pharynxCommand = escapeshellarg(PHP_BINARY)
+	. " " . "-d phar.readonly=0"
 	. " " . escapeshellarg($pharynxPhar)
 	. " -i " . escapeshellarg($projectRoot)
 	. " -c " . escapeshellarg($projectRoot)

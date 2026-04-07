@@ -8,8 +8,8 @@ projects:
     lint: false
     icon: "icon.png"
     libs:
-      - src: vennv\vapm
+      - src: vennv/vapm-pmmp
         version: 2.5.6
-      - src: Paroxity\Commando
+      - src: Paroxity/Commando
         version: 3.3.0
 ...

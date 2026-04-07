@@ -5,6 +5,7 @@ authors: [ReinfyTeam, xqwtxon, xwertxy, UnknownNull]
 version: 1.4.0-ALPHA 
 website: "https://github.com/ReinfyTeam/Zuri/"
 main: ReinfyTeam\Zuri\ZuriAC
+depend: [LibVaLibVapmPMMP, Commando]
 api: 5.0.0
 permissions:
      zuri.command:
