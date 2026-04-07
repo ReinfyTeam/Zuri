@@ -1,12 +1,15 @@
 <?php
 
+use PhpCsFixer\Config;
+use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
+
 $finder = PhpCsFixer\Finder::create()
-    ->in(__DIR__ . '/vendor/') // Target specific vendor package
+    ->in(new RecursiveDirectoryIterator(__DIR__ . "../vendor")) // Target specific vendor package
     ->name('*.php')
     ->ignoreDotFiles(true)
     ->ignoreVCS(true);
 
-$config = new PhpCsFixer\Config();
+$config = new Config();
 return $config->setRules([
         '@PSR12' => true,
         'encoding' => true, // Fixes potential BOM/encoding issues
