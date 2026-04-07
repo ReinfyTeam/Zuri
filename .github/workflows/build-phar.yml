@@ -25,7 +25,7 @@ jobs:
         run: php tools/build.php
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: zuri-phar
           path: build/*.phar
