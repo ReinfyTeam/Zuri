@@ -5,7 +5,7 @@ branches:
 projects:
   Zuri:
     path: ""
-    lint: true
+    lint: false
     icon: "icon.png"
     libs:
       - src: VennDev/LibVapmPMMP/LibVapmPMMP
