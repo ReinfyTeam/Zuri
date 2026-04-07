@@ -4,7 +4,7 @@
     "type": "project",
     "require": {
         "paroxity/commando": "dev-master",
-        "vennv/vapm-pmmp": "^2.5.6",
+        "vennv/vapm-pmmp": "dev-main",
         "muqsit/simple-packet-handler": "0.1.5"
     },
     "require-dev": {
