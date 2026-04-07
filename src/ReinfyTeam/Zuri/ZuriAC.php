@@ -187,7 +187,7 @@ class ZuriAC extends PluginBase {
 		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigPaths::ALERTS_PERMISSION), PermissionManager::OPERATOR);
 		$this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
 		$this->getServer()->getPluginManager()->registerEvents(new ServerListener(), $this);
-		$this->getServer()->getCommandMap()->register("Zuri", new ZuriCommand());
+		$this->getServer()->getCommandMap()->register("zuri", new ZuriCommand($this));
 		$proxyUDPSocket = new ProxyUDPSocket();
 		if (ConfigManager::getData(ConfigPaths::PROXY_ENABLE)) {
 			$ip = ConfigManager::getData(ConfigPaths::PROXY_IP);

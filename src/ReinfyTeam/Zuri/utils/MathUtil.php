@@ -36,9 +36,11 @@ use pocketmine\item\enchantment\VanillaEnchantments;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function abs;
 use function ceil;
 use function fmod;
 use function max;
+use function microtime;
 use function min;
 use function sqrt;
 

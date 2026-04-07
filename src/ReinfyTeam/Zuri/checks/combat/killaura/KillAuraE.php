@@ -31,16 +31,17 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\killaura;
 
-use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function count;
+use function sqrt;
 
 class KillAuraE extends Check {
 	public function getName() : string {

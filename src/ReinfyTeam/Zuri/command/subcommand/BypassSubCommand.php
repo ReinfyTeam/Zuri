@@ -29,34 +29,31 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\events\api;
+namespace ReinfyTeam\Zuri\command\subcommand;
 
-use pocketmine\event\CancellableTrait;
-use pocketmine\event\Event;
+use CortexPE\Commando\BaseSubCommand;
+use JsonException;
+use pocketmine\command\CommandSender;
+use pocketmine\plugin\PluginBase;
+use pocketmine\utils\TextFormat;
+use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\config\ConfigPaths;
 
-class CheckStateChangeEvent extends Event {
-	use CancellableTrait;
-
-	public function __construct(
-		private string $checkName,
-		private ?string $subType,
-		private bool $enabled
-	) {
+class BypassSubCommand extends BaseSubCommand {
+	public function __construct(PluginBase $plugin) {
+		parent::__construct($plugin, "bypass", "Use to on/off for bypass mode.");
 	}
 
-	public function getCheckName() : string {
-		return $this->checkName;
+	protected function prepare() : void {
 	}
 
-	public function getSubType() : ?string {
-		return $this->subType;
-	}
-
-	public function isEnabled() : bool {
-		return $this->enabled;
-	}
-
-	public function setEnabled(bool $enabled) : void {
-		$this->enabled = $enabled;
+	/**
+	 * @throws JsonException
+	 */
+	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
+		$current = ConfigManager::getData(ConfigPaths::PERMISSION_BYPASS_ENABLE) === true;
+		ConfigManager::setData(ConfigPaths::PERMISSION_BYPASS_ENABLE, !$current);
+		$status = !$current ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable";
+		$sender->sendMessage(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::GRAY . " Bypass mode is " . $status);
 	}
 }

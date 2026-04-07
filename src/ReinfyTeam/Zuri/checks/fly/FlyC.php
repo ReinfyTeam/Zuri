@@ -31,17 +31,16 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\fly;
 
-use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function array_intersect;
 use function count;
-use function intval;
 use function is_array;
 
 class FlyC extends Check {

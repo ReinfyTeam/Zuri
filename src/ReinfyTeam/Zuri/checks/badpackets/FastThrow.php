@@ -31,13 +31,13 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
-use ReinfyTeam\Zuri\config\CheckConstants;
-use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\entity\projectile\Arrow;
 use pocketmine\event\entity\ProjectileLaunchEvent;
 use pocketmine\event\Event;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\config\CacheData;
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function microtime;

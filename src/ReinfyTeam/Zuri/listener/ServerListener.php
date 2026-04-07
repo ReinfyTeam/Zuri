@@ -53,8 +53,8 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function count;
 use function explode;
 use function ltrim;
-use function strtolower;
 use function str_contains;
+use function strtolower;
 use function trim;
 
 class ServerListener implements Listener {

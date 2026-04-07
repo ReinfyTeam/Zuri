@@ -1,77 +1,77 @@
 <?php
 
-/*
- *
- *  ____           _            __           _____
- * |  _ \    ___  (_)  _ __    / _|  _   _  |_   _|   ___    __ _   _ __ ___
- * | |_) |  / _ \ | | | '_ \  | |_  | | | |   | |    / _ \  / _` | | '_ ` _ \
- * |  _ <  |  __/ | | | | | | |  _| | |_| |   | |   |  __/ | (_| | | | | | | |
- * |_| \_\  \___| |_| |_| |_| |_|    \__, |   |_|    \___|  \__,_| |_| |_| |_|
- *                                   |___/
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * @author ReinfyTeam
- * @link https://github.com/ReinfyTeam/
- *
- *
- */
-
 declare(strict_types=1);
 
-const COMPRESS_FILES = true;
-const COMPRESSION = Phar::GZ;
+const PHARYNX_DOWNLOAD = "https://github.com/SOF3/pharynx/releases/latest/download/pharynx.phar";
 
-$from = getcwd() . DIRECTORY_SEPARATOR;
-$to = getcwd() . DIRECTORY_SEPARATOR . "build" . DIRECTORY_SEPARATOR;
+$projectRoot = dirname(__DIR__);
+$pluginYmlPath = $projectRoot . DIRECTORY_SEPARATOR . "plugin.yml";
+$composerPath = $projectRoot . DIRECTORY_SEPARATOR . "composer.json";
+$buildDir = $projectRoot . DIRECTORY_SEPARATOR . "build";
+$toolsBinDir = __DIR__ . DIRECTORY_SEPARATOR . "bin";
+$pharynxPhar = $toolsBinDir . DIRECTORY_SEPARATOR . "pharynx.phar";
 
-@mkdir($to, 0777, true);
+if (!file_exists($pluginYmlPath)) {
+	fwrite(STDERR, "plugin.yml not found in project root.\n");
+	exit(1);
+}
 
-copyDirectory($from . "src", $to . "src");
-copyDirectory($from . "resources", $to . "resources");
+if (!file_exists($composerPath)) {
+	fwrite(STDERR, "composer.json not found. Virion-aware builds require composer dependencies.\n");
+	exit(1);
+}
 
-$pluginYml = yaml_parse_file($from . "plugin.yml");
+$pluginName = extractPluginName($pluginYmlPath);
+$outputPath = $buildDir . DIRECTORY_SEPARATOR . $pluginName . ".phar";
 
-yaml_emit_file($to . "plugin.yml", (array) $pluginYml);
+@mkdir($buildDir, 0777, true);
+@mkdir($toolsBinDir, 0777, true);
 
-$outputPath = getcwd() . DIRECTORY_SEPARATOR . $pluginYml["name"] . ".phar";
+if (!file_exists($pharynxPhar)) {
+	echo "Downloading pharynx...\n";
+	$pharynxContents = @file_get_contents(PHARYNX_DOWNLOAD);
+	if ($pharynxContents === false) {
+		fwrite(STDERR, "Failed to download pharynx from " . PHARYNX_DOWNLOAD . "\n");
+		exit(1);
+	}
+	file_put_contents($pharynxPhar, $pharynxContents);
+}
+
+echo "Installing composer dependencies (including virions)...\n";
+runCommand("composer install --no-dev --prefer-dist --no-interaction --working-dir " . escapeshellarg($projectRoot));
 
 @unlink($outputPath);
 
-$phar = new Phar($outputPath);
-$phar->buildFromDirectory($to);
+$pharynxCommand = escapeshellarg(PHP_BINARY)
+	. " " . escapeshellarg($pharynxPhar)
+	. " -i " . escapeshellarg($projectRoot)
+	. " -c " . escapeshellarg($projectRoot)
+	. " -p " . escapeshellarg($outputPath);
 
-if (COMPRESS_FILES) $phar->compressFiles(COMPRESSION);
+echo "Building virion-injected phar...\n";
+runCommand($pharynxCommand);
 
-removeDirectory($to);
+echo "Success! Output path: {$outputPath}\n";
 
-print("Succeed! Output path: $outputPath");
-
-function copyDirectory(string $from, string $to) : void{
-	if (!is_dir($from)) {
-		return;
-	}
-
-	@mkdir($to, 0777, true);
-	$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($from, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
-	foreach($files as $fileInfo){
-		$target = str_replace($from, $to, $fileInfo->getPathname());
-		if($fileInfo->isDir()) @mkdir($target, 0777, true);
-		else{
-			$contents = file_get_contents($fileInfo->getPathname());
-			file_put_contents($target, $contents);
-		}
+function runCommand(string $command) : void {
+	passthru($command, $exitCode);
+	if ($exitCode !== 0) {
+		fwrite(STDERR, "Command failed ({$exitCode}): {$command}\n");
+		exit($exitCode);
 	}
 }
 
-function removeDirectory(string $dir) : void{
-	$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
-	foreach($files as $fileInfo){
-		if($fileInfo->isDir()) rmdir($fileInfo->getPathname());
-		else unlink($fileInfo->getPathname());
+function extractPluginName(string $pluginYmlPath) : string {
+	$contents = file_get_contents($pluginYmlPath);
+	if ($contents === false) {
+		fwrite(STDERR, "Failed to read plugin.yml\n");
+		exit(1);
 	}
-	rmdir($dir);
+
+	if (!preg_match('/^name:\s*["\']?([^"\'\r\n]+)["\']?\s*$/mi', $contents, $matches)) {
+		fwrite(STDERR, "Failed to detect plugin name from plugin.yml\n");
+		exit(1);
+	}
+
+	return trim($matches[1]);
 }

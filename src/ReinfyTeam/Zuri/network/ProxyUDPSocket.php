@@ -43,8 +43,8 @@ use function socket_create;
 use function socket_last_error;
 use function socket_recvfrom;
 use function socket_sendto;
-use function socket_set_option;
 use function socket_set_nonblock;
+use function socket_set_option;
 use function socket_strerror;
 use function strlen;
 

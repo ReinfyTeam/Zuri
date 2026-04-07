@@ -31,10 +31,10 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\chat;
 
-use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerChatEvent;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function count;
 use function explode;

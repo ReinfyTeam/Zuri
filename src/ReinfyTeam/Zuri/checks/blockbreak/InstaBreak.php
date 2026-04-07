@@ -31,13 +31,13 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockbreak;
 
-use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerInteractEvent;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function ceil;
 use function floor;

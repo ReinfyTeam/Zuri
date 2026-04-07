@@ -1,0 +1,22 @@
+{
+    "name": "reinfyteam/zuri",
+    "description": "Zuri Anticheat for PocketMine-MP",
+    "type": "project",
+    "require": {
+        "php": ">=8.4",
+        "pocketmine/pocketmine-mp": "^5.0.0",
+        "paroxity/commando": "^3.3",
+        "vennv/vapm": "^2.5"
+    },
+    "autoload": {
+        "classmap": [
+            "src/"
+        ]
+    },
+    "scripts": {
+        "format": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes",
+        "format:check": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --dry-run --diff"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

@@ -29,34 +29,30 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\events\api;
+namespace ReinfyTeam\Zuri\command\subcommand;
 
-use pocketmine\event\CancellableTrait;
-use pocketmine\event\Event;
+use CortexPE\Commando\BaseSubCommand;
+use pocketmine\command\CommandSender;
+use pocketmine\player\Player;
+use pocketmine\plugin\PluginBase;
+use pocketmine\utils\TextFormat;
+use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\config\ConfigPaths;
+use ReinfyTeam\Zuri\utils\forms\FormSender;
 
-class CheckStateChangeEvent extends Event {
-	use CancellableTrait;
-
-	public function __construct(
-		private string $checkName,
-		private ?string $subType,
-		private bool $enabled
-	) {
+class UiSubCommand extends BaseSubCommand {
+	public function __construct(PluginBase $plugin) {
+		parent::__construct($plugin, "ui", "Sends the Admin Management UI", ["forms", "form", "gui"]);
 	}
 
-	public function getCheckName() : string {
-		return $this->checkName;
+	protected function prepare() : void {
 	}
 
-	public function getSubType() : ?string {
-		return $this->subType;
-	}
-
-	public function isEnabled() : bool {
-		return $this->enabled;
-	}
-
-	public function setEnabled(bool $enabled) : void {
-		$this->enabled = $enabled;
+	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
+		if (!$sender instanceof Player) {
+			$sender->sendMessage(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::RED . " Please use this command at the game!");
+			return;
+		}
+		FormSender::MainUI($sender);
 	}
 }

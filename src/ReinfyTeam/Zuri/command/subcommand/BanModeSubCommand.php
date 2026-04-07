@@ -29,44 +29,39 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\checks\badpackets\inputspoof;
+namespace ReinfyTeam\Zuri\command\subcommand;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
-use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
-use ReinfyTeam\Zuri\checks\Check;
-use ReinfyTeam\Zuri\config\CheckConstants;
-use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
-use ReinfyTeam\Zuri\utils\MathUtil;
-use function abs;
+use CortexPE\Commando\args\RawStringArgument;
+use CortexPE\Commando\BaseSubCommand;
+use JsonException;
+use pocketmine\command\CommandSender;
+use pocketmine\plugin\PluginBase;
+use pocketmine\utils\TextFormat;
+use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\config\ConfigPaths;
+use function strtolower;
 
-class InputSpoofA extends Check {
-	public function getName() : string {
-		return "InputSpoof";
+class BanModeSubCommand extends BaseSubCommand {
+	public function __construct(PluginBase $plugin) {
+		parent::__construct($plugin, "banmode", "Use to on/off ban mode.", ["ban"]);
 	}
 
-	public function getSubType() : string {
-		return "A";
+	protected function prepare() : void {
+		$this->registerArgument(0, new RawStringArgument("mode"));
 	}
 
 	/**
-	 * @throws DiscordWebhookException
+	 * @throws JsonException
 	 */
-	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if (!$packet instanceof PlayerAuthInputPacket) {
+	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
+		if (strtolower((string) ($args["mode"] ?? "")) !== "toggle") {
+			$sender->sendMessage(TextFormat::RED . "/zuri banmode <toggle> - Use to on/off ban mode.");
 			return;
 		}
 
-		$moveX = $packet->getMoveVecX();
-		$moveZ = $packet->getMoveVecZ();
-		$maxAxis = (float) $this->getConstant(CheckConstants::INPUTSPOOFA_MAX_AXIS);
-		$maxVectorLength = (float) $this->getConstant(CheckConstants::INPUTSPOOFA_MAX_VECTOR_LENGTH);
-		$vectorLength = MathUtil::horizontalLength($moveX, $moveZ);
-
-		$this->debug($playerAPI, "moveX={$moveX}, moveZ={$moveZ}, vectorLength={$vectorLength}");
-
-		if (abs($moveX) > $maxAxis || abs($moveZ) > $maxAxis || $vectorLength > $maxVectorLength) {
-			$this->failed($playerAPI);
-		}
+		$current = ConfigManager::getData(ConfigPaths::BAN_ENABLE) === true;
+		ConfigManager::setData(ConfigPaths::BAN_ENABLE, !$current);
+		$status = !$current ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable";
+		$sender->sendMessage(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::GRAY . " Ban Mode is " . $status);
 	}
 }

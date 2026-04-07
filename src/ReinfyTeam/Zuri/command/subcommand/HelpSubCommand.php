@@ -29,34 +29,22 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\events\api;
+namespace ReinfyTeam\Zuri\command\subcommand;
 
-use pocketmine\event\CancellableTrait;
-use pocketmine\event\Event;
+use CortexPE\Commando\BaseSubCommand;
+use pocketmine\command\CommandSender;
+use pocketmine\plugin\PluginBase;
+use ReinfyTeam\Zuri\command\ZuriCommand;
 
-class CheckStateChangeEvent extends Event {
-	use CancellableTrait;
-
-	public function __construct(
-		private string $checkName,
-		private ?string $subType,
-		private bool $enabled
-	) {
+class HelpSubCommand extends BaseSubCommand {
+	public function __construct(PluginBase $plugin) {
+		parent::__construct($plugin, "help", "Show command help", ["cmd", "noarguments"]);
 	}
 
-	public function getCheckName() : string {
-		return $this->checkName;
+	protected function prepare() : void {
 	}
 
-	public function getSubType() : ?string {
-		return $this->subType;
-	}
-
-	public function isEnabled() : bool {
-		return $this->enabled;
-	}
-
-	public function setEnabled(bool $enabled) : void {
-		$this->enabled = $enabled;
+	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
+		$sender->sendMessage(ZuriCommand::buildHelpMessage("zuri"));
 	}
 }

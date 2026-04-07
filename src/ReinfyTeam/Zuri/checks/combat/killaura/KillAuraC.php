@@ -31,7 +31,6 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\killaura;
 
-use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerInteractEvent;
@@ -40,10 +39,12 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function count;
+use function sqrt;
 
 class KillAuraC extends Check {
 	private bool $interact = false;

@@ -31,11 +31,11 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockplace;
 
-use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
 use pocketmine\math\Vector3;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;

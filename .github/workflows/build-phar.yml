@@ -1,0 +1,32 @@
+name: Build Phar with Virions
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          tools: composer:v2
+
+      - name: Build plugin phar
+        run: php tools/build.php
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zuri-phar
+          path: build/*.phar
+          if-no-files-found: error

@@ -10,4 +10,6 @@ projects:
     libs:
       - src: vennv\vapm
         version: 2.5.6
+      - src: Paroxity\Commando
+        version: 3.3.0
 ...
