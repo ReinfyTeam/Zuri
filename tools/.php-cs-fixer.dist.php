@@ -4,7 +4,7 @@ use PhpCsFixer\Config;
 use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
 
 $finder = PhpCsFixer\Finder::create()
-    ->in(new RecursiveDirectoryIterator(__DIR__ . "/vendor")) // Target specific vendor package
+    ->in(new RecursiveDirectoryIterator("../vendor")) // Target specific vendor package
     ->name('*.php')
     ->ignoreDotFiles(true)
     ->ignoreVCS(true);
