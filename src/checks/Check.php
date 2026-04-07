@@ -55,6 +55,7 @@ use function strtolower;
 abstract class Check extends ConfigManager {
 	/** @var array<string, float> */
 	private static array $asyncThrottle = [];
+	private static float $lastAsyncThrottleCleanup = 0.0;
 
 	private ?bool $enabledOverride = null;
 	private ?bool $enabledCache = null;
@@ -77,6 +78,15 @@ abstract class Check extends ConfigManager {
 
 	protected function dispatchAsyncCheck(string $playerName, array $payload) : void {
 		$now = microtime(true);
+		if ((self::$lastAsyncThrottleCleanup === 0.0) || (($now - self::$lastAsyncThrottleCleanup) >= 60.0)) {
+			self::$lastAsyncThrottleCleanup = $now;
+			foreach (self::$asyncThrottle as $throttleKey => $expiresAt) {
+				if ($expiresAt <= $now) {
+					unset(self::$asyncThrottle[$throttleKey]);
+				}
+			}
+		}
+
 		$key = $playerName . ":" . static::class;
 		$minInterval = (float) ($payload["_minInterval"] ?? 0.02);
 		if (isset($payload["_minInterval"])) {

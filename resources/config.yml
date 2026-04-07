@@ -268,17 +268,17 @@ zuri:
                   lastjump-factor: 0.26
                   ice-factor: 0.2
                   # Speed (B) constants
-                  walking-speed-limit: 4.39999
-                  sprinting-speed-limit: 2.06229
-                  jump-speed-limit: 4.19435
+                  walking-speed-limit: 4.79999
+                  sprinting-speed-limit: 2.35229
+                  jump-speed-limit: 4.50435
                   ice-walking-speed-limit: 2.09777
                   speed-effect-limit: 5.85535
                   stairs-speed-limit: 0.80914
-                  time-limit: 0.5
+                  time-limit: 0.2
                   time-effect-limit: 0.2
-                  wakling-distance-limit: 0.25754
-                  sprinting-distance-limit: 0.25344
-                  jump-distance-limit: 0.45767
+                  wakling-distance-limit: 0.29754
+                  sprinting-distance-limit: 0.28344
+                  jump-distance-limit: 0.49767
                   ice-walking-distance-limit: 0.00735
                   speed-effect-distance-limit: 0.49282
                   top-block-limit: 1.02384
@@ -368,9 +368,9 @@ zuri:
                 c: 1
             punishment: KICK
             constants:
-                  max-ground-diff: 1
-                  max-air-ticks: 40
-                  packet-buffer-limit: 2
+                max-ground-diff: 1.2
+                max-air-ticks: 45
+                packet-buffer-limit: 3
         jesus: # Todo: Improve in next version, still in inspections, and testing...
             enable: false
             maxvl: 1
@@ -392,7 +392,7 @@ zuri:
             constants:
                  max-speed: 0.09
                  min-input-length: 0.75
-                 buffer-limit: 3
+                  buffer-limit: 5
                  max-ping: 200
         noslow: # BETA: Detects abnormal speed while using consumables, bows, and similar items.
             enable: true

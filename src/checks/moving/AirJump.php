@@ -79,7 +79,7 @@ class AirJump extends Check {
 				!$playerAPI->isCurrentChunkIsLoaded() ||
 				BlockUtil::isGroundSolid($player) ||
 				$playerAPI->isGliding() ||
-				$playerAPI->recentlyCancelledEvent() < 40
+				$playerAPI->isRecentlyCancelledEvent()
 			) {
 				return;
 			}

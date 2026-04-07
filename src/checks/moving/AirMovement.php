@@ -77,7 +77,7 @@ class AirMovement extends Check {
 				$nLocation["to"]->getY() > $nLocation["from"]->getY() &&
 				$playerAPI->getOnlineTime() >= 30 &&
 				$playerAPI->getPing() < self::getData(self::PING_LAGGING) &&
-				$playerAPI->recentlyCancelledEvent() > 40
+				!$playerAPI->isRecentlyCancelledEvent()
 			) {
 				$distance = $nLocation["to"]->getY() - $playerAPI->getLastGroundY();
 				$limit = $this->getConstant(CheckConstants::AIRMOVEMENT_AIR_LIMIT);

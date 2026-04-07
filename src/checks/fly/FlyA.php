@@ -78,6 +78,8 @@ class FlyA extends Check {
 			"groundSolid" => BlockUtil::isGroundSolid($player),
 			"gliding" => $playerAPI->isGliding(),
 			"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
+			"motionX" => abs($playerAPI->getMotion()->getX()),
+			"motionZ" => abs($playerAPI->getMotion()->getZ()),
 			"currentY" => (float) $player->getLocation()->getY(),
 			"lastYNoGround" => $playerAPI->getExternalData(CacheData::FLY_A_LAST_Y_NO_GROUND),
 			"lastTime" => $playerAPI->getExternalData(CacheData::FLY_A_LAST_TIME),
@@ -107,6 +109,8 @@ class FlyA extends Check {
 			!(bool) ($payload["chunkLoaded"] ?? false) ||
 			(bool) ($payload["groundSolid"] ?? false) ||
 			(bool) ($payload["gliding"] ?? false) ||
+			(float) ($payload["motionX"] ?? 0.0) > 0.11 ||
+			(float) ($payload["motionZ"] ?? 0.0) > 0.11 ||
 			(bool) ($payload["recentlyCancelled"] ?? false)
 		) {
 			return ["unset" => [CacheData::FLY_A_LAST_Y_NO_GROUND, CacheData::FLY_A_LAST_TIME]];

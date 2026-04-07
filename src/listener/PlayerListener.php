@@ -61,6 +61,7 @@ use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\server\CommandEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\inventory\ArmorInventory;
+use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
@@ -145,6 +146,7 @@ class PlayerListener implements Listener {
 		$playerAPI->setOnPlate(BlockUtil::isOnPlate($event->getTo(), 0));
 		$playerAPI->setOnSnow(BlockUtil::isOnSnow($event->getTo(), 0));
 		$playerAPI->setLastMoveTick((double) Server::getInstance()->getTick());
+		$playerAPI->setMotion(Vector3::zero());
 	}
 
 	public function onPlayerInteract(PlayerInteractEvent $event) : void {
@@ -260,7 +262,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		//TODO
 	}
@@ -276,7 +278,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		$this->checkEvent($event, $playerAPI);
 		foreach ($event->getTransaction()->getInventories() as $inventory) {
@@ -293,7 +295,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		$playerAPI->setInventoryOpen(true);
 		$this->checkEvent($event, $playerAPI);
@@ -306,7 +308,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		$playerAPI->setInventoryOpen(false);
 		$this->checkEvent($event, $playerAPI);
@@ -325,7 +327,7 @@ class PlayerListener implements Listener {
 		}
 
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 
 		$playerAPI->setTeleportTicks(microtime(true));
@@ -370,7 +372,7 @@ class PlayerListener implements Listener {
 		if (($player = $event->getEntity()) instanceof Player) {
 			$playerAPI = PlayerAPI::getAPIPlayer($player);
 			if ($event->isCancelled()) {
-				$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+				$playerAPI->setRecentlyCancelledEvent(microtime(true));
 			}
 			if (
 				$event->getCause() === EntityDamageEvent::CAUSE_ENTITY_ATTACK ||
@@ -406,7 +408,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		$this->checkJustEvent($event);
 		if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK) {
@@ -436,7 +438,7 @@ class PlayerListener implements Listener {
 			}
 
 			if ($event->isCancelled()) {
-				$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+				$playerAPI->setRecentlyCancelledEvent(microtime(true));
 			}
 
 			$playerAPI->setProjectileAttackTicks(microtime(true));
@@ -454,7 +456,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		$playerAPI->setDeathTicks(microtime(true));
 	}
@@ -472,7 +474,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -487,7 +489,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -505,7 +507,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -523,7 +525,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -541,7 +543,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		$playerAPI->setBowShotTicks(microtime(true));
 		$this->checkEvent($event, $playerAPI);
@@ -557,7 +559,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -573,7 +575,7 @@ class PlayerListener implements Listener {
 			return;
 		}
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 		$this->checkEvent($event, $playerAPI);
 	}
@@ -638,7 +640,7 @@ class PlayerListener implements Listener {
 
 	private function markRecentlyCancelled(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event->isCancelled()) {
-			$playerAPI->setRecentlyCancelledEvent((int) microtime(true));
+			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 	}
 }

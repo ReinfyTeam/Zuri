@@ -53,32 +53,36 @@ class ReachC extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function checkJustEvent(Event $event) : void {
-		if ($event instanceof EntityDamageByEntityEvent) {
-			if (($victim = $event->getEntity()) instanceof Player && ($damager = $event->getDamager()) instanceof Player) {
-				$victimAPI = PlayerAPI::getAPIPlayer($damager);
-				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
+		if (!$event instanceof EntityDamageByEntityEvent || $event->isCancelled()) {
+			return;
+		}
 
-				if (
-					$damager->isSurvival() ||
-					$entity->isSurvival() ||
-					$victimAPI->getProjectileAttackTicks() < 40 ||
-					$damagerAPI->getProjectileAttackTicks() < 40 ||
-					$victimAPI->getBowShotTicks() < 40 ||
-					$damagerAPI->getBowShotTicks() < 40 ||
-					$playerAPI->recentlyCancelledEvent() < 40
-				) { // false-positive in projectiles
-					return;
-				}
+		if (!($victim = $event->getEntity()) instanceof Player || !($damager = $event->getDamager()) instanceof Player) {
+			return;
+		}
 
-				$eyeHeight = $damager->getEyePos();
-				$cuboid = $victim->getBoundingBox();
-				// get the distance between the eye height and the cuboid
-				$distance = $eyeHeight->distance(new Vector3($cuboid->minX, $cuboid->minY, $cuboid->minZ));
-				$this->debug($damagerAPI, "distance=$distance");
-				if ($distance > $this->getConstant(CheckConstants::REACHC_MAX_REACH_EYE_DISTANCE)) {
-					$this->failed($damagerAPI);
-				}
-			}
+		$victimAPI = PlayerAPI::getAPIPlayer($victim);
+		$damagerAPI = PlayerAPI::getAPIPlayer($damager);
+		if (
+			!$damager->isSurvival() ||
+			!$victim->isSurvival() ||
+			$victimAPI->getProjectileAttackTicks() < 40 ||
+			$damagerAPI->getProjectileAttackTicks() < 40 ||
+			$victimAPI->getBowShotTicks() < 40 ||
+			$damagerAPI->getBowShotTicks() < 40 ||
+			$victimAPI->isRecentlyCancelledEvent() ||
+			$damagerAPI->isRecentlyCancelledEvent()
+		) {
+			return;
+		}
+
+		$eyeHeight = $damager->getEyePos();
+		$cuboid = $victim->getBoundingBox();
+		$distance = $eyeHeight->distance(new Vector3($cuboid->minX, $cuboid->minY, $cuboid->minZ));
+		$limit = (float) $this->getConstant(CheckConstants::REACHC_MAX_REACH_EYE_DISTANCE);
+		$this->debug($damagerAPI, "distance=$distance, limit=$limit");
+		if ($distance > $limit) {
+			$this->failed($damagerAPI);
 		}
 	}
 }

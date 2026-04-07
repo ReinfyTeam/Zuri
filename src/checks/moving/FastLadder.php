@@ -36,6 +36,7 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 use function intval;
@@ -82,7 +83,7 @@ class FastLadder extends Check {
 				!$playerAPI->isCurrentChunkIsLoaded() ||
 				BlockUtil::isGroundSolid($player) ||
 				$playerAPI->isGliding() ||
-				$playerAPI->recentlyCancelledEvent() < 40
+				$playerAPI->isRecentlyCancelledEvent()
 			) {
 				return;
 			}

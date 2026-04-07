@@ -41,8 +41,11 @@ use pocketmine\world\Position;
 use function abs;
 use function array_flip;
 use function fmod;
+use function implode;
 
 class BlockUtil {
+	private static array $idLookupCache = [];
+
 	public static function getBlockAbove(Player $player) : ?Block {
 		$position = $player->getPosition()->add(0, 1.0, 0);
 		return $player->getWorld()->getBlock($position->getSide(Facing::UP));
@@ -181,8 +184,8 @@ class BlockUtil {
 		$blockZ = (int) $location->getZ();
 		$world = $location->getWorld();
 
-		// Flip the array once for fast lookup (#72)
-		$idMap = array_flip($id);
+		$cacheKey = implode(",", $id);
+		$idMap = self::$idLookupCache[$cacheKey] ??= array_flip($id);
 
 		$check = static fn(int $x, int $y, int $z) => isset($idMap[$world->getBlockAt($x, $y, $z)->getTypeId()]);
 

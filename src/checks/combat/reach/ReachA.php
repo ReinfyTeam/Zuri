@@ -34,7 +34,6 @@ namespace ReinfyTeam\Zuri\checks\combat\reach;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
-use pocketmine\player\GameMode;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
@@ -55,36 +54,39 @@ class ReachA extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function checkJustEvent(Event $event) : void {
-		if ($event instanceof EntityDamageByEntityEvent) {
-			$entity = $event->getEntity();
-			$damager = $event->getDamager();
+		if (!$event instanceof EntityDamageByEntityEvent || $event->isCancelled()) {
+			return;
+		}
 
-			if ($damager instanceof Player && $entity instanceof Player) {
-				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
-				$playerAPI = PlayerAPI::getAPIPlayer($entity);
+		$entity = $event->getEntity();
+		$damager = $event->getDamager();
+		if (!$damager instanceof Player || !$entity instanceof Player) {
+			return;
+		}
 
-				if (
-					$damager->isSurvival() ||
-					$entity->isSurvival() ||
-					$playerAPI->getProjectileAttackTicks() < 40 ||
-					$damagerAPI->getProjectileAttackTicks() < 40 ||
-					$playerAPI->getBowShotTicks() < 40 ||
-					$damagerAPI->getBowShotTicks() < 40 ||
-					$playerAPI->recentlyCancelledEvent() < 40
-				) { // false-positive in projectiles
-					return;
-				}
+		$damagerAPI = PlayerAPI::getAPIPlayer($damager);
+		$playerAPI = PlayerAPI::getAPIPlayer($entity);
+		if (
+			!$damager->isSurvival() ||
+			!$entity->isSurvival() ||
+			$playerAPI->getProjectileAttackTicks() < 40 ||
+			$damagerAPI->getProjectileAttackTicks() < 40 ||
+			$playerAPI->getBowShotTicks() < 40 ||
+			$damagerAPI->getBowShotTicks() < 40 ||
+			$playerAPI->isRecentlyCancelledEvent() ||
+			$damagerAPI->isRecentlyCancelledEvent()
+		) {
+			return;
+		}
 
-				$locEntity = $entity->getLocation();
-				$locDamager = $damager->getLocation();
-				$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? abs($locEntity->getY() - $locDamager->getY()) : 0;
-				$distance = MathUtil::distance($locEntity, $locDamager) - $isPlayerTop;
-				$isSurvival = $entity->getGameMode() === GameMode::SURVIVAL();
-				$this->debug($damagerAPI, "isPlayerTop=$isPlayerTop, distance=$distance, isSurvival=$isSurvival");
-				if ($isSurvival && $distance > $this->getConstant(CheckConstants::REACHA_SURVIVAL_MAX_DISTANCE)) {
-					$this->failed($damagerAPI);
-				}
-			}
+		$locEntity = $entity->getLocation();
+		$locDamager = $damager->getLocation();
+		$isPlayerTop = $locEntity->getY() > $locDamager->getY() ? abs($locEntity->getY() - $locDamager->getY()) : 0;
+		$distance = MathUtil::distance($locEntity, $locDamager) - $isPlayerTop;
+		$limit = (float) $this->getConstant(CheckConstants::REACHA_SURVIVAL_MAX_DISTANCE);
+		$this->debug($damagerAPI, "isPlayerTop=$isPlayerTop, distance=$distance, limit=$limit");
+		if ($distance > $limit) {
+			$this->failed($damagerAPI);
 		}
 	}
 }

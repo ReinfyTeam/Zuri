@@ -90,12 +90,15 @@ class FlyB extends Check {
 		}
 
 		$flags = (int) ($payload["flags"] ?? 0);
-		$suspicious = in_array($flags, [614, 615, 103, 102, 38, 39], true) || (($flags >> 9) & 0x01 === 1) || (($flags >> 7) & 0x01 === 1) || (($flags >> 6) & 0x01 === 1);
+		$allowFlightFlag = (($flags >> 9) & 0x01) === 1;
+		$flyingFlag = (($flags >> 7) & 0x01) === 1;
+		$noclipFlag = (($flags >> 6) & 0x01) === 1;
+		$suspicious = $allowFlightFlag || $flyingFlag || $noclipFlag;
 		$buffer = (int) ($payload["buffer"] ?? 0);
 		$buffer = $suspicious ? $buffer + 1 : max(0, $buffer - 1);
 		$result = [
 			"set" => [self::BUFFER_KEY => $buffer],
-			"debug" => "packetFlags={$flags}, suspicious=" . ($suspicious ? "true" : "false") . ", buffer={$buffer}",
+			"debug" => "packetFlags={$flags}, allowFlightFlag=" . ($allowFlightFlag ? "1" : "0") . ", flyingFlag=" . ($flyingFlag ? "1" : "0") . ", noclipFlag=" . ($noclipFlag ? "1" : "0") . ", suspicious=" . ($suspicious ? "true" : "false") . ", buffer={$buffer}",
 		];
 		if ($buffer >= (int) ($payload["bufferLimit"] ?? 2)) {
 			$result["failed"] = true;

@@ -53,36 +53,38 @@ class ReachB extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function checkJustEvent(Event $event) : void {
-		if ($event instanceof EntityDamageByEntityEvent) {
-			$entity = $event->getEntity();
-			$damager = $event->getDamager();
-			if ($damager instanceof Player && $entity instanceof Player) {
-				$entityAPI = PlayerAPI::getAPIPlayer($entity);
-				$damagerAPI = PlayerAPI::getAPIPlayer($damager);
+		if (!$event instanceof EntityDamageByEntityEvent || $event->isCancelled()) {
+			return;
+		}
 
-				if (
-					$damager->isSurvival() ||
-					$entity->isSurvival() ||
-					$entityAPI->getProjectileAttackTicks() < 40 ||
-					$damagerAPI->getProjectileAttackTicks() < 40 ||
-					$entityAPI->getBowShotTicks() < 40 ||
-					$damagerAPI->getBowShotTicks() < 40 ||
-					$playerAPI->recentlyCancelledEvent() < 40
-				) { // false-positive in projectiles
-					return;
-				}
+		$entity = $event->getEntity();
+		$damager = $event->getDamager();
+		if (!$damager instanceof Player || !$entity instanceof Player) {
+			return;
+		}
 
+		$entityAPI = PlayerAPI::getAPIPlayer($entity);
+		$damagerAPI = PlayerAPI::getAPIPlayer($damager);
+		if (
+			!$damager->isSurvival() ||
+			!$entity->isSurvival() ||
+			$entityAPI->getProjectileAttackTicks() < 40 ||
+			$damagerAPI->getProjectileAttackTicks() < 40 ||
+			$entityAPI->getBowShotTicks() < 40 ||
+			$damagerAPI->getBowShotTicks() < 40 ||
+			$entityAPI->isRecentlyCancelledEvent() ||
+			$damagerAPI->isRecentlyCancelledEvent()
+		) {
+			return;
+		}
 
-				$player = $entityAPI->getPlayer();
-				$damager = $damagerAPI->getPlayer();
-				$playerLoc = $player->getLocation();
-				$damagerLoc = $player->getLocation();
-				$distance = MathUtil::XZDistanceSquared($playerLoc->asVector3(), $damagerLoc->asVector3());
-				$this->debug($damagerAPI, "distance=$distance");
-				if ($distance > ($damager->isSurvival() ? $this->getConstant(CheckConstants::REACHB_SURVIVAL_MAX_DISTANCE) : $this->getConstant(CheckConstants::REACHB_CREATIVE_MAX_DISTANCE))) {
-					$this->failed($damagerAPI);
-				}
-			}
+		$playerLoc = $entity->getLocation();
+		$damagerLoc = $damager->getLocation();
+		$distance = MathUtil::XZDistanceSquared($playerLoc->asVector3(), $damagerLoc->asVector3());
+		$limit = (float) $this->getConstant(CheckConstants::REACHB_SURVIVAL_MAX_DISTANCE);
+		$this->debug($damagerAPI, "distance=$distance, limit=$limit");
+		if ($distance > $limit) {
+			$this->failed($damagerAPI);
 		}
 	}
 }

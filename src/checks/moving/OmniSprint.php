@@ -40,6 +40,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\protocol\types\InputMode;
 use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
+use pocketmine\Server;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
@@ -49,6 +50,7 @@ use function max;
 class OmniSprint extends Check {
 	private const string BUFFER_KEY = CacheData::OMNISPRINT_A_BUFFER;
 	private const string LAST_MOVE_XZ_KEY = CacheData::OMNISPRINT_A_LAST_MOVE_XZ;
+	private const string LAST_MOVE_TICK_KEY = CacheData::OMNISPRINT_A_LAST_MOVE_TICK;
 
 	public function getName() : string {
 		return "OmniSprint";
@@ -91,6 +93,13 @@ class OmniSprint extends Check {
 		$inputLength = MathUtil::horizontalLength($packet->getMoveVecX(), $packet->getMoveVecZ());
 		$minInputLength = (float) ($this->getConstant(CheckConstants::OMNISPRINT_MIN_INPUT_LENGTH) ?? 0.75);
 		$maxSpeed = (float) ($this->getConstant(CheckConstants::OMNISPRINT_MAX_SPEED) ?? 0.09);
+		$currentTick = Server::getInstance()->getTick();
+		$lastMoveTick = (int) $playerAPI->getExternalData(self::LAST_MOVE_TICK_KEY, 0);
+		if ($lastMoveTick <= 0 || ($currentTick - $lastMoveTick) > 3) {
+			$this->resetState($playerAPI);
+			return;
+		}
+
 		$moveXZ = (float) $playerAPI->getExternalData(self::LAST_MOVE_XZ_KEY, 0.0);
 		$movingFast = $moveXZ > $maxSpeed;
 		$movingByInput = $inputLength >= $minInputLength;
@@ -124,6 +133,7 @@ class OmniSprint extends Check {
 
 		$moveXZ = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo());
 		$playerAPI->setExternalData(self::LAST_MOVE_XZ_KEY, $moveXZ);
+		$playerAPI->setExternalData(self::LAST_MOVE_TICK_KEY, Server::getInstance()->getTick());
 		$this->debug($playerAPI, "moveXZ={$moveXZ}, isSprinting=" . ($playerAPI->getPlayer()->isSprinting() ? "1" : "0"));
 	}
 
@@ -154,5 +164,6 @@ class OmniSprint extends Check {
 	private function resetState(PlayerAPI $playerAPI) : void {
 		$playerAPI->setExternalData(self::BUFFER_KEY, 0);
 		$playerAPI->unsetExternalData(self::LAST_MOVE_XZ_KEY);
+		$playerAPI->unsetExternalData(self::LAST_MOVE_TICK_KEY);
 	}
 }

@@ -66,7 +66,7 @@ class Jesus extends Check {
 				$playerAPI->getDeathTicks() < 100 ||
 				$player->getAllowFlight() ||
 				$player->isFlying() ||
-				$playerAPI->recentlyCancelledEvent() < 40
+				$playerAPI->isRecentlyCancelledEvent()
 			) {
 				return;
 			}

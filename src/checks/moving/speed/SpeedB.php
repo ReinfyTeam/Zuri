@@ -37,11 +37,10 @@ use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\math\Vector3;
+use pocketmine\Server;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
-use function abs;
-use function microtime;
 use function round;
 
 class SpeedB extends Check {
@@ -60,6 +59,7 @@ class SpeedB extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		if ($event instanceof PlayerMoveEvent) {
+			$groundSolid = BlockUtil::isGroundSolid($player);
 			if (
 				!$player->isSurvival() ||
 				$playerAPI->getAttackTicks() < 40 ||
@@ -76,17 +76,22 @@ class SpeedB extends Check {
 				$player->getAllowFlight() ||
 				$player->hasNoClientPredictions() ||
 				!$playerAPI->isCurrentChunkIsLoaded() ||
-				BlockUtil::isGroundSolid($player) ||
+				$groundSolid ||
 				$playerAPI->isGliding() ||
 				$playerAPI->isRecentlyCancelledEvent()
 			) {
 				return;
 			}
 
-			$now = microtime(true);
-			$time = $playerAPI->getExternalData(CacheData::SPEED_B_MOVE_TIME);
-			$playerAPI->setExternalData(CacheData::SPEED_B_MOVE_TIME, $now);
-			if ($time === null) {
+			$currentTick = Server::getInstance()->getTick();
+			$lastTick = $playerAPI->getExternalData(CacheData::SPEED_B_LAST_SERVER_TICK);
+			$playerAPI->setExternalData(CacheData::SPEED_B_LAST_SERVER_TICK, $currentTick);
+			if (!is_int($lastTick)) {
+				return;
+			}
+
+			$tickDiff = $currentTick - $lastTick;
+			if ($tickDiff <= 0) {
 				return;
 			}
 
@@ -98,8 +103,7 @@ class SpeedB extends Check {
 				"toX" => $event->getTo()->getX(),
 				"toY" => $event->getTo()->getY(),
 				"toZ" => $event->getTo()->getZ(),
-				"time" => $time,
-				"now" => $now,
+				"tickDiff" => $tickDiff,
 				"attackTicks" => $playerAPI->getAttackTicks(),
 				"projectileAttackTicks" => $playerAPI->getProjectileAttackTicks(),
 				"bowShotTicks" => $playerAPI->getBowShotTicks(),
@@ -115,7 +119,7 @@ class SpeedB extends Check {
 				"noClientPredictions" => $player->hasNoClientPredictions(),
 				"survival" => $player->isSurvival(),
 				"chunkLoaded" => $playerAPI->isCurrentChunkIsLoaded(),
-				"groundSolid" => BlockUtil::isGroundSolid($player),
+				"groundSolid" => $groundSolid,
 				"gliding" => $playerAPI->isGliding(),
 				"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
 				"sprinting" => $player->isSprinting(),
@@ -141,6 +145,7 @@ class SpeedB extends Check {
 					"speed-effect-limit" => $this->getConstant(CheckConstants::SPEEDB_SPEED_EFFECT_LIMIT),
 					"time-effect-limit" => $this->getConstant(CheckConstants::SPEEDB_TIME_EFFECT_LIMIT),
 					"speed-effect-distance-limit" => $this->getConstant(CheckConstants::SPEEDB_SPEED_EFFECT_DISTANCE_LIMIT),
+					"max-lag-ticks" => 8,
 					"pingLagging" => self::getData(self::PING_LAGGING),
 				]
 			]);
@@ -176,9 +181,12 @@ class SpeedB extends Check {
 			return [];
 		}
 
-		$time = (float) ($payload["time"] ?? 0.0);
-		$now = (float) ($payload["now"] ?? microtime(true));
-		$timeDiff = abs($time - $now);
+		$tickDiff = (int) ($payload["tickDiff"] ?? 0);
+		if ($tickDiff <= 0) {
+			return [];
+		}
+
+		$timeDiff = $tickDiff / 20;
 		$from = new Vector3((float) ($payload["fromX"] ?? 0.0), (float) ($payload["fromY"] ?? 0.0), (float) ($payload["fromZ"] ?? 0.0));
 		$to = new Vector3((float) ($payload["toX"] ?? 0.0), (float) ($payload["toY"] ?? 0.0), (float) ($payload["toZ"] ?? 0.0));
 		$distance = round(BlockUtil::distance($from, $to), 5);
@@ -204,8 +212,12 @@ class SpeedB extends Check {
 			$distanceLimit += (float) ($constants["speed-effect-distance-limit"] ?? 0) * $effectLevel;
 		}
 
-		$debug = "timeDiff={$timeDiff}, speed={$speed}, distance={$distance}, speedLimit={$speedLimit}, distanceLimit={$distanceLimit}, timeLimit={$timeLimit}";
-		if ($timeDiff > $timeLimit && $speed > $speedLimit && $distance > $distanceLimit && (int) ($payload["ping"] ?? 0) < (int) ($constants["pingLagging"] ?? 0)) {
+		if ($tickDiff > (int) ($constants["max-lag-ticks"] ?? 8)) {
+			return ["debug" => "tickDiff={$tickDiff}, lagSkipped=1"];
+		}
+
+		$debug = "tickDiff={$tickDiff}, timeDiff={$timeDiff}, speed={$speed}, distance={$distance}, speedLimit={$speedLimit}, distanceLimit={$distanceLimit}, timeLimit={$timeLimit}";
+		if ($timeDiff <= $timeLimit && $speed > $speedLimit && $distance > $distanceLimit && (int) ($payload["ping"] ?? 0) < (int) ($constants["pingLagging"] ?? 0)) {
 			return ["failed" => true, "debug" => $debug];
 		}
 

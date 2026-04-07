@@ -172,6 +172,12 @@ class ZuriAC extends PluginBase {
 	}
 
 	protected function onEnable() : void {
+		if (!class_exists(VapmPMMP::class)) {
+			$this->getLogger()->error("LibVapmPMMP is missing from this build. Build with pharynx virion injection (or Poggit virions) before deployment.");
+			$this->getServer()->getPluginManager()->disablePlugin($this);
+			return;
+		}
+
 		VapmPMMP::init($this);
 		$this->loadChecks();
 		$this->getScheduler()->scheduleRepeatingTask(new ServerTickTask($this), 20);

@@ -44,6 +44,8 @@ final class CacheData {
 	public const string NOSLOW_A_BUFFER = "NoSlowA.buffer";
 	public const string OMNISPRINT_A_BUFFER = "OmniSprintA.buffer";
 	public const string OMNISPRINT_A_LAST_MOVE_XZ = "OmniSprintA.lastMoveXZ";
+	public const string OMNISPRINT_A_LAST_MOVE_TICK = "OmniSprintA.lastMoveTick";
+	public const string PHASE_A_BUFFER = "PhaseA.buffer";
 	public const string REACH_E_BUFFER = "ReachE.buffer";
 	public const string REGEN_B_HEAL_COUNT = "RegenB.healCount";
 	public const string REGEN_B_HEAL_TIME = "RegenB.healTime";
@@ -66,6 +68,7 @@ final class CacheData {
 	public const string SCAFFOLD_F_LAST_PLACE_AT = "ScaffoldF.lastPlaceAt";
 	public const string SCAFFOLD_F_LAST_PLAYER = "ScaffoldF.lastPlayer";
 	public const string SPEED_A_LAST_DISTANCE_XZ = "SpeedA.lastDistanceXZ";
+	public const string SPEED_B_LAST_SERVER_TICK = "SpeedB.lastServerTick";
 	public const string SPEED_B_MOVE_TIME = "SpeedB.moveTime";
 	public const string SPAM_A_TICK = "SpamA.tick";
 	public const string SPAM_A_VIOLATION = "SpamA.violation";
