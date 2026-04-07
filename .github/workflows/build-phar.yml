@@ -21,16 +21,15 @@ jobs:
           php-version: 8.4
           pm-version-major: 5
       
-      - name: PHP-CS-Fixer for Composer Libraries
-        uses: docker://oskarstark/php-cs-fixer-ga
-        with:
-          args: --config=tools/.php-cs-fixer.dist.php
+      - name: Install composer dependencies
+        run: composer install --prefer-dist
       
-      - name: PHP-CS-Fixer for Plugin
-        uses: docker://oskarstark/php-cs-fixer-ga
-        with:
-          args: --diff --dry-run
-  
+      - name: Run php-cs-fixer (for composer libraries)
+        run: php-cs-fixer fix --config=build/.php-cs-fixer.dist.php --verbose
+      
+      - name: Run php-cs-fixer (for source code)
+        run: php-cs-fixer fix --config=.php-cs-fixer.php --verbose
+      
       - name: Build plugin phar
         run: php -d phar.readonly=0 tools/build.php
 
