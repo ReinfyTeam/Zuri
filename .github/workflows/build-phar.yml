@@ -15,11 +15,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Setup PHP for PocketMine-MP
+        uses: pmmp/setup-php-action@3.2.0
         with:
-          php-version: "8.4"
-          tools: composer:v2
+          php-version: 8.4
+          pm-version-major: 5
 
       - name: Build plugin phar
         run: php tools/build.php
