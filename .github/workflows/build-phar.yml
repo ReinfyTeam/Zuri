@@ -25,7 +25,7 @@ jobs:
         run: composer install --prefer-dist
       
       - name: Run php-cs-fixer (for composer libraries)
-        run: ./vendor/bin/php-cs-fixer fix --config=tools/.php-cs-fixer.vendor.php --verbose
+        run: ./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.vendor.php --verbose
       
       - name: Run php-cs-fixer (for source code)
         run: ./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.src.php --verbose
