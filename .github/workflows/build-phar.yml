@@ -22,7 +22,7 @@ jobs:
           pm-version-major: 5
       
       - name: Install composer dependencies
-        run: composer install --no-dev --prefer-dist
+        run: composer install --prefer-dist
       
       - name: Run php-cs-fixer (for source code)
         run: ./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --verbose
