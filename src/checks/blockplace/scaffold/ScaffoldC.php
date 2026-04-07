@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockplace\scaffold;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\DataPacket;
@@ -62,7 +63,7 @@ class ScaffoldC extends Check {
 			$posPlayer = $playerAPI->getLocation();
 			$distance = MathUtil::distance($posPlayer->asVector3(), $posBlock->asVector3());
 			$this->debug($playerAPI, "distance=$distance, pitch=" . abs($posPlayer->getPitch()));
-			if ($distance < $this->getConstant("max-place-distance") && abs($posPlayer->getPitch()) > 90) {
+			if ($distance < $this->getConstant(CheckConstants::SCAFFOLDC_MAX_PLACE_DISTANCE) && abs($posPlayer->getPitch()) > 90) {
 				$this->failed($playerAPI);
 			}
 		}

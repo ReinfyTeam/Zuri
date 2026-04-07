@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
@@ -84,7 +85,7 @@ class Spider extends Check {
 			if (($west || $south || $east || $north) && !$onLadder) { // diagonals are solid and the player is not on ladder..
 				$diff = abs($newY - $oldY);
 				if ($newY > $oldY) { // if bigger newY > oldY
-					if ($diff > $this->getConstant("limit-y-diff")) { // impossible :O y update 0.6~?
+					if ($diff > $this->getConstant(CheckConstants::SPIDER_LIMIT_Y_DIFF)) { // impossible :O y update 0.6~?
 						$this->failed($playerAPI);
 					}
 				}

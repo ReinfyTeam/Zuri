@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\killaura;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerInteractEvent;
@@ -101,9 +102,9 @@ class KillAuraC extends Check {
 					"deltaX" => $delta->getX(),
 					"deltaY" => $delta->getY(),
 					"deltaZ" => $delta->getZ(),
-					"maxDistance" => $this->getConstant("max-distance"),
-					"suspiciousPitch" => $this->getConstant("suspecious-pitch"),
-					"suspiciousCount" => $this->getConstant("suspecious-count"),
+					"maxDistance" => $this->getConstant(CheckConstants::KILLAURAC_MAX_DISTANCE),
+					"suspiciousPitch" => $this->getConstant(CheckConstants::KILLAURAC_SUSPECIOUS_PITCH),
+					"suspiciousCount" => $this->getConstant(CheckConstants::KILLAURAC_SUSPECIOUS_COUNT),
 					"targetBlockAir" => $player->getTargetBlock(10)->getTypeId() === BlockTypeIds::AIR,
 					"entities" => $entities,
 				]);

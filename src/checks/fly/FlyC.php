@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\fly;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
@@ -81,7 +82,7 @@ class FlyC extends Check {
 				"inAirTicks" => $player->getInAirTicks(),
 				"oldY" => $oldPos->getY(),
 				"newY" => $newPos->getY(),
-				"maxAirTicks" => (int) $this->getConstant("max-air-ticks"),
+				"maxAirTicks" => (int) $this->getConstant(CheckConstants::FLYC_MAX_AIR_TICKS),
 				"maxY" => $player->getWorld()->getHighestBlockAt((int) $newPos->getX(), (int) $newPos->getZ()),
 				"surroundingBlocks" => BlockUtil::getSurroundingBlocks($player),
 			]);

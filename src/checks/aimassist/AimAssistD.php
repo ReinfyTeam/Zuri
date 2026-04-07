@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\aimassist;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
@@ -69,7 +70,7 @@ class AimAssistD extends Check {
 			if (!empty($nLocation)) {
 				$yawDiff = MathUtil::angleDiff($nLocation["from"]->getYaw(), $nLocation["to"]->getYaw());
 				$pitchDiff = abs($nLocation["to"]->getPitch() - $nLocation["from"]->getPitch());
-				if ($yawDiff > $this->getConstant("min-abs-yaw") && $yawDiff < $this->getConstant("max-abs-yaw") && $pitchDiff > $this->getConstant("min-abs-pitch") && $pitchDiff < $this->getConstant("max-abs-pitch")) {
+				if ($yawDiff > $this->getConstant(CheckConstants::AIMASSISTD_MIN_ABS_YAW) && $yawDiff < $this->getConstant(CheckConstants::AIMASSISTD_MAX_ABS_YAW) && $pitchDiff > $this->getConstant(CheckConstants::AIMASSISTD_MIN_ABS_PITCH) && $pitchDiff < $this->getConstant(CheckConstants::AIMASSISTD_MAX_ABS_PITCH)) {
 					$this->failed($playerAPI);
 				}
 				$this->debug($playerAPI, "yawDiff={$yawDiff}, pitchDiff={$pitchDiff}");

@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\Event;
@@ -77,7 +78,7 @@ class FastBow extends Check {
 			$playerAPI->setExternalData(CacheData::FASTBOW_HS_HIT_TIME, $hsTimeSum / 5);
 			$hsHitTime = $playerAPI->getExternalData(CacheData::FASTBOW_HS_HIT_TIME);
 			$this->debug($playerAPI, "tick=$tick, tickDiff=$tickDiff, tps=$tps, shootFirstTick=$shootFirstTick, hsTimeSum=$hsTimeSum, currentHsIndex=$currentHsIndex, delta=$delta, hsHitTime=$hsHitTime");
-			if ($hsHitTime < $this->getConstant("max-hit-time")) { // idk how i made this..
+			if ($hsHitTime < $this->getConstant(CheckConstants::FASTBOW_MAX_HIT_TIME)) { // idk how i made this..
 				$this->failed($playerAPI);
 			}
 		}

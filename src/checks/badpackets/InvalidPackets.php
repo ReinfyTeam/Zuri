@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
@@ -58,7 +59,7 @@ class InvalidPackets extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof MovePlayerPacket) { // i dont know how i did this.
 			$speed = $playerAPI->getExternalData(CacheData::INVALID_PACKETS_TICK_PACKETS) - $playerAPI->getExternalData(CacheData::INVALID_PACKETS_LAST_PACKET_TICK);
-			if ($speed < $this->getConstant("max-packet-speed")) {
+			if ($speed < $this->getConstant(CheckConstants::INVALIDPACKETS_MAX_PACKET_SPEED)) {
 				$this->debug($playerAPI, "packetSpeed=$speed");
 				$this->failed($playerAPI);
 			}

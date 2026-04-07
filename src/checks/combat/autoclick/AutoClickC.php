@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\autoclick;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Event;
@@ -77,8 +78,8 @@ class AutoClickC extends Check {
 					"canDamagable" => $this->canDamagable,
 					"ticks" => $playerAPI->getExternalData(CacheData::AUTOCLICK_C_TICKS),
 					CacheData::AUTOCLICK_C_LAST_CLICK => $playerAPI->getExternalData(CacheData::AUTOCLICK_C_LAST_CLICK),
-					"animationDiffTime" => (float) $this->getConstant("animation-diff-time"),
-					"animationDiffTicks" => (int) $this->getConstant("animation-diff-ticks"),
+					"animationDiffTime" => (float) $this->getConstant(CheckConstants::AUTOCLICKC_ANIMATION_DIFF_TIME),
+					"animationDiffTicks" => (int) $this->getConstant(CheckConstants::AUTOCLICKC_ANIMATION_DIFF_TICKS),
 					"now" => microtime(true),
 				]);
 			}

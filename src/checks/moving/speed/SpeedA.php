@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving\speed;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
@@ -96,19 +97,19 @@ class SpeedA extends Check {
 				"onIce" => $playerAPI->isOnIce(),
 				"blockAboveSolid" => BlockUtil::getBlockAbove($player)->isSolid(),
 				"startJumping" => $packet->getInputFlags()->get(PlayerAuthInputFlags::START_JUMPING),
-				CacheData::SPEED_A_LAST_DISTANCE_XZ => $playerAPI->getExternalData(CacheData::SPEED_A_LAST_DISTANCE_XZ, $this->getConstant("xz-distance")),
+				CacheData::SPEED_A_LAST_DISTANCE_XZ => $playerAPI->getExternalData(CacheData::SPEED_A_LAST_DISTANCE_XZ, $this->getConstant(CheckConstants::SPEEDA_XZ_DISTANCE)),
 				"motionX" => $playerAPI->getMotion()->getX(),
 				"motionZ" => $playerAPI->getMotion()->getZ(),
-				"friction" => $playerAPI->isOnGround() ? $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN))->getFrictionFactor() : $this->getConstant("friction-factor"),
-				"threshold" => $this->getConstant("threshold"),
+				"friction" => $playerAPI->isOnGround() ? $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN))->getFrictionFactor() : $this->getConstant(CheckConstants::SPEEDA_FRICTION_FACTOR),
+				"threshold" => $this->getConstant(CheckConstants::SPEEDA_THRESHOLD),
 				"constants" => [
-					"xz-distance" => $this->getConstant("xz-distance"),
-					"jump-factor" => $this->getConstant("jump-factor"),
-					"ground-factor" => $this->getConstant("ground-factor"),
-					"lastjump-factor" => $this->getConstant("lastjump-factor"),
-					"ice-factor" => $this->getConstant("ice-factor"),
-					"knockback-factor" => $this->getConstant("knockback-factor"),
-					"lastmove-factor" => $this->getConstant("lastmove-factor"),
+					"xz-distance" => $this->getConstant(CheckConstants::SPEEDA_XZ_DISTANCE),
+					"jump-factor" => $this->getConstant(CheckConstants::SPEEDA_JUMP_FACTOR),
+					"ground-factor" => $this->getConstant(CheckConstants::SPEEDA_GROUND_FACTOR),
+					"lastjump-factor" => $this->getConstant(CheckConstants::SPEEDA_LASTJUMP_FACTOR),
+					"ice-factor" => $this->getConstant(CheckConstants::SPEEDA_ICE_FACTOR),
+					"knockback-factor" => $this->getConstant(CheckConstants::SPEEDA_KNOCKBACK_FACTOR),
+					"lastmove-factor" => $this->getConstant(CheckConstants::SPEEDA_LASTMOVE_FACTOR),
 					"speedLevel" => (($effect = $player->getEffects()->get(\pocketmine\entity\effect\VanillaEffects::SPEED())) !== null) ? $effect->getEffectLevel() : 0,
 					"slownessLevel" => (($effect = $player->getEffects()->get(\pocketmine\entity\effect\VanillaEffects::SLOWNESS())) !== null) ? $effect->getEffectLevel() : 0,
 				],

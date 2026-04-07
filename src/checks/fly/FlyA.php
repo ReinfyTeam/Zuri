@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\fly;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
@@ -81,7 +82,7 @@ class FlyA extends Check {
 			"lastYNoGround" => $playerAPI->getExternalData(CacheData::FLY_A_LAST_Y_NO_GROUND),
 			"lastTime" => $playerAPI->getExternalData(CacheData::FLY_A_LAST_TIME),
 			"now" => microtime(true),
-			"maxGroundDiff" => (float) $this->getConstant("max-ground-diff"),
+			"maxGroundDiff" => (float) $this->getConstant(CheckConstants::FLYA_MAX_GROUND_DIFF),
 		]);
 	}
 

@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\reach;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
 use pocketmine\player\Player;
@@ -78,7 +79,7 @@ class ReachB extends Check {
 				$damagerLoc = $player->getLocation();
 				$distance = MathUtil::XZDistanceSquared($playerLoc->asVector3(), $damagerLoc->asVector3());
 				$this->debug($damagerAPI, "distance=$distance");
-				if ($distance > ($damager->isSurvival() ? $this->getConstant("survival-max-distance") : $this->getConstant("creative-max-distance"))) {
+				if ($distance > ($damager->isSurvival() ? $this->getConstant(CheckConstants::REACHB_SURVIVAL_MAX_DISTANCE) : $this->getConstant(CheckConstants::REACHB_CREATIVE_MAX_DISTANCE))) {
 					$this->failed($damagerAPI);
 				}
 			}

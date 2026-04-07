@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\killaura;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
 use pocketmine\math\Vector3;
@@ -91,7 +92,7 @@ class KillAuraE extends Check {
 					"deltaX" => $delta->getX(),
 					"deltaY" => $delta->getY(),
 					"deltaZ" => $delta->getZ(),
-					"maxRange" => $this->getConstant("max-range"),
+					"maxRange" => $this->getConstant(CheckConstants::KILLAURAE_MAX_RANGE),
 					"entities" => $entities,
 				]);
 			}

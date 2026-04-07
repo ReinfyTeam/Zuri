@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockplace\scaffold;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
@@ -62,7 +63,7 @@ class ScaffoldB extends Check {
 			$oldPitch = $playerAPI->getExternalData(CacheData::SCAFFOLD_B_OLD_PITCH) ?? 0;
 			$this->debug($playerAPI, "oldPitch=$oldPitch distanceY=$distanceY, newPitch=$pitch, ping=" . $playerAPI->getPing());
 			if (
-				$pitch < $this->getConstant("suspecious-pitch-limit") && // is this has good calculation enough?
+				$pitch < $this->getConstant(CheckConstants::SCAFFOLDB_SUSPECIOUS_PITCH_LIMIT) && // is this has good calculation enough?
 				$distanceY && // it depends on block placed is under the player..
 				$oldPitch === $pitch && // for using bedrock long bridging lol anti-false kick
 				$playerAPI->getPing() < self::getData(self::PING_LAGGING)

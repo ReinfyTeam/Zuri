@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
@@ -57,7 +58,7 @@ class ClickTP extends Check {
 			$oldPitch = $event->getFrom()->getPitch();
 			$newPitch = $event->getTo()->getPitch();
 			$this->debug($playerAPI, "distance=$distance, oldYaw=$oldYaw, newYaw=$newYaw, oldPitch=$oldPitch, newPitch=$newPitch");
-			if ($distance > $this->getConstant("max-distance") && $oldYaw === $newYaw && $oldPitch === $newPitch) {
+			if ($distance > $this->getConstant(CheckConstants::CLICKTP_MAX_DISTANCE) && $oldYaw === $newYaw && $oldPitch === $newPitch) {
 				$this->failed($playerAPI);
 			}
 		}

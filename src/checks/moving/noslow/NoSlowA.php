@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving\noslow;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
@@ -56,13 +57,13 @@ class NoSlowA extends Check {
 			return;
 		}
 
-		if ((int) $playerAPI->getPing() > (int) $this->getConstant("max-ping")) {
+		if ((int) $playerAPI->getPing() > (int) $this->getConstant(CheckConstants::NOSLOWA_MAX_PING)) {
 			return;
 		}
 
 		$moveXZ = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo());
 		$buffer = $this->getBuffer($playerAPI);
-		if ($moveXZ > (float) $this->getConstant("max-xz-distance-squared")) {
+		if ($moveXZ > (float) $this->getConstant(CheckConstants::NOSLOWA_MAX_XZ_DISTANCE_SQUARED)) {
 			$buffer++;
 		} else {
 			$buffer = max(0, $buffer - 1);
@@ -71,7 +72,7 @@ class NoSlowA extends Check {
 		$this->setBuffer($playerAPI, $buffer);
 		$this->debug($playerAPI, "moveXZ={$moveXZ}, buffer={$buffer}, ping=" . (int) $playerAPI->getPing());
 
-		if ($buffer >= (int) $this->getConstant("buffer-limit")) {
+		if ($buffer >= (int) $this->getConstant(CheckConstants::NOSLOWA_BUFFER_LIMIT)) {
 			$this->setBuffer($playerAPI, 0);
 			$this->failed($playerAPI);
 		}

@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\autoclick;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
@@ -62,8 +63,8 @@ class AutoClickA extends Check {
 					"ticks" => $playerAPI->getExternalData(CacheData::AUTOCLICK_A_TICKS),
 					CacheData::AUTOCLICK_A_AVG_SPEED => $playerAPI->getExternalData(CacheData::AUTOCLICK_A_AVG_SPEED),
 					CacheData::AUTOCLICK_A_AVG_DEVIATION => $playerAPI->getExternalData(CacheData::AUTOCLICK_A_AVG_DEVIATION),
-					"maxTicks" => (int) $this->getConstant("max-ticks"),
-					"maxDeviation" => (float) $this->getConstant("max-deviation"),
+					"maxTicks" => (int) $this->getConstant(CheckConstants::AUTOCLICKA_MAX_TICKS),
+					"maxDeviation" => (float) $this->getConstant(CheckConstants::AUTOCLICKA_MAX_DEVIATION),
 				]);
 			}
 		}

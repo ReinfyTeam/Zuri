@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets\timer;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
@@ -60,7 +61,7 @@ class TimerB extends Check {
 				"currentTime" => microtime(true) * 1000,
 				"lastTime" => $playerAPI->getExternalData(CacheData::TIMER_A_LAST_TIME),
 				"balance" => $playerAPI->getExternalData(CacheData::TIMER_A_BALANCE, 0),
-				"diffBalance" => (float) $this->getConstant("diff-balance"),
+				"diffBalance" => (float) $this->getConstant(CheckConstants::TIMERB_DIFF_BALANCE),
 			]);
 		}
 	}

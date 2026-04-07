@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockplace\scaffold;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
@@ -63,7 +64,7 @@ class ScaffoldA extends Check {
 				$y = abs($posBlock->getY() - $loc->getY());
 				$z = abs($posBlock->getZ() - $loc->getZ());
 				$this->debug($playerAPI, "x=$x, y=$y, z=$z");
-				if ($x > $this->getConstant("box-range-x") || $y > $this->getConstant("box-range-y") || $z > $this->getConstant("box-range-z")) {
+				if ($x > $this->getConstant(CheckConstants::SCAFFOLDA_BOX_RANGE_X) || $y > $this->getConstant(CheckConstants::SCAFFOLDA_BOX_RANGE_Y) || $z > $this->getConstant(CheckConstants::SCAFFOLDA_BOX_RANGE_Z)) {
 					$this->failed($playerAPI);
 				}
 			}

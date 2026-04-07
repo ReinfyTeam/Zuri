@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\killaura;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
@@ -63,8 +64,8 @@ class KillAuraB extends Check {
 				"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
 				"pitch" => $packet->getPitch(),
 				"yaw" => $packet->getYaw(),
-				"deltaPitch" => $this->getConstant("delta-pitch"),
-				"deltaYaw" => $this->getConstant("delta-yaw"),
+				"deltaPitch" => $this->getConstant(CheckConstants::KILLAURAB_DELTA_PITCH),
+				"deltaYaw" => $this->getConstant(CheckConstants::KILLAURAB_DELTA_YAW),
 			]);
 		}
 	}

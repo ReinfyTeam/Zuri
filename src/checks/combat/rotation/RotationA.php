@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\rotation;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
@@ -38,7 +39,7 @@ class RotationA extends Check {
 		}
 
 		$player = $playerAPI->getPlayer();
-		if (!$player->isSurvival() || (int) $playerAPI->getPing() > (int) $this->getConstant("max-ping")) {
+		if (!$player->isSurvival() || (int) $playerAPI->getPing() > (int) $this->getConstant(CheckConstants::ROTATIONA_MAX_PING)) {
 			$this->setBuffer($playerAPI, 0);
 			$this->storeAngles($playerAPI, $packet->getYaw(), $packet->getPitch(), 0.0, 0.0);
 			return;
@@ -58,14 +59,14 @@ class RotationA extends Check {
 		$lastDeltaYaw = (float) $playerAPI->getExternalData(self::LAST_DELTA_YAW, $deltaYaw);
 		$lastDeltaPitch = (float) $playerAPI->getExternalData(self::LAST_DELTA_PITCH, $deltaPitch);
 
-		$inCombatWindow = $playerAPI->getAttackTicks() < (float) $this->getConstant("combat-window-ticks");
+		$inCombatWindow = $playerAPI->getAttackTicks() < (float) $this->getConstant(CheckConstants::ROTATIONA_COMBAT_WINDOW_TICKS);
 		$isPatternStable =
-			$deltaYaw >= (float) $this->getConstant("min-delta-yaw") &&
-			$deltaYaw <= (float) $this->getConstant("max-delta-yaw") &&
-			$deltaPitch >= (float) $this->getConstant("min-delta-pitch") &&
-			$deltaPitch <= (float) $this->getConstant("max-delta-pitch") &&
-			abs($deltaYaw - $lastDeltaYaw) <= (float) $this->getConstant("yaw-step-epsilon") &&
-			abs($deltaPitch - $lastDeltaPitch) <= (float) $this->getConstant("pitch-step-epsilon");
+			$deltaYaw >= (float) $this->getConstant(CheckConstants::ROTATIONA_MIN_DELTA_YAW) &&
+			$deltaYaw <= (float) $this->getConstant(CheckConstants::ROTATIONA_MAX_DELTA_YAW) &&
+			$deltaPitch >= (float) $this->getConstant(CheckConstants::ROTATIONA_MIN_DELTA_PITCH) &&
+			$deltaPitch <= (float) $this->getConstant(CheckConstants::ROTATIONA_MAX_DELTA_PITCH) &&
+			abs($deltaYaw - $lastDeltaYaw) <= (float) $this->getConstant(CheckConstants::ROTATIONA_YAW_STEP_EPSILON) &&
+			abs($deltaPitch - $lastDeltaPitch) <= (float) $this->getConstant(CheckConstants::ROTATIONA_PITCH_STEP_EPSILON);
 
 		$buffer = $this->getBuffer($playerAPI);
 		if ($inCombatWindow && $isPatternStable) {
@@ -78,7 +79,7 @@ class RotationA extends Check {
 		$this->storeAngles($playerAPI, $yaw, $pitch, $deltaYaw, $deltaPitch);
 		$this->debug($playerAPI, "deltaYaw={$deltaYaw}, deltaPitch={$deltaPitch}, lastDeltaYaw={$lastDeltaYaw}, lastDeltaPitch={$lastDeltaPitch}, buffer={$buffer}");
 
-		if ($buffer >= (int) $this->getConstant("buffer-limit")) {
+		if ($buffer >= (int) $this->getConstant(CheckConstants::ROTATIONA_BUFFER_LIMIT)) {
 			$this->setBuffer($playerAPI, 0);
 			$this->failed($playerAPI);
 		}

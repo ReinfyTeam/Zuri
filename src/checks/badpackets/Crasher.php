@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\world\format\Chunk;
@@ -57,8 +58,8 @@ class Crasher extends Check {
 			$pos = $packet->getPosition();
 			$chunk = $player->getWorld()->getChunk((int) $pos->getX() >> Chunk::COORD_BIT_SIZE, (int) $pos->getZ() >> Chunk::COORD_BIT_SIZE);
 			if (
-				($chunk !== null && $chunk->getHeight() > $this->getConstant("max-y")) ||
-				(abs($pos->getY()) > $this->getConstant("max-y"))
+				($chunk !== null && $chunk->getHeight() > $this->getConstant(CheckConstants::CRASHER_MAX_Y)) ||
+				(abs($pos->getY()) > $this->getConstant(CheckConstants::CRASHER_MAX_Y))
 			) {
 				$this->failed($playerAPI);
 				$this->debug($playerAPI, "y=" . $pos->getY() . ", absY=" . abs($pos->getY()));

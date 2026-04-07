@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\inventory;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
@@ -72,7 +73,7 @@ class ChestStealer extends Check {
 		}
 
 		$diff = $now - (float) $lastTime;
-		if ($diff <= (float) $this->getConstant("diff-time")) {
+		if ($diff <= (float) $this->getConstant(CheckConstants::CHESTSTEALER_DIFF_TIME)) {
 			$streak++;
 		} else {
 			$streak = 0;
@@ -82,7 +83,7 @@ class ChestStealer extends Check {
 		$playerAPI->setExternalData(CacheData::CHESTSTEALER_LAST_TIME, $now);
 		$this->debug($playerAPI, "streak={$streak}, diff={$diff}");
 
-		if ($streak > (int) $this->getConstant("diff-ticks")) {
+		if ($streak > (int) $this->getConstant(CheckConstants::CHESTSTEALER_DIFF_TICKS)) {
 			$this->failed($playerAPI);
 			$playerAPI->setExternalData(CacheData::CHESTSTEALER_TICKS, 0);
 		}

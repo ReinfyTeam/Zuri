@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\chat;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerChatEvent;
@@ -62,7 +63,7 @@ class SpamA extends Check {
 				if ($chatTick !== null || $violationChat !== null) {
 					$diff = microtime(true) - $chatTick;
 					if ($diff <= self::getData(self::CHAT_SPAM_DELAY)) {
-						if ($violationChat <= $this->getConstant("max-violation-rate")) {
+						if ($violationChat <= $this->getConstant(CheckConstants::SPAMA_MAX_VIOLATION_RATE)) {
 							$playerAPI->getPlayer()->sendMessage($this->replaceText($playerAPI, self::getData(self::CHAT_SPAM_TEXT), $this->getName(), $this->getSubType()));
 							$playerAPI->setExternalData(CacheData::SPAM_A_TICK, microtime(true));
 							$playerAPI->setExternalData(CacheData::SPAM_A_VIOLATION, $violationChat + 1);

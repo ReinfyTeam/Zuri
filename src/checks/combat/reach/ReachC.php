@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\reach;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
 use pocketmine\math\Vector3;
@@ -74,7 +75,7 @@ class ReachC extends Check {
 				// get the distance between the eye height and the cuboid
 				$distance = $eyeHeight->distance(new Vector3($cuboid->minX, $cuboid->minY, $cuboid->minZ));
 				$this->debug($damagerAPI, "distance=$distance");
-				if ($distance > $this->getConstant("max-reach-eye-distance")) {
+				if ($distance > $this->getConstant(CheckConstants::REACHC_MAX_REACH_EYE_DISTANCE)) {
 					$this->failed($damagerAPI);
 				}
 			}

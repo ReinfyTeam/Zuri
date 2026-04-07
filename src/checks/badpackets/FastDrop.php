@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerDropItemEvent;
@@ -62,7 +63,7 @@ class FastDrop extends Check {
 			if ($lastTick !== null) {
 				$diff = $currentTick - $lastTick;
 				$ping = $playerAPI->getPing();
-				if ($diff < $this->getConstant("time-limit") && $ping < self::getData(self::PING_LAGGING)) { // Wtf same as fastthrow?
+				if ($diff < $this->getConstant(CheckConstants::FASTDROP_TIME_LIMIT) && $ping < self::getData(self::PING_LAGGING)) { // Wtf same as fastthrow?
 					$event->cancel();
 					$this->failed($playerAPI);
 				}

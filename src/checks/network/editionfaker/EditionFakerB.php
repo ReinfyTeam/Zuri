@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\network\editionfaker;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\types\DeviceOS;
@@ -64,12 +65,12 @@ class EditionFakerB extends Check {
 			$givenOS = $playerAPI->getDeviceOS();
 
 			$expectedOS = match ($titleId) {
-				$this->getConstant("windows-10") => DeviceOS::WINDOWS_10,
-				$this->getConstant("nintendo") => DeviceOS::NINTENDO,
-				$this->getConstant("android") => DeviceOS::ANDROID,
-				$this->getConstant("playstation") => DeviceOS::PLAYSTATION,
-				$this->getConstant("xbox") => DeviceOS::XBOX,
-				$this->getConstant("apple") => DeviceOS::IOS,
+				$this->getConstant(CheckConstants::EDITIONFAKERB_WINDOWS_10) => DeviceOS::WINDOWS_10,
+				$this->getConstant(CheckConstants::EDITIONFAKERB_NINTENDO) => DeviceOS::NINTENDO,
+				$this->getConstant(CheckConstants::EDITIONFAKERB_ANDROID) => DeviceOS::ANDROID,
+				$this->getConstant(CheckConstants::EDITIONFAKERB_PLAYSTATION) => DeviceOS::PLAYSTATION,
+				$this->getConstant(CheckConstants::EDITIONFAKERB_XBOX) => DeviceOS::XBOX,
+				$this->getConstant(CheckConstants::EDITIONFAKERB_APPLE) => DeviceOS::IOS,
 				default => null
 			};
 

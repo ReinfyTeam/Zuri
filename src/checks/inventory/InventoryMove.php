@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\inventory;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\checks\Check;
@@ -66,7 +67,7 @@ class InventoryMove extends Check {
 
 			$moveSensitivity = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo());
 			$this->debug($playerAPI, "isOpen=" . $playerAPI->isInventoryOpen() . ", moveSensitivity=$moveSensitivity");
-			if ($playerAPI->isInventoryOpen() && $moveSensitivity > $this->getConstant("move-sensitivity")) {
+			if ($playerAPI->isInventoryOpen() && $moveSensitivity > $this->getConstant(CheckConstants::INVENTORYMOVE_MOVE_SENSITIVITY)) {
 				$this->failed($playerAPI);
 			}
 		}

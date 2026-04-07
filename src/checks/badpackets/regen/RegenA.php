@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets\regen;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\Event;
@@ -59,7 +60,7 @@ class RegenA extends Check {
 			if ($event->getRegainReason() != EntityDamageEvent::CAUSE_MAGIC && $event->getRegainReason() != EntityDamageEvent::CAUSE_CUSTOM) {
 				$healAmount = $event->getAmount();
 				$this->debug($playerAPI, "healAmount=$healAmount");
-				if ($healAmount > $this->getConstant("max-heal-amount")) {
+				if ($healAmount > $this->getConstant(CheckConstants::REGENA_MAX_HEAL_AMOUNT)) {
 					$this->failed($playerAPI);
 				}
 			}

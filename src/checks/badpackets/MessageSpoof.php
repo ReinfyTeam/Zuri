@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use ReinfyTeam\Zuri\checks\Check;
@@ -57,7 +58,7 @@ class MessageSpoof extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof TextPacket) {
 			$this->debug($playerAPI, "charLength=" . mb_strlen($packet->message));
-			if ((mb_strlen($packet->message)) > $this->getConstant("max-length")) {
+			if ((mb_strlen($packet->message)) > $this->getConstant(CheckConstants::MESSAGESPOOF_MAX_LENGTH)) {
 				$this->failed($playerAPI);
 			}
 		}

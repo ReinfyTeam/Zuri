@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockplace;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
 use pocketmine\math\Vector3;
@@ -82,7 +83,7 @@ class Tower extends Check {
 				$this->debug($playerAPI, "dotProduct=$dotProduct, playerPitch=$playerPitch");
 				// Check if the player's direction is approximately towards the block being placed
 				if ($playerPos->y > $blockPos->y) {
-					if ($dotProduct < $this->getConstant("margin-error") && abs($playerPitch) < $this->getConstant("invalid-pitch")) {
+					if ($dotProduct < $this->getConstant(CheckConstants::TOWER_MARGIN_ERROR) && abs($playerPitch) < $this->getConstant(CheckConstants::TOWER_INVALID_PITCH)) {
 						$event->cancel();
 						$this->failed($playerAPI);
 					}

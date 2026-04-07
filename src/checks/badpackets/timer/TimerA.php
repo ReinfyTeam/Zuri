@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets\timer;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
@@ -64,7 +65,7 @@ class TimerA extends Check {
 				"lastTime" => $playerAPI->getExternalData(CacheData::TIMER_A_LAST_TIME),
 				"balance" => $playerAPI->getExternalData(CacheData::TIMER_A_BALANCE, 0.0),
 				"laggingPing" => self::getData(self::PING_LAGGING),
-				"maxDiff" => (float) $this->getConstant("max-diff"),
+				"maxDiff" => (float) $this->getConstant(CheckConstants::TIMERA_MAX_DIFF),
 				"now" => microtime(true),
 			]);
 		}

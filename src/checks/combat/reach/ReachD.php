@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\reach;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
 use pocketmine\player\Player;
@@ -64,7 +65,7 @@ class ReachD extends Check {
 					return;
 				}
 
-				$useAsync = (bool) ($this->getConstant("async-enabled") ?? false);
+				$useAsync = (bool) ($this->getConstant(CheckConstants::REACHD_ASYNC_ENABLED) ?? false);
 				if ($useAsync) {
 					$payload = $this->buildAsyncPayload($damager, $victim, $damagerAPI);
 					$payload["_minInterval"] = 0.05;
@@ -143,14 +144,14 @@ class ReachD extends Check {
 			"victimEyeZ" => $victim->getEyePos()->getZ(),
 			"damagerPing" => $damager->getNetworkSession()->getPing(),
 			"victimPing" => $victim->getNetworkSession()->getPing(),
-			"defaultEyeDistance" => (float) ($this->getConstant("default-eye-distance") ?? 0.0041),
-			"victimSprintingDistance" => (float) ($this->getConstant("sprinting-eye-distance") ?? 0.97),
-			"victimNotSprintingDistance" => (float) ($this->getConstant("not-sprinting-eye-distance") ?? 0.87),
-			"damagerSprintingDistance" => (float) ($this->getConstant("damager-sprinting-eye-distance") ?? 0.77),
-			"damagerNotSprintingDistance" => (float) ($this->getConstant("not-sprinting-damager-eye-distance") ?? 0.67),
+			"defaultEyeDistance" => (float) ($this->getConstant(CheckConstants::REACHD_DEFAULT_EYE_DISTANCE) ?? 0.0041),
+			"victimSprintingDistance" => (float) ($this->getConstant(CheckConstants::REACHD_SPRINTING_EYE_DISTANCE) ?? 0.97),
+			"victimNotSprintingDistance" => (float) ($this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_EYE_DISTANCE) ?? 0.87),
+			"damagerSprintingDistance" => (float) ($this->getConstant(CheckConstants::REACHD_DAMAGER_SPRINTING_EYE_DISTANCE) ?? 0.77),
+			"damagerNotSprintingDistance" => (float) ($this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_DAMAGER_EYE_DISTANCE) ?? 0.67),
 			"damagerSprinting" => $damager->isSprinting(),
 			"victimSprinting" => $victim->isSprinting(),
-			"limit" => (float) ($this->getConstant("reach-eye-limit") ?? 3.0),
+			"limit" => (float) ($this->getConstant(CheckConstants::REACHD_REACH_EYE_LIMIT) ?? 3.0),
 			"damagerSurvival" => $damager->isSurvival(),
 			"victimSurvival" => $victim->isSurvival(),
 			"victimProjectileTicks" => $victimAPI->getProjectileAttackTicks(),
@@ -171,11 +172,11 @@ class ReachD extends Check {
 			$victim->getEyePos()->getY(),
 			$victim->getEyePos()->getZ()
 		);
-		$distance -= $damager->getNetworkSession()->getPing() * (float) $this->getConstant("default-eye-distance");
-		$distance -= $victim->getNetworkSession()->getPing() * (float) $this->getConstant("default-eye-distance");
-		$distance -= $victim->isSprinting() ? (float) $this->getConstant("sprinting-eye-distance") : (float) $this->getConstant("not-sprinting-eye-distance");
-		$distance -= $damager->isSprinting() ? (float) $this->getConstant("damager-sprinting-eye-distance") : (float) $this->getConstant("not-sprinting-damager-eye-distance");
-		$limit = (float) $this->getConstant("reach-eye-limit");
+		$distance -= $damager->getNetworkSession()->getPing() * (float) $this->getConstant(CheckConstants::REACHD_DEFAULT_EYE_DISTANCE);
+		$distance -= $victim->getNetworkSession()->getPing() * (float) $this->getConstant(CheckConstants::REACHD_DEFAULT_EYE_DISTANCE);
+		$distance -= $victim->isSprinting() ? (float) $this->getConstant(CheckConstants::REACHD_SPRINTING_EYE_DISTANCE) : (float) $this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_EYE_DISTANCE);
+		$distance -= $damager->isSprinting() ? (float) $this->getConstant(CheckConstants::REACHD_DAMAGER_SPRINTING_EYE_DISTANCE) : (float) $this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_DAMAGER_EYE_DISTANCE);
+		$limit = (float) $this->getConstant(CheckConstants::REACHD_REACH_EYE_LIMIT);
 
 		$this->debug($damagerAPI, "distance={$distance}, limit={$limit}");
 		if ($distance > $limit) {

@@ -136,12 +136,16 @@ class GhostHand extends Check {
 	}
 
 	private function profileConstant(string $name) : mixed {
-		$profile = strtolower((string) self::getData("zuri.tuning-presets.active", "custom"));
+		$default = $this->getConstant($name);
+		$profile = strtolower((string) self::getData("zuri.check.ghosthand.tuning-presets.active", "default"));
+		if ($profile === "custom") {
+			$profile = "default";
+		}
 		if ($profile !== "low-latency" && $profile !== "high-latency") {
-			return $this->getConstant($name);
+			return $default;
 		}
 
-		return self::getData("zuri.tuning-presets.combat." . $profile . ".ghosthand." . $name, $this->getConstant($name));
+		return self::getData("zuri.check.ghosthand.tuning-presets." . $profile . "." . $name, $default);
 	}
 
 	private function getIgnoredBlockCategories() : array {

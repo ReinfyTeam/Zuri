@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\entity\projectile\Arrow;
 use pocketmine\event\entity\ProjectileLaunchEvent;
@@ -67,7 +68,7 @@ class FastThrow extends Check {
 					if ($lastUse !== null) {
 						$diff = microtime(true) - $lastUse; // by ticks
 						$this->debug($playerAPI, "diff=$diff");
-						if ($diff < $this->getConstant("timediff-limit") && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) { // < ~0.2 sec, very imposible
+						if ($diff < $this->getConstant(CheckConstants::FASTTHROW_TIMEDIFF_LIMIT) && $playerAPI->getPing() < self::getData(self::PING_LAGGING)) { // < ~0.2 sec, very imposible
 							$event->cancel(); // cancel the event for safety
 							$this->failed($playerAPI);
 						}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockplace\scaffold;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
@@ -47,7 +48,7 @@ class ScaffoldE extends Check {
 			$playerAPI->isInWeb() ||
 			$playerAPI->isInLiquid() ||
 			$playerAPI->isRecentlyCancelledEvent() ||
-			(int) $playerAPI->getPing() > (int) $this->getConstant("expansion-max-ping")
+			(int) $playerAPI->getPing() > (int) $this->getConstant(CheckConstants::SCAFFOLDE_EXPANSION_MAX_PING)
 		) {
 			$this->setBuffer($playerAPI, 0);
 			return;
@@ -59,15 +60,15 @@ class ScaffoldE extends Check {
 		$interval = $lastPlaceAt > 0 ? $now - $lastPlaceAt : 999.0;
 
 		$horizontalDistanceSquared = MathUtil::XZDistanceSquared($player->getPosition(), $blockPos);
-		$suspicious = $interval <= (float) $this->getConstant("max-place-interval") &&
-			$horizontalDistanceSquared > (float) $this->getConstant("max-horizontal-distance-squared");
+		$suspicious = $interval <= (float) $this->getConstant(CheckConstants::SCAFFOLDE_MAX_PLACE_INTERVAL) &&
+			$horizontalDistanceSquared > (float) $this->getConstant(CheckConstants::SCAFFOLDE_MAX_HORIZONTAL_DISTANCE_SQUARED);
 
 		$sequentialDistance = 0.0;
 		$lastBlock = $playerAPI->getExternalData(self::LAST_BLOCK_KEY);
 		if (is_array($lastBlock)) {
 			$previousBlock = new Vector3((float) ($lastBlock["x"] ?? 0.0), (float) ($lastBlock["y"] ?? 0.0), (float) ($lastBlock["z"] ?? 0.0));
 			$sequentialDistance = MathUtil::distance($previousBlock, $blockPos->asVector3());
-			if ($interval <= (float) $this->getConstant("max-place-interval") && $sequentialDistance > (float) $this->getConstant("max-sequential-distance")) {
+			if ($interval <= (float) $this->getConstant(CheckConstants::SCAFFOLDE_MAX_PLACE_INTERVAL) && $sequentialDistance > (float) $this->getConstant(CheckConstants::SCAFFOLDE_MAX_SEQUENTIAL_DISTANCE)) {
 				$suspicious = true;
 			}
 		}
@@ -84,7 +85,7 @@ class ScaffoldE extends Check {
 		$playerAPI->setExternalData(self::LAST_BLOCK_KEY, ["x" => $blockPos->getX(), "y" => $blockPos->getY(), "z" => $blockPos->getZ()]);
 		$this->debug($playerAPI, "horizontalDistanceSquared={$horizontalDistanceSquared}, sequentialDistance={$sequentialDistance}, interval={$interval}, buffer={$buffer}");
 
-		if ($buffer >= (int) $this->getConstant("expansion-buffer-limit")) {
+		if ($buffer >= (int) $this->getConstant(CheckConstants::SCAFFOLDE_EXPANSION_BUFFER_LIMIT)) {
 			$this->setBuffer($playerAPI, 0);
 			$this->failed($playerAPI);
 		}

@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
@@ -79,8 +80,8 @@ class AirMovement extends Check {
 				$playerAPI->recentlyCancelledEvent() > 40
 			) {
 				$distance = $nLocation["to"]->getY() - $playerAPI->getLastGroundY();
-				$limit = $this->getConstant("air-limit");
-				$limit += isset($effects["potion.jump"]) ? ((($effects["potion.jump"] + $this->getConstant("effect-amplifier")) ** $this->getConstant("effect-multiplier")) / $this->getConstant("effect-const")) : 0;
+				$limit = $this->getConstant(CheckConstants::AIRMOVEMENT_AIR_LIMIT);
+				$limit += isset($effects["potion.jump"]) ? ((($effects["potion.jump"] + $this->getConstant(CheckConstants::AIRMOVEMENT_EFFECT_AMPLIFIER)) ** $this->getConstant(CheckConstants::AIRMOVEMENT_EFFECT_MULTIPLIER)) / $this->getConstant(CheckConstants::AIRMOVEMENT_EFFECT_CONST)) : 0;
 				if ($distance > $limit) {
 					$this->failed($playerAPI);
 				}

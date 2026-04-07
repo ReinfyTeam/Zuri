@@ -34,14 +34,12 @@ namespace ReinfyTeam\Zuri\checks\moving;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
-use pocketmine\math\Vector3;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function array_flip;
 use function array_keys;
-use function intval;
 
 class Phase extends Check {
 	public function getName() : string {
@@ -62,6 +60,12 @@ class Phase extends Check {
 			if (!$player->isConnected() || !$player->isOnline()) {
 				return;
 			}
+
+			// Trapdoor/door edge cases can place the player in temporary clipping states.
+			if (BlockUtil::isOnDoor($event->getTo(), 0) || BlockUtil::isOnDoor($event->getTo(), 1)) {
+				return;
+			}
+
 			$id = $world->getBlock($player->getLocation()->add(0, -1, 0))->getTypeId();
 			if ($world->getBlock($player->getLocation()->add(0, 1, 0))->isSolid() && $world->getBlock($player->getLocation()->add(0, -1, 0))->isSolid()) {
 				$skipFlipped = array_flip([
@@ -147,23 +151,12 @@ class Phase extends Check {
 					&& !$playerAPI->isInLiquid()
 					&& !$playerAPI->isInWeb()
 					&& !isset($skipFlipped[$id])
-					&& $playerAPI->recentlyCancelledEvent() > 40 // fix cancelled events false-flagging.
+					&& !$playerAPI->isRecentlyCancelledEvent()
 					&& !BlockUtil::isUnderBlock($event->getTo(), array_keys($skipFlipped), 0)
 				) {
 					$this->failed($playerAPI);
-					$x = intval($player->getLocation()->getX());
-					$z = intval($player->getLocation()->getZ());
-					$oldZ = $event->getFrom()->getZ();
-					$oldX = $event->getFrom()->getX();
-					$newZ = $event->getTo()->getZ();
-					$newX = $event->getTo()->getX();
-					if (($y = intval($player->getWorld()->getHighestBlockAt($x, $z))) > intval($player->getLocation()->getY()) && $oldZ === $newZ && $oldX === $newX) {
-						$world->loadChunk(intval($newX), intval($newZ)); // the best hack thing to do before player teleports at the bottom of the block.
-						$world->loadChunk(intval($oldX), intval($oldZ)); // the best hack thing to do before player teleports at the bottom of the block.
-						$player->teleport(new Vector3($x, $y + 1, $z));
-					}
 					$event->cancel();
-					$this->debug($playerAPI, "x=$x, y=" . intval($player->getLocation()->getY()) . ", z=$z, teleportY=$y");
+					$this->debug($playerAPI, "fromY=" . $event->getFrom()->getY() . ", toY=" . $event->getTo()->getY() . ", cancelled=1");
 				}
 			}
 		}

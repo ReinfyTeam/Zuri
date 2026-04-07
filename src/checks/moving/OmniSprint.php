@@ -31,6 +31,8 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
+use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
@@ -42,9 +44,12 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
-use function spl_object_id;
+use function max;
 
 class OmniSprint extends Check {
+	private const string BUFFER_KEY = CacheData::OMNISPRINT_A_BUFFER;
+	private const string LAST_MOVE_XZ_KEY = CacheData::OMNISPRINT_A_LAST_MOVE_XZ;
+
 	public function getName() : string {
 		return "OmniSprint";
 	}
@@ -53,65 +58,101 @@ class OmniSprint extends Check {
 		return "A";
 	}
 
-	private array $check = [];
-
 	/**
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		$player = $playerAPI->getPlayer();
-		if ($packet instanceof PlayerAuthInputPacket) {
-			if (
-				!$player->isSurvival() ||
-				$playerAPI->getTeleportTicks() < 40 ||
-				$playerAPI->getTeleportCommandTicks() < 40 ||
-				$playerAPI->getHurtTicks() < 20 ||
-				$player->hasNoClientPredictions() ||
-				$playerAPI->isRecentlyCancelledEvent()
-			) {
-				unset($this->check[spl_object_id($playerAPI)]);
-				return;
-			}
+		if (!$packet instanceof PlayerAuthInputPacket) {
+			return;
+		}
 
-			if ($packet->getInputMode() === InputMode::MOUSE_KEYBOARD || $packet->getInputMode() === InputMode::TOUCHSCREEN) { // for windows and mobile, ios only..
-				$inputFlags = $packet->getInputFlags();
-				$left = $inputFlags->get(PlayerAuthInputFlags::LEFT);
-				$right = $inputFlags->get(PlayerAuthInputFlags::RIGHT);
-				$down = $inputFlags->get(PlayerAuthInputFlags::DOWN);
-				$up = $inputFlags->get(PlayerAuthInputFlags::UP);
-				if ($down || $right || $left || $up) {
-					$movingFast = isset($this->check[spl_object_id($playerAPI)]);
-					$invalidSprint = $player->isSprinting() && ($down || (($left || $right) && !$up));
-					if ($invalidSprint && $movingFast) {
-						$this->failed($playerAPI);
-					}
-					$this->debug($playerAPI, "inputMode=" . $packet->getInputMode() . ", left=" . ($left ? "1" : "0") . ", right=" . ($right ? "1" : "0") . ", down=" . ($down ? "1" : "0") . ", up=" . ($up ? "1" : "0") . ", movingFast=" . $movingFast . ", invalidSprint=" . $invalidSprint);
-				}
-			}
+		$player = $playerAPI->getPlayer();
+		$maxPing = (int) ($this->getConstant(CheckConstants::OMNISPRINT_MAX_PING) ?? self::getData(self::PING_LAGGING));
+		if ($this->isExempt($playerAPI) || $playerAPI->getHurtTicks() < 20 || (int) $playerAPI->getPing() > $maxPing) {
+			$this->resetState($playerAPI);
+			return;
+		}
+
+		if ($packet->getInputMode() !== InputMode::MOUSE_KEYBOARD && $packet->getInputMode() !== InputMode::TOUCHSCREEN) {
+			$this->resetState($playerAPI);
+			return;
+		}
+
+		$inputFlags = $packet->getInputFlags();
+		$left = $inputFlags->get(PlayerAuthInputFlags::LEFT);
+		$right = $inputFlags->get(PlayerAuthInputFlags::RIGHT);
+		$down = $inputFlags->get(PlayerAuthInputFlags::DOWN);
+		$up = $inputFlags->get(PlayerAuthInputFlags::UP);
+
+		$backward = $down && !$up;
+		$sidewaysOnly = ($left xor $right) && !$up && !$down;
+		$invalidDirection = $backward || $sidewaysOnly;
+
+		$inputLength = MathUtil::horizontalLength($packet->getMoveVecX(), $packet->getMoveVecZ());
+		$minInputLength = (float) ($this->getConstant(CheckConstants::OMNISPRINT_MIN_INPUT_LENGTH) ?? 0.75);
+		$maxSpeed = (float) ($this->getConstant(CheckConstants::OMNISPRINT_MAX_SPEED) ?? 0.09);
+		$moveXZ = (float) $playerAPI->getExternalData(self::LAST_MOVE_XZ_KEY, 0.0);
+		$movingFast = $moveXZ > $maxSpeed;
+		$movingByInput = $inputLength >= $minInputLength;
+
+		$buffer = (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		if ($player->isSprinting() && $invalidDirection && $movingFast && $movingByInput) {
+			$buffer++;
+		} else {
+			$buffer = max(0, $buffer - 1);
+		}
+
+		$playerAPI->setExternalData(self::BUFFER_KEY, $buffer);
+		$this->debug($playerAPI, "left=" . ($left ? "1" : "0") . ", right=" . ($right ? "1" : "0") . ", down=" . ($down ? "1" : "0") . ", up=" . ($up ? "1" : "0") . ", inputLength={$inputLength}, moveXZ={$moveXZ}, movingFast=" . ($movingFast ? "1" : "0") . ", invalidDirection=" . ($invalidDirection ? "1" : "0") . ", buffer={$buffer}");
+
+		$bufferLimit = (int) ($this->getConstant(CheckConstants::OMNISPRINT_BUFFER_LIMIT) ?? 3);
+		if ($buffer >= $bufferLimit) {
+			$playerAPI->setExternalData(self::BUFFER_KEY, 0);
+			$this->failed($playerAPI);
 		}
 	}
 
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-		if ($event instanceof PlayerMoveEvent) {
-			$player = $playerAPI->getPlayer();
-			if (
-				!$player->isSurvival() ||
-				$playerAPI->getTeleportTicks() < 40 ||
-				$playerAPI->getTeleportCommandTicks() < 40 ||
-				$playerAPI->isRecentlyCancelledEvent()
-			) {
-				unset($this->check[spl_object_id($playerAPI)]);
-				return;
-			}
-
-			if (($d = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo())) > $this->getConstant("max-speed") && !$player->getEffects()->has(VanillaEffects::SPEED())) {
-				$this->check[spl_object_id($playerAPI)] = true; // moving too fast?
-			} else {
-				if (isset($this->check[spl_object_id($playerAPI)])) {
-					unset($this->check[spl_object_id($playerAPI)]);
-				}
-			}
-			$this->debug($playerAPI, "speed=$d, isSprinting=" . $player->isSprinting());
+		if (!$event instanceof PlayerMoveEvent) {
+			return;
 		}
+
+		if ($this->isExempt($playerAPI)) {
+			$this->resetState($playerAPI);
+			return;
+		}
+
+		$moveXZ = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo());
+		$playerAPI->setExternalData(self::LAST_MOVE_XZ_KEY, $moveXZ);
+		$this->debug($playerAPI, "moveXZ={$moveXZ}, isSprinting=" . ($playerAPI->getPlayer()->isSprinting() ? "1" : "0"));
+	}
+
+	private function isExempt(PlayerAPI $playerAPI) : bool {
+		$player = $playerAPI->getPlayer();
+		return
+			!$player->isSurvival() ||
+			$player->isCreative() ||
+			$player->isSpectator() ||
+			!$playerAPI->isCurrentChunkIsLoaded() ||
+			$player->getAllowFlight() ||
+			$player->isFlying() ||
+			$player->hasNoClientPredictions() ||
+			$playerAPI->isGliding() ||
+			$playerAPI->getLastMoveTick() > 5 ||
+			!$playerAPI->isOnGround() ||
+			$playerAPI->isInLiquid() ||
+			$playerAPI->isOnIce() ||
+			$playerAPI->isOnStairs() ||
+			$playerAPI->isOnAdhesion() ||
+			$playerAPI->isInWeb() ||
+			$playerAPI->getTeleportTicks() < 40 ||
+			$playerAPI->getTeleportCommandTicks() < 40 ||
+			$player->getEffects()->has(VanillaEffects::SPEED()) ||
+			$playerAPI->isRecentlyCancelledEvent();
+	}
+
+	private function resetState(PlayerAPI $playerAPI) : void {
+		$playerAPI->setExternalData(self::BUFFER_KEY, 0);
+		$playerAPI->unsetExternalData(self::LAST_MOVE_XZ_KEY);
 	}
 }

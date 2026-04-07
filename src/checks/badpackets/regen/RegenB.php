@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets\regen;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
@@ -75,13 +76,13 @@ class RegenB extends Check {
 						$playerAPI->setExternalData(CacheData::REGEN_B_HEAL_COUNT, $healCount + $healAmount);
 						$playerAPI->setExternalData(CacheData::REGEN_B_HEAL_TIME, $healTime + $delta);
 						$healCount = $playerAPI->getExternalData(CacheData::REGEN_B_HEAL_COUNT);
-						if ($healCount >= $this->getConstant("max-healcount")) {
+						if ($healCount >= $this->getConstant(CheckConstants::REGENB_MAX_HEALCOUNT)) {
 							if ($healTime !== 0 && $healCount !== 0) {
 								$healRate = (float) $healCount / (float) $healTime;
 
 								$this->debug($playerAPI, "healRate=$healRate");
 
-								if ($healRate > $this->getConstant("max-healrate")) {
+								if ($healRate > $this->getConstant(CheckConstants::REGENB_MAX_HEALRATE)) {
 									$this->failed($playerAPI);
 								}
 							}

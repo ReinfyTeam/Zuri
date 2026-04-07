@@ -117,11 +117,15 @@ class Hitbox extends Check {
 	}
 
 	private function profileConstant(string $name) : mixed {
-		$profile = strtolower((string) self::getData("zuri.tuning-presets.active", "custom"));
+		$default = $this->getConstant($name);
+		$profile = strtolower((string) self::getData("zuri.check.hitbox.tuning-presets.active", "default"));
+		if ($profile === "custom") {
+			$profile = "default";
+		}
 		if ($profile !== "low-latency" && $profile !== "high-latency") {
-			return $this->getConstant($name);
+			return $default;
 		}
 
-		return self::getData("zuri.tuning-presets.combat." . $profile . ".hitbox." . $name, $this->getConstant($name));
+		return self::getData("zuri.check.hitbox.tuning-presets." . $profile . "." . $name, $default);
 	}
 }

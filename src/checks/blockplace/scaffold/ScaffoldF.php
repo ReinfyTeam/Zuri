@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockplace\scaffold;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\Event;
@@ -48,7 +49,7 @@ class ScaffoldF extends Check {
 			$playerAPI->isInWeb() ||
 			$playerAPI->isInLiquid() ||
 			$playerAPI->isRecentlyCancelledEvent() ||
-			(int) $playerAPI->getPing() > (int) $this->getConstant("ghost-max-ping")
+			(int) $playerAPI->getPing() > (int) $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MAX_PING)
 		) {
 			$this->resetState($playerAPI);
 			return;
@@ -75,11 +76,11 @@ class ScaffoldF extends Check {
 			$blockStep = MathUtil::distance($previousBlock, $blockPos->asVector3());
 			$playerStepSquared = MathUtil::XZDistanceSquared($previousPlayer, $playerPos);
 			$suspicious =
-				$interval <= (float) $this->getConstant("ghost-max-place-interval") &&
+				$interval <= (float) $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MAX_PLACE_INTERVAL) &&
 				$isBelow &&
-				$blockStep >= (float) $this->getConstant("ghost-min-block-step") &&
-				$playerStepSquared <= (float) $this->getConstant("ghost-max-player-step-squared") &&
-				$playerBlockDistanceSquared >= (float) $this->getConstant("ghost-min-player-block-distance-squared");
+				$blockStep >= (float) $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MIN_BLOCK_STEP) &&
+				$playerStepSquared <= (float) $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MAX_PLAYER_STEP_SQUARED) &&
+				$playerBlockDistanceSquared >= (float) $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MIN_PLAYER_BLOCK_DISTANCE_SQUARED);
 		}
 
 		$buffer = $this->getBuffer($playerAPI);
@@ -95,7 +96,7 @@ class ScaffoldF extends Check {
 		$playerAPI->setExternalData(self::LAST_PLAYER_KEY, ["x" => $playerPos->getX(), "y" => $playerPos->getY(), "z" => $playerPos->getZ()]);
 		$this->debug($playerAPI, "interval={$interval}, blockStep={$blockStep}, playerStepSquared={$playerStepSquared}, playerBlockDistanceSquared={$playerBlockDistanceSquared}, below={$isBelow}, buffer={$buffer}");
 
-		if ($buffer >= (int) $this->getConstant("ghost-buffer-limit")) {
+		if ($buffer >= (int) $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_BUFFER_LIMIT)) {
 			$this->resetState($playerAPI);
 			$this->failed($playerAPI);
 		}

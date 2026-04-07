@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\blockinteract;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerInteractEvent;
 use ReinfyTeam\Zuri\checks\Check;
@@ -52,7 +53,7 @@ class BlockReach extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerInteractEvent) {
 			$block = $event->getBlock();
-			if (!$playerAPI->getPlayer()->canInteract($block->getPosition()->add(0.5, 0.5, 0.5), $playerAPI->getPlayer()->isCreative() ? $this->getConstant("max-creative-reach") : $this->getConstant("max-survival-reach"))) {
+			if (!$playerAPI->getPlayer()->canInteract($block->getPosition()->add(0.5, 0.5, 0.5), $playerAPI->getPlayer()->isCreative() ? $this->getConstant(CheckConstants::BLOCKREACH_MAX_CREATIVE_REACH) : $this->getConstant(CheckConstants::BLOCKREACH_MAX_SURVIVAL_REACH))) {
 				$this->failed($playerAPI);
 			}
 		}

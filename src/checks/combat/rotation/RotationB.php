@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\rotation;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
@@ -40,7 +41,7 @@ class RotationB extends Check {
 		if (
 			!$player->isSurvival() ||
 			$playerAPI->isRecentlyCancelledEvent() ||
-			(int) $playerAPI->getPing() > (int) $this->getConstant("max-ping")
+			(int) $playerAPI->getPing() > (int) $this->getConstant(CheckConstants::ROTATIONB_MAX_PING)
 		) {
 			$this->setBuffer($playerAPI, 0);
 			$this->storeState($playerAPI, $packet->getYaw(), $packet->getPitch(), 0.0);
@@ -60,11 +61,11 @@ class RotationB extends Check {
 		$deltaPitch = abs($pitch - (float) $lastPitch);
 		$lastDeltaYaw = (float) $playerAPI->getExternalData(self::LAST_DELTA_YAW, $deltaYaw);
 
-		$inCombatWindow = $playerAPI->getAttackTicks() < (float) $this->getConstant("combat-window-ticks");
+		$inCombatWindow = $playerAPI->getAttackTicks() < (float) $this->getConstant(CheckConstants::ROTATIONB_COMBAT_WINDOW_TICKS);
 		$looksSnapped =
-			$deltaYaw >= (float) $this->getConstant("snap-min-delta-yaw") &&
-			abs($deltaYaw - $lastDeltaYaw) <= (float) $this->getConstant("snap-repeat-epsilon") &&
-			$deltaPitch <= (float) $this->getConstant("snap-max-delta-pitch");
+			$deltaYaw >= (float) $this->getConstant(CheckConstants::ROTATIONB_SNAP_MIN_DELTA_YAW) &&
+			abs($deltaYaw - $lastDeltaYaw) <= (float) $this->getConstant(CheckConstants::ROTATIONB_SNAP_REPEAT_EPSILON) &&
+			$deltaPitch <= (float) $this->getConstant(CheckConstants::ROTATIONB_SNAP_MAX_DELTA_PITCH);
 
 		$buffer = $this->getBuffer($playerAPI);
 		if ($inCombatWindow && $looksSnapped) {
@@ -77,7 +78,7 @@ class RotationB extends Check {
 		$this->storeState($playerAPI, $yaw, $pitch, $deltaYaw);
 		$this->debug($playerAPI, "deltaYaw={$deltaYaw}, deltaPitch={$deltaPitch}, lastDeltaYaw={$lastDeltaYaw}, buffer={$buffer}");
 
-		if ($buffer >= (int) $this->getConstant("snap-buffer-limit")) {
+		if ($buffer >= (int) $this->getConstant(CheckConstants::ROTATIONB_SNAP_BUFFER_LIMIT)) {
 			$this->setBuffer($playerAPI, 0);
 			$this->failed($playerAPI);
 		}

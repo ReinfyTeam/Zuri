@@ -42,6 +42,8 @@ final class CacheData {
 	public const string INVALID_PACKETS_LAST_PACKET_TICK = "InvalidPackets.lastPacketTick";
 	public const string INVALID_PACKETS_TICK_PACKETS = "InvalidPackets.tickPackets";
 	public const string NOSLOW_A_BUFFER = "NoSlowA.buffer";
+	public const string OMNISPRINT_A_BUFFER = "OmniSprintA.buffer";
+	public const string OMNISPRINT_A_LAST_MOVE_XZ = "OmniSprintA.lastMoveXZ";
 	public const string REACH_E_BUFFER = "ReachE.buffer";
 	public const string REGEN_B_HEAL_COUNT = "RegenB.healCount";
 	public const string REGEN_B_HEAL_TIME = "RegenB.healTime";

@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\autoclick;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
@@ -63,8 +64,8 @@ class AutoClickB extends Check {
 					"placingTicks" => $playerAPI->getPlacingTicks(),
 					"ticks" => $playerAPI->getExternalData(CacheData::AUTOCLICK_B_TICKS),
 					CacheData::AUTOCLICK_B_LAST_CLICK => $playerAPI->getExternalData(CacheData::AUTOCLICK_B_LAST_CLICK),
-					"diffTime" => (float) $this->getConstant("diff-time"),
-					"diffTicks" => (int) $this->getConstant("diff-ticks"),
+					"diffTime" => (float) $this->getConstant(CheckConstants::AUTOCLICKB_DIFF_TIME),
+					"diffTicks" => (int) $this->getConstant(CheckConstants::AUTOCLICKB_DIFF_TICKS),
 					"now" => microtime(true),
 				]);
 			}

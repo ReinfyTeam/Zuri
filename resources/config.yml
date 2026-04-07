@@ -23,65 +23,6 @@ zuri:
         #This is the buyer's discretion if you have custom errors with your server we will not be responsible.
         normal: 20
         lagging: 200
-    tuning-presets:
-        # custom: use values from zuri.check.<module>.constants as-is.
-        # low-latency/high-latency: override GhostHand/Hitbox/ItemLerp constants at runtime.
-        active: custom # custom | low-latency | high-latency
-        combat:
-            low-latency:
-                ghosthand:
-                    min-distance: 1.5
-                    max-distance: 3.8
-                    min-teleport-ticks: 40
-                    max-ping: 150
-                    ray-step: 0.18
-                    buffer-limit: 4
-                    ignore-block-categories: [slabs, stairs, walls, fences, gates, glass, panes, leaves]
-                hitbox:
-                    min-distance: 1.3
-                    max-distance: 3.8
-                    combat-window-ticks: 12
-                    min-teleport-ticks: 40
-                    max-ping: 150
-                    min-dot: 0.38
-                    dot-ping-compensation: 0.0006
-                    max-miss-distance: 1.05
-                    miss-ping-compensation: 0.0012
-                    buffer-limit: 5
-                itemlerp:
-                    max-switch-ticks: 1.45
-                    combat-window-ticks: 10
-                    min-cps: 9
-                    min-teleport-ticks: 30
-                    max-ping: 145
-                    buffer-limit: 5
-            high-latency:
-                ghosthand:
-                    min-distance: 1.8
-                    max-distance: 4.1
-                    min-teleport-ticks: 55
-                    max-ping: 260
-                    ray-step: 0.24
-                    buffer-limit: 7
-                    ignore-block-categories: [slabs, stairs, walls, fences, gates, glass, panes, leaves, trapdoors, doors]
-                hitbox:
-                    min-distance: 1.5
-                    max-distance: 4.1
-                    combat-window-ticks: 18
-                    min-teleport-ticks: 55
-                    max-ping: 260
-                    min-dot: 0.28
-                    dot-ping-compensation: 0.001
-                    max-miss-distance: 1.3
-                    miss-ping-compensation: 0.0022
-                    buffer-limit: 8
-                itemlerp:
-                    max-switch-ticks: 1.9
-                    combat-window-ticks: 14
-                    min-cps: 7
-                    min-teleport-ticks: 45
-                    max-ping: 240
-                    buffer-limit: 8
     lagging:
         message: "{prefix} §cThe server is lagging! The server has currently §b{tps} tps§c! Zuri can't check players at the moment!"
     #Bypass a world according to list.
@@ -442,14 +383,17 @@ zuri:
             pre-vl:
                 a: 5
             punishment: KICK
-        omnisprint: # Todo: Improve in next version, fix false-positive in certain moves..
+        omnisprint: # BETA: Directional sprint anomaly detector with movement buffering.
             enable: false
             maxvl: 1
             pre-vl:
                 a: 10
             punishment: KICK
             constants:
-                 max-speed: 0.3
+                 max-speed: 0.09
+                 min-input-length: 0.75
+                 buffer-limit: 3
+                 max-ping: 200
         noslow: # BETA: Detects abnormal speed while using consumables, bows, and similar items.
             enable: true
             maxvl: 1
@@ -568,6 +512,26 @@ zuri:
                   ray-step: 0.2
                   buffer-limit: 5
                   ignore-block-categories: [slabs, stairs, walls, fences, gates, glass, panes, leaves]
+            tuning-presets:
+                # default/custom: use values from this module constants as-is.
+                # low-latency/high-latency: override GhostHand constants for this module only.
+                active: default # default | custom | low-latency | high-latency
+                low-latency:
+                    min-distance: 1.5
+                    max-distance: 3.8
+                    min-teleport-ticks: 40
+                    max-ping: 150
+                    ray-step: 0.18
+                    buffer-limit: 4
+                    ignore-block-categories: [slabs, stairs, walls, fences, gates, glass, panes, leaves]
+                high-latency:
+                    min-distance: 1.8
+                    max-distance: 4.1
+                    min-teleport-ticks: 55
+                    max-ping: 260
+                    ray-step: 0.24
+                    buffer-limit: 7
+                    ignore-block-categories: [slabs, stairs, walls, fences, gates, glass, panes, leaves, trapdoors, doors]
         hitbox:
             enable: true
             maxvl: 1
@@ -585,6 +549,32 @@ zuri:
                   max-miss-distance: 1.15
                   miss-ping-compensation: 0.0015
                   buffer-limit: 6
+            tuning-presets:
+                # default/custom: use values from this module constants as-is.
+                # low-latency/high-latency: override Hitbox constants for this module only.
+                active: default # default | custom | low-latency | high-latency
+                low-latency:
+                    min-distance: 1.3
+                    max-distance: 3.8
+                    combat-window-ticks: 12
+                    min-teleport-ticks: 40
+                    max-ping: 150
+                    min-dot: 0.38
+                    dot-ping-compensation: 0.0006
+                    max-miss-distance: 1.05
+                    miss-ping-compensation: 0.0012
+                    buffer-limit: 5
+                high-latency:
+                    min-distance: 1.5
+                    max-distance: 4.1
+                    combat-window-ticks: 18
+                    min-teleport-ticks: 55
+                    max-ping: 260
+                    min-dot: 0.28
+                    dot-ping-compensation: 0.001
+                    max-miss-distance: 1.3
+                    miss-ping-compensation: 0.0022
+                    buffer-limit: 8
         itemlerp:
             enable: true
             maxvl: 1
@@ -598,6 +588,24 @@ zuri:
                   min-teleport-ticks: 35
                   max-ping: 170
                   buffer-limit: 6
+            tuning-presets:
+                # default/custom: use values from this module constants as-is.
+                # low-latency/high-latency: override ItemLerp constants for this module only.
+                active: default # default | custom | low-latency | high-latency
+                low-latency:
+                    max-switch-ticks: 1.45
+                    combat-window-ticks: 10
+                    min-cps: 9
+                    min-teleport-ticks: 30
+                    max-ping: 145
+                    buffer-limit: 5
+                high-latency:
+                    max-switch-ticks: 1.9
+                    combat-window-ticks: 14
+                    min-cps: 7
+                    min-teleport-ticks: 45
+                    max-ping: 240
+                    buffer-limit: 8
         velocity: # BETA: Detects anti-knockback style behavior after recent combat hits.
             enable: true
             maxvl: 1

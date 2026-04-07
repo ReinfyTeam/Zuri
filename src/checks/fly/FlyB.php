@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\fly;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
@@ -66,7 +67,7 @@ class FlyB extends Check {
 				"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
 				"flags" => $packet->flags,
 				"buffer" => (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0),
-				"bufferLimit" => (int) $this->getConstant("packet-buffer-limit"),
+				"bufferLimit" => (int) $this->getConstant(CheckConstants::FLYB_PACKET_BUFFER_LIMIT),
 			]);
 		}
 	}

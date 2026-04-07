@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
@@ -55,7 +56,7 @@ class ImpossiblePitch extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($packet instanceof PlayerAuthInputPacket && ($pitch = abs($packet->getPitch())) > $this->getConstant("max-pitch")) {
+		if ($packet instanceof PlayerAuthInputPacket && ($pitch = abs($packet->getPitch())) > $this->getConstant(CheckConstants::IMPOSSIBLEPITCH_MAX_PITCH)) {
 			$this->debug($playerAPI, "pitch=$pitch");
 			$this->failed($playerAPI);
 		}

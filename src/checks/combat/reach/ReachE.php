@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\reach;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
@@ -61,8 +62,8 @@ class ReachE extends Check {
 			$closestY,
 			$closestZ
 		);
-		$distance -= (int) $damagerAPI->getPing() * (float) $this->getConstant("edge-ping-compensation");
-		$limit = (float) $this->getConstant("edge-reach-limit");
+		$distance -= (int) $damagerAPI->getPing() * (float) $this->getConstant(CheckConstants::REACHE_EDGE_PING_COMPENSATION);
+		$limit = (float) $this->getConstant(CheckConstants::REACHE_EDGE_REACH_LIMIT);
 
 		$buffer = $this->getBuffer($damagerAPI);
 		if ($distance > $limit) {
@@ -74,7 +75,7 @@ class ReachE extends Check {
 		$this->setBuffer($damagerAPI, $buffer);
 		$this->debug($damagerAPI, "distance={$distance}, limit={$limit}, buffer={$buffer}");
 
-		if ($buffer >= (int) $this->getConstant("edge-buffer-limit")) {
+		if ($buffer >= (int) $this->getConstant(CheckConstants::REACHE_EDGE_BUFFER_LIMIT)) {
 			$this->setBuffer($damagerAPI, 0);
 			$this->failed($damagerAPI);
 		}
@@ -84,14 +85,14 @@ class ReachE extends Check {
 		return
 			!$damager->isSurvival() ||
 			!$victim->isSurvival() ||
-			(int) $damagerAPI->getPing() > (int) $this->getConstant("edge-max-ping") ||
+			(int) $damagerAPI->getPing() > (int) $this->getConstant(CheckConstants::REACHE_EDGE_MAX_PING) ||
 			$damagerAPI->isRecentlyCancelledEvent() ||
 			$victimAPI->isRecentlyCancelledEvent() ||
-			$damagerAPI->getTeleportTicks() < (float) $this->getConstant("edge-min-teleport-ticks") ||
-			$victimAPI->getProjectileAttackTicks() < (float) $this->getConstant("edge-min-stability-ticks") ||
-			$damagerAPI->getProjectileAttackTicks() < (float) $this->getConstant("edge-min-stability-ticks") ||
-			$victimAPI->getBowShotTicks() < (float) $this->getConstant("edge-min-stability-ticks") ||
-			$damagerAPI->getBowShotTicks() < (float) $this->getConstant("edge-min-stability-ticks");
+			$damagerAPI->getTeleportTicks() < (float) $this->getConstant(CheckConstants::REACHE_EDGE_MIN_TELEPORT_TICKS) ||
+			$victimAPI->getProjectileAttackTicks() < (float) $this->getConstant(CheckConstants::REACHE_EDGE_MIN_STABILITY_TICKS) ||
+			$damagerAPI->getProjectileAttackTicks() < (float) $this->getConstant(CheckConstants::REACHE_EDGE_MIN_STABILITY_TICKS) ||
+			$victimAPI->getBowShotTicks() < (float) $this->getConstant(CheckConstants::REACHE_EDGE_MIN_STABILITY_TICKS) ||
+			$damagerAPI->getBowShotTicks() < (float) $this->getConstant(CheckConstants::REACHE_EDGE_MIN_STABILITY_TICKS);
 	}
 
 	private function getBuffer(PlayerAPI $playerAPI) : int {

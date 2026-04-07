@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerItemConsumeEvent;
@@ -79,7 +80,7 @@ class FastEat extends Check {
 				if ($lastTick !== null) {
 					$diff = microtime(true) - $lastTick;
 					$ping = $playerAPI->getPing();
-					if ($diff < $this->getConstant("timediff-limit") && $ping < self::getData(self::PING_LAGGING)) {
+					if ($diff < $this->getConstant(CheckConstants::FASTEAT_TIMEDIFF_LIMIT) && $ping < self::getData(self::PING_LAGGING)) {
 						$event->cancel();
 						$this->failed($playerAPI);
 						$playerAPI->unsetExternalData(CacheData::FASTEAT_LAST_TICK);

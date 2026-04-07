@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\inventory;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\Event;
 use pocketmine\event\inventory\InventoryCloseEvent;
@@ -72,7 +73,7 @@ class ChestAura extends Check {
 				$timeDiff = microtime(true) - (float) $timeOpenChest;
 				$rate = $countTransaction / max(0.001, $timeDiff);
 				$this->debug($playerAPI, "timeDiff={$timeDiff}, count={$countTransaction}, rate={$rate}");
-				if ($countTransaction >= 6 && $rate > (float) $this->getConstant("transaction-divisible")) {
+				if ($countTransaction >= 6 && $rate > (float) $this->getConstant(CheckConstants::CHESTAURA_TRANSACTION_DIVISIBLE)) {
 					$this->failed($playerAPI);
 				}
 			}

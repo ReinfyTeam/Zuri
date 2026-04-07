@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
@@ -74,11 +75,11 @@ class Step extends Check {
 			}
 			$lastY = $playerAPI->getExternalData(CacheData::STEP_LAST_Y);
 			$locationPlayer = $player->getLocation();
-			$limit = $this->getConstant("y-limit");
+			$limit = $this->getConstant(CheckConstants::STEP_Y_LIMIT);
 			if ($lastY !== null) {
 				$diff = $locationPlayer->getY() - $lastY;
-				$limit += $playerAPI->isOnStairs() ? $this->getConstant("stairs-limit") : 0;
-				$limit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant("jump-limit") : 0;
+				$limit += $playerAPI->isOnStairs() ? $this->getConstant(CheckConstants::STEP_STAIRS_LIMIT) : 0;
+				$limit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant(CheckConstants::STEP_JUMP_LIMIT) : 0;
 				if ($diff > $limit) {
 					$this->failed($playerAPI);
 				}

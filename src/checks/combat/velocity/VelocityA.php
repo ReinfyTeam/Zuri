@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\combat\velocity;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\Event;
@@ -60,12 +61,12 @@ class VelocityA extends Check {
 		}
 
 		$elapsedTicks = MathUtil::ticksSince((float) $hitAt);
-		if ($elapsedTicks > (float) $this->getConstant("max-observe-ticks")) {
+		if ($elapsedTicks > (float) $this->getConstant(CheckConstants::VELOCITYA_MAX_OBSERVE_TICKS)) {
 			$this->resetState($playerAPI);
 			return;
 		}
 
-		if ($elapsedTicks < (float) $this->getConstant("start-observe-ticks")) {
+		if ($elapsedTicks < (float) $this->getConstant(CheckConstants::VELOCITYA_START_OBSERVE_TICKS)) {
 			return;
 		}
 
@@ -84,7 +85,7 @@ class VelocityA extends Check {
 			$playerAPI->isInBoundingBox() ||
 			$playerAPI->getTeleportTicks() < 20 ||
 			$playerAPI->isRecentlyCancelledEvent() ||
-			(int) $playerAPI->getPing() > (int) $this->getConstant("max-ping")
+			(int) $playerAPI->getPing() > (int) $this->getConstant(CheckConstants::VELOCITYA_MAX_PING)
 		) {
 			$this->resetState($playerAPI);
 			return;
@@ -92,7 +93,7 @@ class VelocityA extends Check {
 
 		$moveXZ = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo());
 		$buffer = (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0);
-		if ($moveXZ < (float) $this->getConstant("min-response-distance-squared")) {
+		if ($moveXZ < (float) $this->getConstant(CheckConstants::VELOCITYA_MIN_RESPONSE_DISTANCE_SQUARED)) {
 			$buffer++;
 		} else {
 			$buffer = max(0, $buffer - 1);
@@ -101,7 +102,7 @@ class VelocityA extends Check {
 		$playerAPI->setExternalData(self::BUFFER_KEY, $buffer);
 		$this->debug($playerAPI, "elapsedTicks={$elapsedTicks}, moveXZ={$moveXZ}, buffer={$buffer}");
 
-		if ($buffer >= (int) $this->getConstant("buffer-limit")) {
+		if ($buffer >= (int) $this->getConstant(CheckConstants::VELOCITYA_BUFFER_LIMIT)) {
 			$this->resetState($playerAPI);
 			$this->failed($playerAPI);
 		}

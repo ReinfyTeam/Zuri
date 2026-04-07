@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets\timer;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
@@ -41,11 +42,11 @@ class TimerD extends Check {
 			"buffer" => $playerAPI->getExternalData(CacheData::TIMER_D_BUFFER, 0),
 			"ping" => (int) $playerAPI->getPing(),
 			"maxPing" => (int) self::getData(self::PING_LAGGING),
-			"expectedMsPerTick" => (float) $this->getConstant("drift-expected-ms-per-tick"),
-			"maxTickJump" => (int) $this->getConstant("drift-max-tick-jump"),
-			"maxNegativeDrift" => (float) $this->getConstant("drift-max-negative"),
-			"warmupSamples" => (int) $this->getConstant("drift-warmup-samples"),
-			"bufferLimit" => (int) $this->getConstant("drift-buffer-limit"),
+			"expectedMsPerTick" => (float) $this->getConstant(CheckConstants::TIMERD_DRIFT_EXPECTED_MS_PER_TICK),
+			"maxTickJump" => (int) $this->getConstant(CheckConstants::TIMERD_DRIFT_MAX_TICK_JUMP),
+			"maxNegativeDrift" => (float) $this->getConstant(CheckConstants::TIMERD_DRIFT_MAX_NEGATIVE),
+			"warmupSamples" => (int) $this->getConstant(CheckConstants::TIMERD_DRIFT_WARMUP_SAMPLES),
+			"bufferLimit" => (int) $this->getConstant(CheckConstants::TIMERD_DRIFT_BUFFER_LIMIT),
 		]);
 	}
 

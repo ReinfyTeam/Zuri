@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\badpackets\inputspoof;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
@@ -31,8 +32,8 @@ class InputSpoofA extends Check {
 
 		$moveX = $packet->getMoveVecX();
 		$moveZ = $packet->getMoveVecZ();
-		$maxAxis = (float) $this->getConstant("max-axis");
-		$maxVectorLength = (float) $this->getConstant("max-vector-length");
+		$maxAxis = (float) $this->getConstant(CheckConstants::INPUTSPOOFA_MAX_AXIS);
+		$maxVectorLength = (float) $this->getConstant(CheckConstants::INPUTSPOOFA_MAX_VECTOR_LENGTH);
 		$vectorLength = MathUtil::horizontalLength($moveX, $moveZ);
 
 		$this->debug($playerAPI, "moveX={$moveX}, moveZ={$moveZ}, vectorLength={$vectorLength}");

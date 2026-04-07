@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\inventory;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
@@ -85,7 +86,7 @@ class InventoryCleaner extends Check {
 		}
 
 		$diff = $now - (float) $start;
-		if ($diff > (float) $this->getConstant("diff-ticks")) {
+		if ($diff > (float) $this->getConstant(CheckConstants::INVENTORYCLEANER_DIFF_TICKS)) {
 			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION, $now);
 			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, 1);
 			return;
@@ -95,7 +96,7 @@ class InventoryCleaner extends Check {
 		$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, $transaction);
 		$this->debug($playerAPI, "transaction={$transaction}, diff={$diff}");
 
-		if ($transaction > (int) $this->getConstant("max-transaction")) {
+		if ($transaction > (int) $this->getConstant(CheckConstants::INVENTORYCLEANER_MAX_TRANSACTION)) {
 			$this->failed($playerAPI);
 			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION, $now);
 			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, 0);

@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\moving\speed;
 
+use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\config\CacheData;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
@@ -125,21 +126,21 @@ class SpeedB extends Check {
 				"speedEffectLevel" => ($effect = $player->getEffects()->get(VanillaEffects::SPEED())) !== null ? $effect->getEffectLevel() : 0,
 				"ping" => $playerAPI->getPing(),
 				"constants" => [
-					"walking-speed-limit" => $this->getConstant("walking-speed-limit"),
-					"sprinting-speed-limit" => $this->getConstant("sprinting-speed-limit"),
-					"jump-speed-limit" => $this->getConstant("jump-speed-limit"),
-					"ice-walking-speed-limit" => $this->getConstant("ice-walking-speed-limit"),
-					"top-block-limit" => $this->getConstant("top-block-limit"),
-					"stairs-speed-limit" => $this->getConstant("stairs-speed-limit"),
-					"time-limit" => $this->getConstant("time-limit"),
-					"wakling-distance-limit" => $this->getConstant("wakling-distance-limit"),
-					"sprinting-distance-limit" => $this->getConstant("sprinting-distance-limit"),
-					"jump-distance-limit" => $this->getConstant("jump-distance-limit"),
-					"ice-walking-distance-limit" => $this->getConstant("ice-walking-distance-limit"),
-					"stairs-walking-distance-limit" => $this->getConstant("stairs-walking-distance-limit"),
-					"speed-effect-limit" => $this->getConstant("speed-effect-limit"),
-					"time-effect-limit" => $this->getConstant("time-effect-limit"),
-					"speed-effect-distance-limit" => $this->getConstant("speed-effect-distance-limit"),
+					"walking-speed-limit" => $this->getConstant(CheckConstants::SPEEDB_WALKING_SPEED_LIMIT),
+					"sprinting-speed-limit" => $this->getConstant(CheckConstants::SPEEDB_SPRINTING_SPEED_LIMIT),
+					"jump-speed-limit" => $this->getConstant(CheckConstants::SPEEDB_JUMP_SPEED_LIMIT),
+					"ice-walking-speed-limit" => $this->getConstant(CheckConstants::SPEEDB_ICE_WALKING_SPEED_LIMIT),
+					"top-block-limit" => $this->getConstant(CheckConstants::SPEEDB_TOP_BLOCK_LIMIT),
+					"stairs-speed-limit" => $this->getConstant(CheckConstants::SPEEDB_STAIRS_SPEED_LIMIT),
+					"time-limit" => $this->getConstant(CheckConstants::SPEEDB_TIME_LIMIT),
+					"wakling-distance-limit" => $this->getConstant(CheckConstants::SPEEDB_WAKLING_DISTANCE_LIMIT),
+					"sprinting-distance-limit" => $this->getConstant(CheckConstants::SPEEDB_SPRINTING_DISTANCE_LIMIT),
+					"jump-distance-limit" => $this->getConstant(CheckConstants::SPEEDB_JUMP_DISTANCE_LIMIT),
+					"ice-walking-distance-limit" => $this->getConstant(CheckConstants::SPEEDB_ICE_WALKING_DISTANCE_LIMIT),
+					"stairs-walking-distance-limit" => $this->getConstant(CheckConstants::SPEEDB_STAIRS_WALKING_DISTANCE_LIMIT),
+					"speed-effect-limit" => $this->getConstant(CheckConstants::SPEEDB_SPEED_EFFECT_LIMIT),
+					"time-effect-limit" => $this->getConstant(CheckConstants::SPEEDB_TIME_EFFECT_LIMIT),
+					"speed-effect-distance-limit" => $this->getConstant(CheckConstants::SPEEDB_SPEED_EFFECT_DISTANCE_LIMIT),
 					"pingLagging" => self::getData(self::PING_LAGGING),
 				]
 			]);
