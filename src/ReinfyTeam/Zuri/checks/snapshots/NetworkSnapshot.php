@@ -1,0 +1,119 @@
+<?php
+
+/*
+ *
+ *  ____           _            __           _____
+ * |  _ \    ___  (_)  _ __    / _|  _   _  |_   _|   ___    __ _   _ __ ___
+ * | |_) |  / _ \ | | | '_ \  | |_  | | | |   | |    / _ \  / _` | | '_ ` _ \
+ * |  _ <  |  __/ | | | | | | |  _| | |_| |   | |   |  __/ | (_| | | | | | | |
+ * |_| \_\  \___| |_| |_| |_| |_|    \__, |   |_|    \___|  \__,_| |_| |_| |_|
+ *                                   |___/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zuri attempts to enforce "vanilla Minecraft" mechanics, as well as preventing
+ * players from abusing weaknesses in Minecraft or its protocol, making your server
+ * more safe. Organized in different sections, various checks are performed to test
+ * players doing, covering a wide range including flying and speeding, fighting
+ * hacks, fast block breaking and nukers, inventory hacks, chat spam and other types
+ * of malicious behaviour.
+ *
+ * @author ReinfyTeam
+ * @link https://github.com/ReinfyTeam/
+ *
+ *
+ */
+
+declare(strict_types=1);
+
+namespace ReinfyTeam\Zuri\checks\snapshots;
+
+use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\player\Player;
+use ReinfyTeam\Zuri\player\PlayerAPI;
+use function is_array;
+use function is_string;
+use function microtime;
+
+/**
+ * Captures immutable packet/network state for async worker evaluation.
+ *
+ * Used by: BadPackets, MessageSpoof, InvalidPackets, Crasher, FastDrop,
+ * FastEat, FastThrow, ImpossiblePitch, SelfHit, and other network checks
+ */
+class NetworkSnapshot extends AsyncSnapshot {
+	/** Packet metadata. */
+	private string $packetName;
+	private float $packetTime;
+
+	/** Player state. */
+	private int $ping;
+	private bool $survival;
+	private int $onlineTime;
+	private int $attackTicks;
+	private int $teleportTicks;
+
+	/** Packet-specific data (serialized). */
+	private array $packetData;
+
+	/** Cached network data. */
+	private mixed $cachedData = [];
+
+	public function __construct(string $checkType, Player $player, PlayerAPI $playerAPI, DataPacket $packet) {
+		parent::__construct($checkType);
+
+		$this->packetName = $packet::class;
+		$this->packetTime = microtime(true);
+		$this->ping = $player->getNetworkSession()->getPing();
+		$this->survival = $player->isSurvival();
+		$this->onlineTime = $playerAPI->getOnlineTime();
+		$this->attackTicks = $playerAPI->getAttackTicks();
+		$this->teleportTicks = $playerAPI->getTeleportTicks();
+
+		// Extract serializable packet data
+		$this->packetData = [];
+	}
+
+	/**
+	 * Add packet-specific data that is JSON-serializable.
+	 */
+	public function addPacketData(string $key, mixed $value) : self {
+		$this->packetData[$key] = $value;
+		return $this;
+	}
+
+	/**
+	 * Add cached network interaction data.
+	 */
+	public function addCachedData(string $key, mixed $value) : self {
+		$this->cachedData[$key] = $value;
+		return $this;
+	}
+
+	public function build() : array {
+		return [
+			"type" => $this->checkType,
+			"packetName" => $this->packetName,
+			"packetTime" => $this->packetTime,
+			"ping" => $this->ping,
+			"survival" => $this->survival,
+			"onlineTime" => $this->onlineTime,
+			"attackTicks" => $this->attackTicks,
+			"teleportTicks" => $this->teleportTicks,
+			"packetData" => $this->packetData,
+			"cachedData" => $this->cachedData,
+		];
+	}
+
+	public function validate() : void {
+		if (!is_string($this->packetName)) {
+			throw new SnapshotException("Invalid packet name in network snapshot");
+		}
+		if (!is_array($this->packetData)) {
+			throw new SnapshotException("Invalid packet data in network snapshot");
+		}
+	}
+}

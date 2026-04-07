@@ -36,13 +36,44 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use Throwable;
 use vennv\vapm\ClosureThread;
+use function array_shift;
+use function count;
 use function is_array;
 use function is_string;
 use function json_decode;
 use function method_exists;
 
 class CheckAsyncTask {
-	public static function dispatch(string $checkClass, string $playerName, array $payload) : void {
+	/** @var list<array{0:string,1:string,2:array,3:int}> */
+	private static array $queue = [];
+	private static int $inFlight = 0;
+	private static int $maxConcurrentWorkers = 4;
+	private static int $maxQueueSize = 2048;
+
+	public static function configure(int $maxConcurrentWorkers, int $maxQueueSize) : void {
+		self::$maxConcurrentWorkers = $maxConcurrentWorkers > 0 ? $maxConcurrentWorkers : 1;
+		self::$maxQueueSize = $maxQueueSize > 0 ? $maxQueueSize : 1;
+	}
+
+	public static function dispatch(string $checkClass, string $playerName, array $payload, int $sequence) : void {
+		if (self::$inFlight >= self::$maxConcurrentWorkers && count(self::$queue) >= self::$maxQueueSize) {
+			return;
+		}
+
+		self::$queue[] = [$checkClass, $playerName, $payload, $sequence];
+		self::drain();
+	}
+
+	private static function drain() : void {
+		while (self::$inFlight < self::$maxConcurrentWorkers && self::$queue !== []) {
+			[$checkClass, $playerName, $payload, $sequence] = array_shift(self::$queue);
+			self::startTask($checkClass, $playerName, $payload, $sequence);
+		}
+	}
+
+	private static function startTask(string $checkClass, string $playerName, array $payload, int $sequence) : void {
+		self::$inFlight++;
+
 		$thread = new ClosureThread(
 			static function (string $checkClass, string $playerName, array $payload) : array {
 				try {
@@ -57,7 +88,10 @@ class CheckAsyncTask {
 			},
 			[$checkClass, $playerName, $payload]
 		);
-		$thread->start()->then(function(string $output) use ($checkClass, $playerName) : void {
+		$thread->start()->then(function(string $output) use ($checkClass, $playerName, $sequence) : void {
+			self::$inFlight = self::$inFlight > 0 ? self::$inFlight - 1 : 0;
+			self::drain();
+
 			$result = json_decode($output, true);
 			if (!is_array($result) || isset($result['error'])) {
 				return;
@@ -69,6 +103,9 @@ class CheckAsyncTask {
 			}
 
 			$playerAPI = PlayerAPI::getAPIPlayer($player);
+			if (!$playerAPI->isAsyncSequenceCurrent($checkClass, $sequence)) {
+				return;
+			}
 			/** @var Check $check */
 			$check = new $checkClass();
 			self::applyResult($check, $playerAPI, $result);

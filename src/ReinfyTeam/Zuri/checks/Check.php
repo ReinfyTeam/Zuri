@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\checks;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\event\Event;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\events\api\CheckFailedEvent;
@@ -75,7 +76,29 @@ abstract class Check extends ConfigManager {
 	public function checkJustEvent(Event $event) : void {
 	}
 
+	public static function evaluateAsync(array $payload) : array {
+		if (($payload["_type"] ?? null) === "__decision") {
+			return (array) ($payload["result"] ?? []);
+		}
+
+		return [];
+	}
+
 	protected function dispatchAsyncCheck(string $playerName, array $payload) : void {
+		if (!(bool) self::getData("zuri.async.enable", true)) {
+			return;
+		}
+
+		$player = Server::getInstance()->getPlayerExact($playerName);
+		if ($player === null || !$player->isOnline() || !$player->isConnected()) {
+			return;
+		}
+
+		CheckAsyncTask::configure(
+			(int) self::getData("zuri.async.max-concurrent-workers", 4),
+			(int) self::getData("zuri.async.max-queue-size", 2048)
+		);
+
 		$now = microtime(true);
 		if ((self::$lastAsyncThrottleCleanup === 0.0) || (($now - self::$lastAsyncThrottleCleanup) >= 60.0)) {
 			self::$lastAsyncThrottleCleanup = $now;
@@ -87,7 +110,7 @@ abstract class Check extends ConfigManager {
 		}
 
 		$key = $playerName . ":" . static::class;
-		$minInterval = (float) ($payload["_minInterval"] ?? 0.02);
+		$minInterval = (float) ($payload["_minInterval"] ?? self::getData("zuri.async.default-min-interval", 0.02));
 		if (isset($payload["_minInterval"])) {
 			unset($payload["_minInterval"]);
 		}
@@ -96,8 +119,46 @@ abstract class Check extends ConfigManager {
 			return;
 		}
 
+		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		$sequence = $playerAPI->nextAsyncSequence(static::class);
+		$payload["_sequence"] = $sequence;
+		$payload["_checkClass"] = static::class;
+
 		self::$asyncThrottle[$key] = $now + $minInterval;
-		CheckAsyncTask::dispatch(static::class, $playerName, $payload);
+		CheckAsyncTask::dispatch(static::class, $playerName, $payload, $sequence);
+	}
+
+	protected function dispatchAsyncDecision(
+		PlayerAPI $playerAPI,
+		bool $failed = false,
+		string $debug = "",
+		array $set = [],
+		array $unset = [],
+		float $minInterval = 0.0
+	) : void {
+		$result = [];
+		if ($set !== []) {
+			$result["set"] = $set;
+		}
+		if ($unset !== []) {
+			$result["unset"] = $unset;
+		}
+		if ($debug !== "") {
+			$result["debug"] = $debug;
+		}
+		if ($failed) {
+			$result["failed"] = true;
+		}
+
+		$payload = [
+			"_type" => "__decision",
+			"result" => $result,
+		];
+		if ($minInterval > 0.0) {
+			$payload["_minInterval"] = $minInterval;
+		}
+
+		$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), $payload);
 	}
 
 	public function replaceText(PlayerAPI $player, string $text, string $reason = "", string $subType = "") : string {

@@ -41,7 +41,6 @@ use pocketmine\player\SurvivalBlockBreakHandler;
 use ReflectionException;
 use ReflectionProperty;
 use ReinfyTeam\Zuri\utils\MathUtil;
-use function abs;
 use function count;
 use function microtime;
 use function spl_object_id;
@@ -102,6 +101,7 @@ class PlayerAPI implements IPlayerAPI {
 	private int $numberBlocksAllowPlace = 2; //2 is normal action
 	private array $violations = [];
 	private array $realViolations = [];
+	private array $asyncSequences = [];
 	private array $nLocation = [];
 	private array $externalData = [];
 	private string $captchaCode = "nocode";
@@ -661,6 +661,29 @@ class PlayerAPI implements IPlayerAPI {
 		}
 
 		$this->realViolations[$supplier][] = microtime(true);
+	}
+
+	//Async sequence
+	public function getAsyncSequence(string $supplier) : int {
+		return $this->asyncSequences[$supplier] ?? 0;
+	}
+
+	public function nextAsyncSequence(string $supplier) : int {
+		return $this->asyncSequences[$supplier] = $this->getAsyncSequence($supplier) + 1;
+	}
+
+	public function isAsyncSequenceCurrent(string $supplier, int $sequence) : bool {
+		return $this->getAsyncSequence($supplier) === $sequence;
+	}
+
+	public function resetAsyncSequence(string $supplier) : void {
+		if (isset($this->asyncSequences[$supplier])) {
+			unset($this->asyncSequences[$supplier]);
+		}
+	}
+
+	public function resetAsyncSequences() : void {
+		$this->asyncSequences = [];
 	}
 
 	//Location

@@ -4,9 +4,11 @@
     "type": "project",
     "require": {
         "php": ">=8.4",
-        "pocketmine/pocketmine-mp": "^5.0.0",
-        "paroxity/commando": "^3.3",
+        "paroxity/commando": "dev-master",
         "vennv/vapm": "^2.5"
+    },
+    "require-dev": {
+        "pocketmine/pocketmine-mp": "^5.42.1"
     },
     "autoload": {
         "classmap": [
