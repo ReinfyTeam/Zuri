@@ -290,8 +290,8 @@ zuri:
                 a: 1
             punishment: KICK
             constants:
-                 diff-time: 0.1
-                 diff-ticks: 1
+                  diff-time: 0.1
+                  diff-ticks: 1
         instabreak:
             enable: true
             maxvl: 1
@@ -341,24 +341,24 @@ zuri:
             constants:
                   # When true, Reach (D) is evaluated in the LibVapmPMMP worker instead of the main tick path.
                   # Keep this enabled on busy servers if you want the heavier distance math moved off the main flow.
-                 max-distance: 4.3
-                 survival-max-distance: 3.0
-                 creative-max-distance: 8.3
-                 max-reach-eye-distance: 3.0
+                  max-distance: 4.3
+                  survival-max-distance: 3.0
+                  creative-max-distance: 8.3
+                  max-reach-eye-distance: 3.0
                   # Requires LibVapmPMMP support through the plugin bootstrap.
                   async-enabled: true
-                 default-eye-distance: 0.0041
-                 sprinting-eye-distance: 0.97
-                 not-sprinting-eye-distance: 0.87
-                 damager-sprinting-eye-distance: 0.77
-                 not-sprinting-damager-eye-distance: 0.67
-                 reach-eye-limit: 3.0
-                 edge-reach-limit: 3.15
-                 edge-ping-compensation: 0.0015
-                 edge-buffer-limit: 3
-                 edge-max-ping: 220
-                 edge-min-teleport-ticks: 20
-                 edge-min-stability-ticks: 20
+                  default-eye-distance: 0.0041
+                  sprinting-eye-distance: 0.97
+                  not-sprinting-eye-distance: 0.87
+                  damager-sprinting-eye-distance: 0.77
+                  not-sprinting-damager-eye-distance: 0.67
+                  reach-eye-limit: 3.0
+                  edge-reach-limit: 3.15
+                  edge-ping-compensation: 0.0015
+                  edge-buffer-limit: 3
+                  edge-max-ping: 220
+                  edge-min-teleport-ticks: 20
+                  edge-min-stability-ticks: 20
         fly:
             enable: true
             maxvl: 1
@@ -390,10 +390,10 @@ zuri:
                 a: 10
             punishment: KICK
             constants:
-                 max-speed: 0.09
-                 min-input-length: 0.75
+                  max-speed: 0.09
+                  min-input-length: 0.75
                   buffer-limit: 5
-                 max-ping: 200
+                  max-ping: 200
         noslow: # BETA: Detects abnormal speed while using consumables, bows, and similar items.
             enable: true
             maxvl: 1
@@ -401,9 +401,9 @@ zuri:
                 a: 4
             punishment: KICK
             constants:
-                 max-xz-distance-squared: 0.095
-                 buffer-limit: 4
-                 max-ping: 200
+                  max-xz-distance-squared: 0.095
+                  buffer-limit: 4
+                  max-ping: 200
         chestaura: 
             enable: true
             maxvl: 1
@@ -427,10 +427,10 @@ zuri:
                 a: 5
             punishment: KICK
             constants:
-                 air-limit: 3.0
-                 effect-amplifier: 1.4
-                 effect-multiplier: 2
-                 effect-const: 16
+                  air-limit: 3.0
+                  effect-amplifier: 1.4
+                  effect-multiplier: 2
+                  effect-const: 16
         phase:
             enable: true
             maxvl: 1
@@ -463,13 +463,13 @@ zuri:
                 d: 4
             punishment: KICK
             constants:
-                 max-diff: 10
-                 diff-balance: -5
-                 drift-expected-ms-per-tick: 50
-                 drift-max-tick-jump: 4
-                 drift-max-negative: 28
-                 drift-warmup-samples: 6
-                 drift-buffer-limit: 3
+                  max-diff: 10
+                  diff-balance: -5
+                  drift-expected-ms-per-tick: 50
+                  drift-max-tick-jump: 4
+                  drift-max-negative: 28
+                  drift-warmup-samples: 6
+                  drift-buffer-limit: 3
         fasteat: 
             enable: true
             maxvl: 1
@@ -699,9 +699,9 @@ zuri:
                 a: 3
                 b: 3
             constants:
-                 max-heal-amount: 3
-                 max-healcount: 5
-                 min-healrate: 0.5
+                  max-heal-amount: 3
+                  max-healcount: 5
+                  min-healrate: 0.5
         fastbow: # Todo: Improve in next versions, support for custom bows...
             enable: false
             maxvl: 1
