@@ -3,12 +3,16 @@
     "description": "Zuri Anticheat for PocketMine-MP",
     "type": "project",
     "require": {
-        "php": ">=8.4",
         "paroxity/commando": "dev-master",
-        "vennv/vapm-pmmp": "^2.5.6"
+        "vennv/vapm-pmmp": "^2.5.6",
+        "muqsit/simple-packet-handler": "0.1.5"
     },
     "require-dev": {
-        "pocketmine/pocketmine-mp": "^5.42.1"
+        "php": ">=8.4",
+        "pocketmine/pocketmine-mp": "^5.42.1",
+        "sof3/pharynx": "^0.3.0",
+        "phpstan/phpstan": "^1.2",
+        "friendsofphp/php-cs-fixer": "^3.66"
     },
     "autoload": {
         "classmap": [
@@ -17,7 +21,10 @@
     },
     "scripts": {
         "format": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes",
-        "format:check": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --dry-run --diff"
+        "format:check": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --dry-run --diff",
+        "analyze": "vendor/bin/phpstan",
+        "build": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -p=ProfanityFilter.phar",
+        "build-source": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -o=./output/"
     },
     "minimum-stability": "stable",
     "prefer-stable": true
