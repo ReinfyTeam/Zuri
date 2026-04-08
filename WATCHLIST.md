@@ -1,8 +1,8 @@
 # Watchlist / Development Phase
 
-- [ ] Create snapshot/builder infrastructure for asynchronous checking.
-- [ ] Migrate all modules to asynchronous checking.
-- [ ] Implement batch queueing system intended for asynchronous threads.
+- [x] Create snapshot/builder infrastructure for asynchronous checking.
+- [x] Migrate all modules to asynchronous checking.
+- [x] Implement batch queueing system intended for asynchronous threads.
 - [ ] Test and validate all asynchronous checks and ensure all snapshots are working and returning to the main thread.
 
 ## Detection Quality
