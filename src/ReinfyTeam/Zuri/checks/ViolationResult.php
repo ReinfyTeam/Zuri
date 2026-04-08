@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks;
 
 use function max;
+use function microtime;
 use function min;
 use function round;
 

@@ -47,7 +47,6 @@ use ReinfyTeam\Zuri\task\ServerTickTask;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 use ReinfyTeam\Zuri\ZuriAC;
-use function exp;
 use function implode;
 use function in_array;
 use function max;

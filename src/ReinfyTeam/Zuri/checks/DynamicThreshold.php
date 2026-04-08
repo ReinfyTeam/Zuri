@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\checks;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\task\ServerTickTask;
+use function count;
 use function max;
 use function microtime;
 use function min;

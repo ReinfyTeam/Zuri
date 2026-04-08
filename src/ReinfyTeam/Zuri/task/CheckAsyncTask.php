@@ -41,7 +41,9 @@ use function count;
 use function is_array;
 use function is_string;
 use function json_decode;
+use function max;
 use function method_exists;
+use function microtime;
 
 class CheckAsyncTask {
 	/** @var list<array{0:string,1:string,2:array,3:int}> */

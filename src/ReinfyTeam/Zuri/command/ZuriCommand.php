@@ -35,6 +35,7 @@ use CortexPE\Commando\BaseCommand;
 use pocketmine\command\CommandSender;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\command\subcommand\AboutSubCommand;
+use ReinfyTeam\Zuri\command\subcommand\AsyncStatusSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\BanModeSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\BypassSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\CaptchaSubCommand;
@@ -43,7 +44,6 @@ use ReinfyTeam\Zuri\command\subcommand\HelpSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\ListSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\NotifySubCommand;
 use ReinfyTeam\Zuri\command\subcommand\UiSubCommand;
-use ReinfyTeam\Zuri\command\subcommand\AsyncStatusSubCommand;
 use ReinfyTeam\Zuri\ZuriAC;
 use function implode;
 
