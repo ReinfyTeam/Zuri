@@ -93,6 +93,7 @@ class ChatSnapshot extends AsyncSnapshot {
 		return [
 			"type" => $this->checkType,
 			"schemaVersion" => self::SCHEMA_VERSION,
+			"captureTime" => $this->captureTime,
 			"message" => $this->message,
 			"messageTime" => $this->messageTime,
 			"messageLength" => $this->messageLength,

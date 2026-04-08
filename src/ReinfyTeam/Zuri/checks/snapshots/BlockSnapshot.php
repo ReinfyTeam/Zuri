@@ -120,6 +120,7 @@ class BlockSnapshot extends AsyncSnapshot {
 		return [
 			"type" => $this->checkType,
 			"schemaVersion" => self::SCHEMA_VERSION,
+			"captureTime" => $this->captureTime,
 			"blockX" => $this->blockX,
 			"blockY" => $this->blockY,
 			"blockZ" => $this->blockZ,

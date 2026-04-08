@@ -60,6 +60,23 @@ class AsyncStatusSubCommand extends BaseSubCommand {
 				"completed" => (string) $metrics["totalCompleted"],
 				"dropped" => (string) $metrics["totalDropped"],
 			]),
+			Lang::get(LangKeys::ASYNC_STATUS_HEALTH, [
+				"stuck" => (string) $metrics["totalRecoveredStuck"],
+				"restarts" => (string) $metrics["totalAutoRestarts"],
+				"late" => (string) $metrics["totalLateCompletions"],
+				"timeout" => (string) round((float) $metrics["workerTimeoutSeconds"], 2),
+			]),
+			Lang::get(LangKeys::ASYNC_STATUS_FALLBACK, [
+				"active" => ((bool) $metrics["syncFallbackActive"]) ? "yes" : "no",
+				"count" => (string) $metrics["totalSyncFallback"],
+				"errors" => (string) $metrics["totalFallbackErrors"],
+			]),
+			Lang::get(LangKeys::ASYNC_STATUS_LATENCY, [
+				"build" => (string) round((float) $metrics["avgBuildDelay"], 4),
+				"queue" => (string) round((float) $metrics["avgQueueWait"], 4),
+				"worker" => (string) round((float) $metrics["avgWorkerTime"], 4),
+				"merge" => (string) round((float) $metrics["avgMergeTime"], 4),
+			]),
 			Lang::get(LangKeys::ASYNC_STATUS_AVG, ["avg" => (string) round((float) $metrics["avgWorkerTime"], 4)]),
 		];
 

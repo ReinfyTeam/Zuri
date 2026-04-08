@@ -17,9 +17,9 @@
 - [x] Add strict snapshot schema versioning to prevent thread desync when fields change.
 - [x] Implement snapshot integrity guards (required fields, value bounds, sanity assertions).
 - [x] Add bounded queue backpressure handling with dropped-task telemetry.
-- [ ] Implement worker health checks and auto-restart for stuck async workers.
-- [ ] Add latency budget metrics for snapshot build, queue wait, worker processing, and main-thread merge.
-- [ ] Add graceful fallback path to sync-safe mode if async pipeline degrades.
+- [x] Implement worker health checks and auto-restart for stuck async workers.
+- [x] Add latency budget metrics for snapshot build, queue wait, worker processing, and main-thread merge.
+- [x] Add graceful fallback path to sync-safe mode if async pipeline degrades.
 
 ## Performance and Stability
 

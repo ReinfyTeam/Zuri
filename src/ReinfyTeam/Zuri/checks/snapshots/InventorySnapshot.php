@@ -116,6 +116,7 @@ class InventorySnapshot extends AsyncSnapshot {
 		return [
 			"type" => $this->checkType,
 			"schemaVersion" => self::SCHEMA_VERSION,
+			"captureTime" => $this->captureTime,
 			"inventoryContents" => $this->inventoryContents,
 			"armorContents" => $this->armorContents,
 			"cursorItem" => $this->cursorItem,

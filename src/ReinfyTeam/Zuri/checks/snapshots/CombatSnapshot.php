@@ -125,6 +125,7 @@ class CombatSnapshot extends AsyncSnapshot {
 		return [
 			"type" => $this->checkType,
 			"schemaVersion" => self::SCHEMA_VERSION,
+			"captureTime" => $this->captureTime,
 			"damagerEyeX" => $this->damagerEyeX,
 			"damagerEyeY" => $this->damagerEyeY,
 			"damagerEyeZ" => $this->damagerEyeZ,

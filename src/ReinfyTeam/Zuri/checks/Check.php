@@ -90,10 +90,6 @@ abstract class Check extends ConfigManager {
 	}
 
 	protected function dispatchAsyncCheck(string $playerName, array $payload) : void {
-		if (!(bool) self::getData("zuri.async.enable", true)) {
-			return;
-		}
-
 		$player = Server::getInstance()->getPlayerExact($playerName);
 		if ($player === null || !$player->isOnline() || !$player->isConnected()) {
 			return;
@@ -101,7 +97,9 @@ abstract class Check extends ConfigManager {
 
 		CheckAsyncTask::configure(
 			(int) self::getData("zuri.async.max-concurrent-workers", 4),
-			(int) self::getData("zuri.async.max-queue-size", 2048)
+			(int) self::getData("zuri.async.max-queue-size", 2048),
+			(float) self::getData("zuri.async.worker-timeout-seconds", 3.0),
+			(float) self::getData("zuri.async.degraded-cooldown-seconds", 6.0)
 		);
 
 		$now = microtime(true);

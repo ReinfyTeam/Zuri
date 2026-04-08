@@ -31,7 +31,7 @@ Also, adding :star: a **Star** is also appreciated. ✨
 - You can switch ready tuning presets for combat-sensitive detections (`custom`, `low-latency`, `high-latency`) from `zuri.tuning-presets.active`.
    - This is useful when your server has either very stable low ping PvP traffic or mixed high-latency public traffic.
 - It is more **lightweight** compared to paid anticheat. You don't have to struggle about the performance, with this anticheat, it can possible block them all easily! 💰
-   - The checks are split so the simple ones stay direct while heavier calculations can be evaluated separately when the feature is enabled.
+   - The checks are split so the simple ones stay direct while heavier calculations are evaluated through the async pipeline.
 - ✨ It is easy to use when it comes at the game, you can easily debug things, manage them all at the game, and **disable checks** according to your command.
    - This is useful when a server owner wants to test a module, reduce false positives, or temporarily isolate a problem during maintenance.
 - ❌ Limit players joining by their ip limit, you can change and configure on how many players can join with same ip address. *(optional)*
@@ -51,9 +51,12 @@ Here are the **dependencies** were used in the plugin:
 - [AntiInstabreak by PMMP](https://github.com/pmmp/AntiInstabreak) (**Instabreak (A)**)
 - [Commando by Paroxity & CortexPE](https://github.com/Paroxity/Commando)
 - [LibVapmPMMP](https://github.com/VennDev/LibVapmPMMP)
+- [InfoAPI](https://github.com/SOF3/InfoAPI) for API placeholders used languages for server developers.
 
 Some are for fixes and some are modified for compability.
-These libraries cover the parts that are outside the anticheat core itself, such as forms, webhook delivery, and specific block-break detection support. Async handling now also uses [LibVapmPMMP](https://github.com/VennDev/LibVapmPMMP) as the thread/coroutine backend for heavier check evaluation, which keeps more expensive checks away from the normal event path when the feature is enabled.
+These libraries cover the parts that are outside the anticheat core itself, such as forms, webhook delivery, and specific block-break detection support. 
+
+Async handling now also uses [LibVapmPMMP](https://github.com/VennDev/LibVapmPMMP) as the thread/coroutine backend for heavier check evaluation, which keeps more expensive checks away from the normal event path.
 
 # Current Modules
 **BETA** - means to be in testing, and to be optimize in the next version. <br>
@@ -135,7 +138,7 @@ Every module below is grouped by the type of behavior it watches so server owner
     - **A:** Check distance between the player, check also if the player is in top.
     - **B:** Check distance squared between the player. Check also gamemode for possible reach distance.
     - **C:** Check eye height and cuboid if it is actually hitting the player legitable.
-    - **D:** Correlate eye-to-eye distance with sprint and ping compensation, with optional async evaluation.
+   - **D:** Correlate eye-to-eye distance with sprint and ping compensation through async evaluation.
     - **E:** Detect out-of-bounds eye-to-hitbox edge reach with stability and ping gating.
 - **Fly**
     - **A:** Check if the player is moving the air upwards.

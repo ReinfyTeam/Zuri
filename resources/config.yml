@@ -84,14 +84,16 @@ zuri:
         log-admin: true # Send to admin their data... Might to cause lag if enabled... Only works if player is in debug mode!
         log-server: false # Log to server, Might to cause lag if enabled... Only works if player is in debug mode also!
     async:
-        # Master switch for async check dispatch.
-        enable: true
         # Default minimum seconds between dispatches for the same player/check pair.
         default-min-interval: 0.02
         # Max number of in-flight async workers for check evaluation.
         max-concurrent-workers: 4
         # Max queued async payloads before new payloads are dropped.
         max-queue-size: 2048
+        # If a worker appears stuck longer than this, recover its slot and retry once.
+        worker-timeout-seconds: 3.0
+        # Duration to stay in sync-safe fallback mode after async degradation.
+        degraded-cooldown-seconds: 6.0
     confidence:
         # Confidence scoring reduces false positives by requiring a minimum certainty level
         # before triggering violations. Lower values catch more cheats but may false-positive.

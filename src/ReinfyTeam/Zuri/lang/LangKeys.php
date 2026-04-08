@@ -92,6 +92,9 @@ final class LangKeys {
 	public const string ASYNC_STATUS_WORKERS = "commands.async.workers";
 	public const string ASYNC_STATUS_TOTALS = "commands.async.totals";
 	public const string ASYNC_STATUS_AVG = "commands.async.avg";
+	public const string ASYNC_STATUS_HEALTH = "commands.async.health";
+	public const string ASYNC_STATUS_FALLBACK = "commands.async.fallback";
+	public const string ASYNC_STATUS_LATENCY = "commands.async.latency";
 
 	public const string STARTUP_SOURCE_WARNING = "startup.source-warning";
 	public const string STARTUP_PROXY_STOPPING = "startup.proxy-stopping";

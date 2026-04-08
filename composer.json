@@ -6,7 +6,7 @@
         "paroxity/commando": "dev-master",
         "vennv/vapm-pmmp": "dev-main",
         "muqsit/simple-packet-handler": "0.1.5",
-        "sof3/infoapi": "^2"
+        "sof3/infoapi": "^2.0.0-beta.1"
     },
     "require-dev": {
         "php": ">=8.4",

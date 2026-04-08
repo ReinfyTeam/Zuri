@@ -155,6 +155,7 @@ class MovementSnapshot extends AsyncSnapshot {
 		return [
 			"type" => $this->checkType,
 			"schemaVersion" => self::SCHEMA_VERSION,
+			"captureTime" => $this->captureTime,
 			"posX" => $this->posX,
 			"posY" => $this->posY,
 			"posZ" => $this->posZ,

@@ -83,6 +83,9 @@ commands:
     queue: "§7Queue: §f{queue}§7 / §f{maxQueue}"
     workers: "§7Workers in flight: §f{inFlight}§7 / §f{maxWorkers}"
     totals: "§7Total dispatched: §f{dispatched}§7, completed: §f{completed}§7, dropped: §f{dropped}"
+    health: "§7Health: §fstuck recovered={stuck}§7, restarts={restarts}, late completions={late}, timeout={timeout}s"
+    fallback: "§7Sync fallback: §factive={active}§7, used={count}, errors={errors}"
+    latency: "§7Latency budget avg (s): §fbuild={build}§7, queue={queue}, worker={worker}, merge={merge}"
     avg: "§7Avg worker time: §f{avg}s"
 
 startup:

@@ -99,6 +99,7 @@ class NetworkSnapshot extends AsyncSnapshot {
 		return [
 			"type" => $this->checkType,
 			"schemaVersion" => self::SCHEMA_VERSION,
+			"captureTime" => $this->captureTime,
 			"packetName" => $this->packetName,
 			"packetTime" => $this->packetTime,
 			"ping" => $this->ping,

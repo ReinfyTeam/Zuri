@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "25e3447d52425f33618bb14e7be0ed4c",
+    "content-hash": "1fdc9e8ea86643019961a12ff5d02218",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -1067,6 +1067,202 @@
                 "source": "https://github.com/ramsey/uuid/tree/4.9.2"
             },
             "time": "2025-12-14T04:43:48+00:00"
+        },
+        {
+            "name": "sof3/await-generator",
+            "version": "3.6.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SOF3/await-generator.git",
+                "reference": "90f4dda776eaf9bcb4693599c61c42e4c584a73f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SOF3/await-generator/zipball/90f4dda776eaf9bcb4693599c61c42e4c584a73f",
+                "reference": "90f4dda776eaf9bcb4693599c61c42e4c584a73f",
+                "shasum": ""
+            },
+            "require": {
+                "ext-bcmath": "*",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "composer/package-versions-deprecated": "1.11.99.1",
+                "infection/infection": "^0.18.2 || ^0.20.2 || ^0.26.0",
+                "phpstan/phpstan": "^0.12.84",
+                "phpunit/phpunit": "^9"
+            },
+            "type": "library",
+            "extra": {
+                "virion": {
+                    "spec": "3.0",
+                    "namespace-root": "SOFe\\AwaitGenerator"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "SOFe\\AwaitGenerator\\": "await-generator/src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "SOFe",
+                    "email": "sofe2038@gmail.com"
+                }
+            ],
+            "description": "Use async/await in PHP using generators",
+            "support": {
+                "issues": "https://github.com/SOF3/await-generator/issues",
+                "source": "https://github.com/SOF3/await-generator/tree/3.6.1"
+            },
+            "time": "2023-07-27T09:45:08+00:00"
+        },
+        {
+            "name": "sof3/infoapi",
+            "version": "2.0.0-beta.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SOF3/InfoAPI.git",
+                "reference": "5aaad7cb89a966d1f36497701a2376118bd8a668"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SOF3/InfoAPI/zipball/5aaad7cb89a966d1f36497701a2376118bd8a668",
+                "reference": "5aaad7cb89a966d1f36497701a2376118bd8a668",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "pocketmine/pocketmine-mp": "^5.0.0",
+                "sof3/await-generator": "^3.6.1",
+                "sof3/pmevent": "^0.0.2",
+                "sof3/zleep": "^0.1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.20",
+                "phpstan/extension-installer": "^1.1.0",
+                "phpstan/phpstan": "^1.10.0",
+                "phpstan/phpstan-phpunit": "^1.0.0",
+                "phpunit/phpunit": "^9.5.0",
+                "sof3/pharynx": "^0.3.4"
+            },
+            "type": "library",
+            "extra": {
+                "virion": {
+                    "spec": "3.1",
+                    "namespace-root": "SOFe\\InfoAPI",
+                    "shared-namespace-root": "Shared\\SOFe\\InfoAPI"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "shared",
+                    "lib"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "support": {
+                "issues": "https://github.com/SOF3/InfoAPI/issues",
+                "source": "https://github.com/SOF3/InfoAPI/tree/2.0.0-beta.1"
+            },
+            "time": "2023-08-15T15:29:36+00:00"
+        },
+        {
+            "name": "sof3/pmevent",
+            "version": "0.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SOF3/pmevent.git",
+                "reference": "426bf3ab1e956028789095ccfb8aaeada39654dc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SOF3/pmevent/zipball/426bf3ab1e956028789095ccfb8aaeada39654dc",
+                "reference": "426bf3ab1e956028789095ccfb8aaeada39654dc",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1.0",
+                "pocketmine/pocketmine-mp": "^5.0.0",
+                "sof3/await-generator": "^3.5.2"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.4",
+                "phpstan/phpstan": "^1.2"
+            },
+            "type": "library",
+            "extra": {
+                "virion": {
+                    "spec": "3.0",
+                    "namespace-root": "SOFe\\PmEvent"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "src"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "support": {
+                "issues": "https://github.com/SOF3/pmevent/issues",
+                "source": "https://github.com/SOF3/pmevent/tree/0.0.2"
+            },
+            "time": "2023-07-27T11:22:52+00:00"
+        },
+        {
+            "name": "sof3/zleep",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SOF3/zleep.git",
+                "reference": "cf3c3322fe8a415b5586505f9fc1c90d00230f86"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SOF3/zleep/zipball/cf3c3322fe8a415b5586505f9fc1c90d00230f86",
+                "reference": "cf3c3322fe8a415b5586505f9fc1c90d00230f86",
+                "shasum": ""
+            },
+            "require": {
+                "pocketmine/pocketmine-mp": "^5.0.0",
+                "sof3/await-generator": "^3.5.2"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.4",
+                "phpstan/phpstan": "^1.2",
+                "sof3/pharynx": "^0.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "virion": {
+                    "spec": "3.0",
+                    "namespace-root": "SOFe\\Zleep"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "src"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "support": {
+                "issues": "https://github.com/SOF3/zleep/issues",
+                "source": "https://github.com/SOF3/zleep/tree/0.1.0"
+            },
+            "time": "2023-06-16T15:26:05+00:00"
         },
         {
             "name": "symfony/filesystem",
@@ -4546,6 +4742,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "paroxity/commando": 20,
+        "sof3/infoapi": 10,
         "vennv/vapm-pmmp": 20
     },
     "prefer-stable": true,
