@@ -1,7 +1,11 @@
 # Zuri Pocketmine-MP Anticheat 🛡️
 **Zuri** is an anticheat made to protect the server from any may unfair advantages from the players. A powerful anticheat made to destroy hackers from your server for PocketMine-MP.
 
-**Zuri** attempts to enforce "vanilla Minecraft" mechanics, as well as preventing players from abusing weaknesses in Minecraft or its protocol, making your server more safe. Organized in different sections, various checks are performed to test player behavior across movement, combat, block interaction, inventory handling, chat abuse, and packet consistency. The plugin is designed to combine fast main-thread checks with heavier calculations that can be offloaded when needed, so servers can keep detection active without turning every event into a lag spike.
+**Zuri** attempts to enforce "vanilla Minecraft" mechanics, as well as preventing players from abusing weaknesses in Minecraft or its protocol, making your server more safe. 
+
+Organized in different sections, various checks are performed to test player behavior across movement, combat, block interaction, inventory handling, chat abuse, and packet consistency. 
+
+The plugin is designed to combine fast main-thread checks with heavier calculations that can be offloaded when needed, so servers can keep detection active without turning every event into a lag spike.
 
 > ⚠️ **Spoon or Fork of Pocketmine-MP are not supported.** Do not try to create an issue, it will closed automatically.
 
@@ -45,6 +49,8 @@ Here are the **dependencies** were used in the plugin:
 - [FormAPI Fix](https://github.com/DavyCraft648/FormAPI-PM)
 - [Modified DiscordWebhookAPI](https://github.com/CortexPE/DiscordWebhookAPI/)
 - [AntiInstabreak by PMMP](https://github.com/pmmp/AntiInstabreak) (**Instabreak (A)**)
+- [Commando by Paroxity & CortexPE](https://github.com/Paroxity/Commando)
+- [LibVapmPMMP](https://github.com/VennDev/LibVapmPMMP)
 
 Some are for fixes and some are modified for compability.
 These libraries cover the parts that are outside the anticheat core itself, such as forms, webhook delivery, and specific block-break detection support. Async handling now also uses [LibVapmPMMP](https://github.com/VennDev/LibVapmPMMP) as the thread/coroutine backend for heavier check evaluation, which keeps more expensive checks away from the normal event path when the feature is enabled.
