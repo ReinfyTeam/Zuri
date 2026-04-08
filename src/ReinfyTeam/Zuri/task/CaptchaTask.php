@@ -35,6 +35,7 @@ use pocketmine\scheduler\Task;
 use Random\RandomException;
 use ReinfyTeam\Zuri\events\CaptchaEvent;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\ExceptionHandler;
 use ReinfyTeam\Zuri\ZuriAC;
 
 class CaptchaTask extends Task {
@@ -50,15 +51,17 @@ class CaptchaTask extends Task {
 	 */
 	public function onRun() : void {
 		self::$instance = $this;
-		foreach ($this->plugin->getServer()->getOnlinePlayers() as $player) {
-			if ($player instanceof PlayerAPI) {
-				$event = new CaptchaEvent($player);
-				$event->call();
-				if ($event->isCancelled()) {
-					return;
+		ExceptionHandler::wrapVoid(function() : void {
+			foreach ($this->plugin->getServer()->getOnlinePlayers() as $player) {
+				if ($player instanceof PlayerAPI) {
+					$event = new CaptchaEvent($player);
+					$event->call();
+					if ($event->isCancelled()) {
+						return;
+					}
 				}
 			}
-		}
+		}, "CaptchaTask::onRun");
 	}
 
 	public static function getInstance() : self {

@@ -32,6 +32,10 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\snapshots;
 
 use JsonSerializable;
+use function array_key_exists;
+use function gettype;
+use function implode;
+use function is_numeric;
 use function microtime;
 
 /**
@@ -48,6 +52,12 @@ use function microtime;
  *   4. Main thread applies result atomically
  */
 abstract class AsyncSnapshot implements JsonSerializable {
+	/**
+	 * Schema version for this snapshot type. Increment when fields change.
+	 * Subclasses must define their own SCHEMA_VERSION constant.
+	 */
+	public const SCHEMA_VERSION = 1;
+
 	/**
 	 * The check type identifier (e.g., "FlyA", "ReachD", "SpeedB").
 	 * Used to validate the payload in evaluateAsync() methods.
@@ -93,5 +103,77 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	 */
 	public function jsonSerialize() : mixed {
 		return $this->build();
+	}
+
+	/**
+	 * Validate schema version from a deserialized payload.
+	 * Call this at the start of evaluateAsync() to prevent desync.
+	 *
+	 * @param array $payload The deserialized payload
+	 * @param int $expectedVersion The expected schema version
+	 * @return bool True if version matches, false if mismatch
+	 */
+	public static function validateSchemaVersion(array $payload, int $expectedVersion) : bool {
+		$version = $payload['schemaVersion'] ?? 0;
+		return $version === $expectedVersion;
+	}
+
+	/**
+	 * Assert that a payload has the expected schema version.
+	 * Throws SnapshotException if version mismatches.
+	 *
+	 * @param array $payload The deserialized payload
+	 * @param int $expectedVersion The expected schema version
+	 * @throws SnapshotException If version doesn't match
+	 */
+	public static function assertSchemaVersion(array $payload, int $expectedVersion) : void {
+		$version = $payload['schemaVersion'] ?? 0;
+		if ($version !== $expectedVersion) {
+			throw new SnapshotException(
+				"Schema version mismatch: expected {$expectedVersion}, got {$version}. " .
+				"This may indicate stale async tasks during a plugin update."
+			);
+		}
+	}
+
+	/**
+	 * Validate that required fields exist in a payload.
+	 *
+	 * @param array $payload The payload to validate
+	 * @param string[] $requiredFields List of required field names
+	 * @throws SnapshotException If any required field is missing
+	 */
+	public static function assertRequiredFields(array $payload, array $requiredFields) : void {
+		$missing = [];
+		foreach ($requiredFields as $field) {
+			if (!array_key_exists($field, $payload)) {
+				$missing[] = $field;
+			}
+		}
+		if ($missing !== []) {
+			throw new SnapshotException(
+				"Missing required fields in snapshot: " . implode(', ', $missing)
+			);
+		}
+	}
+
+	/**
+	 * Validate that a numeric field is within bounds.
+	 *
+	 * @param mixed $value The value to check
+	 * @param float $min Minimum allowed value
+	 * @param float $max Maximum allowed value
+	 * @param string $fieldName Name for error message
+	 * @throws SnapshotException If value is out of bounds
+	 */
+	public static function assertBounds(mixed $value, float $min, float $max, string $fieldName) : void {
+		if (!is_numeric($value)) {
+			throw new SnapshotException("Field '{$fieldName}' must be numeric, got " . gettype($value));
+		}
+		if ($value < $min || $value > $max) {
+			throw new SnapshotException(
+				"Field '{$fieldName}' value {$value} out of bounds [{$min}, {$max}]"
+			);
+		}
 	}
 }

@@ -90,6 +90,14 @@ zuri:
         # Higher values reduce false positives but may miss subtle cheats.
         # Range: 0.0 (always trigger) to 1.0 (never trigger). Recommended: 0.4-0.6
         threshold: 0.5
+    dynamic-thresholds:
+        # Automatically adjust check thresholds based on server and player conditions.
+        # When enabled, thresholds become more lenient during:
+        # - High player ping (network latency)
+        # - Low server TPS (server lag)
+        # - High server load (many players/entities)
+        # This significantly reduces false positives during degraded conditions.
+        enable: true
     captcha:
         # Captcha is used to pause a player until they complete a verification challenge.
         enable: true
@@ -354,14 +362,10 @@ zuri:
                 e: 3
             punishment: KICK
             constants:
-                  # When true, Reach (D) is evaluated in the LibVapmPMMP worker instead of the main tick path.
-                  # Keep this enabled on busy servers if you want the heavier distance math moved off the main flow.
                   max-distance: 4.3
                   survival-max-distance: 3.0
                   creative-max-distance: 8.3
                   max-reach-eye-distance: 3.0
-                  # Requires LibVapmPMMP support through the plugin bootstrap.
-                  async-enabled: true
                   default-eye-distance: 0.0041
                   sprinting-eye-distance: 0.97
                   not-sprinting-eye-distance: 0.87

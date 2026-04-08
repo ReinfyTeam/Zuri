@@ -38,7 +38,6 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\checks\snapshots\CombatSnapshot;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 
 class ReachD extends Check {
@@ -50,9 +49,6 @@ class ReachD extends Check {
 		return "D";
 	}
 
-	/**
-	 * @throws DiscordWebhookException
-	 */
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			$damager = $event->getDamager();
@@ -66,21 +62,15 @@ class ReachD extends Check {
 					return;
 				}
 
-				$useAsync = (bool) ($this->getConstant(CheckConstants::REACHD_ASYNC_ENABLED) ?? false);
-				if ($useAsync) {
-					$snapshot = new CombatSnapshot("ReachD", $damager, $damagerAPI, $victim, $victimAPI);
-					$snapshot->addCachedData("defaultEyeDistance", (float) ($this->getConstant(CheckConstants::REACHD_DEFAULT_EYE_DISTANCE) ?? 0.0041));
-					$snapshot->addCachedData("victimSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_SPRINTING_EYE_DISTANCE) ?? 0.97));
-					$snapshot->addCachedData("victimNotSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_EYE_DISTANCE) ?? 0.87));
-					$snapshot->addCachedData("damagerSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_DAMAGER_SPRINTING_EYE_DISTANCE) ?? 0.77));
-					$snapshot->addCachedData("damagerNotSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_DAMAGER_EYE_DISTANCE) ?? 0.67));
-					$snapshot->addCachedData("limit", (float) ($this->getConstant(CheckConstants::REACHD_REACH_EYE_LIMIT) ?? 3.0));
-					$snapshot->validate();
-					$this->dispatchAsyncCheck($damager->getName(), $snapshot->build());
-					return;
-				}
-
-				$this->evaluateSync($damager, $victim, $damagerAPI);
+				$snapshot = new CombatSnapshot("ReachD", $damager, $damagerAPI, $victim, $victimAPI);
+				$snapshot->addCachedData("defaultEyeDistance", (float) ($this->getConstant(CheckConstants::REACHD_DEFAULT_EYE_DISTANCE) ?? 0.0041));
+				$snapshot->addCachedData("victimSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_SPRINTING_EYE_DISTANCE) ?? 0.97));
+				$snapshot->addCachedData("victimNotSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_EYE_DISTANCE) ?? 0.87));
+				$snapshot->addCachedData("damagerSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_DAMAGER_SPRINTING_EYE_DISTANCE) ?? 0.77));
+				$snapshot->addCachedData("damagerNotSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_DAMAGER_EYE_DISTANCE) ?? 0.67));
+				$snapshot->addCachedData("limit", (float) ($this->getConstant(CheckConstants::REACHD_REACH_EYE_LIMIT) ?? 3.0));
+				$snapshot->validate();
+				$this->dispatchAsyncCheck($damager->getName(), $snapshot->build());
 			}
 		}
 	}
@@ -142,26 +132,5 @@ class ReachD extends Check {
 			$damagerAPI->getBowShotTicks() < 40 ||
 			$victimAPI->isRecentlyCancelledEvent() ||
 			$damagerAPI->isRecentlyCancelledEvent();
-	}
-
-	private function evaluateSync(Player $damager, Player $victim, PlayerAPI $damagerAPI) : void {
-		$distance = MathUtil::distanceFromComponents(
-			$damager->getEyePos()->getX(),
-			$damager->getEyePos()->getY(),
-			$damager->getEyePos()->getZ(),
-			$victim->getEyePos()->getX(),
-			$victim->getEyePos()->getY(),
-			$victim->getEyePos()->getZ()
-		);
-		$distance -= $damager->getNetworkSession()->getPing() * (float) $this->getConstant(CheckConstants::REACHD_DEFAULT_EYE_DISTANCE);
-		$distance -= $victim->getNetworkSession()->getPing() * (float) $this->getConstant(CheckConstants::REACHD_DEFAULT_EYE_DISTANCE);
-		$distance -= $victim->isSprinting() ? (float) $this->getConstant(CheckConstants::REACHD_SPRINTING_EYE_DISTANCE) : (float) $this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_EYE_DISTANCE);
-		$distance -= $damager->isSprinting() ? (float) $this->getConstant(CheckConstants::REACHD_DAMAGER_SPRINTING_EYE_DISTANCE) : (float) $this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_DAMAGER_EYE_DISTANCE);
-		$limit = (float) $this->getConstant(CheckConstants::REACHD_REACH_EYE_LIMIT);
-
-		$this->debug($damagerAPI, "distance={$distance}, limit={$limit}");
-		if ($distance > $limit) {
-			$this->failed($damagerAPI);
-		}
 	}
 }

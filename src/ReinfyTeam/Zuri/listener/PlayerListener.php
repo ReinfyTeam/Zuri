@@ -70,6 +70,7 @@ use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\utils\ExceptionHandler;
 use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
@@ -327,6 +328,13 @@ class PlayerListener implements Listener {
 
 		if ($event->isCancelled()) {
 			$playerAPI->setRecentlyCancelledEvent(microtime(true));
+		}
+
+		// Track world transfers for FP cooldown
+		$from = $event->getFrom();
+		$to = $event->getTo();
+		if ($from->getWorld()->getFolderName() !== $to->getWorld()->getFolderName()) {
+			$playerAPI->setLastWorldTransfer(microtime(true));
 		}
 
 		$playerAPI->setTeleportTicks(microtime(true));
@@ -600,7 +608,10 @@ class PlayerListener implements Listener {
 		}
 
 		foreach (ZuriAC::EventChecks() as $class) {
-			$class->checkEvent($event, $player);
+			ExceptionHandler::wrapVoid(
+				fn() => $class->checkEvent($event, $player),
+				"checkEvent:" . $class->getName() . ":" . $class->getSubType()
+			);
 		}
 	}
 
@@ -610,13 +621,19 @@ class PlayerListener implements Listener {
 		}
 
 		foreach (ZuriAC::PacketChecks() as $class) {
-			$class->check($packet, $player);
+			ExceptionHandler::wrapVoid(
+				fn() => $class->check($packet, $player),
+				"check:" . $class->getName() . ":" . $class->getSubType()
+			);
 		}
 	}
 
 	private function checkJustEvent(Event $event) : void {
 		foreach (ZuriAC::JustEventChecks() as $class) {
-			$class->checkJustEvent($event);
+			ExceptionHandler::wrapVoid(
+				fn() => $class->checkJustEvent($event),
+				"checkJustEvent:" . $class->getName() . ":" . $class->getSubType()
+			);
 		}
 	}
 

@@ -228,7 +228,17 @@ abstract class Check extends ConfigManager {
 			return false;
 		}
 
-		if (ServerTickTask::getInstance()->isLagging(microtime(true)) === true) {
+		// FP Cooldown: Skip checks during lag, teleport, or world transfer windows
+		if ($playerAPI->isInFPCooldown()) {
+			return false;
+		}
+
+		if (ServerTickTask::getInstance()?->isLagging(microtime(true)) === true) {
+			// Set lag cooldown for all online players
+			foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $onlinePlayer) {
+				$api = PlayerAPI::getAPIPlayer($onlinePlayer);
+				$api->setLastLagSpike(microtime(true));
+			}
 			(new ServerLagEvent($playerAPI))->call();
 			return false;
 		}
@@ -431,6 +441,33 @@ abstract class Check extends ConfigManager {
 
 		// Use sigmoid-like curve for smoother confidence scaling
 		return 0.4 + (0.6 * $normalized);
+	}
+
+	/**
+	 * Get a dynamically adjusted threshold based on server/player conditions.
+	 *
+	 * @param float $baseThreshold The base threshold from config
+	 * @param PlayerAPI $playerAPI The player being checked
+	 * @return float Adjusted threshold (always >= base)
+	 */
+	protected function getDynamicThreshold(float $baseThreshold, PlayerAPI $playerAPI) : float {
+		if (!(bool) self::getData("zuri.dynamic-thresholds.enable", true)) {
+			return $baseThreshold;
+		}
+
+		return DynamicThreshold::adjust($baseThreshold, $playerAPI, $this->getName());
+	}
+
+	/**
+	 * Check if a value exceeds the dynamic threshold.
+	 *
+	 * @param float $value The value to check
+	 * @param float $baseThreshold The base threshold from config
+	 * @param PlayerAPI $playerAPI The player being checked
+	 * @return bool True if value exceeds the adjusted threshold
+	 */
+	protected function exceedsDynamicThreshold(float $value, float $baseThreshold, PlayerAPI $playerAPI) : bool {
+		return $value > $this->getDynamicThreshold($baseThreshold, $playerAPI);
 	}
 
 	/**

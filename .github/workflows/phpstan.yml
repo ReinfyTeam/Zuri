@@ -1,0 +1,28 @@
+name: PHPStan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  phpstan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP for PocketMine-MP
+        uses: pmmp/setup-php-action@3.2.0
+        with:
+          php-version: 8.4
+          pm-version-major: 5
+
+      - name: Install composer dependencies
+        run: composer install --prefer-dist
+
+      - name: Run PHPStan
+        run: ./vendor/bin/phpstan analyse --no-progress

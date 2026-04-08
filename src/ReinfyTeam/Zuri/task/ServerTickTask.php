@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\task;
 
 use pocketmine\scheduler\Task;
+use ReinfyTeam\Zuri\utils\ExceptionHandler;
 use ReinfyTeam\Zuri\ZuriAC;
 use function microtime;
 
@@ -45,11 +46,13 @@ class ServerTickTask extends Task {
 	}
 
 	public function onRun() : void {
-		self::$instance = $this;
-		$this->tick = microtime(true);
+		ExceptionHandler::wrapVoid(function() : void {
+			self::$instance = $this;
+			$this->tick = microtime(true);
+		}, "ServerTickTask::onRun");
 	}
 
-	public static function getInstance() : self {
+	public static function getInstance() : ?self {
 		return self::$instance;
 	}
 

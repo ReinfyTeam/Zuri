@@ -99,7 +99,6 @@ final class CheckConstants {
 	public const string REACHB_CREATIVE_MAX_DISTANCE = "creative-max-distance";
 	public const string REACHB_SURVIVAL_MAX_DISTANCE = "survival-max-distance";
 	public const string REACHC_MAX_REACH_EYE_DISTANCE = "max-reach-eye-distance";
-	public const string REACHD_ASYNC_ENABLED = "async-enabled";
 	public const string REACHD_DAMAGER_SPRINTING_EYE_DISTANCE = "damager-sprinting-eye-distance";
 	public const string REACHD_DEFAULT_EYE_DISTANCE = "default-eye-distance";
 	public const string REACHD_NOT_SPRINTING_DAMAGER_EYE_DISTANCE = "not-sprinting-damager-eye-distance";

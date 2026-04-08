@@ -97,15 +97,22 @@ class PlayerAPI implements IPlayerAPI {
 	private float $lastMoveTick = 0.0;
 	private float $teleportCommandTicks = 0.0;
 	private float $eventCancelled = 0.0;
+	private float $lastLagSpike = 0.0;
+	private float $lastWorldTransfer = 0.0;
 	private int $cps = 0;
 	private int $blocksBrokeASec = 0;
 	private int $blocksPlacedASec = 0;
 	private int $numberBlocksAllowBreak = 2; //2 is normal action
 	private int $numberBlocksAllowPlace = 2; //2 is normal action
+	/** @var array<string, int> */
 	private array $violations = [];
+	/** @var array<string, float> */
 	private array $realViolations = [];
+	/** @var array<string, int> */
 	private array $asyncSequences = [];
+	/** @var array<string, Location> */
 	private array $nLocation = [];
+	/** @var array<string, mixed> */
 	private array $externalData = [];
 	private string $captchaCode = "nocode";
 	/** @var array<string, list<array{score: float, timestamp: float}>> */
@@ -814,5 +821,65 @@ class PlayerAPI implements IPlayerAPI {
 
 	public function isDebug() : bool {
 		return $this->debug;
+	}
+
+	// FP Cooldown System - Lag spikes
+	public function setLastLagSpike(float $time) : void {
+		$this->lastLagSpike = $time;
+	}
+
+	public function getLastLagSpike() : float {
+		return $this->lastLagSpike;
+	}
+
+	public function isInLagCooldown(float $cooldownSeconds = 3.0) : bool {
+		if ($this->lastLagSpike < 1.0) {
+			return false;
+		}
+		return (microtime(true) - $this->lastLagSpike) < $cooldownSeconds;
+	}
+
+	// FP Cooldown System - World transfers
+	public function setLastWorldTransfer(float $time) : void {
+		$this->lastWorldTransfer = $time;
+	}
+
+	public function getLastWorldTransfer() : float {
+		return $this->lastWorldTransfer;
+	}
+
+	public function isInWorldTransferCooldown(float $cooldownSeconds = 5.0) : bool {
+		if ($this->lastWorldTransfer < 1.0) {
+			return false;
+		}
+		return (microtime(true) - $this->lastWorldTransfer) < $cooldownSeconds;
+	}
+
+	/**
+	 * Check if player is in any false-positive cooldown window.
+	 * Returns true if checks should be skipped.
+	 */
+	public function isInFPCooldown() : bool {
+		// Skip checks right after joining (first 3 seconds)
+		if ($this->getOnlineTime() < 3) {
+			return true;
+		}
+
+		// Skip checks during lag cooldown (3 seconds after lag spike)
+		if ($this->isInLagCooldown(3.0)) {
+			return true;
+		}
+
+		// Skip checks during world transfer cooldown (5 seconds after teleport to new world)
+		if ($this->isInWorldTransferCooldown(5.0)) {
+			return true;
+		}
+
+		// Skip checks right after teleport (2 seconds)
+		if ($this->getTicksSinceTeleport() < 40) { // 40 ticks = 2 seconds
+			return true;
+		}
+
+		return false;
 	}
 }

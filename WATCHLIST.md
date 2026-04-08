@@ -8,7 +8,7 @@
 ## Detection Quality
 
 - [x] Add confidence scoring to every violation result to reduce hard binary flagging.
-- [ ] Introduce per-check dynamic thresholds based on ping, TPS, and server load.
+- [x] Introduce per-check dynamic thresholds based on ping, TPS, and server load.
 - [ ] Add automatic false-positive cooldown windows after lag spikes and world transfers.
 - [ ] Build cross-check correlation (movement + combat + packet timing) before escalating punishments.
 
