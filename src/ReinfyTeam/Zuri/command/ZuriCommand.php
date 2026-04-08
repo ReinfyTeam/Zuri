@@ -43,6 +43,7 @@ use ReinfyTeam\Zuri\command\subcommand\HelpSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\ListSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\NotifySubCommand;
 use ReinfyTeam\Zuri\command\subcommand\UiSubCommand;
+use ReinfyTeam\Zuri\command\subcommand\AsyncStatusSubCommand;
 use ReinfyTeam\Zuri\ZuriAC;
 use function implode;
 
@@ -59,6 +60,7 @@ class ZuriCommand extends BaseCommand {
 		$this->registerSubCommand(new CaptchaSubCommand($this->plugin));
 		$this->registerSubCommand(new BypassSubCommand($this->plugin));
 		$this->registerSubCommand(new DebugSubCommand($this->plugin));
+		$this->registerSubCommand(new AsyncStatusSubCommand($this->plugin));
 		$this->registerSubCommand(new ListSubCommand($this->plugin));
 		$this->registerSubCommand(new UiSubCommand($this->plugin));
 		$this->registerSubCommand(new HelpSubCommand($this->plugin));

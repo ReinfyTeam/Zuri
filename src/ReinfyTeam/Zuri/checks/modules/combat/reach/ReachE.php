@@ -88,11 +88,15 @@ class ReachE extends Check {
 		$snapshot->addCachedData("edgePingCompensation", (float) $this->getConstant(CheckConstants::REACHE_EDGE_PING_COMPENSATION));
 		$snapshot->addCachedData("edgeReachLimit", (float) $this->getConstant(CheckConstants::REACHE_EDGE_REACH_LIMIT));
 		$snapshot->addCachedData("edgeBufferLimit", (int) $this->getConstant(CheckConstants::REACHE_EDGE_BUFFER_LIMIT));
+		$snapshot->validate();
 		$this->dispatchAsyncCheck($damager->getName(), $snapshot->build());
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "ReachE") {
+		if (
+			($payload["type"] ?? null) !== "ReachE" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\CombatSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

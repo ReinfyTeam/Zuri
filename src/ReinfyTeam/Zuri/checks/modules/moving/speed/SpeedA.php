@@ -116,6 +116,8 @@ class SpeedA extends Check {
 				"slownessLevel" => (($effect = $player->getEffects()->get(\pocketmine\entity\effect\VanillaEffects::SLOWNESS())) !== null) ? $effect->getEffectLevel() : 0,
 			]);
 
+			$snapshot->validate();
+
 			// Dispatch async check with snapshot payload
 			$payload = $snapshot->build();
 			$this->dispatchAsyncCheck($player->getName(), $payload);
@@ -123,7 +125,10 @@ class SpeedA extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "SpeedA") {
+		if (
+			($payload["type"] ?? null) !== "SpeedA" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

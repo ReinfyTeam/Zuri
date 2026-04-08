@@ -65,6 +65,8 @@ class WrongPitch extends Check {
 			// Add WrongPitch-specific cached data
 			$snapshot->addCachedData("pitch", abs($packet->getPitch()));
 
+			$snapshot->validate();
+
 			// Dispatch async check with snapshot payload
 			$payload = $snapshot->build();
 			$this->dispatchAsyncCheck($player->getName(), $payload);
@@ -72,7 +74,10 @@ class WrongPitch extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "WrongPitch") {
+		if (
+			($payload["type"] ?? null) !== "WrongPitch" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

@@ -61,12 +61,12 @@ class RegenB extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityRegainHealthEvent) {
 			if (!in_array($event->getRegainReason(), [EntityDamageEvent::CAUSE_MAGIC, EntityDamageEvent::CAUSE_CUSTOM], true)) {
-				$tick = (double) Server::getInstance()->getTick();
+				$tick = Server::getInstance()->getTick();
 				$tps = Server::getInstance()->getTicksPerSecond();
-				$lastHealthTick = $playerAPI->getExternalData(CacheData::REGEN_B_LAST_HEALTH_TICK) ?? 0;
+				$lastHealthTick = (int) ($playerAPI->getExternalData(CacheData::REGEN_B_LAST_HEALTH_TICK) ?? 0);
 				$healAmount = $event->getAmount();
 				$this->debug($playerAPI, "tick=$tick, tps=$tps, lastHealthTick=$lastHealthTick, healAmount=$healAmount");
-				if ($tps > 0.0 && $lastHealthTick != -1.0) {
+				if ($tps > 0.0 && $lastHealthTick !== -1) {
 					$diffTicks = $tick - $lastHealthTick; // server ticks since last health regain
 					$delta = $diffTicks / $tps; // seconds since last health regain
 					$healCount = $playerAPI->getExternalData(CacheData::REGEN_B_HEAL_COUNT) ?? 0;

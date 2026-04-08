@@ -80,13 +80,18 @@ class AntiVoid extends Check {
 
 		$playerAPI->setExternalData(CacheData::ANTIVOID_LAST_Y, $currentY);
 
+		$snapshot->validate();
+
 		// Dispatch async check with snapshot payload
 		$payload = $snapshot->build();
 		$this->dispatchAsyncCheck($player->getName(), $payload);
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "AntiVoid") {
+		if (
+			($payload["type"] ?? null) !== "AntiVoid" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

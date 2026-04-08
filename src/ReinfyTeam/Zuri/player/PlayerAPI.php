@@ -42,7 +42,10 @@ use ReflectionException;
 use ReflectionProperty;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function count;
+use function exp;
+use function max;
 use function microtime;
+use function min;
 use function spl_object_id;
 
 class PlayerAPI implements IPlayerAPI {
@@ -105,6 +108,8 @@ class PlayerAPI implements IPlayerAPI {
 	private array $nLocation = [];
 	private array $externalData = [];
 	private string $captchaCode = "nocode";
+	/** @var array<string, list<array{score: float, timestamp: float}>> */
+	private array $confidenceScores = [];
 
 	public function __construct(private readonly Player $player) {
 		$this->onGround = $player->isOnGround();
@@ -252,7 +257,7 @@ class PlayerAPI implements IPlayerAPI {
 		$this->lastMoveTick = $data;
 	}
 
-	public function getLastMoveTick() : float {
+	public function getLastMoveTick() : int {
 		return MathUtil::ticksSince($this->lastMoveTick);
 	}
 
@@ -260,7 +265,7 @@ class PlayerAPI implements IPlayerAPI {
 		$this->projectileAttackTicks = $data;
 	}
 
-	public function getProjectileAttackTicks() : float {
+	public function getProjectileAttackTicks() : int {
 		return MathUtil::ticksSince($this->projectileAttackTicks);
 	}
 
@@ -269,7 +274,7 @@ class PlayerAPI implements IPlayerAPI {
 		$this->bowShotTicks = $data;
 	}
 
-	public function getBowShotTicks() : float {
+	public function getBowShotTicks() : int {
 		return MathUtil::ticksSince($this->bowShotTicks);
 	}
 
@@ -277,7 +282,7 @@ class PlayerAPI implements IPlayerAPI {
 		$this->hurtTicks = $data;
 	}
 
-	public function getTeleportCommandTicks() : float {
+	public function getTeleportCommandTicks() : int {
 		return MathUtil::ticksSince($this->teleportCommandTicks);
 	}
 
@@ -285,7 +290,7 @@ class PlayerAPI implements IPlayerAPI {
 		$this->teleportCommandTicks = $data;
 	}
 
-	public function getHurtTicks() : float {
+	public function getHurtTicks() : int {
 		return MathUtil::ticksSince($this->hurtTicks);
 	}
 
@@ -465,7 +470,7 @@ class PlayerAPI implements IPlayerAPI {
 		return $this->lastGroundY;
 	}
 
-	public function setlastGroundY(float $data) : void {
+	public function setLastGroundY(float $data) : void {
 		$this->lastGroundY = $data;
 	}
 
@@ -558,7 +563,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	//Teleport ticks
-	public function getTeleportTicks() : float {
+	public function getTeleportTicks() : int {
 		return MathUtil::ticksSince($this->teleportTicks);
 	}
 
@@ -567,7 +572,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	//Jump ticks
-	public function getJumpTicks() : float {
+	public function getJumpTicks() : int {
 		return MathUtil::ticksSince($this->jumpTicks);
 	}
 
@@ -576,7 +581,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	//Attack ticks
-	public function getAttackTicks() : float {
+	public function getAttackTicks() : int {
 		return MathUtil::ticksSince($this->attackTicks);
 	}
 
@@ -585,7 +590,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	//On slime block ticks
-	public function getSlimeBlockTicks() : float {
+	public function getSlimeBlockTicks() : int {
 		return MathUtil::ticksSince($this->slimeBlockTicks);
 	}
 
@@ -594,7 +599,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	//Death ticks
-	public function getDeathTicks() : float {
+	public function getDeathTicks() : int {
 		return MathUtil::ticksSince($this->deathTicks);
 	}
 
@@ -603,7 +608,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	//Placing ticks
-	public function getPlacingTicks() : float {
+	public function getPlacingTicks() : int {
 		return MathUtil::ticksSince($this->placingTicks);
 	}
 
@@ -661,6 +666,76 @@ class PlayerAPI implements IPlayerAPI {
 		}
 
 		$this->realViolations[$supplier][] = microtime(true);
+	}
+
+	//Confidence scoring
+	/**
+	 * Get the accumulated confidence score for a check.
+	 * Uses exponential decay: older scores contribute less.
+	 */
+	public function getConfidenceScore(string $supplier) : float {
+		if (!isset($this->confidenceScores[$supplier]) || $this->confidenceScores[$supplier] === []) {
+			return 0.0;
+		}
+
+		$now = microtime(true);
+		$decayRate = 0.1; // Decay over ~10 seconds
+		$totalScore = 0.0;
+
+		foreach ($this->confidenceScores[$supplier] as $index => $entry) {
+			$age = $now - $entry['timestamp'];
+			if ($age > 30.0) { // Expire after 30 seconds
+				unset($this->confidenceScores[$supplier][$index]);
+				continue;
+			}
+			$decayedScore = $entry['score'] * exp(-$decayRate * $age);
+			$totalScore += $decayedScore;
+		}
+
+		return min(1.0, $totalScore);
+	}
+
+	/**
+	 * Add a confidence score for a check.
+	 */
+	public function addConfidenceScore(string $supplier, float $score) : void {
+		if (!isset($this->confidenceScores[$supplier])) {
+			$this->confidenceScores[$supplier] = [];
+		}
+
+		// Clean old entries
+		$now = microtime(true);
+		foreach ($this->confidenceScores[$supplier] as $index => $entry) {
+			if (($now - $entry['timestamp']) > 30.0) {
+				unset($this->confidenceScores[$supplier][$index]);
+			}
+		}
+
+		$this->confidenceScores[$supplier][] = [
+			'score' => max(0.0, min(1.0, $score)),
+			'timestamp' => $now,
+		];
+	}
+
+	/**
+	 * Reset confidence scores for a check.
+	 */
+	public function resetConfidenceScore(string $supplier) : void {
+		if (isset($this->confidenceScores[$supplier])) {
+			unset($this->confidenceScores[$supplier]);
+		}
+	}
+
+	/**
+	 * Get all confidence scores (for debugging/telemetry).
+	 * @return array<string, float>
+	 */
+	public function getAllConfidenceScores() : array {
+		$scores = [];
+		foreach ($this->confidenceScores as $supplier => $_) {
+			$scores[$supplier] = $this->getConfidenceScore($supplier);
+		}
+		return $scores;
 	}
 
 	//Async sequence

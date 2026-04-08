@@ -82,6 +82,8 @@ class FlyC extends Check {
 			$snapshot->addCachedData("maxY", $player->getWorld()->getHighestBlockAt((int) $newPos->getX(), (int) $newPos->getZ()));
 			$snapshot->addCachedData("surroundingBlocks", BlockUtil::getSurroundingBlocks($player));
 
+			$snapshot->validate();
+
 			// Dispatch async check with snapshot payload
 			$payload = $snapshot->build();
 			$this->dispatchAsyncCheck($player->getName(), $payload);
@@ -89,7 +91,10 @@ class FlyC extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "FlyC") {
+		if (
+			($payload["type"] ?? null) !== "FlyC" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

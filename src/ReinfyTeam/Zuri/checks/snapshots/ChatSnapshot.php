@@ -44,6 +44,8 @@ use function strlen;
  * Used by: SpamA, SpamB and other chat checks
  */
 class ChatSnapshot extends AsyncSnapshot {
+	public const SCHEMA_VERSION = 1;
+
 	/** Chat message. */
 	private string $message;
 
@@ -90,6 +92,7 @@ class ChatSnapshot extends AsyncSnapshot {
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
+			"schemaVersion" => self::SCHEMA_VERSION,
 			"message" => $this->message,
 			"messageTime" => $this->messageTime,
 			"messageLength" => $this->messageLength,

@@ -42,6 +42,8 @@ use function is_float;
  * FastBreak, Tower, Scaffold, FillBlock, BlockReach
  */
 class BlockSnapshot extends AsyncSnapshot {
+	public const SCHEMA_VERSION = 1;
+
 	/** Block position. */
 	private float $blockX;
 	private float $blockY;
@@ -117,6 +119,7 @@ class BlockSnapshot extends AsyncSnapshot {
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
+			"schemaVersion" => self::SCHEMA_VERSION,
 			"blockX" => $this->blockX,
 			"blockY" => $this->blockY,
 			"blockZ" => $this->blockZ,

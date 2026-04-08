@@ -82,11 +82,15 @@ class ReachA extends Check {
 
 		$snapshot = new CombatSnapshot("ReachA", $damager, $damagerAPI, $entity, $playerAPI);
 		$snapshot->addCachedData("maxDistance", (float) $this->getConstant(CheckConstants::REACHA_SURVIVAL_MAX_DISTANCE));
+		$snapshot->validate();
 		$this->dispatchAsyncCheck($damager->getName(), $snapshot->build());
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "ReachA") {
+		if (
+			($payload["type"] ?? null) !== "ReachA" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\CombatSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

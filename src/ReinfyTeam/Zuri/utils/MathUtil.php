@@ -125,8 +125,8 @@ class MathUtil {
 		return abs(self::wrapAngleTo180($to - $from));
 	}
 
-	public static function ticksSince(float $timestamp) : float {
-		return (microtime(true) - $timestamp) * 20;
+	public static function ticksSince(float $timestamp) : int {
+		return (int) ((microtime(true) - $timestamp) * 20);
 	}
 
 	public static function isRecent(float $timestamp, float $maxTicks) : bool {

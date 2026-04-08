@@ -147,7 +147,10 @@ class SpeedB extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "SpeedB") {
+		if (
+			($payload["type"] ?? null) !== "SpeedB" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

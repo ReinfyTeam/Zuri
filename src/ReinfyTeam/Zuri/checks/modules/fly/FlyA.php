@@ -78,13 +78,18 @@ class FlyA extends Check {
 		$snapshot->addCachedData("now", microtime(true));
 		$snapshot->addCachedData("maxGroundDiff", (float) $this->getConstant(CheckConstants::FLYA_MAX_GROUND_DIFF));
 
+		$snapshot->validate();
+
 		// Dispatch async check with snapshot payload
 		$payload = $snapshot->build();
 		$this->dispatchAsyncCheck($player->getName(), $payload);
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "FlyA") {
+		if (
+			($payload["type"] ?? null) !== "FlyA" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

@@ -47,9 +47,13 @@ use ReinfyTeam\Zuri\task\ServerTickTask;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 use ReinfyTeam\Zuri\ZuriAC;
+use function exp;
 use function implode;
 use function in_array;
+use function max;
 use function microtime;
+use function min;
+use function round;
 use function strtolower;
 
 abstract class Check extends ConfigManager {
@@ -342,6 +346,91 @@ abstract class Check extends ConfigManager {
 
 
 		return false;
+	}
+
+	/**
+	 * Report a violation with confidence scoring instead of binary pass/fail.
+	 *
+	 * This method allows checks to report violations with a confidence level,
+	 * enabling more nuanced detection that reduces false positives.
+	 *
+	 * @param PlayerAPI $playerAPI The player being checked
+	 * @param float $baseConfidence Base confidence (0.0-1.0) from detection logic
+	 * @param string $debugInfo Optional debug information
+	 * @return bool Whether the violation was processed (true) or suppressed (false)
+	 * @throws DiscordWebhookException
+	 */
+	public function failedWithConfidence(PlayerAPI $playerAPI, float $baseConfidence = 0.6, string $debugInfo = "") : bool {
+		// Clamp confidence to valid range
+		$baseConfidence = max(0.0, min(1.0, $baseConfidence));
+
+		// Create violation result with confidence scoring
+		$result = new ViolationResult($this->getName(), $this->getSubType(), $baseConfidence, $debugInfo);
+
+		// Apply contextual factors
+		$player = $playerAPI->getPlayer();
+		$result->applyPingFactor($player->getNetworkSession()->getPing() ?? 0);
+		$result->applyOnlineTimeFactor($playerAPI->getOnlineTime());
+		$result->applyRepeatFactor($playerAPI->getViolation($this->getName()));
+		$result->applyEnvironmentFactor(
+			$playerAPI->isCurrentChunkIsLoaded(),
+			$playerAPI->getTeleportTicks() < 60,
+			$playerAPI->getHurtTicks() < 20,
+			ServerTickTask::getInstance()->isLagging(microtime(true))
+		);
+
+		// Get threshold from config (default 0.5 = medium confidence required)
+		$threshold = (float) self::getData("zuri.confidence.threshold", 0.5);
+		$finalConfidence = $result->getConfidence();
+
+		// Track confidence score for trending analysis
+		$playerAPI->addConfidenceScore($this->getName(), $finalConfidence);
+
+		// Debug output if enabled
+		if ($playerAPI->isDebug()) {
+			$this->debug($playerAPI, "Confidence: " . $result->getConfidencePercent() . "% (threshold: " . round($threshold * 100) . "%) " . $debugInfo);
+			return false;
+		}
+
+		// If confidence doesn't meet threshold, suppress the violation
+		if ($finalConfidence < $threshold) {
+			// Low confidence - log for analysis but don't trigger violation
+			if (self::getData(self::DETECTION_ENABLE) === true && $finalConfidence >= 0.3) {
+				// Only show detections for borderline cases (30-50% confidence)
+				$message = ReplaceText::replace($playerAPI, self::getData(self::DETECTION_MESSAGE), $this->getName(), $this->getSubType());
+				$message .= TextFormat::GRAY . " [" . $result->getConfidencePercent() . "% confidence]";
+				foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
+					if ($p->hasPermission("zuri.admin")) {
+						$p->sendMessage($message);
+					}
+				}
+			}
+			return false;
+		}
+
+		// High confidence - proceed with normal violation handling
+		return $this->failed($playerAPI);
+	}
+
+	/**
+	 * Calculate confidence based on how far a value exceeds a threshold.
+	 * Useful for checks that measure continuous values (speed, reach, etc.)
+	 *
+	 * @param float $actual The actual measured value
+	 * @param float $threshold The threshold that should not be exceeded
+	 * @param float $maxExcess The excess at which confidence is 100%
+	 * @return float Confidence score (0.0-1.0)
+	 */
+	protected function calculateExcessConfidence(float $actual, float $threshold, float $maxExcess = 1.0) : float {
+		if ($actual <= $threshold) {
+			return 0.0;
+		}
+
+		$excess = $actual - $threshold;
+		$normalized = min(1.0, $excess / $maxExcess);
+
+		// Use sigmoid-like curve for smoother confidence scaling
+		return 0.4 + (0.6 * $normalized);
 	}
 
 	/**

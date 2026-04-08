@@ -74,6 +74,8 @@ class FlyB extends Check {
 			$snapshot->addCachedData("buffer", (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0));
 			$snapshot->addCachedData("bufferLimit", (int) $this->getConstant(CheckConstants::FLYB_PACKET_BUFFER_LIMIT));
 
+			$snapshot->validate();
+
 			// Dispatch async check with snapshot payload
 			$payload = $snapshot->build();
 			$this->dispatchAsyncCheck($player->getName(), $payload);
@@ -81,7 +83,10 @@ class FlyB extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "FlyB") {
+		if (
+			($payload["type"] ?? null) !== "FlyB" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

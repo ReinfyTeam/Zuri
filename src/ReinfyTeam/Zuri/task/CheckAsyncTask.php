@@ -50,6 +50,30 @@ class CheckAsyncTask {
 	private static int $maxConcurrentWorkers = 4;
 	private static int $maxQueueSize = 2048;
 
+	private static int $totalDispatched = 0;
+	private static int $totalCompleted = 0;
+	private static int $totalDropped = 0;
+	private static float $lastDispatchAt = 0.0;
+	private static float $lastCompleteAt = 0.0;
+	/** @var array<string,float> */
+	private static array $inFlightStartedAt = [];
+	private static float $totalWorkerTime = 0.0;
+
+	public static function getMetrics() : array {
+		return [
+			"queueSize" => count(self::$queue),
+			"inFlight" => self::$inFlight,
+			"maxConcurrentWorkers" => self::$maxConcurrentWorkers,
+			"maxQueueSize" => self::$maxQueueSize,
+			"totalDispatched" => self::$totalDispatched,
+			"totalCompleted" => self::$totalCompleted,
+			"totalDropped" => self::$totalDropped,
+			"lastDispatchAt" => self::$lastDispatchAt,
+			"lastCompleteAt" => self::$lastCompleteAt,
+			"avgWorkerTime" => self::$totalCompleted > 0 ? self::$totalWorkerTime / self::$totalCompleted : 0.0,
+		];
+	}
+
 	public static function configure(int $maxConcurrentWorkers, int $maxQueueSize) : void {
 		self::$maxConcurrentWorkers = $maxConcurrentWorkers > 0 ? $maxConcurrentWorkers : 1;
 		self::$maxQueueSize = $maxQueueSize > 0 ? $maxQueueSize : 1;
@@ -57,10 +81,12 @@ class CheckAsyncTask {
 
 	public static function dispatch(string $checkClass, string $playerName, array $payload, int $sequence) : void {
 		if (self::$inFlight >= self::$maxConcurrentWorkers && count(self::$queue) >= self::$maxQueueSize) {
+			self::$totalDropped++;
 			return;
 		}
 
 		self::$queue[] = [$checkClass, $playerName, $payload, $sequence];
+		self::$lastDispatchAt = microtime(true);
 		self::drain();
 	}
 
@@ -73,6 +99,10 @@ class CheckAsyncTask {
 
 	private static function startTask(string $checkClass, string $playerName, array $payload, int $sequence) : void {
 		self::$inFlight++;
+		self::$totalDispatched++;
+
+		$id = $checkClass . ":" . $playerName . ":" . $sequence;
+		self::$inFlightStartedAt[$id] = microtime(true);
 
 		$thread = new ClosureThread(
 			static function (string $checkClass, string $playerName, array $payload) : array {
@@ -90,6 +120,14 @@ class CheckAsyncTask {
 		);
 		$thread->start()->then(function(string $output) use ($checkClass, $playerName, $sequence) : void {
 			self::$inFlight = self::$inFlight > 0 ? self::$inFlight - 1 : 0;
+			self::$lastCompleteAt = microtime(true);
+			self::$totalCompleted++;
+
+			$id = $checkClass . ":" . $playerName . ":" . $sequence;
+			$startedAt = self::$inFlightStartedAt[$id] ?? self::$lastCompleteAt;
+			unset(self::$inFlightStartedAt[$id]);
+			self::$totalWorkerTime += max(0.0, self::$lastCompleteAt - $startedAt);
+
 			self::drain();
 
 			$result = json_decode($output, true);

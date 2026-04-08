@@ -57,11 +57,11 @@ class FastBow extends Check {
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof EntityShootBowEvent) {
-			$tick = (float) Server::getInstance()->getTick();
+			$tick = Server::getInstance()->getTick();
 			$tps = (float) Server::getInstance()->getTicksPerSecond();
-			$shootFirstTick = (float) $playerAPI->getExternalData(CacheData::FASTBOW_SHOOT_FIRST_TICK, -1.0);
-			if ($shootFirstTick === -1.0) {
-				$shootFirstTick = $tick - 30.0;
+			$shootFirstTick = (int) $playerAPI->getExternalData(CacheData::FASTBOW_SHOOT_FIRST_TICK, -1);
+			if ($shootFirstTick === -1) {
+				$shootFirstTick = $tick - 30;
 			}
 
 			$currentHsIndex = (int) $playerAPI->getExternalData(CacheData::FASTBOW_CURRENT_HS_INDEX, 0);
@@ -88,9 +88,9 @@ class FastBow extends Check {
 			return [];
 		}
 
-		$tick = (float) ($payload["tick"] ?? 0.0);
+		$tick = (int) ($payload["tick"] ?? 0);
 		$tps = (float) ($payload["tps"] ?? 20.0);
-		$shootFirstTick = (float) ($payload["shootFirstTick"] ?? -1.0);
+		$shootFirstTick = (int) ($payload["shootFirstTick"] ?? -1);
 		$hsTimeSum = (float) ($payload["hsTimeSum"] ?? 0.0);
 		$currentHsIndex = (int) ($payload["currentHsIndex"] ?? 0);
 		$hsTimeList = (array) ($payload["hsTimeList"] ?? []);

@@ -156,27 +156,27 @@ interface IPlayerAPI {
 
 	public function getOnlineTime() : int;
 
-	public function getTeleportTicks() : float;
+	public function getTeleportTicks() : int;
 
 	public function setTeleportTicks(float $data) : void;
 
-	public function getJumpTicks() : float;
+	public function getJumpTicks() : int;
 
 	public function setJumpTicks(float $data) : void;
 
-	public function getAttackTicks() : float;
+	public function getAttackTicks() : int;
 
 	public function setAttackTicks(float $data) : void;
 
-	public function getSlimeBlockTicks() : float;
+	public function getSlimeBlockTicks() : int;
 
 	public function setSlimeBlockTicks(float $data) : void;
 
-	public function getDeathTicks() : float;
+	public function getDeathTicks() : int;
 
 	public function setDeathTicks(float $data) : void;
 
-	public function getPlacingTicks() : float;
+	public function getPlacingTicks() : int;
 
 	public function setPlacingTicks(float $data) : void;
 

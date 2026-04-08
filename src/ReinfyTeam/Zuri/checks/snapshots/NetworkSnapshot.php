@@ -45,6 +45,8 @@ use function microtime;
  * FastEat, FastThrow, ImpossiblePitch, SelfHit, and other network checks
  */
 class NetworkSnapshot extends AsyncSnapshot {
+	public const SCHEMA_VERSION = 1;
+
 	/** Packet metadata. */
 	private string $packetName;
 	private float $packetTime;
@@ -96,6 +98,7 @@ class NetworkSnapshot extends AsyncSnapshot {
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
+			"schemaVersion" => self::SCHEMA_VERSION,
 			"packetName" => $this->packetName,
 			"packetTime" => $this->packetTime,
 			"ping" => $this->ping,

@@ -43,6 +43,8 @@ use function is_float;
  * Rotation, Velocity, FastBow
  */
 class CombatSnapshot extends AsyncSnapshot {
+	public const SCHEMA_VERSION = 1;
+
 	/** Damager state. */
 	private float $damagerEyeX;
 	private float $damagerEyeY;
@@ -122,6 +124,7 @@ class CombatSnapshot extends AsyncSnapshot {
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
+			"schemaVersion" => self::SCHEMA_VERSION,
 			"damagerEyeX" => $this->damagerEyeX,
 			"damagerEyeY" => $this->damagerEyeY,
 			"damagerEyeZ" => $this->damagerEyeZ,

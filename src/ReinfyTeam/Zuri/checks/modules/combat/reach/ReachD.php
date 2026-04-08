@@ -75,6 +75,7 @@ class ReachD extends Check {
 					$snapshot->addCachedData("damagerSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_DAMAGER_SPRINTING_EYE_DISTANCE) ?? 0.77));
 					$snapshot->addCachedData("damagerNotSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_DAMAGER_EYE_DISTANCE) ?? 0.67));
 					$snapshot->addCachedData("limit", (float) ($this->getConstant(CheckConstants::REACHD_REACH_EYE_LIMIT) ?? 3.0));
+					$snapshot->validate();
 					$this->dispatchAsyncCheck($damager->getName(), $snapshot->build());
 					return;
 				}
@@ -85,7 +86,10 @@ class ReachD extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "ReachD") {
+		if (
+			($payload["type"] ?? null) !== "ReachD" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\CombatSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

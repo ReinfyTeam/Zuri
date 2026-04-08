@@ -3,11 +3,11 @@
 - [x] Create snapshot/builder infrastructure for asynchronous checking.
 - [x] Migrate all modules to asynchronous checking.
 - [x] Implement batch queueing system intended for asynchronous threads.
-- [ ] Test and validate all asynchronous checks and ensure all snapshots are working and returning to the main thread.
+- [x] Test and validate all asynchronous checks and ensure all snapshots are working and returning to the main thread.
 
 ## Detection Quality
 
-- [ ] Add confidence scoring to every violation result to reduce hard binary flagging.
+- [x] Add confidence scoring to every violation result to reduce hard binary flagging.
 - [ ] Introduce per-check dynamic thresholds based on ping, TPS, and server load.
 - [ ] Add automatic false-positive cooldown windows after lag spikes and world transfers.
 - [ ] Build cross-check correlation (movement + combat + packet timing) before escalating punishments.

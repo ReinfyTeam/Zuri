@@ -79,11 +79,15 @@ class ReachC extends Check {
 
 		$snapshot = new CombatSnapshot("ReachC", $damager, $damagerAPI, $victim, $victimAPI);
 		$snapshot->addCachedData("maxReachEyeDistance", (float) $this->getConstant(CheckConstants::REACHC_MAX_REACH_EYE_DISTANCE));
+		$snapshot->validate();
 		$this->dispatchAsyncCheck($damager->getName(), $snapshot->build());
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "ReachC") {
+		if (
+			($payload["type"] ?? null) !== "ReachC" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\CombatSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

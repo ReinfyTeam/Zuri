@@ -12,7 +12,11 @@ vendor/*
 
 # Build binary files
 tools/bin/*
-output.phar
+*.phar
+build/*
 
 # jupyter
 **/.ipynb_checkpoints/
+
+# github codespaces
+.devcontainer

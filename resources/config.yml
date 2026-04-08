@@ -84,6 +84,12 @@ zuri:
         max-concurrent-workers: 4
         # Max queued async payloads before new payloads are dropped.
         max-queue-size: 2048
+    confidence:
+        # Confidence scoring reduces false positives by requiring a minimum certainty level
+        # before triggering violations. Lower values catch more cheats but may false-positive.
+        # Higher values reduce false positives but may miss subtle cheats.
+        # Range: 0.0 (always trigger) to 1.0 (never trigger). Recommended: 0.4-0.6
+        threshold: 0.5
     captcha:
         # Captcha is used to pause a player until they complete a verification challenge.
         enable: true

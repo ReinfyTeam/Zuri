@@ -42,6 +42,8 @@ use function is_array;
  * InventoryMove
  */
 class InventorySnapshot extends AsyncSnapshot {
+	public const SCHEMA_VERSION = 1;
+
 	/** Inventory contents snapshot (serializable). */
 	private array $inventoryContents;
 
@@ -113,6 +115,7 @@ class InventorySnapshot extends AsyncSnapshot {
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
+			"schemaVersion" => self::SCHEMA_VERSION,
 			"inventoryContents" => $this->inventoryContents,
 			"armorContents" => $this->armorContents,
 			"cursorItem" => $this->cursorItem,

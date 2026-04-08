@@ -78,6 +78,8 @@ class ClickTP extends Check {
 			$snapshot->addCachedData("newPitch", $newPitch);
 			$snapshot->addCachedData("maxDistance", (float) $this->getConstant(CheckConstants::CLICKTP_MAX_DISTANCE));
 
+			$snapshot->validate();
+
 			// Dispatch async check with snapshot payload
 			$payload = $snapshot->build();
 			$this->dispatchAsyncCheck($player->getName(), $payload);
@@ -85,7 +87,10 @@ class ClickTP extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "ClickTP") {
+		if (
+			($payload["type"] ?? null) !== "ClickTP" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

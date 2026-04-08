@@ -68,7 +68,6 @@ use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 use pocketmine\player\Player;
-use pocketmine\Server;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\ZuriAC;
@@ -145,7 +144,7 @@ class PlayerListener implements Listener {
 		$playerAPI->setOnCarpet(BlockUtil::isOnCarpet($event->getTo(), 0));
 		$playerAPI->setOnPlate(BlockUtil::isOnPlate($event->getTo(), 0));
 		$playerAPI->setOnSnow(BlockUtil::isOnSnow($event->getTo(), 0));
-		$playerAPI->setLastMoveTick((double) Server::getInstance()->getTick());
+		$playerAPI->setLastMoveTick(microtime(true));
 		$playerAPI->setMotion(Vector3::zero());
 	}
 

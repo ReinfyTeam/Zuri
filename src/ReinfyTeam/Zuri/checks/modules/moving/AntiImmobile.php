@@ -74,6 +74,8 @@ class AntiImmobile extends Check {
 				$snapshot->addCachedData("toY", $event->getTo()->getY());
 				$snapshot->addCachedData("toZ", $event->getTo()->getZ());
 
+				$snapshot->validate();
+
 				// Dispatch async check with snapshot payload
 				$payload = $snapshot->build();
 				$this->dispatchAsyncCheck($player->getName(), $payload);
@@ -82,7 +84,10 @@ class AntiImmobile extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "AntiImmobile") {
+		if (
+			($payload["type"] ?? null) !== "AntiImmobile" ||
+			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
+		) {
 			return [];
 		}
 

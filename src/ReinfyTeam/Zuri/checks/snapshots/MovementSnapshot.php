@@ -44,6 +44,8 @@ use function is_float;
  * AntiVoid, AntiImmobile, AirJump, WrongPitch, FakeGlide, OmniSprint
  */
 class MovementSnapshot extends AsyncSnapshot {
+	public const SCHEMA_VERSION = 1;
+
 	/** Player position at capture time. */
 	private float $posX;
 	private float $posY;
@@ -152,6 +154,7 @@ class MovementSnapshot extends AsyncSnapshot {
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
+			"schemaVersion" => self::SCHEMA_VERSION,
 			"posX" => $this->posX,
 			"posY" => $this->posY,
 			"posZ" => $this->posZ,
