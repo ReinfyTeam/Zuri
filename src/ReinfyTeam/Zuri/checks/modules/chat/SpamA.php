@@ -36,6 +36,8 @@ use pocketmine\event\player\PlayerChatEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function microtime;
@@ -64,7 +66,7 @@ class SpamA extends Check {
 					$diff = microtime(true) - $chatTick;
 					if ($diff <= self::getData(self::CHAT_SPAM_DELAY)) {
 						if ($violationChat <= $this->getConstant(CheckConstants::SPAMA_MAX_VIOLATION_RATE)) {
-							$playerAPI->getPlayer()->sendMessage($this->replaceText($playerAPI, self::getData(self::CHAT_SPAM_TEXT), $this->getName(), $this->getSubType()));
+							$playerAPI->getPlayer()->sendMessage($this->replaceText($playerAPI, Lang::raw(LangKeys::CHAT_SPAM_TEXT), $this->getName(), $this->getSubType()));
 							$playerAPI->setExternalData(CacheData::SPAM_A_TICK, microtime(true));
 							$playerAPI->setExternalData(CacheData::SPAM_A_VIOLATION, $violationChat + 1);
 							$this->dispatchAsyncDecision($playerAPI, true);

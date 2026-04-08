@@ -91,10 +91,12 @@ class FlyC extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (
-			($payload["type"] ?? null) !== "FlyC" ||
-			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
-		) {
+		if (!MovementSnapshot::validatePayload(
+			$payload,
+			"FlyC",
+			MovementSnapshot::SCHEMA_VERSION,
+			["type", "schemaVersion", "cachedData"]
+		)) {
 			return [];
 		}
 

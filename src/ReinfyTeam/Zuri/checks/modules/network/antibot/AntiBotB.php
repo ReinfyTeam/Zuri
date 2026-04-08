@@ -36,6 +36,8 @@ use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function str_contains;
 use function strtolower;
@@ -71,14 +73,14 @@ class AntiBotB extends Check {
 				foreach (self::SUSPICIOUS_CLIENT_SIGNATURES as $signature) {
 					if (str_contains($model, $signature) || str_contains($thirdParty, $signature)) {
 						$this->warn($event->getPlayerInfo()->getUsername());
-						$event->setKickFlag(0, self::getData(self::ANTIBOT_MESSAGE));
+						$event->setKickFlag(0, Lang::get(LangKeys::ANTIBOT_MESSAGE));
 						return;
 					}
 				}
 
 				if (str_contains($thirdParty, "lunar") && ($extraData["DeviceOS"] ?? null) !== DeviceOS::WINDOWS_10 && ($extraData["DeviceOS"] ?? null) !== DeviceOS::WIN32) {
 					$this->warn($event->getPlayerInfo()->getUsername());
-					$event->setKickFlag(0, self::getData(self::ANTIBOT_MESSAGE));
+					$event->setKickFlag(0, Lang::get(LangKeys::ANTIBOT_MESSAGE));
 					return;
 				}
 			}

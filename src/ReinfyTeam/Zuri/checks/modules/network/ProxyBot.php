@@ -35,6 +35,8 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\utils\Internet;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use function json_decode;
 use function strtolower;
 
@@ -60,7 +62,7 @@ class ProxyBot extends Check {
 					$proxy = strtolower((string) ($data[$ip]["proxy"] ?? "no")) === "yes";
 					if ($proxy) {
 						$this->warn($event->getPlayerInfo()->getUsername());
-						$event->setKickFlag(0, self::getData(self::ANTIBOT_MESSAGE));
+						$event->setKickFlag(0, Lang::get(LangKeys::ANTIBOT_MESSAGE));
 					}
 				}
 			}

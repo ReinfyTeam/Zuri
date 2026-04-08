@@ -83,10 +83,17 @@ class FlyB extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (
-			($payload["type"] ?? null) !== "FlyB" ||
-			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
-		) {
+		if (!MovementSnapshot::validatePayload(
+			$payload,
+			"FlyB",
+			MovementSnapshot::SCHEMA_VERSION,
+			["type", "schemaVersion", "teleportTicks", "teleportCommandTicks", "hurtTicks", "cachedData"],
+			[
+				"teleportTicks" => [0.0, 120000.0],
+				"teleportCommandTicks" => [0.0, 120000.0],
+				"hurtTicks" => [0.0, 120000.0],
+			]
+		)) {
 			return [];
 		}
 

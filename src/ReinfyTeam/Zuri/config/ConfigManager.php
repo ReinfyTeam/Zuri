@@ -62,6 +62,10 @@ class ConfigManager extends ConfigPaths {
 			ZuriAC::getInstance()->saveResource("webhook.yml");
 		}
 
+		if (!file_exists(ZuriAC::getInstance()->getDataFolder() . "lang/en_US.yml")) {
+			ZuriAC::getInstance()->saveResource("lang/en_US.yml");
+		}
+
 		$pluginConfigResource = ZuriAC::getInstance()->getResource("config.yml");
 		$pluginConfig = yaml_parse(stream_get_contents($pluginConfigResource));
 		fclose($pluginConfigResource);

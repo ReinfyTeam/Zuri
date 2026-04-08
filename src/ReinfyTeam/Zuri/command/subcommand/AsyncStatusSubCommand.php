@@ -34,7 +34,8 @@ namespace ReinfyTeam\Zuri\command\subcommand;
 use CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
-use pocketmine\utils\TextFormat;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\task\CheckAsyncTask;
 use function implode;
 use function round;
@@ -51,15 +52,15 @@ class AsyncStatusSubCommand extends BaseSubCommand {
 		$metrics = CheckAsyncTask::getMetrics();
 
 		$lines = [
-			TextFormat::YELLOW . "[Zuri] Async pipeline status:",
-			TextFormat::GRAY . "Queue: " . TextFormat::WHITE . $metrics["queueSize"] .
-				TextFormat::GRAY . " / " . TextFormat::WHITE . $metrics["maxQueueSize"],
-			TextFormat::GRAY . "Workers in flight: " . TextFormat::WHITE . $metrics["inFlight"] .
-				TextFormat::GRAY . " / " . TextFormat::WHITE . $metrics["maxConcurrentWorkers"],
-			TextFormat::GRAY . "Total dispatched: " . TextFormat::WHITE . $metrics["totalDispatched"] .
-				TextFormat::GRAY . ", completed: " . TextFormat::WHITE . $metrics["totalCompleted"] .
-				TextFormat::GRAY . ", dropped: " . TextFormat::WHITE . $metrics["totalDropped"],
-			TextFormat::GRAY . "Avg worker time: " . TextFormat::WHITE . round((float) $metrics["avgWorkerTime"], 4) . "s",
+			Lang::get(LangKeys::ASYNC_STATUS_HEADER),
+			Lang::get(LangKeys::ASYNC_STATUS_QUEUE, ["queue" => (string) $metrics["queueSize"], "maxQueue" => (string) $metrics["maxQueueSize"]]),
+			Lang::get(LangKeys::ASYNC_STATUS_WORKERS, ["inFlight" => (string) $metrics["inFlight"], "maxWorkers" => (string) $metrics["maxConcurrentWorkers"]]),
+			Lang::get(LangKeys::ASYNC_STATUS_TOTALS, [
+				"dispatched" => (string) $metrics["totalDispatched"],
+				"completed" => (string) $metrics["totalCompleted"],
+				"dropped" => (string) $metrics["totalDropped"],
+			]),
+			Lang::get(LangKeys::ASYNC_STATUS_AVG, ["avg" => (string) round((float) $metrics["avgWorkerTime"], 4)]),
 		];
 
 		$sender->sendMessage(implode("\n", $lines));

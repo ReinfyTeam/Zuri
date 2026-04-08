@@ -34,7 +34,6 @@ namespace ReinfyTeam\Zuri;
 use Exception;
 use Phar;
 use pocketmine\plugin\PluginBase;
-use pocketmine\utils\TextFormat;
 use ReflectionMethod;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\checks\modules\aimassist\AimAssistA;
@@ -123,6 +122,8 @@ use ReinfyTeam\Zuri\checks\modules\network\ProxyBot;
 use ReinfyTeam\Zuri\command\ZuriCommand;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\listener\PlayerListener;
 use ReinfyTeam\Zuri\listener\ServerListener;
 use ReinfyTeam\Zuri\network\ProxyUDPSocket;
@@ -148,15 +149,19 @@ class ZuriAC extends PluginBase {
 	protected function onLoad() : void {
 		self::$instance = $this;
 		ConfigManager::checkConfig();
+		Lang::boot();
 
 		$minimumVersion = self::MINIMUM_PHP_VERSION;
 		if (version_compare(PHP_VERSION, $minimumVersion, '<')) {
-			$this->getLogger()->error("⚠️ You're running PHP " . PHP_VERSION . ", which is older than $minimumVersion. Please upgrade your PHP Installion to $minimumVersion or later! You may find PHP $minimumVersion builds at github.com/pmmp/PHP-Binaries/releases");
+			$this->getLogger()->error(Lang::get(LangKeys::STARTUP_PHP_TOO_OLD, [
+				"phpVersion" => PHP_VERSION,
+				"minimumVersion" => $minimumVersion,
+			]));
 			$this->getServer()->shutdown();
 		}
 
 		if (!Phar::running()) {
-			$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::RED . " You are running source-code of the plugin, this might degrade checking performance. We recommended you to download phar plugin from Poggit builds or Github releases. Instead of using source-code from Github.");
+			$this->getServer()->getLogger()->notice(Lang::get(LangKeys::STARTUP_SOURCE_WARNING));
 		}
 	}
 
@@ -174,7 +179,7 @@ class ZuriAC extends PluginBase {
 
 	protected function onEnable() : void {
 		if (!class_exists(VapmPMMP::class)) {
-			$this->getLogger()->error("LibVapmPMMP is missing from this build. Build with pharynx virion injection (or Poggit virions) before deployment.");
+			$this->getLogger()->error(Lang::get(LangKeys::STARTUP_VAPM_MISSING));
 			$this->getServer()->getPluginManager()->disablePlugin($this);
 			return;
 		}
@@ -196,7 +201,7 @@ class ZuriAC extends PluginBase {
 			try {
 				$proxyUDPSocket->bind(new InternetAddress($ip, $port));
 			} catch (Exception $exception) {
-				$this->getServer()->getLogger()->notice(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::RED . " {$exception->getMessage()}, stopping proxy...");
+				$this->getServer()->getLogger()->notice(Lang::get(LangKeys::STARTUP_PROXY_STOPPING, ["error" => $exception->getMessage()]));
 				return;
 			}
 		}

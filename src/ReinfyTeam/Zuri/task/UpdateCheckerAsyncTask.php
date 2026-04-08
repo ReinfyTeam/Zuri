@@ -34,9 +34,8 @@ namespace ReinfyTeam\Zuri\task;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\utils\Internet;
-use pocketmine\utils\TextFormat;
-use ReinfyTeam\Zuri\config\ConfigManager;
-use ReinfyTeam\Zuri\config\ConfigPaths;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use function date;
 use function json_decode;
 use function round;
@@ -61,18 +60,17 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 
 	public function onCompletion() : void {
 		$server = Server::getInstance();
-		$prefix = ConfigManager::getData(ConfigPaths::PREFIX) . " ";
 
 		[$result, $error] = $this->getResult();
 
 		if ($error !== null || $result === null) {
-			$server->getLogger()->notice($prefix . TextFormat::RED . "An error occurred while checking updates from GitHub: {$error}. Please check your internet connection and try again.");
+			$server->getLogger()->notice(Lang::get(LangKeys::UPDATE_ERROR, ["error" => (string) $error]));
 			return;
 		}
 
 		$json = json_decode($result->getBody(), true);
 		if ($json === null) {
-			$server->getLogger()->notice($prefix . TextFormat::RED . "Failed to decode update information.");
+			$server->getLogger()->notice(Lang::get(LangKeys::UPDATE_DECODE_FAILED));
 			return;
 		}
 
@@ -80,7 +78,7 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 		$currentVersionTag = "v" . $this->currentVersion;
 
 		if ($latestVersion === $currentVersionTag) {
-			$server->getLogger()->notice($prefix . TextFormat::GREEN . "No updates found. Enjoy!");
+			$server->getLogger()->notice(Lang::get(LangKeys::UPDATE_NONE));
 			return;
 		}
 
@@ -95,10 +93,10 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 		$branch = $json["target_commitish"] ?? "N/A";
 		$publishTime = isset($json["published_at"]) ? date('F j, Y', strtotime($json["published_at"])) : "N/A";
 
-		$server->getLogger()->warning($prefix . TextFormat::AQUA . "A new latest version of Zuri is released! ({$publishTime})");
-		$server->getLogger()->warning($prefix . TextFormat::AQUA . "Current Version: {$currentVersionTag}");
-		$server->getLogger()->warning($prefix . TextFormat::AQUA . "Latest Version: {$versionLabel} ({$branch})");
-		$server->getLogger()->warning($prefix . TextFormat::AQUA . "Download Count: {$downloadCount}");
-		$server->getLogger()->warning($prefix . TextFormat::AQUA . "Download: {$downloadUrl} ({$fileSizeKB} KB)");
+		$server->getLogger()->warning(Lang::get(LangKeys::UPDATE_AVAILABLE, ["publishTime" => $publishTime]));
+		$server->getLogger()->warning(Lang::get(LangKeys::UPDATE_CURRENT, ["currentVersion" => $currentVersionTag]));
+		$server->getLogger()->warning(Lang::get(LangKeys::UPDATE_LATEST, ["latestVersion" => $versionLabel, "branch" => $branch]));
+		$server->getLogger()->warning(Lang::get(LangKeys::UPDATE_DOWNLOADS, ["downloadCount" => (string) $downloadCount]));
+		$server->getLogger()->warning(Lang::get(LangKeys::UPDATE_DOWNLOAD_URL, ["downloadUrl" => $downloadUrl, "fileSizeKB" => (string) $fileSizeKB]));
 	}
 }

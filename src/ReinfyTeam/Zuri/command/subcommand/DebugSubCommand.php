@@ -36,8 +36,8 @@ use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
-use ReinfyTeam\Zuri\config\ConfigManager;
-use ReinfyTeam\Zuri\config\ConfigPaths;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
 class DebugSubCommand extends BaseSubCommand {
@@ -50,7 +50,7 @@ class DebugSubCommand extends BaseSubCommand {
 
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		if (!$sender instanceof Player) {
-			$sender->sendMessage(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::RED . " Please use this command at the game!");
+			$sender->sendMessage(Lang::get(LangKeys::CMD_UI_IN_GAME_ONLY));
 			return;
 		}
 
@@ -58,6 +58,6 @@ class DebugSubCommand extends BaseSubCommand {
 		$newDebugStatus = !$playerAPI->isDebug();
 		$playerAPI->setDebug($newDebugStatus);
 		$status = $newDebugStatus ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable";
-		$sender->sendMessage(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::GRAY . " Debug mode is " . $status);
+		$sender->sendMessage(Lang::get(LangKeys::CMD_DEBUG_STATUS, ["status" => $status]));
 	}
 }

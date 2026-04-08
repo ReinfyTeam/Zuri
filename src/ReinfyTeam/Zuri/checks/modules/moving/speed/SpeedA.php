@@ -125,10 +125,16 @@ class SpeedA extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (
-			($payload["type"] ?? null) !== "SpeedA" ||
-			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
-		) {
+		if (!MovementSnapshot::validatePayload(
+			$payload,
+			"SpeedA",
+			MovementSnapshot::SCHEMA_VERSION,
+			["type", "schemaVersion", "onGround", "motionX", "motionZ", "cachedData"],
+			[
+				"motionX" => [-20.0, 20.0],
+				"motionZ" => [-20.0, 20.0],
+			]
+		)) {
 			return [];
 		}
 

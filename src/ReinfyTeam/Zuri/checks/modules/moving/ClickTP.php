@@ -87,10 +87,12 @@ class ClickTP extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (
-			($payload["type"] ?? null) !== "ClickTP" ||
-			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
-		) {
+		if (!MovementSnapshot::validatePayload(
+			$payload,
+			"ClickTP",
+			MovementSnapshot::SCHEMA_VERSION,
+			["type", "schemaVersion", "cachedData"]
+		)) {
 			return [];
 		}
 

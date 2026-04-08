@@ -33,6 +33,8 @@ namespace ReinfyTeam\Zuri\config;
 
 abstract class ConfigPaths {
 	public const string PREFIX = "zuri.prefix";
+	public const string LANGUAGE_LOCALE = "zuri.language.locale";
+	public const string LANGUAGE_FALLBACK_LOCALE = "zuri.language.fallback-locale";
 
 	public const string ANTIBOT_MESSAGE = "zuri.antibot.message";
 	public const string EDITIONFAKER_MESSAGE = "zuri.editionfaker.message";

@@ -85,10 +85,18 @@ class ReachB extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (
-			($payload["type"] ?? null) !== "ReachB" ||
-			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\CombatSnapshot::SCHEMA_VERSION
-		) {
+		if (!CombatSnapshot::validatePayload(
+			$payload,
+			"ReachB",
+			CombatSnapshot::SCHEMA_VERSION,
+			["type", "schemaVersion", "damagerEyeX", "damagerEyeZ", "victimEyeX", "victimEyeZ", "cachedData"],
+			[
+				"damagerEyeX" => [-30000000.0, 30000000.0],
+				"damagerEyeZ" => [-30000000.0, 30000000.0],
+				"victimEyeX" => [-30000000.0, 30000000.0],
+				"victimEyeZ" => [-30000000.0, 30000000.0],
+			]
+		)) {
 			return [];
 		}
 

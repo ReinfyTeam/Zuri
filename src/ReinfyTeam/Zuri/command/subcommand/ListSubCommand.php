@@ -37,6 +37,8 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\ZuriAC;
 use function strtolower;
 
@@ -49,20 +51,23 @@ class ListSubCommand extends BaseSubCommand {
 	}
 
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
-		$prefix = ConfigManager::getData(ConfigPaths::PREFIX);
-		$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
-		$sender->sendMessage($prefix . TextFormat::GRAY . " Zuri Modules/Check Information List:");
+		$sender->sendMessage(Lang::get(LangKeys::CMD_LIST_HEADER));
+		$sender->sendMessage(Lang::get(LangKeys::CMD_LIST_TITLE));
 		$added = [];
 		foreach (ZuriAC::Checks() as $check) {
 			$name = $check->getName();
 			if (!isset($added[$name])) {
 				$status = $check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled";
 				$maxVl = ConfigManager::getData(ConfigPaths::CHECK . "." . strtolower($name) . ".maxvl");
-				$sender->sendMessage($prefix . TextFormat::RESET . " " . TextFormat::AQUA . $name . TextFormat::DARK_GRAY . " (" . TextFormat::YELLOW . $check->getAllSubTypes() . TextFormat::DARK_GRAY . ") " .
-				TextFormat::GRAY . "| " . TextFormat::AQUA . "Status: " . $status . TextFormat::GRAY . " | " . TextFormat::AQUA . "Max Violation: " . TextFormat::YELLOW . $maxVl);
+				$sender->sendMessage(Lang::get(LangKeys::CMD_LIST_ENTRY, [
+					"name" => $name,
+					"subtypes" => $check->getAllSubTypes(),
+					"status" => $status,
+					"maxvl" => (string) $maxVl,
+				]));
 				$added[$name] = true;
 			}
 		}
-		$sender->sendMessage($prefix . TextFormat::GRAY . " -------------------------------");
+		$sender->sendMessage(Lang::get(LangKeys::CMD_LIST_FOOTER));
 	}
 }

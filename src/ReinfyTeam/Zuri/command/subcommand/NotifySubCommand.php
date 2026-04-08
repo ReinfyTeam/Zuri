@@ -39,6 +39,8 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use function strtolower;
 
 class NotifySubCommand extends BaseSubCommand {
@@ -56,7 +58,7 @@ class NotifySubCommand extends BaseSubCommand {
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$key = strtolower((string) ($args["mode"] ?? ""));
 		if ($key !== "toggle" && $key !== "admin") {
-			$sender->sendMessage(TextFormat::RED . "/zuri notify <toggle|admin> - Use to on/off notify.");
+			$sender->sendMessage(Lang::get(LangKeys::CMD_NOTIFY_USAGE));
 			return;
 		}
 
@@ -65,6 +67,6 @@ class NotifySubCommand extends BaseSubCommand {
 		ConfigManager::setData($configPath, !$current);
 		$status = !$current ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable";
 		$msgKey = $key === "toggle" ? "Notify toggle" : "Notify admin mode";
-		$sender->sendMessage(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::GRAY . " {$msgKey} is " . $status);
+		$sender->sendMessage(Lang::get(LangKeys::CMD_NOTIFY_STATUS, ["target" => $msgKey, "status" => $status]));
 	}
 }

@@ -176,4 +176,59 @@ abstract class AsyncSnapshot implements JsonSerializable {
 			);
 		}
 	}
+
+	/**
+	 * Assert that a payload matches the expected type, schema, and required fields.
+	 *
+	 * @param array $payload The payload to validate
+	 * @param string $expectedType Expected payload type
+	 * @param int $expectedVersion Expected schema version
+	 * @param string[] $requiredFields Required field names
+	 * @param array<string,array{0:float,1:float}> $boundedFields Field bounds map (field => [min,max])
+	 * @throws SnapshotException If any assertion fails
+	 */
+	public static function assertPayload(
+		array $payload,
+		string $expectedType,
+		int $expectedVersion,
+		array $requiredFields = [],
+		array $boundedFields = []
+	) : void {
+		if (($payload['type'] ?? null) !== $expectedType) {
+			$actualType = (string) ($payload['type'] ?? 'unknown');
+			throw new SnapshotException("Snapshot type mismatch: expected {$expectedType}, got {$actualType}");
+		}
+
+		self::assertSchemaVersion($payload, $expectedVersion);
+		self::assertRequiredFields($payload, $requiredFields);
+
+		foreach ($boundedFields as $field => $bounds) {
+			self::assertBounds($payload[$field] ?? null, $bounds[0], $bounds[1], $field);
+		}
+	}
+
+	/**
+	 * Safe payload validation helper for evaluateAsync() methods.
+	 * Returns false instead of throwing on malformed payloads.
+	 *
+	 * @param array $payload The payload to validate
+	 * @param string $expectedType Expected payload type
+	 * @param int $expectedVersion Expected schema version
+	 * @param string[] $requiredFields Required field names
+	 * @param array<string,array{0:float,1:float}> $boundedFields Field bounds map (field => [min,max])
+	 */
+	public static function validatePayload(
+		array $payload,
+		string $expectedType,
+		int $expectedVersion,
+		array $requiredFields = [],
+		array $boundedFields = []
+	) : bool {
+		try {
+			self::assertPayload($payload, $expectedType, $expectedVersion, $requiredFields, $boundedFields);
+			return true;
+		} catch (SnapshotException) {
+			return false;
+		}
+	}
 }

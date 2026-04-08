@@ -35,6 +35,8 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
 class NetworkLimit extends Check {
@@ -59,7 +61,7 @@ class NetworkLimit extends Check {
 
 			if ($this->ipList[$ip] > self::getData(self::NETWORK_LIMIT)) {
 				$this->warn($event->getPlayerInfo()->getUsername());
-				$event->setKickFlag(0, self::getData(self::NETWORK_MESSAGE));
+				$event->setKickFlag(0, Lang::get(LangKeys::NETWORK_LIMIT_MESSAGE));
 				$this->ipList[$ip]--;
 			}
 		}

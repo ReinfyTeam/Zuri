@@ -35,9 +35,8 @@ use CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
-use pocketmine\utils\TextFormat;
-use ReinfyTeam\Zuri\config\ConfigManager;
-use ReinfyTeam\Zuri\config\ConfigPaths;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\utils\forms\FormSender;
 
 class UiSubCommand extends BaseSubCommand {
@@ -50,7 +49,7 @@ class UiSubCommand extends BaseSubCommand {
 
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		if (!$sender instanceof Player) {
-			$sender->sendMessage(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::RED . " Please use this command at the game!");
+			$sender->sendMessage(Lang::get(LangKeys::CMD_UI_IN_GAME_ONLY));
 			return;
 		}
 		FormSender::MainUI($sender);

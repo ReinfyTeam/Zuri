@@ -9,14 +9,14 @@
 
 - [x] Add confidence scoring to every violation result to reduce hard binary flagging.
 - [x] Introduce per-check dynamic thresholds based on ping, TPS, and server load.
-- [ ] Add automatic false-positive cooldown windows after lag spikes and world transfers.
+- [x] Add automatic false-positive cooldown windows after lag spikes and world transfers.
 - [ ] Build cross-check correlation (movement + combat + packet timing) before escalating punishments.
 
 ## Async and Data Pipeline
 
-- [ ] Add strict snapshot schema versioning to prevent thread desync when fields change.
-- [ ] Implement snapshot integrity guards (required fields, value bounds, sanity assertions).
-- [ ] Add bounded queue backpressure handling with dropped-task telemetry.
+- [x] Add strict snapshot schema versioning to prevent thread desync when fields change.
+- [x] Implement snapshot integrity guards (required fields, value bounds, sanity assertions).
+- [x] Add bounded queue backpressure handling with dropped-task telemetry.
 - [ ] Implement worker health checks and auto-restart for stuck async workers.
 - [ ] Add latency budget metrics for snapshot build, queue wait, worker processing, and main-thread merge.
 - [ ] Add graceful fallback path to sync-safe mode if async pipeline degrades.

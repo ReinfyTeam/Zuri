@@ -35,6 +35,8 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use function in_array;
 use function str_contains;
 use function strlen;
@@ -81,39 +83,39 @@ class EditionFakerA extends Check {
 
 			if (!in_array($deviceOs, self::DEVICE_OS_LIST, true)) {
 				$this->warn($nickname);
-				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
+				$event->setKickFlag(0, Lang::get(LangKeys::EDITIONFAKER_MESSAGE));
 				return;
 			}
 
 			if (!in_array($deviceOs, self::NULL_MODELS, true) && $deviceModel === "") {
 				$this->warn($nickname);
-				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
+				$event->setKickFlag(0, Lang::get(LangKeys::EDITIONFAKER_MESSAGE));
 				return;
 			}
 
 			if (strlen($deviceId) < 8) {
 				$this->warn($nickname);
-				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
+				$event->setKickFlag(0, Lang::get(LangKeys::EDITIONFAKER_MESSAGE));
 				return;
 			}
 
 			if (str_contains($thirdPartyName, "lunar") && $deviceOs !== DeviceOS::WINDOWS_10 && $deviceOs !== DeviceOS::WIN32) {
 				$this->warn($nickname);
-				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
+				$event->setKickFlag(0, Lang::get(LangKeys::EDITIONFAKER_MESSAGE));
 				return;
 			}
 
 			if ($deviceOs === DeviceOS::IOS) {
 				if ($deviceId !== strtoupper($deviceId)) {
 					$this->warn($nickname);
-					$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
+					$event->setKickFlag(0, Lang::get(LangKeys::EDITIONFAKER_MESSAGE));
 					return;
 				}
 			}
 
 			if (str_contains(strtolower($deviceModel), "lunar") && $deviceOs !== DeviceOS::WINDOWS_10 && $deviceOs !== DeviceOS::WIN32) {
 				$this->warn($nickname);
-				$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
+				$event->setKickFlag(0, Lang::get(LangKeys::EDITIONFAKER_MESSAGE));
 			}
 		}
 	}

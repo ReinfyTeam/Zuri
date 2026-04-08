@@ -40,6 +40,8 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use function strtolower;
 use function ucfirst;
 
@@ -57,14 +59,13 @@ class CaptchaSubCommand extends BaseSubCommand {
 	 * @throws JsonException
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
-		$prefix = ConfigManager::getData(ConfigPaths::PREFIX);
 		$option = strtolower((string) ($args["option"] ?? ""));
 
-		$toggleConfig = static function(string $path, string $msg) use ($prefix, $sender) : void {
+		$toggleConfig = static function(string $path, string $msg) use ($sender) : void {
 			$current = ConfigManager::getData($path) === true;
 			ConfigManager::setData($path, !$current);
 			$status = !$current ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable";
-			$sender->sendMessage($prefix . TextFormat::GRAY . " {$msg} is " . $status);
+			$sender->sendMessage(Lang::get(LangKeys::CMD_GENERIC_TOGGLE_STATUS, ["target" => $msg, "status" => $status]));
 		};
 
 		switch ($option) {
@@ -76,7 +77,7 @@ class CaptchaSubCommand extends BaseSubCommand {
 			case "tip":
 			case "title":
 				if (ConfigManager::getData(ConfigPaths::CAPTCHA_RANDOMIZE)) {
-					$sender->sendMessage($prefix . TextFormat::RED . " Randomize is on! Turn off randomize to toggle this!");
+					$sender->sendMessage(Lang::get(LangKeys::CMD_CAPTCHA_RANDOMIZE_ON));
 					return;
 				}
 				$path = match ($option) {
@@ -94,14 +95,14 @@ class CaptchaSubCommand extends BaseSubCommand {
 			case "length":
 				$length = $args["length"] ?? null;
 				if ($length === null || $length < 1 || $length > 15) {
-					$sender->sendMessage($prefix . TextFormat::RED . " Invalid usage! " . TextFormat::RED . "/zuri captcha length <int: 1-15>");
+					$sender->sendMessage(Lang::get(LangKeys::CMD_CAPTCHA_INVALID_LENGTH));
 					return;
 				}
 				ConfigManager::setData(ConfigPaths::CAPTCHA_CODE_LENGTH, $length);
-				$sender->sendMessage($prefix . TextFormat::GREEN . " Changed the code length to " . $length . "!");
+				$sender->sendMessage(Lang::get(LangKeys::CMD_CAPTCHA_LENGTH_UPDATED, ["length" => $length]));
 				return;
 		}
 
-		$sender->sendMessage(TextFormat::RED . "/zuri captcha <toggle|message|tip|title|randomize|length> [length] - Use to on/off and set length code for captcha.");
+		$sender->sendMessage(Lang::get(LangKeys::CMD_CAPTCHA_USAGE));
 	}
 }

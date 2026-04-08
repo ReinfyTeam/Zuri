@@ -36,6 +36,8 @@ use pocketmine\event\Event;
 use Random\RandomException;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\CharUtil;
 use ReinfyTeam\Zuri\utils\ReplaceText;
@@ -55,15 +57,15 @@ class CaptchaEvent extends Event {
 	}
 
 	protected function sendMessage() : void {
-		$this->playerAPI->getPlayer()->sendMessage(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigPaths::CAPTCHA_TEXT)));
+		$this->playerAPI->getPlayer()->sendMessage(ReplaceText::replace($this->playerAPI, Lang::raw(LangKeys::CAPTCHA_TEXT)));
 	}
 
 	protected function sendTip() : void {
-		$this->playerAPI->getPlayer()->sendTip(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigPaths::CAPTCHA_TEXT)));
+		$this->playerAPI->getPlayer()->sendTip(ReplaceText::replace($this->playerAPI, Lang::raw(LangKeys::CAPTCHA_TEXT)));
 	}
 
 	protected function sendTitle() : void {
-		$this->playerAPI->getPlayer()->sendSubTitle(ReplaceText::replace($this->playerAPI, ConfigManager::getData(ConfigPaths::CAPTCHA_TEXT)));
+		$this->playerAPI->getPlayer()->sendSubTitle(ReplaceText::replace($this->playerAPI, Lang::raw(LangKeys::CAPTCHA_TEXT)));
 	}
 
 	/**

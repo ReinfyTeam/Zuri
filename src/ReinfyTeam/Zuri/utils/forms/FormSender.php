@@ -38,8 +38,11 @@ use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\API;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\ZuriAC;
+use function array_search;
 use function intval;
 use function is_bool;
 use function strtolower;
@@ -187,23 +190,38 @@ final class FormSender extends ConfigManager {
 	}
 
 	public static function AdvanceTools(Player $player, bool $updated = false) : void {
-		$form = new CustomForm(function(Player $player, $data) {
+		$availableLocales = Lang::getAvailableLocales();
+		$activeLocaleIndex = array_search(Lang::getActiveLocale(), $availableLocales, true);
+		if ($activeLocaleIndex === false) {
+			$activeLocaleIndex = 0;
+		}
+
+		$form = new CustomForm(function(Player $player, $data) use ($availableLocales) {
 			if ($data === null) {
 				self::MainUI($player);
 				return;
 			}
 
-			PlayerAPI::getAPIPlayer($player)->setDebug($data[1]);
-			self::setData(self::PROXY_ENABLE, $data[2]);
-			self::setData(self::DISCORD_ENABLE, $data[3]);
+			$localeIndex = (int) ($data["locale"] ?? 0);
+			$selectedLocale = $availableLocales[$localeIndex] ?? Lang::getActiveLocale();
+			Lang::setLocale($selectedLocale, true);
+
+			PlayerAPI::getAPIPlayer($player)->setDebug((bool) ($data["debug"] ?? false));
+			self::setData(self::PROXY_ENABLE, (bool) ($data["proxy"] ?? false));
+			self::setData(self::DISCORD_ENABLE, (bool) ($data["discord"] ?? false));
 			self::AdvanceTools($player, true);
 		});
 
-		$form->setTitle("Advance Tools");
-		$form->addLabel(($updated ? "Updated Successfully!" : "Choose what do you want to toggle.."));
-		$form->addToggle("Debug Mode", PlayerAPI::getAPIPlayer($player)->isDebug());
-		$form->addToggle("ProxyUDP (Beta)", self::getData(self::PROXY_ENABLE));
-		$form->addToggle("Discord Webhook Alerts", self::getData(self::DISCORD_ENABLE));
+		$form->setTitle(Lang::get(LangKeys::UI_ADVANCE_TOOLS_TITLE));
+		$form->addLabel(
+			$updated
+				? Lang::get(LangKeys::UI_ADVANCE_TOOLS_UPDATED_LANGUAGE, ["locale" => Lang::getActiveLocale()])
+				: Lang::get(LangKeys::UI_ADVANCE_TOOLS_CHOOSE)
+		);
+		$form->addDropdown(Lang::get(LangKeys::UI_ADVANCE_TOOLS_LANGUAGE_LABEL), $availableLocales, $activeLocaleIndex, "locale");
+		$form->addToggle("Debug Mode", PlayerAPI::getAPIPlayer($player)->isDebug(), "debug");
+		$form->addToggle("ProxyUDP (Beta)", self::getData(self::PROXY_ENABLE), "proxy");
+		$form->addToggle("Discord Webhook Alerts", self::getData(self::DISCORD_ENABLE), "discord");
 		$player->sendForm($form);
 	}
 

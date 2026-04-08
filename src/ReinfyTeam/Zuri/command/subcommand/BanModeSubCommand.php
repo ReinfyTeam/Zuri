@@ -39,6 +39,8 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use function strtolower;
 
 class BanModeSubCommand extends BaseSubCommand {
@@ -55,13 +57,13 @@ class BanModeSubCommand extends BaseSubCommand {
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		if (strtolower((string) ($args["mode"] ?? "")) !== "toggle") {
-			$sender->sendMessage(TextFormat::RED . "/zuri banmode <toggle> - Use to on/off ban mode.");
+			$sender->sendMessage(Lang::get(LangKeys::CMD_BANMODE_USAGE));
 			return;
 		}
 
 		$current = ConfigManager::getData(ConfigPaths::BAN_ENABLE) === true;
 		ConfigManager::setData(ConfigPaths::BAN_ENABLE, !$current);
 		$status = !$current ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable";
-		$sender->sendMessage(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::GRAY . " Ban Mode is " . $status);
+		$sender->sendMessage(Lang::get(LangKeys::CMD_BANMODE_STATUS, ["status" => $status]));
 	}
 }

@@ -86,10 +86,17 @@ class FlyA extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (
-			($payload["type"] ?? null) !== "FlyA" ||
-			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
-		) {
+		if (!MovementSnapshot::validatePayload(
+			$payload,
+			"FlyA",
+			MovementSnapshot::SCHEMA_VERSION,
+			["type", "schemaVersion", "posY", "absMotionX", "absMotionZ", "cachedData"],
+			[
+				"posY" => [-2048.0, 2048.0],
+				"absMotionX" => [0.0, 20.0],
+				"absMotionZ" => [0.0, 20.0],
+			]
+		)) {
 			return [];
 		}
 

@@ -35,6 +35,8 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerChatEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\CacheData;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function count;
 use function explode;
@@ -91,7 +93,7 @@ class SpamB extends Check {
 						$violation = true;
 					}
 					if ($violation === true) {
-						$playerAPI->getPlayer()->sendMessage($this->replaceText($playerAPI, self::getData(self::CHAT_REPEAT_TEXT), $this->getName(), $this->getSubType()));
+						$playerAPI->getPlayer()->sendMessage($this->replaceText($playerAPI, Lang::raw(LangKeys::CHAT_REPEAT_TEXT), $this->getName(), $this->getSubType()));
 						$this->dispatchAsyncDecision($playerAPI, true);
 						$event->cancel();
 					}

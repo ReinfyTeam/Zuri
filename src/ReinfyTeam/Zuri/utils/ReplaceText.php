@@ -34,7 +34,9 @@ namespace ReinfyTeam\Zuri\utils;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\ZuriAC;
 use function base64_encode;
+use function class_exists;
 use function date;
 use function is_string;
 use function str_replace;
@@ -72,6 +74,15 @@ class ReplaceText extends ConfigManager {
 		];
 
 		$text = str_replace($keys, $replace, $text);
+
+		if (class_exists(\SOFe\InfoAPI::class)) {
+			try {
+				$contextPlayer = is_string($player) ? Server::getInstance()->getPlayerExact($player) : $player->getPlayer();
+				$text = \SOFe\InfoAPI::render(ZuriAC::getInstance(), $text, [], $contextPlayer);
+			} catch (\Throwable) {
+				// Ignore rendering failures to preserve legacy placeholder behavior.
+			}
+		}
 
 		return Utils::ParseColors($text);
 	}

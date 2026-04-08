@@ -33,7 +33,6 @@ namespace ReinfyTeam\Zuri\command;
 
 use CortexPE\Commando\BaseCommand;
 use pocketmine\command\CommandSender;
-use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\command\subcommand\AboutSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\AsyncStatusSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\BanModeSubCommand;
@@ -41,9 +40,12 @@ use ReinfyTeam\Zuri\command\subcommand\BypassSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\CaptchaSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\DebugSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\HelpSubCommand;
+use ReinfyTeam\Zuri\command\subcommand\LanguageSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\ListSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\NotifySubCommand;
 use ReinfyTeam\Zuri\command\subcommand\UiSubCommand;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\ZuriAC;
 use function implode;
 
@@ -63,6 +65,7 @@ class ZuriCommand extends BaseCommand {
 		$this->registerSubCommand(new AsyncStatusSubCommand($this->plugin));
 		$this->registerSubCommand(new ListSubCommand($this->plugin));
 		$this->registerSubCommand(new UiSubCommand($this->plugin));
+		$this->registerSubCommand(new LanguageSubCommand($this->plugin));
 		$this->registerSubCommand(new HelpSubCommand($this->plugin));
 	}
 
@@ -71,20 +74,22 @@ class ZuriCommand extends BaseCommand {
 	}
 
 	public static function buildHelpMessage(string $namecmd = "zuri") : string {
+		$version = ZuriAC::getInstance()->getDescription()->getVersion();
+		$author = ZuriAC::getInstance()->getDescription()->getAuthors()[0] ?? 'Unknown';
 		return implode("\n", [
-			TextFormat::RED . "----- Zuri Anticheat -----",
-			TextFormat::AQUA . "Build: " . TextFormat::GRAY . ZuriAC::getInstance()->getDescription()->getVersion() .
-			TextFormat::AQUA . " Author: " . TextFormat::GRAY . ZuriAC::getInstance()->getDescription()->getAuthors()[0],
+			Lang::get(LangKeys::CMD_HELP_HEADER),
+			Lang::get(LangKeys::CMD_HELP_BUILD_AUTHOR, ["version" => $version, "author" => $author]),
 			"",
-			TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " about" . TextFormat::GRAY . " - Show information the plugin.",
-			TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " notify <toggle|admin>" . TextFormat::GRAY . " - Use to on/off notify.",
-			TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " banmode <toggle>" . TextFormat::GRAY . " - Use to on/off ban mode.",
-			TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " captcha <toggle|message|tip|title|randomize|length> [length]" . TextFormat::GRAY . " - Use to on/off mode for captcha.",
-			TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " bypass" . TextFormat::GRAY . " - Use to on/off for bypass mode.",
-			TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " debug" . TextFormat::GRAY . " - Use to on/off for debug mode.",
-			TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " list" . TextFormat::GRAY . " - List of modules in Zuri.",
-			TextFormat::RED . "/" . $namecmd . TextFormat::RESET . " ui" . TextFormat::GRAY . " - Sends the Admin Management UI",
-			TextFormat::RED . "----------------------"
+			Lang::get(LangKeys::CMD_HELP_ABOUT, ["command" => $namecmd]),
+			Lang::get(LangKeys::CMD_HELP_NOTIFY, ["command" => $namecmd]),
+			Lang::get(LangKeys::CMD_HELP_BANMODE, ["command" => $namecmd]),
+			Lang::get(LangKeys::CMD_HELP_CAPTCHA, ["command" => $namecmd]),
+			Lang::get(LangKeys::CMD_HELP_BYPASS, ["command" => $namecmd]),
+			Lang::get(LangKeys::CMD_HELP_DEBUG, ["command" => $namecmd]),
+			Lang::get(LangKeys::CMD_HELP_LIST, ["command" => $namecmd]),
+			Lang::get(LangKeys::CMD_HELP_UI, ["command" => $namecmd]),
+			Lang::get(LangKeys::CMD_HELP_LANGUAGE, ["command" => $namecmd]),
+			Lang::get(LangKeys::CMD_HELP_FOOTER)
 		]);
 	}
 }

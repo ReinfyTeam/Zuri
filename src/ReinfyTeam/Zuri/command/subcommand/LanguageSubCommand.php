@@ -31,31 +31,43 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\command\subcommand;
 
+use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseSubCommand;
-use JsonException;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
-use pocketmine\utils\TextFormat;
-use ReinfyTeam\Zuri\config\ConfigManager;
-use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
+use function implode;
+use function strtolower;
 
-class BypassSubCommand extends BaseSubCommand {
+class LanguageSubCommand extends BaseSubCommand {
 	public function __construct(PluginBase $plugin) {
-		parent::__construct($plugin, "bypass", "Use to on/off for bypass mode.");
+		parent::__construct($plugin, "language", "Switch plugin language at runtime", ["lang", "locale"]);
 	}
 
 	protected function prepare() : void {
+		$this->registerArgument(0, new RawStringArgument("locale", true));
 	}
 
-	/**
-	 * @throws JsonException
-	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
-		$current = ConfigManager::getData(ConfigPaths::PERMISSION_BYPASS_ENABLE) === true;
-		ConfigManager::setData(ConfigPaths::PERMISSION_BYPASS_ENABLE, !$current);
-		$status = !$current ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable";
-		$sender->sendMessage(Lang::get(LangKeys::CMD_BYPASS_STATUS, ["status" => $status]));
+		$requested = (string) ($args["locale"] ?? "");
+		$available = Lang::getAvailableLocales();
+
+		if ($requested === "" || strtolower($requested) === "list") {
+			$sender->sendMessage(Lang::get(LangKeys::CMD_LANGUAGE_CURRENT, ["locale" => Lang::getActiveLocale()]));
+			$sender->sendMessage(Lang::get(LangKeys::CMD_LANGUAGE_AVAILABLE, ["locales" => implode(", ", $available)]));
+			if ($requested === "") {
+				$sender->sendMessage(Lang::get(LangKeys::CMD_LANGUAGE_USAGE));
+			}
+			return;
+		}
+
+		if (!Lang::setLocale($requested, true)) {
+			$sender->sendMessage(Lang::get(LangKeys::CMD_LANGUAGE_UNSUPPORTED, ["locale" => $requested]));
+			$sender->sendMessage(Lang::get(LangKeys::CMD_LANGUAGE_AVAILABLE, ["locales" => implode(", ", $available)]));
+			return;
+		}
+
+		$sender->sendMessage(Lang::get(LangKeys::CMD_LANGUAGE_SWITCHED, ["locale" => Lang::getActiveLocale()]));
 	}
 }

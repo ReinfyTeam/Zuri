@@ -88,10 +88,12 @@ class AntiVoid extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (
-			($payload["type"] ?? null) !== "AntiVoid" ||
-			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot::SCHEMA_VERSION
-		) {
+		if (!MovementSnapshot::validatePayload(
+			$payload,
+			"AntiVoid",
+			MovementSnapshot::SCHEMA_VERSION,
+			["type", "schemaVersion", "onGround", "cachedData"]
+		)) {
 			return [];
 		}
 

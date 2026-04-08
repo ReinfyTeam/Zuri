@@ -34,8 +34,9 @@ namespace ReinfyTeam\Zuri\command\subcommand;
 use CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
-use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\API;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\ZuriAC;
 use function count;
 
@@ -57,9 +58,9 @@ class AboutSubCommand extends BaseSubCommand {
 		$allChecks = API::getAllChecks(false);
 		$allChecksWithSub = API::getAllChecks();
 
-		$sender->sendMessage(TextFormat::AQUA . "Build: " . TextFormat::GRAY . $version . TextFormat::AQUA . " Author: " . TextFormat::GRAY . $author);
-		$sender->sendMessage(TextFormat::AQUA . "Total Enabled Checks: " . TextFormat::GRAY . count($enabledChecks) . " (With SubTypes: " . count($enabledChecksWithSub) . ")");
-		$sender->sendMessage(TextFormat::AQUA . "Total Disabled Checks: " . TextFormat::GRAY . count($disabledChecks) . " (With SubTypes: " . count($disabledChecksWithSub) . ")");
-		$sender->sendMessage(TextFormat::AQUA . "Total All Checks: " . TextFormat::GRAY . count($allChecks) . " (With SubTypes: " . count($allChecksWithSub) . ")");
+		$sender->sendMessage(Lang::get(LangKeys::CMD_ABOUT_BUILD_AUTHOR, ["version" => $version, "author" => $author]));
+		$sender->sendMessage(Lang::get(LangKeys::CMD_ABOUT_ENABLED, ["count" => count($enabledChecks), "subcount" => count($enabledChecksWithSub)]));
+		$sender->sendMessage(Lang::get(LangKeys::CMD_ABOUT_DISABLED, ["count" => count($disabledChecks), "subcount" => count($disabledChecksWithSub)]));
+		$sender->sendMessage(Lang::get(LangKeys::CMD_ABOUT_ALL, ["count" => count($allChecks), "subcount" => count($allChecksWithSub)]));
 	}
 }

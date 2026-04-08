@@ -93,10 +93,18 @@ class ReachE extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (
-			($payload["type"] ?? null) !== "ReachE" ||
-			(int) ($payload["schemaVersion"] ?? 0) !== \ReinfyTeam\Zuri\checks\snapshots\CombatSnapshot::SCHEMA_VERSION
-		) {
+		if (!CombatSnapshot::validatePayload(
+			$payload,
+			"ReachE",
+			CombatSnapshot::SCHEMA_VERSION,
+			["type", "schemaVersion", "damagerEyeX", "damagerEyeY", "damagerEyeZ", "damagerPing", "cachedData"],
+			[
+				"damagerEyeX" => [-30000000.0, 30000000.0],
+				"damagerEyeY" => [-2048.0, 2048.0],
+				"damagerEyeZ" => [-30000000.0, 30000000.0],
+				"damagerPing" => [0.0, 60000.0],
+			]
+		)) {
 			return [];
 		}
 

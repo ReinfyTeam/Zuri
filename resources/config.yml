@@ -8,6 +8,14 @@
 
 zuri:
     prefix: "§7(§e§lZuri§r§7) §8>§r"
+    language:
+        # Active language code. You can switch this live with /zuri language <code> or in /zuri ui.
+        locale: "en_US"
+        # Fallback locale used when selected locale is missing keys.
+        fallback-locale: "en_US"
+        # Custom locales are loaded automatically from:
+        # - plugins/Zuri/lang/*.yml
+        # - plugins/Zuri/langs/*.yml
     version: "0.2.8" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     antibot:
        message: "§cSorry! You are humman?"

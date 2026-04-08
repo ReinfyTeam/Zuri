@@ -35,6 +35,8 @@ use pocketmine\event\Event;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\CheckConstants;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use function count_chars;
 use function in_array;
 use function preg_match;
@@ -104,7 +106,7 @@ class DeviceSpoofID extends Check {
 
 	private function kick(PlayerPreLoginEvent $event) : void {
 		$this->warn($event->getPlayerInfo()->getUsername());
-		$event->setKickFlag(0, self::getData(self::EDITIONFAKER_MESSAGE));
+		$event->setKickFlag(0, Lang::get(LangKeys::EDITIONFAKER_MESSAGE));
 	}
 
 	public static function evaluateAsync(array $payload) : array {
