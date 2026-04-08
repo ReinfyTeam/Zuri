@@ -13,3 +13,6 @@ vendor/*
 # Build binary files
 tools/bin/*
 output.phar
+
+# jupyter
+**/.ipynb_checkpoints/
