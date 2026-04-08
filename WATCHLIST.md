@@ -11,9 +11,6 @@
 - [ ] Introduce per-check dynamic thresholds based on ping, TPS, and server load.
 - [ ] Add automatic false-positive cooldown windows after lag spikes and world transfers.
 - [ ] Build cross-check correlation (movement + combat + packet timing) before escalating punishments.
-- [ ] Add version-aware check adapters for protocol differences between client versions.
-- [ ] Implement first-join calibration phase for player baseline behavior profiling.
-- [ ] Add check metadata standard (risk level, minimum sample size, warmup period).
 
 ## Async and Data Pipeline
 
@@ -28,7 +25,6 @@
 
 - [ ] Add continuous hot-path profiling for checks, packet handlers, and violation processing.
 - [ ] Introduce object pooling for frequently allocated packet analysis structures.
-- [ ] Reduce lock contention by separating read-heavy and write-heavy shared state.
 - [ ] Add memory pressure watchdog and rolling cache eviction strategy.
 - [ ] Add startup self-diagnostics for missing config keys, invalid values, and stale cache data.
 - [ ] Add panic-safe exception boundaries around all scheduled tasks and event listeners.
@@ -36,8 +32,6 @@
 ## Punishment and Action System
 
 - [ ] Add policy engine for progressive punishments (notify, flag, setback, kick, ban).
-- [ ] Add per-check action profiles configurable by environment (practice, ranked, testing).
-- [ ] Add weighted decay system for historical violations over time.
 - [ ] Add staff acknowledgment flow before high-impact automatic punishments.
 - [ ] Add temporary quarantine mode that limits suspicious players without immediate bans.
 
