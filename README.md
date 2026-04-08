@@ -5,46 +5,6 @@
 
 > ⚠️ **Spoon or Fork of Pocketmine-MP are not supported.** Do not try to create an issue, it will closed automatically.
 
-# Virions and Build
-This repository now builds with virions using the Poggit virion v3 workflow (composer + shading tool), as described in https://poggit.github.io/support/virion.html.
-
-## How to add a virion
-1. Add the virion package to `composer.json` under `require`.
-2. Add the same virion to `.poggit.yml` under `projects.Zuri.libs` so Poggit CI also injects it.
-3. Run the build script:
-
-```bash
-php tools/build.php
-```
-
-The build script will:
-- install composer dependencies (virions included)
-- download `pharynx.phar` automatically if missing
-- compile and shade virions into the output phar
-
-Output is written to `build/Zuri.phar`.
-
-## Current virions used
-- `paroxity/commando`
-- `vennv/vapm`
-
-## GitHub build workflow
-This repository includes `.github/workflows/build-phar.yml`, which:
-1. checks out the repository
-2. sets up PHP 8.4 + Composer
-3. runs `php tools/build.php`
-4. uploads `build/*.phar` as a workflow artifact
-
-This ensures every CI build contains shaded virions.
-
-## Code style
-Use the Composer scripts from the project root:
-
-```bash
-composer run format
-composer run format:check
-```
-
 😁 If you are interested with our projects, you may help us by:
 - [Donate via Ko-Fi](https://ko-fi.com/xqwtxon)
 - [Become a Patreon](https://patreon.com/xwertxy)
