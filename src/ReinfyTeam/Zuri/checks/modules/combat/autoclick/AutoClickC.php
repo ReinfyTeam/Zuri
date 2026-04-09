@@ -67,7 +67,8 @@ class AutoClickC extends Check {
 				$animationDiffTimeRaw = $this->getConstant(CheckConstants::AUTOCLICKC_ANIMATION_DIFF_TIME);
 				$animationDiffTicksRaw = $this->getConstant(CheckConstants::AUTOCLICKC_ANIMATION_DIFF_TICKS);
 				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
-					"type" => "AutoClickC",
+					"checkName" => $this->getName(),
+					"checkSubType" => $this->getSubType(),
 					"isDigging" => $playerAPI->isDigging(),
 					"placingTicks" => $playerAPI->getPlacingTicks(),
 					"attackTicks" => $playerAPI->getAttackTicks(),
@@ -84,7 +85,8 @@ class AutoClickC extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "AutoClickC") {
+		$check = new self();
+		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
 			return [];
 		}
 

@@ -99,7 +99,8 @@ class KillAuraC extends Check {
 					];
 				}
 				$this->dispatchAsyncCheck($player->getName(), [
-					"type" => "KillAuraC",
+					"checkName" => $this->getName(),
+					"checkSubType" => $this->getSubType(),
 					"playerId" => $player->getId(),
 					"pitch" => $player->getLocation()->getPitch(),
 					"locX" => $player->getLocation()->getX(),
@@ -120,7 +121,8 @@ class KillAuraC extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "KillAuraC") {
+		$check = new self();
+		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
 			return [];
 		}
 

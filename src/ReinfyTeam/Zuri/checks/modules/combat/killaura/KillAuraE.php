@@ -87,7 +87,8 @@ class KillAuraE extends Check {
 					];
 				}
 				$this->dispatchAsyncCheck($damager->getName(), [
-					"type" => "KillAuraE",
+					"checkName" => $this->getName(),
+					"checkSubType" => $this->getSubType(),
 					"victimId" => $entity->getId(),
 					"locX" => $damager->getLocation()->getX(),
 					"locY" => $damager->getLocation()->getY(),
@@ -104,7 +105,8 @@ class KillAuraE extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "KillAuraE") {
+		$check = new self();
+		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
 			return [];
 		}
 

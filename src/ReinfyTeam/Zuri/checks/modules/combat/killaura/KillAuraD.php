@@ -57,7 +57,8 @@ class KillAuraD extends Check {
 		$player = $playerAPI->getPlayer();
 		if ($packet instanceof AnimatePacket) {
 			$this->dispatchAsyncCheck($player->getName(), [
-				"type" => "KillAuraD",
+				"checkName" => $this->getName(),
+				"checkSubType" => $this->getSubType(),
 				"isDigging" => $playerAPI->isDigging(),
 				"placingTicks" => $playerAPI->getPlacingTicks(),
 				"attackTicks" => $playerAPI->getAttackTicks(),
@@ -69,7 +70,8 @@ class KillAuraD extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "KillAuraD") {
+		$check = new self();
+		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
 			return [];
 		}
 

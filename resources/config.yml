@@ -100,6 +100,14 @@ zuri:
         # Higher values reduce false positives but may miss subtle cheats.
         # Range: 0.0 (always trigger) to 1.0 (never trigger). Recommended: 0.4-0.6
         threshold: 0.5
+    correlation:
+        # Require evidence across multiple check domains before escalating high-impact punishments.
+        # Domains tracked: movement, combat, packet_timing.
+        enable: true
+        # Time window (seconds) where recent domain hits count toward correlation.
+        window-seconds: 10.0
+        # Number of unique domains required before kick/ban/captcha escalation (1-3).
+        required-groups: 3
     dynamic-thresholds:
         # Automatically adjust check thresholds based on server and player conditions.
         # When enabled, thresholds become more lenient during:

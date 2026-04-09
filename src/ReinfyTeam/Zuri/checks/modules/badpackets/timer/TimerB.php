@@ -58,7 +58,8 @@ class TimerB extends Check {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$diffBalanceRaw = $this->getConstant(CheckConstants::TIMERB_DIFF_BALANCE);
 			$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
-				"type" => "TimerB",
+				"checkName" => $this->getName(),
+				"checkSubType" => $this->getSubType(),
 				"alive" => $playerAPI->getPlayer()->isAlive(),
 				"currentTime" => microtime(true) * 1000,
 				"lastTime" => $playerAPI->getExternalData(CacheData::TIMER_A_LAST_TIME),
@@ -69,6 +70,11 @@ class TimerB extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
+		$check = new self();
+		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
+			return [];
+		}
+
 		if (!(bool) ($payload["alive"] ?? false)) {
 			return ["set" => [CacheData::TIMER_A_BALANCE => 0], "unset" => [CacheData::TIMER_A_LAST_TIME],];
 		}

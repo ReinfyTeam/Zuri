@@ -58,7 +58,8 @@ class AutoClickA extends Check {
 				$maxTicksRaw = $this->getConstant(CheckConstants::AUTOCLICKA_MAX_TICKS);
 				$maxDeviationRaw = $this->getConstant(CheckConstants::AUTOCLICKA_MAX_DEVIATION);
 				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
-					"type" => "AutoClickA",
+					"checkName" => $this->getName(),
+					"checkSubType" => $this->getSubType(),
 					"isDigging" => $playerAPI->isDigging(),
 					"ticks" => $playerAPI->getExternalData(CacheData::AUTOCLICK_A_TICKS),
 					CacheData::AUTOCLICK_A_AVG_SPEED => $playerAPI->getExternalData(CacheData::AUTOCLICK_A_AVG_SPEED),
@@ -71,7 +72,8 @@ class AutoClickA extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (!isset($payload["type"]) || $payload["type"] !== "AutoClickA") {
+		$check = new self();
+		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
 			return [];
 		}
 

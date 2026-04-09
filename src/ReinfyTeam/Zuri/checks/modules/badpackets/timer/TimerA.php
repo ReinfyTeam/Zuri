@@ -35,6 +35,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\checks\CrossCheckCorrelation;
 use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
@@ -52,6 +53,9 @@ class TimerA extends Check {
 	public function getSubType() : string {
 		return "A";
 	}
+	public function getCorrelationGroup() : ?string {
+		return CrossCheckCorrelation::GROUP_PACKET_TIMING;
+	}
 
 	/**
 	 * @throws DiscordWebhookException
@@ -60,7 +64,8 @@ class TimerA extends Check {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$maxDiffRaw = $this->getConstant(CheckConstants::TIMERA_MAX_DIFF);
 			$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
-				"type" => "TimerA",
+				"checkName" => $this->getName(),
+				"checkSubType" => $this->getSubType(),
 				"tps" => Server::getInstance()->getTicksPerSecond(),
 				"ping" => $playerAPI->getPing(),
 				"packetTick" => $packet->getTick(),
@@ -75,7 +80,8 @@ class TimerA extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "TimerA") {
+		$check = new self();
+		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
 			return [];
 		}
 

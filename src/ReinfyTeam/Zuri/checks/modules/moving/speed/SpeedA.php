@@ -56,6 +56,10 @@ class SpeedA extends Check {
 		return "A";
 	}
 
+	public function getCorrelationGroup() : ?string {
+		return \ReinfyTeam\Zuri\checks\CrossCheckCorrelation::GROUP_MOVEMENT;
+	}
+
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		if ($packet instanceof PlayerAuthInputPacket) {

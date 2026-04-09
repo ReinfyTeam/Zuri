@@ -62,7 +62,8 @@ class TimerD extends Check {
 		}
 
 		$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
-			"type" => "TimerD",
+			"checkName" => $this->getName(),
+			"checkSubType" => $this->getSubType(),
 			"authTick" => $packet->getTick(),
 			"nowMs" => microtime(true) * 1000,
 			"lastAuthTick" => $playerAPI->getExternalData(CacheData::TIMER_D_LAST_AUTH_TICK),
@@ -81,7 +82,8 @@ class TimerD extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "TimerD") {
+		$check = new self();
+		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
 			return [];
 		}
 

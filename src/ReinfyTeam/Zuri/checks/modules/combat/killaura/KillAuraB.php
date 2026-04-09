@@ -58,7 +58,8 @@ class KillAuraB extends Check {
 			$deltaPitchRaw = $this->getConstant(CheckConstants::KILLAURAB_DELTA_PITCH);
 			$deltaYawRaw = $this->getConstant(CheckConstants::KILLAURAB_DELTA_YAW);
 			$this->dispatchAsyncCheck($player->getName(), [
-				"type" => "KillAuraB",
+				"checkName" => $this->getName(),
+				"checkSubType" => $this->getSubType(),
 				"flying" => $player->isFlying(),
 				"allowFlight" => $player->getAllowFlight(),
 				"attackTicks" => $playerAPI->getAttackTicks(),
@@ -74,7 +75,8 @@ class KillAuraB extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "KillAuraB") {
+		$check = new self();
+		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
 			return [];
 		}
 

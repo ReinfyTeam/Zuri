@@ -63,7 +63,8 @@ class AutoClickB extends Check {
 				$diffTimeRaw = $this->getConstant(CheckConstants::AUTOCLICKB_DIFF_TIME);
 				$diffTicksRaw = $this->getConstant(CheckConstants::AUTOCLICKB_DIFF_TICKS);
 				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
-					"type" => "AutoClickB",
+					"checkName" => $this->getName(),
+					"checkSubType" => $this->getSubType(),
 					"placingTicks" => $playerAPI->getPlacingTicks(),
 					"ticks" => $playerAPI->getExternalData(CacheData::AUTOCLICK_B_TICKS),
 					CacheData::AUTOCLICK_B_LAST_CLICK => $playerAPI->getExternalData(CacheData::AUTOCLICK_B_LAST_CLICK),
@@ -76,7 +77,8 @@ class AutoClickB extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "AutoClickB") {
+		$check = new self();
+		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
 			return [];
 		}
 

@@ -76,6 +76,16 @@ abstract class Check extends ConfigManager {
 
 	public abstract function getSubType() : string;
 
+	/**
+	 * Declare which correlation domain this check belongs to.
+	 * Used for cross-check correlation before punishment escalation.
+	 *
+	 * @return string|null One of CrossCheckCorrelation::GROUP_* constants, or null if not part of correlation.
+	 */
+	public function getCorrelationGroup() : ?string {
+		return null;
+	}
+
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 	}
 
@@ -274,6 +284,20 @@ abstract class Check extends ConfigManager {
 		$reachedMaxRealViolations = $playerAPI->getRealViolation($this->getName()) > $maxViolations;
 		$server = ZuriAC::getInstance()->getServer();
 
+		$correlationEnabled = self::getData("zuri.correlation.enable", true) !== false;
+		$correlationWindowSeconds = self::toFloat(self::getData("zuri.correlation.window-seconds", 10.0), 10.0);
+		$requiredGroupsRaw = self::toInt(self::getData("zuri.correlation.required-groups", 3), 3);
+		$requiredGroups = CrossCheckCorrelation::normalizeRequiredGroups($requiredGroupsRaw);
+		$storedGroupHits = $playerAPI->getExternalData("correlation.groupHits", []);
+		$typedGroupHits = is_array($storedGroupHits) ? $storedGroupHits : [];
+		[$correlatedGroups, $groupHits] = CrossCheckCorrelation::recordAndCount(
+			$typedGroupHits,
+			$this->getName(),
+			microtime(true),
+			$correlationWindowSeconds
+		);
+		$playerAPI->setExternalData("correlation.groupHits", $groupHits);
+
 		if (self::getData(self::WORLD_BYPASS_ENABLE) === true) {
 			$worldBypassModeRaw = self::getData(self::WORLD_BYPASS_MODE);
 			$worldBypassMode = strtolower(self::toString($worldBypassModeRaw, "blacklist"));
@@ -326,6 +350,14 @@ abstract class Check extends ConfigManager {
 		if ($this->getPunishment() === "flag") {
 			$playerAPI->setFlagged(true);
 			return true;
+		}
+
+		$requiresEscalationCorrelation = $correlationEnabled
+			&& $reachedMaxRealViolations
+			&& $reachedMaxViolations
+			&& in_array($this->getPunishment(), ["ban", "kick", "captcha"], true);
+		if ($requiresEscalationCorrelation && $correlatedGroups < $requiredGroups) {
+			return false;
 		}
 
 		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "ban" && self::getData(self::BAN_ENABLE) === true) {

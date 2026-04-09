@@ -10,7 +10,7 @@
 - [x] Add confidence scoring to every violation result to reduce hard binary flagging.
 - [x] Introduce per-check dynamic thresholds based on ping, TPS, and server load.
 - [x] Add automatic false-positive cooldown windows after lag spikes and world transfers.
-- [ ] Build cross-check correlation (movement + combat + packet timing) before escalating punishments.
+- [x] Build cross-check correlation (movement + combat + packet timing) before escalating punishments.
 
 ## Async and Data Pipeline
 

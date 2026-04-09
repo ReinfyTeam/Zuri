@@ -70,7 +70,8 @@ class AimAssistB extends Check {
 			$nLocation = $playerAPI->getNLocation();
 			if (!empty($nLocation)) {
 				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
-					"type" => "AimAssistB",
+					"checkName" => $this->getName(),
+					"checkSubType" => $this->getSubType(),
 					"toYaw" => $nLocation["to"]->getYaw(),
 					"fromYaw" => $nLocation["from"]->getYaw(),
 					"toPitch" => $nLocation["to"]->getPitch(),
@@ -81,7 +82,8 @@ class AimAssistB extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "AimAssistB") {
+		$check = new self();
+		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
 			return [];
 		}
 

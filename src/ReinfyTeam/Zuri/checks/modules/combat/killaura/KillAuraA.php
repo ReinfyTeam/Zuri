@@ -49,6 +49,9 @@ class KillAuraA extends Check {
 	public function getSubType() : string {
 		return "A";
 	}
+	public function getCorrelationGroup() : ?string {
+		return \ReinfyTeam\Zuri\checks\CrossCheckCorrelation::GROUP_COMBAT;
+	}
 
 	/**
 	 * @throws DiscordWebhookException
@@ -56,7 +59,8 @@ class KillAuraA extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerActionPacket) {
 			$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
-				"type" => "KillAuraA",
+				"checkName" => $this->getName(),
+				"checkSubType" => $this->getSubType(),
 				"action" => $packet->action,
 				"face" => $packet->face,
 			]);
@@ -64,7 +68,8 @@ class KillAuraA extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		if (($payload["type"] ?? null) !== "KillAuraA") {
+		$check = new self();
+		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
 			return [];
 		}
 
