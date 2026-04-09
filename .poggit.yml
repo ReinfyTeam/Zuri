@@ -8,7 +8,7 @@ projects:
     lint: false
     icon: "icon.png"
     libs:
-      - src: VennDev/LibVapmPMMP
+      - src: VennDev/LibVapmPMMP/
         version: 2.5.6
       - src: ReinfyTeam/DiscordWebhookAPI
         version: 2.0.0
