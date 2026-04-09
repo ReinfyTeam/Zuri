@@ -1074,12 +1074,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ReinfyTeam/DiscordWebhookAPI.git",
-                "reference": "6eb1b1fb13393b41276fac658521f0782eeac605"
+                "reference": "fef07136ed41d8e92e0bf094ae223e5371a011d9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ReinfyTeam/DiscordWebhookAPI/zipball/6eb1b1fb13393b41276fac658521f0782eeac605",
-                "reference": "6eb1b1fb13393b41276fac658521f0782eeac605",
+                "url": "https://api.github.com/repos/ReinfyTeam/DiscordWebhookAPI/zipball/fef07136ed41d8e92e0bf094ae223e5371a011d9",
+                "reference": "fef07136ed41d8e92e0bf094ae223e5371a011d9",
                 "shasum": ""
             },
             "require": {
@@ -1091,7 +1091,7 @@
                 "phpstan/phpstan": "^1.2"
             },
             "default-branch": true,
-            "type": "project",
+            "type": "library",
             "extra": {
                 "virion": {
                     "spec": "3.0",
@@ -1109,7 +1109,7 @@
                 "issues": "https://github.com/ReinfyTeam/DiscordWebhookAPI/issues",
                 "source": "https://github.com/ReinfyTeam/DiscordWebhookAPI/tree/master"
             },
-            "time": "2026-04-09T13:41:45+00:00"
+            "time": "2026-04-09T16:30:31+00:00"
         },
         {
             "name": "reinfyteam/libpmform",
@@ -1117,12 +1117,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ReinfyTeam/libpmform.git",
-                "reference": "495e2b260ccb10fe284f890d2296fa2ac287d6a7"
+                "reference": "ba1cb6a2f8cb3f5e3aea0b51f89f7cdd4d6a7d4a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ReinfyTeam/libpmform/zipball/495e2b260ccb10fe284f890d2296fa2ac287d6a7",
-                "reference": "495e2b260ccb10fe284f890d2296fa2ac287d6a7",
+                "url": "https://api.github.com/repos/ReinfyTeam/libpmform/zipball/ba1cb6a2f8cb3f5e3aea0b51f89f7cdd4d6a7d4a",
+                "reference": "ba1cb6a2f8cb3f5e3aea0b51f89f7cdd4d6a7d4a",
                 "shasum": ""
             },
             "require": {
@@ -1164,7 +1164,7 @@
             "support": {
                 "source": "https://github.com/ReinfyTeam/libpmform/tree/main"
             },
-            "time": "2026-04-09T16:10:05+00:00"
+            "time": "2026-04-09T16:17:19+00:00"
         },
         {
             "name": "reinfyteam/libvapm-pmmp",
@@ -1172,12 +1172,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ReinfyTeam/LibVapmPMMP.git",
-                "reference": "243613d550398ec368509561d531d28d7fc6f86b"
+                "reference": "2ce762ee1a1021fb34965da7662b8d647c698062"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ReinfyTeam/LibVapmPMMP/zipball/243613d550398ec368509561d531d28d7fc6f86b",
-                "reference": "243613d550398ec368509561d531d28d7fc6f86b",
+                "url": "https://api.github.com/repos/ReinfyTeam/LibVapmPMMP/zipball/2ce762ee1a1021fb34965da7662b8d647c698062",
+                "reference": "2ce762ee1a1021fb34965da7662b8d647c698062",
                 "shasum": ""
             },
             "require-dev": {
@@ -1221,7 +1221,7 @@
             "support": {
                 "source": "https://github.com/ReinfyTeam/LibVapmPMMP/tree/main"
             },
-            "time": "2026-04-09T15:33:43+00:00"
+            "time": "2026-04-09T16:17:39+00:00"
         },
         {
             "name": "sof3/await-generator",
