@@ -107,7 +107,7 @@ final class FormSender extends ConfigManager {
 	}
 
 	public static function MainUI(Player $player) : void {
-		$form = new SimpleForm("Anticheat Manager", "Choose what do you want to set..");
+		$form = new SimpleForm(Lang::get(LangKeys::UI_MAIN_TITLE), Lang::get(LangKeys::UI_MAIN_CHOOSE));
 		$form->setCallback(function(Player $player, FormResponse $response) {
 			$data = $response->getData();
 			if ($data === null) {
@@ -130,15 +130,18 @@ final class FormSender extends ConfigManager {
 			}
 		});
 
-		$form->addButton("Manage Modules");
-		$form->addButton("Captcha Settings");
-		$form->addButton("Admin Settings");
-		$form->addButton("Advance Tools");
+		$form->addButton(Lang::get(LangKeys::UI_MAIN_MANAGE_MODULES));
+		$form->addButton(Lang::get(LangKeys::UI_MAIN_CAPTCHA_SETTINGS));
+		$form->addButton(Lang::get(LangKeys::UI_MAIN_ADMIN_SETTINGS));
+		$form->addButton(Lang::get(LangKeys::UI_MAIN_ADVANCE_TOOLS));
 		$player->sendForm($form);
 	}
 
 	public static function ManageModules(Player $player, bool $reloaded = false) : void {
-		$form = new SimpleForm("Manage Modules", ($reloaded ? "Successfully reloaded all of the modules!" : "Choose what do you want to manage.."));
+		$form = new SimpleForm(
+			Lang::get(LangKeys::UI_MANAGE_MODULES_TITLE),
+			$reloaded ? Lang::get(LangKeys::UI_MANAGE_MODULES_RELOADED) : Lang::get(LangKeys::UI_MANAGE_MODULES_CHOOSE)
+		);
 		$form->setCallback(function(Player $player, FormResponse $response) {
 			$data = $response->getData();
 			if ($data === null) {
@@ -160,14 +163,14 @@ final class FormSender extends ConfigManager {
 			}
 		});
 
-		$form->addButton("Enable/Disable Modules");
-		$form->addButton("Module Information");
-		$form->addButton("Reload all modules");
+		$form->addButton(Lang::get(LangKeys::UI_MANAGE_MODULES_ENABLE_DISABLE));
+		$form->addButton(Lang::get(LangKeys::UI_MANAGE_MODULES_MODULE_INFORMATION));
+		$form->addButton(Lang::get(LangKeys::UI_MANAGE_MODULES_RELOAD_ALL));
 		$player->sendForm($form);
 	}
 
 	public static function CaptchaSettings(Player $player, bool $updated = false) : void {
-		$form = new CustomForm("Captcha Settings");
+		$form = new CustomForm(Lang::get(LangKeys::UI_CAPTCHA_TITLE));
 		$form->setCallback(function(Player $player, FormResponse $response) {
 			$data = $response->getData();
 			if ($data === null) {
@@ -198,25 +201,25 @@ final class FormSender extends ConfigManager {
 			self::CaptchaSettings($player, true);
 		});
 
-		$form->addLabel(($updated ? "Updated Successfully!" : "Choose what do you want to modify.."));
-		$form->addToggle("Enable Captcha", self::boolData(self::CAPTCHA_ENABLE));
+		$form->addLabel(($updated ? Lang::get(LangKeys::UI_CAPTCHA_UPDATED) : Lang::get(LangKeys::UI_CAPTCHA_CHOOSE)));
+		$form->addToggle(Lang::get(LangKeys::UI_CAPTCHA_ENABLE), self::boolData(self::CAPTCHA_ENABLE));
 		if (self::boolData(self::CAPTCHA_ENABLE)) {
-			$form->addSlider("Length of Code", 1, 15, -1, self::intData(self::CAPTCHA_CODE_LENGTH, 6));
+			$form->addInput(Lang::get(LangKeys::UI_CAPTCHA_LENGTH), (string) self::intData(self::CAPTCHA_CODE_LENGTH, 6));
 			if (!self::boolData(self::CAPTCHA_RANDOMIZE)) {
-				$form->addToggle("Send Tip", self::boolData(self::CAPTCHA_TIP));
-				$form->addToggle("Send Message", self::boolData(self::CAPTCHA_MESSAGE));
-				$form->addToggle("Send Title", self::boolData(self::CAPTCHA_TITLE));
+				$form->addToggle(Lang::get(LangKeys::UI_CAPTCHA_SEND_TIP), self::boolData(self::CAPTCHA_TIP));
+				$form->addToggle(Lang::get(LangKeys::UI_CAPTCHA_SEND_MESSAGE), self::boolData(self::CAPTCHA_MESSAGE));
+				$form->addToggle(Lang::get(LangKeys::UI_CAPTCHA_SEND_TITLE), self::boolData(self::CAPTCHA_TITLE));
 			}
 			if (self::boolData(self::CAPTCHA_RANDOMIZE)) {
-				$form->addLabel(TextFormat::RED . "When Random Send Type is on, to choose send type, please turn off first the random send type!");
+				$form->addLabel(Lang::get(LangKeys::UI_CAPTCHA_RANDOMIZE_WARNING));
 			}
-			$form->addToggle("Randomize Send Type", self::boolData(self::CAPTCHA_RANDOMIZE));
+			$form->addToggle(Lang::get(LangKeys::UI_CAPTCHA_RANDOMIZE), self::boolData(self::CAPTCHA_RANDOMIZE));
 		}
 		$player->sendForm($form);
 	}
 
 	public static function AdminSettings(Player $player, bool $updated = false) : void {
-		$form = new CustomForm("Admin Settings");
+		$form = new CustomForm(Lang::get(LangKeys::UI_ADMIN_TITLE));
 		$form->setCallback(function(Player $player, FormResponse $response) {
 			$data = $response->getData();
 			if ($data === null) {
@@ -242,15 +245,15 @@ final class FormSender extends ConfigManager {
 			self::AdminSettings($player, true);
 		});
 
-		$form->addLabel(($updated ? "Updated Successfully!" : "Choose what do you want to change.."));
-		$form->addToggle("Ban Mode", self::boolData(self::BAN_ENABLE));
-		$form->addToggle("Kick Mode", self::boolData(self::KICK_ENABLE));
-		$form->addToggle("Bypass Permission", self::boolData(self::PERMISSION_BYPASS_ENABLE));
-		$form->addToggle("Admin Alerts", self::boolData(self::ALERTS_ENABLE));
-		$form->addToggle("PreVL Detections", self::boolData(self::DETECTION_ENABLE));
-		$form->addToggle("Network IP Limit", self::boolData(self::NETWORK_LIMIT_ENABLE));
+		$form->addLabel(($updated ? Lang::get(LangKeys::UI_ADMIN_UPDATED) : Lang::get(LangKeys::UI_ADMIN_CHOOSE)));
+		$form->addToggle(Lang::get(LangKeys::UI_ADMIN_BAN_MODE), self::boolData(self::BAN_ENABLE));
+		$form->addToggle(Lang::get(LangKeys::UI_ADMIN_KICK_MODE), self::boolData(self::KICK_ENABLE));
+		$form->addToggle(Lang::get(LangKeys::UI_ADMIN_BYPASS_PERMISSION), self::boolData(self::PERMISSION_BYPASS_ENABLE));
+		$form->addToggle(Lang::get(LangKeys::UI_ADMIN_ALERTS), self::boolData(self::ALERTS_ENABLE));
+		$form->addToggle(Lang::get(LangKeys::UI_ADMIN_PREVL_DETECTIONS), self::boolData(self::DETECTION_ENABLE));
+		$form->addToggle(Lang::get(LangKeys::UI_ADMIN_NETWORK_LIMIT_ENABLE), self::boolData(self::NETWORK_LIMIT_ENABLE));
 		if (self::boolData(self::NETWORK_LIMIT_ENABLE)) {
-			$form->addSlider("Player IP Limit", 1, 100, -1, self::intData(self::NETWORK_LIMIT, 3));
+			$form->addInput(Lang::get(LangKeys::UI_ADMIN_NETWORK_LIMIT), (string) self::intData(self::NETWORK_LIMIT, 3));
 		}
 		$player->sendForm($form);
 	}
@@ -291,14 +294,14 @@ final class FormSender extends ConfigManager {
 				: Lang::get(LangKeys::UI_ADVANCE_TOOLS_CHOOSE)
 		);
 		$form->addDropdown(Lang::get(LangKeys::UI_ADVANCE_TOOLS_LANGUAGE_LABEL), $availableLocales, $activeLocaleIndex);
-		$form->addToggle("Debug Mode", PlayerAPI::getAPIPlayer($player)->isDebug());
-		$form->addToggle("ProxyUDP (Beta)", self::boolData(self::PROXY_ENABLE));
-		$form->addToggle("Discord Webhook Alerts", self::boolData(self::DISCORD_ENABLE));
+		$form->addToggle(Lang::get(LangKeys::UI_ADVANCE_TOOLS_DEBUG_MODE), PlayerAPI::getAPIPlayer($player)->isDebug());
+		$form->addToggle(Lang::get(LangKeys::UI_ADVANCE_TOOLS_PROXY_UDP), self::boolData(self::PROXY_ENABLE));
+		$form->addToggle(Lang::get(LangKeys::UI_ADVANCE_TOOLS_DISCORD_ALERTS), self::boolData(self::DISCORD_ENABLE));
 		$player->sendForm($form);
 	}
 
 	public static function ToggleModules(Player $player, bool $toggled = false) : void {
-		$form = new CustomForm("Toggle Modules");
+		$form = new CustomForm(Lang::get(LangKeys::UI_TOGGLE_MODULES_TITLE));
 		$form->setCallback(function(Player $player, FormResponse $response) {
 			$data = $response->getData();
 			if ($data === null) {
@@ -328,7 +331,7 @@ final class FormSender extends ConfigManager {
 			self::ToggleModules($player, true);
 		});
 
-		$form->addLabel(($toggled ? "Toggled successfully!" : "Choose what do you want to toggle.."));
+		$form->addLabel(($toggled ? Lang::get(LangKeys::UI_TOGGLE_MODULES_TOGGLED) : Lang::get(LangKeys::UI_TOGGLE_MODULES_CHOOSE)));
 
 		foreach (API::getAllChecks(false) as $check) {
 			$form->addToggle($check->getName(), $check->enable());
@@ -340,7 +343,7 @@ final class FormSender extends ConfigManager {
 	public static function PickAModule(Player $player) : void {
 		/** @var list<string> $modules */
 		$modules = [];
-		$form = new SimpleForm("Pick a Module", "Choose what do you want to pick..");
+		$form = new SimpleForm(Lang::get(LangKeys::UI_PICK_MODULE_TITLE), Lang::get(LangKeys::UI_PICK_MODULE_CHOOSE));
 		$form->setCallback(function(Player $player, FormResponse $response) use (&$modules) {
 			$data = $response->getData();
 			if ($data === null) {
@@ -369,7 +372,7 @@ final class FormSender extends ConfigManager {
 				if ($check->getName() === "NetworkLimit") {
 					continue;
 				}
-				$form->addButton($check->getName() . "\nClick to view information.");
+				$form->addButton($check->getName() . "\n" . Lang::get(LangKeys::UI_PICK_MODULE_VIEW_INFO));
 			}
 		}
 
@@ -377,9 +380,26 @@ final class FormSender extends ConfigManager {
 	}
 
 	public static function ModuleInformation(Player $player, Check $check) : void {
+		$checkPunishment = strtolower($check->getPunishment());
+		$statusValue = $check->enable() ? Lang::get(LangKeys::UI_COMMON_ENABLED) : Lang::get(LangKeys::UI_COMMON_DISABLED);
+		$banValue = $checkPunishment === "ban" ? Lang::get(LangKeys::UI_COMMON_YES) : Lang::get(LangKeys::UI_COMMON_NO);
+		$kickValue = $checkPunishment === "kick" ? Lang::get(LangKeys::UI_COMMON_YES) : Lang::get(LangKeys::UI_COMMON_NO);
+		$captchaValue = $checkPunishment === "captcha" ? Lang::get(LangKeys::UI_COMMON_YES) : Lang::get(LangKeys::UI_COMMON_NO);
+		$flagValue = $checkPunishment === "flag" ? Lang::get(LangKeys::UI_COMMON_YES) : Lang::get(LangKeys::UI_COMMON_NO);
+		$maxVlCurrent = self::intData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl");
+		$maxVlValue = $maxVlCurrent === 0 ? Lang::get(LangKeys::UI_MODULE_INFO_INSTANT_PUNISHMENT) : (string) $maxVlCurrent;
 		$form = new SimpleForm(
-			$check->getName() . " Information",
-			TextFormat::RESET . "Name: " . TextFormat::YELLOW . $check->getName() . "\n" . TextFormat::RESET . "Sub Types: " . TextFormat::YELLOW . $check->getAllSubTypes() . "\n" . TextFormat::RESET . "Status: " . ($check->enable() ? TextFormat::GREEN . "Enabled" : TextFormat::RED . "Disabled") . "\n" . TextFormat::RESET . "Ban: " . ($check->getPunishment() === "ban" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Kick: " . ($check->getPunishment() === "kick" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Captcha: " . ($check->getPunishment() === "captcha" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Flag: " . ($check->getPunishment() === "flag" ? TextFormat::GREEN . "Yes" : TextFormat::RED . "No") . "\n" . TextFormat::RESET . "Max Violation: " . TextFormat::YELLOW . (self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl") === 0 ? "Instant Punishment" : self::getData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl"))
+			Lang::get(LangKeys::UI_MODULE_INFO_TITLE, ["module" => $check->getName()]),
+			Lang::get(LangKeys::UI_MODULE_INFO_BODY, [
+				"name" => $check->getName(),
+				"subtypes" => $check->getAllSubTypes(),
+				"status" => $statusValue,
+				"ban" => $banValue,
+				"kick" => $kickValue,
+				"captcha" => $captchaValue,
+				"flag" => $flagValue,
+				"maxvl" => $maxVlValue,
+			])
 		);
 		$form->setCallback(function(Player $player, FormResponse $response) use ($check) {
 			$data = $response->getData();
@@ -401,16 +421,16 @@ final class FormSender extends ConfigManager {
 			}
 		});
 
-		$form->addButton("Change PreVL");
-		$form->addButton("Toggle Punishment");
+		$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_CHANGE_PREVL));
+		$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_TOGGLE_PUNISHMENT));
 		if (self::intData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl") !== 0) {
-			$form->addButton("Change MaxVL");
+			$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_CHANGE_MAXVL));
 		}
 		$player->sendForm($form);
 	}
 
 	public static function ChangeMaxVL(Player $player, Check $check, bool $saved = false) : void {
-		$form = new CustomForm($check->getName() . " MaxVL");
+		$form = new CustomForm(Lang::get(LangKeys::UI_CHANGE_MAXVL_TITLE, ["module" => $check->getName()]));
 		$form->setCallback(function(Player $player, FormResponse $response) use ($check) {
 			$data = $response->getData();
 			if ($data === null) {
@@ -429,15 +449,15 @@ final class FormSender extends ConfigManager {
 			}
 		});
 
-		$form->addLabel(($saved ? TextFormat::GREEN . "Modified successfully!" : "Modify the slider do you want to set.."));
-		$form->addSlider("MaxVL", 0, 100, -1, self::intData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
+		$form->addLabel(($saved ? Lang::get(LangKeys::UI_CHANGE_MAXVL_UPDATED) : Lang::get(LangKeys::UI_CHANGE_MAXVL_CHOOSE)));
+		$form->addInput(Lang::get(LangKeys::UI_CHANGE_MAXVL_INPUT), (string) self::intData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl"));
 		$player->sendForm($form);
 	}
 
 	public static function ChangePreVL(Player $player, Check $check, bool $saved = false) : void {
 		/** @var list<string> $subTypes */
 		$subTypes = [];
-		$form = new CustomForm($check->getName() . " PreVL");
+		$form = new CustomForm(Lang::get(LangKeys::UI_CHANGE_PREVL_TITLE, ["module" => $check->getName()]));
 		$form->setCallback(function(Player $player, FormResponse $response) use ($check, &$subTypes) {
 			$data = $response->getData();
 			if ($data === null) {
@@ -461,19 +481,25 @@ final class FormSender extends ConfigManager {
 			self::ChangePreVL($player, $check, true);
 		});
 
-		$form->addLabel(($saved ? TextFormat::GREEN . "Modified successfully!" : "Modify the slider do you want to set.."));
+		$form->addLabel(($saved ? Lang::get(LangKeys::UI_CHANGE_PREVL_UPDATED) : Lang::get(LangKeys::UI_CHANGE_PREVL_CHOOSE)));
 		foreach (self::arrayData(self::CHECK . "." . strtolower($check->getName()) . ".pre-vl") as $subType => $amount) {
 			if (!is_string($subType)) {
 				continue;
 			}
 			$subTypes[] = $subType;
-			$form->addSlider($check->getName() . " (" . strtoupper($subType) . ")", 0, 100, -1, is_numeric($amount) ? (int) $amount : 0);
+			$form->addInput(
+				Lang::get(LangKeys::UI_CHANGE_PREVL_INPUT, ["module" => $check->getName(), "subtype" => strtoupper($subType)]),
+				(string) (is_numeric($amount) ? (int) $amount : 0)
+			);
 		}
 		$player->sendForm($form);
 	}
 
 	public static function TogglePunishment(Player $player, Check $check, bool $saved = false) : void {
-		$form = new SimpleForm($check->getName() . " Punishment", ($saved ? TextFormat::GREEN . "Toggled successfully!" : "Choose what do you want to toggle.."));
+		$form = new SimpleForm(
+			Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_TITLE, ["module" => $check->getName()]),
+			($saved ? Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_TOGGLED) : Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_CHOOSE))
+		);
 		$form->setCallback(function(Player $player, FormResponse $response) use ($check) {
 			$data = $response->getData();
 			if ($data === null) {
@@ -495,9 +521,18 @@ final class FormSender extends ConfigManager {
 			self::TogglePunishment($player, $check, true);
 		});
 
-		$form->addButton("Kick Mode\n" . (strtolower(self::stringData(self::CHECK . "." . strtolower($check->getName()) . ".punishment")) === "kick" ? "Enabled" : "Disabled"));
-		$form->addButton("Ban Mode\n" . (strtolower(self::stringData(self::CHECK . "." . strtolower($check->getName()) . ".punishment")) === "ban" ? "Enabled" : "Disabled"));
-		$form->addButton("Flag Mode\n" . (strtolower(self::stringData(self::CHECK . "." . strtolower($check->getName()) . ".punishment")) === "flag" ? "Enabled" : "Disabled"));
+		$form->addButton(Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_BUTTON, [
+			"mode" => Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_KICK),
+			"status" => (strtolower(self::stringData(self::CHECK . "." . strtolower($check->getName()) . ".punishment")) === "kick" ? Lang::get(LangKeys::UI_COMMON_ENABLED) : Lang::get(LangKeys::UI_COMMON_DISABLED)),
+		]));
+		$form->addButton(Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_BUTTON, [
+			"mode" => Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_BAN),
+			"status" => (strtolower(self::stringData(self::CHECK . "." . strtolower($check->getName()) . ".punishment")) === "ban" ? Lang::get(LangKeys::UI_COMMON_ENABLED) : Lang::get(LangKeys::UI_COMMON_DISABLED)),
+		]));
+		$form->addButton(Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_BUTTON, [
+			"mode" => Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_FLAG),
+			"status" => (strtolower(self::stringData(self::CHECK . "." . strtolower($check->getName()) . ".punishment")) === "flag" ? Lang::get(LangKeys::UI_COMMON_ENABLED) : Lang::get(LangKeys::UI_COMMON_DISABLED)),
+		]));
 		$player->sendForm($form);
 	}
 }

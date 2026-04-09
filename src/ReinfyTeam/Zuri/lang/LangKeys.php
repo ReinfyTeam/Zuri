@@ -129,4 +129,81 @@ final class LangKeys {
 	public const UI_ADVANCE_TOOLS_UPDATED_LANGUAGE = "ui.advance-tools.updated-language";
 	public const UI_ADVANCE_TOOLS_CHOOSE = "ui.advance-tools.choose";
 	public const UI_ADVANCE_TOOLS_LANGUAGE_LABEL = "ui.advance-tools.language-label";
+	public const UI_MAIN_TITLE = "ui.main.title";
+	public const UI_MAIN_CHOOSE = "ui.main.choose";
+	public const UI_MAIN_MANAGE_MODULES = "ui.main.manage-modules";
+	public const UI_MAIN_CAPTCHA_SETTINGS = "ui.main.captcha-settings";
+	public const UI_MAIN_ADMIN_SETTINGS = "ui.main.admin-settings";
+	public const UI_MAIN_ADVANCE_TOOLS = "ui.main.advance-tools";
+
+	public const UI_MANAGE_MODULES_TITLE = "ui.manage-modules.title";
+	public const UI_MANAGE_MODULES_CHOOSE = "ui.manage-modules.choose";
+	public const UI_MANAGE_MODULES_RELOADED = "ui.manage-modules.reloaded";
+	public const UI_MANAGE_MODULES_ENABLE_DISABLE = "ui.manage-modules.enable-disable";
+	public const UI_MANAGE_MODULES_MODULE_INFORMATION = "ui.manage-modules.module-information";
+	public const UI_MANAGE_MODULES_RELOAD_ALL = "ui.manage-modules.reload-all";
+
+	public const UI_CAPTCHA_TITLE = "ui.captcha.title";
+	public const UI_CAPTCHA_CHOOSE = "ui.captcha.choose";
+	public const UI_CAPTCHA_UPDATED = "ui.captcha.updated";
+	public const UI_CAPTCHA_ENABLE = "ui.captcha.enable";
+	public const UI_CAPTCHA_LENGTH = "ui.captcha.length";
+	public const UI_CAPTCHA_SEND_TIP = "ui.captcha.send-tip";
+	public const UI_CAPTCHA_SEND_MESSAGE = "ui.captcha.send-message";
+	public const UI_CAPTCHA_SEND_TITLE = "ui.captcha.send-title";
+	public const UI_CAPTCHA_RANDOMIZE_WARNING = "ui.captcha.randomize-warning";
+	public const UI_CAPTCHA_RANDOMIZE = "ui.captcha.randomize";
+
+	public const UI_ADMIN_TITLE = "ui.admin.title";
+	public const UI_ADMIN_CHOOSE = "ui.admin.choose";
+	public const UI_ADMIN_UPDATED = "ui.admin.updated";
+	public const UI_ADMIN_BAN_MODE = "ui.admin.ban-mode";
+	public const UI_ADMIN_KICK_MODE = "ui.admin.kick-mode";
+	public const UI_ADMIN_BYPASS_PERMISSION = "ui.admin.bypass-permission";
+	public const UI_ADMIN_ALERTS = "ui.admin.alerts";
+	public const UI_ADMIN_PREVL_DETECTIONS = "ui.admin.prevl-detections";
+	public const UI_ADMIN_NETWORK_LIMIT_ENABLE = "ui.admin.network-limit-enable";
+	public const UI_ADMIN_NETWORK_LIMIT = "ui.admin.network-limit";
+
+	public const UI_ADVANCE_TOOLS_DEBUG_MODE = "ui.advance-tools.debug-mode";
+	public const UI_ADVANCE_TOOLS_PROXY_UDP = "ui.advance-tools.proxy-udp";
+	public const UI_ADVANCE_TOOLS_DISCORD_ALERTS = "ui.advance-tools.discord-alerts";
+
+	public const UI_TOGGLE_MODULES_TITLE = "ui.toggle-modules.title";
+	public const UI_TOGGLE_MODULES_CHOOSE = "ui.toggle-modules.choose";
+	public const UI_TOGGLE_MODULES_TOGGLED = "ui.toggle-modules.toggled";
+
+	public const UI_PICK_MODULE_TITLE = "ui.pick-module.title";
+	public const UI_PICK_MODULE_CHOOSE = "ui.pick-module.choose";
+	public const UI_PICK_MODULE_VIEW_INFO = "ui.pick-module.view-info";
+
+	public const UI_MODULE_INFO_TITLE = "ui.module-info.title";
+	public const UI_MODULE_INFO_BODY = "ui.module-info.body";
+	public const UI_MODULE_INFO_BUTTON_CHANGE_PREVL = "ui.module-info.button-change-prevl";
+	public const UI_MODULE_INFO_BUTTON_TOGGLE_PUNISHMENT = "ui.module-info.button-toggle-punishment";
+	public const UI_MODULE_INFO_BUTTON_CHANGE_MAXVL = "ui.module-info.button-change-maxvl";
+	public const UI_MODULE_INFO_INSTANT_PUNISHMENT = "ui.module-info.instant-punishment";
+
+	public const UI_CHANGE_MAXVL_TITLE = "ui.change-maxvl.title";
+	public const UI_CHANGE_MAXVL_CHOOSE = "ui.change-maxvl.choose";
+	public const UI_CHANGE_MAXVL_UPDATED = "ui.change-maxvl.updated";
+	public const UI_CHANGE_MAXVL_INPUT = "ui.change-maxvl.input";
+
+	public const UI_CHANGE_PREVL_TITLE = "ui.change-prevl.title";
+	public const UI_CHANGE_PREVL_CHOOSE = "ui.change-prevl.choose";
+	public const UI_CHANGE_PREVL_UPDATED = "ui.change-prevl.updated";
+	public const UI_CHANGE_PREVL_INPUT = "ui.change-prevl.input";
+
+	public const UI_TOGGLE_PUNISHMENT_TITLE = "ui.toggle-punishment.title";
+	public const UI_TOGGLE_PUNISHMENT_CHOOSE = "ui.toggle-punishment.choose";
+	public const UI_TOGGLE_PUNISHMENT_TOGGLED = "ui.toggle-punishment.toggled";
+	public const UI_TOGGLE_PUNISHMENT_KICK = "ui.toggle-punishment.kick";
+	public const UI_TOGGLE_PUNISHMENT_BAN = "ui.toggle-punishment.ban";
+	public const UI_TOGGLE_PUNISHMENT_FLAG = "ui.toggle-punishment.flag";
+	public const UI_TOGGLE_PUNISHMENT_BUTTON = "ui.toggle-punishment.button";
+
+	public const UI_COMMON_ENABLED = "ui.common.enabled";
+	public const UI_COMMON_DISABLED = "ui.common.disabled";
+	public const UI_COMMON_YES = "ui.common.yes";
+	public const UI_COMMON_NO = "ui.common.no";
 }
