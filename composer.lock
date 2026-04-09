@@ -1117,12 +1117,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ReinfyTeam/libpmform.git",
-                "reference": "209fc3031d21b4ff329db9fc80b7652686e299fa"
+                "reference": "495e2b260ccb10fe284f890d2296fa2ac287d6a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ReinfyTeam/libpmform/zipball/209fc3031d21b4ff329db9fc80b7652686e299fa",
-                "reference": "209fc3031d21b4ff329db9fc80b7652686e299fa",
+                "url": "https://api.github.com/repos/ReinfyTeam/libpmform/zipball/495e2b260ccb10fe284f890d2296fa2ac287d6a7",
+                "reference": "495e2b260ccb10fe284f890d2296fa2ac287d6a7",
                 "shasum": ""
             },
             "require": {
@@ -1137,7 +1137,7 @@
             "extra": {
                 "virion": {
                     "spec": "3.1",
-                    "namespace-root": "CzechPMDevs\\libpmform"
+                    "namespace-root": "czechpmdevs\\libpmform"
                 }
             },
             "autoload": {
@@ -1164,7 +1164,7 @@
             "support": {
                 "source": "https://github.com/ReinfyTeam/libpmform/tree/main"
             },
-            "time": "2026-04-09T10:01:39+00:00"
+            "time": "2026-04-09T16:10:05+00:00"
         },
         {
             "name": "reinfyteam/libvapm-pmmp",
