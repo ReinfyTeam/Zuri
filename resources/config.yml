@@ -16,23 +16,17 @@ zuri:
         # Custom locales are loaded automatically from:
         # - plugins/Zuri/lang/*.yml
         # - plugins/Zuri/langs/*.yml
-    version: "0.2.8" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
-    antibot:
-       message: "§cSorry! You are humman?"
-    editionfaker:
-       message: "§cInvalid client!"
+    # User-facing messages are translated from resources/lang/*.yml now.
+    version: "0.3.0" #This config version: DO NOT CHANGE THIS, UNLESS THE DEVELOPER TOLD YOU TO CHANGE THIS!!
     network:
         enable: false # If you are using WaterDogPE, considering using a plugin that supports login-extras to include their player public ip address on their login. This may cause issue between login info's given by WaterDogPE proxy when using this ip limiter. Due the certain issues occured, this feature is now optional prior for the proxy issues.
         #This is to limit the player's access to the same address to the server.
         limit: 3
-        message: "§cSorry the server can't allow access to cross the line."
     ping:
         #This is a customization that helps Zuri test the best cheating players.
         #This is the buyer's discretion if you have custom errors with your server we will not be responsible.
         normal: 20
         lagging: 200
-    lagging:
-        message: "{prefix} §cThe server is lagging! The server has currently §b{tps} tps§c! Zuri can't check players at the moment!"
     #Bypass a world according to list.
     world_bypass:
         enable: false
@@ -49,7 +43,6 @@ zuri:
         port: 19132
     alerts:
         # Sends console and staff alerts whenever a check reaches its pre-violation or punishment threshold.
-        message: "{prefix} §f{player_name} §7failed §f{module} §7(§c{subtype}§7) §7VL §2{realViolation}"
         enable: true
         # When enabled, only players with the permission below will see alert messages.
         admin: false #This will cause the in-game cheat detector to send it to the person with the permissions below
@@ -58,16 +51,12 @@ zuri:
         # Commands are dispatched from the console after a ban decision is confirmed.
         commands:
             - 'ban "{player_name}" Unfair Advantage'
-        message: "{prefix} §f{player_name} §chas been banned from server for hacking or abuse."
         enable: true
     detection:
         # Detections when suddenly triggered any checks that detects any kind of hack. This might spam your console or chat. NOT RECOMMENDED.
         enable: false
-        message: "{prefix} §f{player_name} §7suspected using §f{module} §7(§c{subtype}§7) §7PRE-VL §2{violation}"
     kick:
-        kickmessage: "§fYou have been kicked from the server."
         # This message is used for staff notifications and is separate from the player-facing kick UI.
-        message: "{prefix} §f{player_name} §chas been kicked from server for hacking or abuse."
         enable: true
         # If this is enabled, this will be used. DISABLING THIS, THE FALL BACK KICK WHICH LEADS MANY BUGS, PLAYERS CANNOT BE KICKED ETC.. SO, PLEASE DO NOT DISABLE KICK COMMAND MODE FEATURE.
         commands:
@@ -77,7 +66,6 @@ zuri:
     warning:
               # Warning is a soft action used by login and captcha flows before a punishment is applied.
               enable: true
-              message: "{prefix} §l§7[§eWARNING§7] §r§f{player_name} §7is tried using §f{module} §7(§c{subtype}§7)"
     debug:
         # Debug mode prints calculation details for the selected player only.
         enable: true # Allow debugging checks: (/zuri debug)
@@ -119,7 +107,6 @@ zuri:
     captcha:
         # Captcha is used to pause a player until they complete a verification challenge.
         enable: true
-        text: "{prefix} §cType §b{code} §cto get rid of mute!"
         message: true
         tip: false
         title: false
@@ -140,13 +127,9 @@ zuri:
         enable: false # Should discord webhooks are enabled in the server?
     chat:
         spam:
-            text: "{prefix} §cSo sorry! Each chat only has a fixed time of 2 seconds apart."
             delay: 2
         command:
-            text: "{prefix} §cSo sorry! Each command only has a fixed time of 2 seconds apart."
             delay: 2
-        repeat:
-            text: "{prefix} §cSo sorry! Don't go back to your chat last time!"
     check:
         antibot:
             enable: true

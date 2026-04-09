@@ -10,6 +10,14 @@ projects:
     libs:
       - src: VennDev/LibVapmPMMP/LibVapmPMMP
         version: 2.5.6
+      - src: ReinfyTeam/DiscordWebhookAPI/DiscordWebhookAPI
+        version: 2.0.0
       - src: Paroxity/Commando/Commando
         version: 3.3.0
+      - src: SOF3/InfoAPI/InfoAPI
+        version: 2.0.0-beta.1
+      - src: CzechPMDevs/libpmform/
+        version: 1.1.0
+      - src: Muqsit/SimplePacketHandler/SimplePacketHandler
+        version: 0.1.5
 ...

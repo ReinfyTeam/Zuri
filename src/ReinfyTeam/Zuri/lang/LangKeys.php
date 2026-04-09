@@ -45,6 +45,7 @@ final class LangKeys {
 	public const EDITIONFAKER_MESSAGE = "messages.editionfaker.message";
 	public const NETWORK_LIMIT_MESSAGE = "messages.network.limit";
 	public const CHAT_SPAM_TEXT = "messages.chat.spam";
+	public const CHAT_COMMAND_TEXT = "messages.chat.command";
 	public const CHAT_REPEAT_TEXT = "messages.chat.repeat";
 
 	public const CMD_HELP_HEADER = "commands.help.header";

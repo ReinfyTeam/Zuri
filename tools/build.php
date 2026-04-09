@@ -10,6 +10,24 @@ $composerPath = $projectRoot . DIRECTORY_SEPARATOR . "composer.json";
 $buildDir = $projectRoot . DIRECTORY_SEPARATOR . "build";
 $toolsBinDir = __DIR__ . DIRECTORY_SEPARATOR . "bin";
 $pharynxPhar = $toolsBinDir . DIRECTORY_SEPARATOR . "pharynx.phar";
+$buildSource = false;
+$sourceOutputPath = $projectRoot . DIRECTORY_SEPARATOR . "output";
+
+foreach (array_slice($argv, 1) as $argument) {
+	if ($argument === "--source") {
+		$buildSource = true;
+		continue;
+	}
+
+	if (str_starts_with($argument, "--output=")) {
+		$value = trim(substr($argument, strlen("--output=")));
+		if ($value !== "") {
+			$sourceOutputPath = str_starts_with($value, DIRECTORY_SEPARATOR)
+				? $value
+				: $projectRoot . DIRECTORY_SEPARATOR . $value;
+		}
+	}
+}
 
 if (!file_exists($pluginYmlPath)) {
 	fwrite(STDERR, "plugin.yml not found in project root.\n");
@@ -38,21 +56,24 @@ if (!file_exists($pharynxPhar)) {
 }
 
 echo "Installing composer dependencies (including virions)...\n";
-runCommand("composer install --no-dev --prefer-dist --no-interaction --working-dir " . escapeshellarg($projectRoot));
+runCommand("/usr/local/bin/composer install --prefer-dist --no-interaction --working-dir " . escapeshellarg($projectRoot));
 
 @unlink($outputPath);
 
-$pharynxCommand = escapeshellarg(PHP_BINARY)
+$pathValue = "/usr/local/bin:/usr/bin:/bin:" . (getenv("PATH") ?: "");
+
+$pharynxCommand = "PATH=" . escapeshellarg($pathValue) . " "
+	. escapeshellarg(PHP_BINARY)
 	. " -d phar.readonly=0"
 	. " " . escapeshellarg($pharynxPhar)
 	. " -i " . escapeshellarg($projectRoot)
-	. " -p" . escapeshellarg($outputPath)
+	. ($buildSource ? " -o" . escapeshellarg($sourceOutputPath) : " -p" . escapeshellarg($outputPath))
 	. " -c" . escapeshellarg($projectRoot);
 
-echo "Building virion-injected phar...\n";
+echo $buildSource ? "Building virion-injected source tree...\n" : "Building virion-injected phar...\n";
 runCommand($pharynxCommand);
 
-echo "Success! Output path: {$outputPath}\n";
+echo "Success! Output path: " . ($buildSource ? $sourceOutputPath : $outputPath) . "\n";
 
 function runCommand(string $command) : void {
 	passthru($command, $exitCode);

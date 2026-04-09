@@ -31,6 +31,9 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils\discord;
 
+use CortexPE\DiscordWebhookAPI\Embed;
+use CortexPE\DiscordWebhookAPI\Message;
+use CortexPE\DiscordWebhookAPI\Webhook;
 use DateTime;
 use pocketmine\utils\Config;
 use ReinfyTeam\Zuri\config\ConfigManager;

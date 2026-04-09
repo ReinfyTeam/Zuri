@@ -47,7 +47,6 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\ZuriAC;
 use function array_key_exists;
 use function array_search;
-use function count;
 use function intval;
 use function is_array;
 use function is_bool;

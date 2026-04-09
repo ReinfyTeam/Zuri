@@ -28,6 +28,7 @@ messages:
     limit: "§cSorry the server can't allow access to cross the line."
   chat:
     spam: "{prefix} §cSo sorry! Each chat only has a fixed time of 2 seconds apart."
+    command: "{prefix} §cSo sorry! Each command only has a fixed time of 2 seconds apart."
     repeat: "{prefix} §cSo sorry! Don't go back to your chat last time!"
 
 commands:
