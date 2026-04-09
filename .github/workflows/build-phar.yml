@@ -34,5 +34,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: Zuri
-          path: build/*.phar
+          path: build/Zuri.phar
           if-no-files-found: error
