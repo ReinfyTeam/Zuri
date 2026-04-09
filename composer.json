@@ -31,7 +31,7 @@
         "format:check": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --dry-run --diff",
         "analyze": "vendor/bin/phpstan",
         "build": "php -dphar.readonly=0 tools/build.php",
-        "build-source": "php tools/build.php --source --output=./output/"
+        "build-source": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -o=./build/"
     },
     "minimum-stability": "stable",
     "prefer-stable": true
