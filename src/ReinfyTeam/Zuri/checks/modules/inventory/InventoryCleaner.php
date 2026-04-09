@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 use function microtime;
 
 class InventoryCleaner extends Check {
@@ -76,7 +77,8 @@ class InventoryCleaner extends Check {
 		}
 
 		$start = $playerAPI->getExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION);
-		$transaction = (int) $playerAPI->getExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, 0);
+		$transactionRaw = $playerAPI->getExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, 0);
+		$transaction = is_numeric($transactionRaw) ? (int) $transactionRaw : 0;
 		$now = microtime(true);
 
 		if ($start === null) {
@@ -85,8 +87,11 @@ class InventoryCleaner extends Check {
 			return;
 		}
 
-		$diff = $now - (float) $start;
-		if ($diff > (float) $this->getConstant(CheckConstants::INVENTORYCLEANER_DIFF_TICKS)) {
+		$startFloat = is_numeric($start) ? (float) $start : $now;
+		$diff = $now - $startFloat;
+		$diffTicksRaw = $this->getConstant(CheckConstants::INVENTORYCLEANER_DIFF_TICKS);
+		$diffTicks = is_numeric($diffTicksRaw) ? (float) $diffTicksRaw : 0.0;
+		if ($diff > $diffTicks) {
 			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION, $now);
 			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, 1);
 			return;
@@ -96,7 +101,9 @@ class InventoryCleaner extends Check {
 		$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, $transaction);
 		$this->debug($playerAPI, "transaction={$transaction}, diff={$diff}");
 
-		if ($transaction > (int) $this->getConstant(CheckConstants::INVENTORYCLEANER_MAX_TRANSACTION)) {
+		$maxTransactionRaw = $this->getConstant(CheckConstants::INVENTORYCLEANER_MAX_TRANSACTION);
+		$maxTransaction = is_numeric($maxTransactionRaw) ? (int) $maxTransactionRaw : 0;
+		if ($transaction > $maxTransaction) {
 			$this->dispatchAsyncDecision($playerAPI, true);
 			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TICKS_TRANSACTION, $now);
 			$playerAPI->setExternalData(CacheData::INVENTORYCLEANER_TRANSACTION, 0);

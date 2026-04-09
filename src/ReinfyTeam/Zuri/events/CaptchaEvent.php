@@ -41,6 +41,8 @@ use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\CharUtil;
 use ReinfyTeam\Zuri\utils\ReplaceText;
+use function is_int;
+use function is_numeric;
 use function random_int;
 
 class CaptchaEvent extends Event {
@@ -74,7 +76,14 @@ class CaptchaEvent extends Event {
 	public function call() : void {
 		if ($this->playerAPI->isCaptcha()) {
 			if ($this->playerAPI->getCaptchaCode() === "nocode") {
-				$this->playerAPI->setCaptchaCode(CharUtil::generatorCode(ConfigManager::getData(ConfigPaths::CAPTCHA_CODE_LENGTH)));
+				$captchaCodeLengthRaw = ConfigManager::getData(ConfigPaths::CAPTCHA_CODE_LENGTH);
+				$captchaCodeLength = is_int($captchaCodeLengthRaw)
+					? $captchaCodeLengthRaw
+					: (is_numeric($captchaCodeLengthRaw) ? (int) $captchaCodeLengthRaw : 6);
+				if ($captchaCodeLength <= 0) {
+					$captchaCodeLength = 6;
+				}
+				$this->playerAPI->setCaptchaCode(CharUtil::generatorCode($captchaCodeLength));
 			}
 			if (ConfigManager::getData(ConfigPaths::CAPTCHA_RANDOMIZE) === true) {
 				switch(random_int(1, 3)) {

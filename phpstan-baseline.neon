@@ -1,0 +1,2001 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\API\\:\\:allModuleInfo\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/API.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\API\\:\\:getAllChecks\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/API.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\API\\:\\:getAllDisabledChecks\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/API.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\API\\:\\:getAllEnabledChecks\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/API.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\API\\:\\:getAllModules\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/API.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\API\\:\\:getChecksByName\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/API.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\API\\:\\:getMaxViolationByModule\\(\\) should return int\\|null but returns mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/API.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\API\\:\\:getPunishmentByModule\\(\\) should return string\\|null but returns mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/API.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\API\\:\\:getSubTypeByModule\\(\\) should return string\\|null but returns mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/API.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\ZuriAC\\:\\:Checks\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/ZuriAC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\ZuriAC\\:\\:EventChecks\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/ZuriAC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\ZuriAC\\:\\:JustEventChecks\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/ZuriAC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\ZuriAC\\:\\:PacketChecks\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/ZuriAC.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\ZuriAC\\:\\:\\$checks type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/ZuriAC.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\ZuriAC\\:\\:\\$eventChecks type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/ZuriAC.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\ZuriAC\\:\\:\\$justEventChecks type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/ZuriAC.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\ZuriAC\\:\\:\\$packetChecks type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/ZuriAC.php
+
+		-
+			message: "#^Cannot call method isLagging\\(\\) on ReinfyTeam\\\\Zuri\\\\task\\\\ServerTickTask\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/Check.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\Check\\:\\:dispatchAsyncCheck\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/Check.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\Check\\:\\:dispatchAsyncDecision\\(\\) has parameter \\$set with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/Check.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\Check\\:\\:dispatchAsyncDecision\\(\\) has parameter \\$unset with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/Check.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\Check\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/Check.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\Check\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/Check.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\Check\\:\\:\\$constantCache type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/Check.php
+
+		-
+			message: "#^Cannot call method isLagging\\(\\) on ReinfyTeam\\\\Zuri\\\\task\\\\ServerTickTask\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/DynamicThreshold.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\DynamicThreshold\\:\\:getDiagnostics\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/DynamicThreshold.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\ViolationResult\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/ViolationResult.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\aimassist\\\\AimAssistB\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/aimassist/AimAssistB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\aimassist\\\\AimAssistB\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/aimassist/AimAssistB.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/inputspoof/InputSpoofA.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/timer/TimerA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\badpackets\\\\timer\\\\TimerA\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/timer/TimerA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\badpackets\\\\timer\\\\TimerA\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/timer/TimerA.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/timer/TimerB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\badpackets\\\\timer\\\\TimerB\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/timer/TimerB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\badpackets\\\\timer\\\\TimerB\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/timer/TimerB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\badpackets\\\\timer\\\\TimerC\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/timer/TimerC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\badpackets\\\\timer\\\\TimerC\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/timer/TimerC.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/timer/TimerD.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 3
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/timer/TimerD.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\badpackets\\\\timer\\\\TimerD\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/timer/TimerD.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\badpackets\\\\timer\\\\TimerD\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/badpackets/timer/TimerD.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between pocketmine\\\\player\\\\Player and null will always evaluate to false\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/blockbreak/WrongMining.php
+
+		-
+			message: "#^Parameter \\#2 \\$maxDistance of method pocketmine\\\\player\\\\Player\\:\\:canInteract\\(\\) expects float, mixed given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/blockinteract/BlockReach.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between pocketmine\\\\player\\\\Player and null will always evaluate to false\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/blockplace/FillBlock.php
+
+		-
+			message: "#^Call to an undefined method pocketmine\\\\inventory\\\\PlayerInventory\\|ReinfyTeam\\\\Zuri\\\\player\\\\PlayerAPI\\:\\:getItemInHand\\(\\)\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/blockplace/scaffold/ScaffoldA.php
+
+		-
+			message: "#^Call to an undefined method pocketmine\\\\event\\\\block\\\\BlockPlaceEvent\\:\\:getBlock\\(\\)\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/blockplace/scaffold/ScaffoldE.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 4
+			path: src/ReinfyTeam/Zuri/checks/modules/blockplace/scaffold/ScaffoldE.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/blockplace/scaffold/ScaffoldE.php
+
+		-
+			message: "#^Call to an undefined method pocketmine\\\\event\\\\block\\\\BlockPlaceEvent\\:\\:getBlock\\(\\)\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/blockplace/scaffold/ScaffoldF.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 4
+			path: src/ReinfyTeam/Zuri/checks/modules/blockplace/scaffold/ScaffoldF.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/blockplace/scaffold/ScaffoldF.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/FastBow.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\FastBow\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/FastBow.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\FastBow\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/FastBow.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 4
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/GhostHand.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/GhostHand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\GhostHand\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/GhostHand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\GhostHand\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/GhostHand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\GhostHand\\:\\:getIgnoredBlockCategories\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/GhostHand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\GhostHand\\:\\:hasSolidBetween\\(\\) has parameter \\$ignoredCategories with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/GhostHand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\GhostHand\\:\\:isIgnoredSolid\\(\\) has parameter \\$ignoredCategories with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/GhostHand.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 8
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/Hitbox.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/Hitbox.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\Hitbox\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/Hitbox.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\Hitbox\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/Hitbox.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\ImposibleHit\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/ImposibleHit.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\ImposibleHit\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/ImposibleHit.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\ImposibleHit\\:\\:\\$eating type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/ImposibleHit.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 3
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/ItemLerp.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 3
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/ItemLerp.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\ItemLerp\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/ItemLerp.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\ItemLerp\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/ItemLerp.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickA.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\autoclick\\\\AutoClickA\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\autoclick\\\\AutoClickA\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickA.php
+
+		-
+			message: "#^PHPDoc tag @throws with type ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\autoclick\\\\ReflectionException\\|ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\DiscordWebhookException is not subtype of Throwable$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickA.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickB.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\autoclick\\\\AutoClickB\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\autoclick\\\\AutoClickB\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickB.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickC.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\autoclick\\\\AutoClickC\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\autoclick\\\\AutoClickC\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickC.php
+
+		-
+			message: "#^PHPDoc tag @throws with type ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\autoclick\\\\ReflectionException\\|ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\DiscordWebhookException is not subtype of Throwable$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickC.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between pocketmine\\\\player\\\\Player and null will always evaluate to false\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/autoclick/AutoClickC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\killaura\\\\KillAuraA\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\killaura\\\\KillAuraA\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\killaura\\\\KillAuraB\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\killaura\\\\KillAuraB\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraB.php
+
+		-
+			message: "#^Cannot call method getTypeId\\(\\) on pocketmine\\\\block\\\\Block\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\killaura\\\\KillAuraC\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\killaura\\\\KillAuraC\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\killaura\\\\KillAuraD\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraD.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\killaura\\\\KillAuraD\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraD.php
+
+		-
+			message: "#^Offset 'survival' on array on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraD.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between pocketmine\\\\player\\\\Player and null will always evaluate to false\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraD.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\killaura\\\\KillAuraE\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraE.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\killaura\\\\KillAuraE\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/killaura/KillAuraE.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\reach\\\\ReachA\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\reach\\\\ReachA\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachA.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\reach\\\\ReachB\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\reach\\\\ReachB\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachB.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\reach\\\\ReachC\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\reach\\\\ReachC\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachC.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 6
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachD.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\reach\\\\ReachD\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachD.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\reach\\\\ReachD\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachD.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 7
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachE.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachE.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\reach\\\\ReachE\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachE.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\reach\\\\ReachE\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/reach/ReachE.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 7
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/rotation/RotationA.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/rotation/RotationA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\rotation\\\\RotationA\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/rotation/RotationA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\rotation\\\\RotationA\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/rotation/RotationA.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 4
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/rotation/RotationB.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/rotation/RotationB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\rotation\\\\RotationB\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/rotation/RotationB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\rotation\\\\RotationB\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/rotation/RotationB.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 3
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/velocity/VelocityA.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/velocity/VelocityA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\velocity\\\\VelocityA\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/velocity/VelocityA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\combat\\\\velocity\\\\VelocityA\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/combat/velocity/VelocityA.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/fly/FlyA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\fly\\\\FlyA\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/fly/FlyA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\fly\\\\FlyA\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/fly/FlyA.php
+
+		-
+			message: "#^Access to an undefined property pocketmine\\\\network\\\\mcpe\\\\protocol\\\\UpdateAdventureSettingsPacket\\:\\:\\$flags\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/fly/FlyB.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/fly/FlyB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\fly\\\\FlyB\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/fly/FlyB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\fly\\\\FlyB\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/fly/FlyB.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/fly/FlyC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\fly\\\\FlyC\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/fly/FlyC.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\fly\\\\FlyC\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/fly/FlyC.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/inventory/ChestAura.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/inventory/ChestStealer.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/inventory/ChestStealer.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/inventory/InventoryCleaner.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/inventory/InventoryCleaner.php
+
+		-
+			message: "#^Binary operation \"\\*\\*\" between \\(float\\|int\\) and mixed results in an error\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/AirMovement.php
+
+		-
+			message: "#^Cannot call method getText\\(\\) on pocketmine\\\\lang\\\\Translatable\\|string\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/AirMovement.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\AntiImmobile\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/AntiImmobile.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\AntiImmobile\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/AntiImmobile.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\speed\\\\AntiVoid\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/AntiVoid.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\speed\\\\AntiVoid\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/AntiVoid.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/ClickTP.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\ClickTP\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/ClickTP.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\ClickTP\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/ClickTP.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/OmniSprint.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/OmniSprint.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\Phase\\:\\:getSkipFlipped\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/Phase.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\Phase\\:\\:getSkipIds\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/Phase.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\Phase\\:\\:\\$skipFlipped type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/Phase.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\Phase\\:\\:\\$skipIds type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/Phase.php
+
+		-
+			message: "#^Comparison operation \"\\>\" between \\(float\\|int\\) and \\(array\\|float\\|int\\) results in an error\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/Step.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between pocketmine\\\\player\\\\Player and null will always evaluate to false\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/Step.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\WrongPitch\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/WrongPitch.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\WrongPitch\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/WrongPitch.php
+
+		-
+			message: "#^Cannot cast mixed to float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/noslow/NoSlowA.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/noslow/NoSlowA.php
+
+		-
+			message: "#^Cannot call method isSolid\\(\\) on pocketmine\\\\block\\\\Block\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/speed/SpeedA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\speed\\\\SpeedA\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/speed/SpeedA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\speed\\\\SpeedA\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/speed/SpeedA.php
+
+		-
+			message: "#^Comparison operation \"\\<\" between int\\<min, 39\\> and 40 is always true\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/speed/SpeedB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\speed\\\\SpeedB\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/speed/SpeedB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\moving\\\\speed\\\\SpeedB\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/speed/SpeedB.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/speed/SpeedB.php
+
+		-
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/moving/speed/SpeedB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\NetworkLimit\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/NetworkLimit.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\NetworkLimit\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/NetworkLimit.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\NetworkLimit\\:\\:\\$ipList type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/NetworkLimit.php
+
+		-
+			message: "#^Cannot access offset 'proxy' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/ProxyBot.php
+
+		-
+			message: "#^Cannot access offset 'status' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/ProxyBot.php
+
+		-
+			message: "#^Cannot access offset string on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/ProxyBot.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/ProxyBot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\ProxyBot\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/ProxyBot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\ProxyBot\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/ProxyBot.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/network/antibot/AntiBotA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\antibot\\\\AntiBotA\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/antibot/AntiBotA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\antibot\\\\AntiBotA\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/antibot/AntiBotA.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/network/antibot/AntiBotB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\antibot\\\\AntiBotB\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/antibot/AntiBotB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\antibot\\\\AntiBotB\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/antibot/AntiBotB.php
+
+		-
+			message: "#^Offset 'DeviceOS' on array\\<string, mixed\\> on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/modules/network/antibot/AntiBotB.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 3
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/DeviceSpoofID.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/DeviceSpoofID.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\editionfaker\\\\DeviceSpoofID\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/DeviceSpoofID.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\editionfaker\\\\DeviceSpoofID\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/DeviceSpoofID.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function strlen expects string, array\\<int, int\\>\\|string given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/DeviceSpoofID.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between lowercase\\-string&non\\-falsy\\-string and '' will always evaluate to false\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/DeviceSpoofID.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 3
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/EditionFakerA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\editionfaker\\\\EditionFakerA\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/EditionFakerA.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\editionfaker\\\\EditionFakerA\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/EditionFakerA.php
+
+		-
+			message: "#^Access to an undefined property pocketmine\\\\network\\\\mcpe\\\\protocol\\\\LoginPacket\\:\\:\\$chainDataJwt\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/EditionFakerB.php
+
+		-
+			message: "#^Access to property \\$titleId on an unknown class pocketmine\\\\network\\\\mcpe\\\\protocol\\\\types\\\\login\\\\AuthenticationData\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/EditionFakerB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\editionfaker\\\\EditionFakerB\\:\\:evaluateAsync\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/EditionFakerB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\modules\\\\network\\\\editionfaker\\\\EditionFakerB\\:\\:evaluateAsync\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/modules/network/editionfaker/EditionFakerB.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\AsyncSnapshot\\:\\:assertPayload\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/AsyncSnapshot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\AsyncSnapshot\\:\\:assertRequiredFields\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/AsyncSnapshot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\AsyncSnapshot\\:\\:assertSchemaVersion\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/AsyncSnapshot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\AsyncSnapshot\\:\\:build\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/AsyncSnapshot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\AsyncSnapshot\\:\\:validatePayload\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/AsyncSnapshot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\AsyncSnapshot\\:\\:validateSchemaVersion\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/AsyncSnapshot.php
+
+		-
+			message: "#^Cannot access offset string on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/BlockSnapshot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\BlockSnapshot\\:\\:build\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/BlockSnapshot.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\BlockSnapshot\\:\\:\\$ping \\(int\\) does not accept int\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/BlockSnapshot.php
+
+		-
+			message: "#^Result of \\|\\| is always false\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/BlockSnapshot.php
+
+		-
+			message: "#^Cannot access offset string on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/ChatSnapshot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\ChatSnapshot\\:\\:build\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/ChatSnapshot.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\ChatSnapshot\\:\\:\\$ping \\(int\\) does not accept int\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/ChatSnapshot.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\ChatSnapshot\\:\\:\\$recentMessages type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/ChatSnapshot.php
+
+		-
+			message: "#^Cannot access offset string on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/CombatSnapshot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\CombatSnapshot\\:\\:build\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/CombatSnapshot.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\CombatSnapshot\\:\\:\\$damagerPing \\(int\\) does not accept int\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/CombatSnapshot.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\CombatSnapshot\\:\\:\\$victimPing \\(int\\) does not accept int\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/CombatSnapshot.php
+
+		-
+			message: "#^Result of \\|\\| is always false\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/snapshots/CombatSnapshot.php
+
+		-
+			message: "#^Call to an undefined method pocketmine\\\\inventory\\\\PlayerInventory\\:\\:getCursorItem\\(\\)\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/InventorySnapshot.php
+
+		-
+			message: "#^Call to an undefined method pocketmine\\\\item\\\\Item\\:\\:getId\\(\\)\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/snapshots/InventorySnapshot.php
+
+		-
+			message: "#^Call to an undefined method pocketmine\\\\item\\\\Item\\:\\:getMeta\\(\\)\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/snapshots/InventorySnapshot.php
+
+		-
+			message: "#^Cannot access offset string on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/InventorySnapshot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\InventorySnapshot\\:\\:build\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/InventorySnapshot.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\InventorySnapshot\\:\\:\\$armorContents type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/InventorySnapshot.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\InventorySnapshot\\:\\:\\$inventoryContents type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/InventorySnapshot.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\InventorySnapshot\\:\\:\\$ping \\(int\\) does not accept int\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/InventorySnapshot.php
+
+		-
+			message: "#^Result of \\|\\| is always false\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/InventorySnapshot.php
+
+		-
+			message: "#^Cannot access offset string on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/MovementSnapshot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\MovementSnapshot\\:\\:build\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/MovementSnapshot.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\MovementSnapshot\\:\\:\\$ping \\(int\\) does not accept int\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/MovementSnapshot.php
+
+		-
+			message: "#^Result of \\|\\| is always false\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/checks/snapshots/MovementSnapshot.php
+
+		-
+			message: "#^Cannot access offset string on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/NetworkSnapshot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\NetworkSnapshot\\:\\:build\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/NetworkSnapshot.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\NetworkSnapshot\\:\\:\\$packetData type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/NetworkSnapshot.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\checks\\\\snapshots\\\\NetworkSnapshot\\:\\:\\$ping \\(int\\) does not accept int\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/checks/snapshots/NetworkSnapshot.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\command\\\\ZuriCommand\\:\\:onRun\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/ZuriCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$plugin of class ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\AboutSubCommand constructor expects pocketmine\\\\plugin\\\\PluginBase, pocketmine\\\\plugin\\\\Plugin given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/ZuriCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$plugin of class ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\AsyncStatusSubCommand constructor expects pocketmine\\\\plugin\\\\PluginBase, pocketmine\\\\plugin\\\\Plugin given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/ZuriCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$plugin of class ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\BanModeSubCommand constructor expects pocketmine\\\\plugin\\\\PluginBase, pocketmine\\\\plugin\\\\Plugin given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/ZuriCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$plugin of class ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\BypassSubCommand constructor expects pocketmine\\\\plugin\\\\PluginBase, pocketmine\\\\plugin\\\\Plugin given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/ZuriCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$plugin of class ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\CaptchaSubCommand constructor expects pocketmine\\\\plugin\\\\PluginBase, pocketmine\\\\plugin\\\\Plugin given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/ZuriCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$plugin of class ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\DebugSubCommand constructor expects pocketmine\\\\plugin\\\\PluginBase, pocketmine\\\\plugin\\\\Plugin given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/ZuriCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$plugin of class ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\HelpSubCommand constructor expects pocketmine\\\\plugin\\\\PluginBase, pocketmine\\\\plugin\\\\Plugin given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/ZuriCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$plugin of class ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\LanguageSubCommand constructor expects pocketmine\\\\plugin\\\\PluginBase, pocketmine\\\\plugin\\\\Plugin given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/ZuriCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$plugin of class ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\ListSubCommand constructor expects pocketmine\\\\plugin\\\\PluginBase, pocketmine\\\\plugin\\\\Plugin given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/ZuriCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$plugin of class ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\NotifySubCommand constructor expects pocketmine\\\\plugin\\\\PluginBase, pocketmine\\\\plugin\\\\Plugin given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/ZuriCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$plugin of class ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\UiSubCommand constructor expects pocketmine\\\\plugin\\\\PluginBase, pocketmine\\\\plugin\\\\Plugin given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/ZuriCommand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\AboutSubCommand\\:\\:onRun\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/subcommand/AboutSubCommand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\AsyncStatusSubCommand\\:\\:onRun\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/subcommand/AsyncStatusSubCommand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\BanModeSubCommand\\:\\:onRun\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/subcommand/BanModeSubCommand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\BypassSubCommand\\:\\:onRun\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/subcommand/BypassSubCommand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\CaptchaSubCommand\\:\\:onRun\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/subcommand/CaptchaSubCommand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\DebugSubCommand\\:\\:onRun\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/subcommand/DebugSubCommand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\HelpSubCommand\\:\\:onRun\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/subcommand/HelpSubCommand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\LanguageSubCommand\\:\\:onRun\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/subcommand/LanguageSubCommand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\ListSubCommand\\:\\:onRun\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/subcommand/ListSubCommand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\NotifySubCommand\\:\\:onRun\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/subcommand/NotifySubCommand.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\command\\\\subcommand\\\\UiSubCommand\\:\\:onRun\\(\\) has parameter \\$args with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/command/subcommand/UiSubCommand.php
+
+		-
+			message: "#^Cannot access offset 'version' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/config/ConfigManager.php
+
+		-
+			message: "#^Cannot access offset 'zuri' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/config/ConfigManager.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\config\\\\ConfigManager\\:\\:getData\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/config/ConfigManager.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\config\\\\ConfigManager\\:\\:setData\\(\\) has parameter \\$data with no type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/config/ConfigManager.php
+
+		-
+			message: "#^Parameter \\#1 \\$input of function yaml_parse expects string, string\\|false given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/config/ConfigManager.php
+
+		-
+			message: "#^Parameter \\#1 \\$stream of function fclose expects resource, resource\\|null given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/config/ConfigManager.php
+
+		-
+			message: "#^Parameter \\#1 \\$stream of function stream_get_contents expects resource, resource\\|null given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/config/ConfigManager.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\events\\\\ServerLagEvent\\:\\:\\$moduleName is unused\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/events/ServerLagEvent.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\events\\\\ServerLagEvent\\:\\:\\$subType is unused\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/events/ServerLagEvent.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/lang/Lang.php
+
+		-
+			message: "#^Else branch is unreachable because ternary operator condition is always true\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/lang/Lang.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\lang\\\\Lang\\:\\:flattenKeys\\(\\) has parameter \\$source with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/lang/Lang.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\lang\\\\Lang\\:\\:mergeMissingWithFallback\\(\\) has parameter \\$fallback with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/lang/Lang.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\lang\\\\Lang\\:\\:mergeMissingWithFallback\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/lang/Lang.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\lang\\\\Lang\\:\\:resolve\\(\\) has parameter \\$source with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/lang/Lang.php
+
+		-
+			message: "#^Static property ReinfyTeam\\\\Zuri\\\\lang\\\\Lang\\:\\:\\$fallbackLocale is never read, only written\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/lang/Lang.php
+
+		-
+			message: "#^Call to an undefined method pocketmine\\\\event\\\\Event\\:\\:isCancelled\\(\\)\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/listener/PlayerListener.php
+
+		-
+			message: "#^Call to an undefined method pocketmine\\\\event\\\\entity\\\\ProjectileHitEvent\\:\\:isCancelled\\(\\)\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/listener/PlayerListener.php
+
+		-
+			message: "#^Call to an undefined method pocketmine\\\\event\\\\inventory\\\\InventoryCloseEvent\\:\\:isCancelled\\(\\)\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/listener/PlayerListener.php
+
+		-
+			message: "#^Call to an undefined method pocketmine\\\\event\\\\player\\\\PlayerDeathEvent\\:\\:isCancelled\\(\\)\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/listener/PlayerListener.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\listener\\\\PlayerListener\\:\\:onProjectileHit\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/listener/PlayerListener.php
+
+		-
+			message: "#^Parameter \\#1 \\$packet of method ReinfyTeam\\\\Zuri\\\\listener\\\\PlayerListener\\:\\:check\\(\\) expects pocketmine\\\\network\\\\mcpe\\\\protocol\\\\DataPacket, pocketmine\\\\network\\\\mcpe\\\\protocol\\\\ServerboundPacket given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/listener/PlayerListener.php
+
+		-
+			message: "#^Parameter \\#1 \\$player of static method ReinfyTeam\\\\Zuri\\\\player\\\\PlayerAPI\\:\\:getAPIPlayer\\(\\) expects pocketmine\\\\player\\\\Player, pocketmine\\\\entity\\\\Entity given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/listener/PlayerListener.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\listener\\\\PlayerListener\\:\\:\\$blockInteracted type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/listener/PlayerListener.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\listener\\\\PlayerListener\\:\\:\\$clicksData type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/listener/PlayerListener.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between pocketmine\\\\entity\\\\Entity and null will always evaluate to false\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/listener/PlayerListener.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between pocketmine\\\\player\\\\Player and null will always evaluate to false\\.$#"
+			count: 24
+			path: src/ReinfyTeam/Zuri/listener/PlayerListener.php
+
+		-
+			message: "#^Variable \\$blockInteracted might not be defined\\.$#"
+			count: 4
+			path: src/ReinfyTeam/Zuri/listener/PlayerListener.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\listener\\\\ServerListener\\:\\:\\$ip type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/listener/ServerListener.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\network\\\\ProxyUDPSocket\\:\\:\\$socket has no type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/network/ProxyUDPSocket.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\player\\\\IPlayerAPI\\:\\:getExternalData\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/IPlayerAPI.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\player\\\\IPlayerAPI\\:\\:getNLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/IPlayerAPI.php
+
+		-
+			message: "#^Argument of an invalid type float supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/PlayerAPI.php
+
+		-
+			message: "#^Argument of an invalid type int supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/PlayerAPI.php
+
+		-
+			message: "#^Call to an undefined method ReinfyTeam\\\\Zuri\\\\player\\\\PlayerAPI\\:\\:getTicksSinceTeleport\\(\\)\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/PlayerAPI.php
+
+		-
+			message: "#^Cannot access an offset on float\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/PlayerAPI.php
+
+		-
+			message: "#^Cannot access an offset on int\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/PlayerAPI.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\player\\\\PlayerAPI\\:\\:getDeviceOS\\(\\) should return int but returns mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/PlayerAPI.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\player\\\\PlayerAPI\\:\\:getExternalData\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/PlayerAPI.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\player\\\\PlayerAPI\\:\\:getNLocation\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/PlayerAPI.php
+
+		-
+			message: "#^Parameter \\#1 \\$value of function count expects array\\|Countable, float given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/PlayerAPI.php
+
+		-
+			message: "#^Parameter \\#1 \\$value of function count expects array\\|Countable, int given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/PlayerAPI.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between float and 0 will always evaluate to false\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/player/PlayerAPI.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between pocketmine\\\\player\\\\Player and null will always evaluate to false\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/player/PlayerAPI.php
+
+		-
+			message: "#^Instanceof between pocketmine\\\\player\\\\Player and ReinfyTeam\\\\Zuri\\\\player\\\\PlayerAPI will always evaluate to false\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/CaptchaTask.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\task\\\\CaptchaTask\\:\\:getInstance\\(\\) should return ReinfyTeam\\\\Zuri\\\\task\\\\CaptchaTask but returns ReinfyTeam\\\\Zuri\\\\task\\\\CaptchaTask\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/CaptchaTask.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\task\\\\CheckAsyncTask\\:\\:applyResult\\(\\) has parameter \\$result with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/CheckAsyncTask.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\task\\\\CheckAsyncTask\\:\\:dispatch\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/CheckAsyncTask.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\task\\\\CheckAsyncTask\\:\\:executeSyncFallback\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/CheckAsyncTask.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\task\\\\CheckAsyncTask\\:\\:getMetrics\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/CheckAsyncTask.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\task\\\\CheckAsyncTask\\:\\:startTask\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/CheckAsyncTask.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\task\\\\CheckAsyncTask\\:\\:\\$activeTasks type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/CheckAsyncTask.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\task\\\\CheckAsyncTask\\:\\:\\$queue type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/CheckAsyncTask.php
+
+		-
+			message: "#^Cannot access offset 'assets' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Cannot access offset 'browser_download_url' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Cannot access offset 'download_count' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Cannot access offset 'prerelease' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Cannot access offset 'published_at' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Cannot access offset 'size' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Cannot access offset 'tag_name' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Cannot access offset 'target_commitish' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Cannot access offset 0 on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Cannot call method getBody\\(\\) on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Cannot use array destructuring on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Parameter \\#1 \\$datetime of function strtotime expects string, mixed given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Parameter \\#2 \\$replacements of static method ReinfyTeam\\\\Zuri\\\\lang\\\\Lang\\:\\:get\\(\\) expects array\\<string, float\\|int\\|string\\>, array\\<string, mixed\\> given\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/task/UpdateCheckerAsyncTask.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\BlockUtil\\:\\:distance\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/BlockUtil.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\BlockUtil\\:\\:getSurroundingBlocks\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/BlockUtil.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\BlockUtil\\:\\:getUnderBlock\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/BlockUtil.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\BlockUtil\\:\\:isUnderBlock\\(\\) has parameter \\$id with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/BlockUtil.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\utils\\\\BlockUtil\\:\\:\\$idLookupCache type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/BlockUtil.php
+
+		-
+			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/MathUtil.php
+
+		-
+			message: "#^Access to an undefined property ReinfyTeam\\\\Zuri\\\\utils\\\\PermissionManager\\:\\:\\$attachment\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/utils/PermissionManager.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\PermissionManager\\:\\:addPlayerPermissions\\(\\) has parameter \\$permissions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/PermissionManager.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\PermissionManager\\:\\:getAllPermissions\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/PermissionManager.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\PermissionManager\\:\\:register\\(\\) has parameter \\$childPermission with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/PermissionManager.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\player\\\\PlayerAPI\\:\\:getViolation\\(\\) invoked with 0 parameters, 1 required\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/utils/ReplaceText.php
+
+		-
+			message: "#^Parameter \\#1 \\$player of static method ReinfyTeam\\\\Zuri\\\\player\\\\PlayerAPI\\:\\:getAPIPlayer\\(\\) expects pocketmine\\\\player\\\\Player, string given\\.$#"
+			count: 3
+			path: src/ReinfyTeam/Zuri/utils/ReplaceText.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function base64_encode expects string, string\\|false given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/ReplaceText.php
+
+		-
+			message: "#^Access to property \\$chain on an unknown class pocketmine\\\\network\\\\mcpe\\\\protocol\\\\types\\\\login\\\\JwtChain\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/Utils.php
+
+		-
+			message: "#^Cannot call method getValue\\(\\) on pocketmine\\\\entity\\\\Attribute\\|null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/Utils.php
+
+		-
+			message: "#^Instantiated class pocketmine\\\\network\\\\mcpe\\\\protocol\\\\types\\\\login\\\\AuthenticationData not found\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/Utils.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\Utils\\:\\:ParseColors\\(\\) has parameter \\$text with no type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/Utils.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\Utils\\:\\:fetchAuthData\\(\\) has invalid return type pocketmine\\\\network\\\\mcpe\\\\protocol\\\\types\\\\login\\\\AuthenticationData\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/Utils.php
+
+		-
+			message: "#^PHPDoc tag @var for variable \\$extraData contains unknown class pocketmine\\\\network\\\\mcpe\\\\protocol\\\\types\\\\login\\\\AuthenticationData\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/utils/Utils.php
+
+		-
+			message: "#^Parameter \\$chain of method ReinfyTeam\\\\Zuri\\\\utils\\\\Utils\\:\\:fetchAuthData\\(\\) has invalid type pocketmine\\\\network\\\\mcpe\\\\protocol\\\\types\\\\login\\\\JwtChain\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/Utils.php
+
+		-
+			message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Cannot access offset 'inline' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Cannot access offset 'title' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Cannot access offset 'value' on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Discord\\:\\:Send\\(\\) has parameter \\$moduleInfo with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#1 \\$avatarURL of method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Message\\:\\:setAvatarURL\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#1 \\$color of method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Embed\\:\\:setColor\\(\\) expects int, float\\|int given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#1 \\$content of method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Message\\:\\:setContent\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#1 \\$hex of static method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Discord\\:\\:textToHex\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#1 \\$url of class ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Webhook constructor expects string, mixed given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#1 \\$url of method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Embed\\:\\:setImage\\(\\) expects string, mixed given\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#1 \\$url of method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Embed\\:\\:setThumbnail\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#1 \\$username of method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Message\\:\\:setUsername\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#2 \\$iconURL of method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Embed\\:\\:setFooter\\(\\) expects string\\|null, mixed given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#2 \\$text of static method ReinfyTeam\\\\Zuri\\\\utils\\\\ReplaceText\\:\\:replace\\(\\) expects string, mixed given\\.$#"
+			count: 6
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#2 \\$url of method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Embed\\:\\:setAuthor\\(\\) expects string\\|null, mixed given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#3 \\$iconURL of method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Embed\\:\\:setAuthor\\(\\) expects string\\|null, mixed given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Parameter \\#3 \\$inline of method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Embed\\:\\:addField\\(\\) expects bool, mixed given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Part \\$field_name \\(mixed\\) of encapsed string cannot be cast to string\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Discord.php
+
+		-
+			message: "#^Deprecated in PHP 8\\.4\\: Parameter \\#2 \\$iconURL \\(string\\) is implicitly nullable via default value null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Embed.php
+
+		-
+			message: "#^Deprecated in PHP 8\\.4\\: Parameter \\#2 \\$url \\(string\\) is implicitly nullable via default value null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Embed.php
+
+		-
+			message: "#^Deprecated in PHP 8\\.4\\: Parameter \\#3 \\$iconURL \\(string\\) is implicitly nullable via default value null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Embed.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Embed\\:\\:asArray\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Embed.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Embed\\:\\:\\$data type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Embed.php
+
+		-
+			message: "#^Deprecated in PHP 8\\.4\\: Parameter \\#1 \\$embeds \\(array\\) is implicitly nullable via default value null\\.$#"
+			count: 2
+			path: src/ReinfyTeam/Zuri/utils/discord/Message.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Message\\:\\:__construct\\(\\) has parameter \\$embeds with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Message.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Message\\:\\:create\\(\\) has parameter \\$embeds with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Message.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Message\\:\\:jsonSerialize\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Message.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\Message\\:\\:\\$data type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/Message.php
+
+		-
+			message: "#^Cannot call method getURL\\(\\) on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/WebhookSendTask.php
+
+		-
+			message: "#^Cannot use array destructuring on mixed\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/WebhookSendTask.php
+
+		-
+			message: "#^Part \\$responseBody \\(mixed\\) of encapsed string cannot be cast to string\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/WebhookSendTask.php
+
+		-
+			message: "#^Part \\$responseCode \\(mixed\\) of encapsed string cannot be cast to string\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/WebhookSendTask.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\WebhookSendTask\\:\\:\\$message with generic class pocketmine\\\\thread\\\\NonThreadSafeValue does not specify its types\\: TValue$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/WebhookSendTask.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\utils\\\\discord\\\\WebhookSendTask\\:\\:\\$webhook with generic class pocketmine\\\\thread\\\\NonThreadSafeValue does not specify its types\\: TValue$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/discord/WebhookSendTask.php
+
+		-
+			message: "#^Deprecated in PHP 8\\.4\\: Parameter \\#2 \\$default \\(bool\\) is implicitly nullable via default value null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/CustomForm.php
+
+		-
+			message: "#^Deprecated in PHP 8\\.4\\: Parameter \\#3 \\$default \\(int\\) is implicitly nullable via default value null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/CustomForm.php
+
+		-
+			message: "#^Deprecated in PHP 8\\.4\\: Parameter \\#3 \\$default \\(string\\) is implicitly nullable via default value null\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/CustomForm.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\CustomForm\\:\\:addContent\\(\\) has parameter \\$content with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/CustomForm.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\CustomForm\\:\\:addDropdown\\(\\) has parameter \\$options with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/CustomForm.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\CustomForm\\:\\:addStepSlider\\(\\) has parameter \\$steps with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/CustomForm.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\CustomForm\\:\\:processData\\(\\) has parameter \\$data with no type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/CustomForm.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\CustomForm\\:\\:\\$labelMap type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/CustomForm.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\CustomForm\\:\\:\\$validationMethods type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/CustomForm.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\Form\\:\\:jsonSerialize\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/Form.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\Form\\:\\:processData\\(\\) has parameter \\$data with no type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/Form.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\Form\\:\\:setCallable\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/Form.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\Form\\:\\:\\$data type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/Form.php
+
+		-
+			message: "#^Parameter \\#3 \\$default of method ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\CustomForm\\:\\:addDropdown\\(\\) expects int\\|null, int\\|string given\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/FormSender.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\ModalForm\\:\\:processData\\(\\) has parameter \\$data with no type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/ModalForm.php
+
+		-
+			message: "#^Method ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\SimpleForm\\:\\:processData\\(\\) has parameter \\$data with no type specified\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/SimpleForm.php
+
+		-
+			message: "#^Property ReinfyTeam\\\\Zuri\\\\utils\\\\forms\\\\SimpleForm\\:\\:\\$labelMap type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: src/ReinfyTeam/Zuri/utils/forms/SimpleForm.php

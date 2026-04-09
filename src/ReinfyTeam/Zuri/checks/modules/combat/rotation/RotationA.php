@@ -42,6 +42,7 @@ use function abs;
 use function fmod;
 use function is_float;
 use function is_int;
+use function is_numeric;
 use function max;
 
 class RotationA extends Check {
@@ -69,7 +70,9 @@ class RotationA extends Check {
 		}
 
 		$player = $playerAPI->getPlayer();
-		if (!$player->isSurvival() || (int) $playerAPI->getPing() > (int) $this->getConstant(CheckConstants::ROTATIONA_MAX_PING)) {
+		$maxPingRaw = $this->getConstant(CheckConstants::ROTATIONA_MAX_PING);
+		$maxPing = is_numeric($maxPingRaw) ? (int) $maxPingRaw : 0;
+		if (!$player->isSurvival() || (int) $playerAPI->getPing() > $maxPing) {
 			$this->setBuffer($playerAPI, 0);
 			$this->storeAngles($playerAPI, $packet->getYaw(), $packet->getPitch(), 0.0, 0.0);
 			return;
@@ -86,17 +89,36 @@ class RotationA extends Check {
 		$pitch = $packet->getPitch();
 		$deltaYaw = $this->angleDelta((float) $lastYaw, $yaw);
 		$deltaPitch = abs($pitch - (float) $lastPitch);
-		$lastDeltaYaw = (float) $playerAPI->getExternalData(self::LAST_DELTA_YAW, $deltaYaw);
-		$lastDeltaPitch = (float) $playerAPI->getExternalData(self::LAST_DELTA_PITCH, $deltaPitch);
+		$lastDeltaYawRaw = $playerAPI->getExternalData(self::LAST_DELTA_YAW, $deltaYaw);
+		$lastDeltaPitchRaw = $playerAPI->getExternalData(self::LAST_DELTA_PITCH, $deltaPitch);
+		$combatWindowTicksRaw = $this->getConstant(CheckConstants::ROTATIONA_COMBAT_WINDOW_TICKS);
+		$minDeltaYawRaw = $this->getConstant(CheckConstants::ROTATIONA_MIN_DELTA_YAW);
+		$maxDeltaYawRaw = $this->getConstant(CheckConstants::ROTATIONA_MAX_DELTA_YAW);
+		$minDeltaPitchRaw = $this->getConstant(CheckConstants::ROTATIONA_MIN_DELTA_PITCH);
+		$maxDeltaPitchRaw = $this->getConstant(CheckConstants::ROTATIONA_MAX_DELTA_PITCH);
+		$yawStepEpsilonRaw = $this->getConstant(CheckConstants::ROTATIONA_YAW_STEP_EPSILON);
+		$pitchStepEpsilonRaw = $this->getConstant(CheckConstants::ROTATIONA_PITCH_STEP_EPSILON);
+		$bufferLimitRaw = $this->getConstant(CheckConstants::ROTATIONA_BUFFER_LIMIT);
 
-		$inCombatWindow = $playerAPI->getAttackTicks() < (float) $this->getConstant(CheckConstants::ROTATIONA_COMBAT_WINDOW_TICKS);
+		$lastDeltaYaw = is_numeric($lastDeltaYawRaw) ? (float) $lastDeltaYawRaw : $deltaYaw;
+		$lastDeltaPitch = is_numeric($lastDeltaPitchRaw) ? (float) $lastDeltaPitchRaw : $deltaPitch;
+		$combatWindowTicks = is_numeric($combatWindowTicksRaw) ? (float) $combatWindowTicksRaw : 0.0;
+		$minDeltaYaw = is_numeric($minDeltaYawRaw) ? (float) $minDeltaYawRaw : 0.0;
+		$maxDeltaYaw = is_numeric($maxDeltaYawRaw) ? (float) $maxDeltaYawRaw : 0.0;
+		$minDeltaPitch = is_numeric($minDeltaPitchRaw) ? (float) $minDeltaPitchRaw : 0.0;
+		$maxDeltaPitch = is_numeric($maxDeltaPitchRaw) ? (float) $maxDeltaPitchRaw : 0.0;
+		$yawStepEpsilon = is_numeric($yawStepEpsilonRaw) ? (float) $yawStepEpsilonRaw : 0.0;
+		$pitchStepEpsilon = is_numeric($pitchStepEpsilonRaw) ? (float) $pitchStepEpsilonRaw : 0.0;
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 0;
+
+		$inCombatWindow = $playerAPI->getAttackTicks() < $combatWindowTicks;
 		$isPatternStable =
-			$deltaYaw >= (float) $this->getConstant(CheckConstants::ROTATIONA_MIN_DELTA_YAW) &&
-			$deltaYaw <= (float) $this->getConstant(CheckConstants::ROTATIONA_MAX_DELTA_YAW) &&
-			$deltaPitch >= (float) $this->getConstant(CheckConstants::ROTATIONA_MIN_DELTA_PITCH) &&
-			$deltaPitch <= (float) $this->getConstant(CheckConstants::ROTATIONA_MAX_DELTA_PITCH) &&
-			abs($deltaYaw - $lastDeltaYaw) <= (float) $this->getConstant(CheckConstants::ROTATIONA_YAW_STEP_EPSILON) &&
-			abs($deltaPitch - $lastDeltaPitch) <= (float) $this->getConstant(CheckConstants::ROTATIONA_PITCH_STEP_EPSILON);
+			$deltaYaw >= $minDeltaYaw &&
+			$deltaYaw <= $maxDeltaYaw &&
+			$deltaPitch >= $minDeltaPitch &&
+			$deltaPitch <= $maxDeltaPitch &&
+			abs($deltaYaw - $lastDeltaYaw) <= $yawStepEpsilon &&
+			abs($deltaPitch - $lastDeltaPitch) <= $pitchStepEpsilon;
 
 		$buffer = $this->getBuffer($playerAPI);
 		$this->storeAngles($playerAPI, $yaw, $pitch, $deltaYaw, $deltaPitch);
@@ -109,7 +131,7 @@ class RotationA extends Check {
 			"deltaPitch" => $deltaPitch,
 			"lastDeltaYaw" => $lastDeltaYaw,
 			"lastDeltaPitch" => $lastDeltaPitch,
-			"bufferLimit" => (int) $this->getConstant(CheckConstants::ROTATIONA_BUFFER_LIMIT),
+			"bufferLimit" => $bufferLimit,
 		]);
 	}
 
@@ -118,19 +140,31 @@ class RotationA extends Check {
 			return [];
 		}
 
-		$buffer = (int) ($payload["buffer"] ?? 0);
+		$bufferRaw = $payload["buffer"] ?? 0;
+		$buffer = is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 		if ((bool) ($payload["inCombatWindow"] ?? false) && (bool) ($payload["isPatternStable"] ?? false)) {
 			$buffer++;
 		} else {
 			$buffer = max(0, $buffer - 1);
 		}
 
+		$deltaYawRaw = $payload["deltaYaw"] ?? 0.0;
+		$deltaPitchRaw = $payload["deltaPitch"] ?? 0.0;
+		$lastDeltaYawRaw = $payload["lastDeltaYaw"] ?? 0.0;
+		$lastDeltaPitchRaw = $payload["lastDeltaPitch"] ?? 0.0;
+		$bufferLimitRaw = $payload["bufferLimit"] ?? 0;
+		$deltaYaw = is_numeric($deltaYawRaw) ? (float) $deltaYawRaw : 0.0;
+		$deltaPitch = is_numeric($deltaPitchRaw) ? (float) $deltaPitchRaw : 0.0;
+		$lastDeltaYaw = is_numeric($lastDeltaYawRaw) ? (float) $lastDeltaYawRaw : 0.0;
+		$lastDeltaPitch = is_numeric($lastDeltaPitchRaw) ? (float) $lastDeltaPitchRaw : 0.0;
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 0;
+
 		$result = [
 			"set" => [self::BUFFER => $buffer],
-			"debug" => "deltaYaw=" . (float) ($payload["deltaYaw"] ?? 0.0) . ", deltaPitch=" . (float) ($payload["deltaPitch"] ?? 0.0) . ", lastDeltaYaw=" . (float) ($payload["lastDeltaYaw"] ?? 0.0) . ", lastDeltaPitch=" . (float) ($payload["lastDeltaPitch"] ?? 0.0) . ", buffer={$buffer}",
+			"debug" => "deltaYaw={$deltaYaw}, deltaPitch={$deltaPitch}, lastDeltaYaw={$lastDeltaYaw}, lastDeltaPitch={$lastDeltaPitch}, buffer={$buffer}",
 		];
 
-		if ($buffer >= (int) ($payload["bufferLimit"] ?? 0)) {
+		if ($buffer >= $bufferLimit) {
 			$result["set"][self::BUFFER] = 0;
 			$result["failed"] = true;
 		}
@@ -143,7 +177,8 @@ class RotationA extends Check {
 	}
 
 	private function getBuffer(PlayerAPI $playerAPI) : int {
-		return (int) $playerAPI->getExternalData(self::BUFFER, 0);
+		$bufferRaw = $playerAPI->getExternalData(self::BUFFER, 0);
+		return is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 	}
 
 	private function setBuffer(PlayerAPI $playerAPI, int $value) : void {

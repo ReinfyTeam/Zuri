@@ -39,6 +39,8 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
+use function is_numeric;
+use function is_string;
 use function max;
 use function min;
 use function strtolower;
@@ -76,7 +78,7 @@ class Hitbox extends Check {
 		}
 
 		$attackTicks = $damagerAPI->getAttackTicks();
-		if ($attackTicks > (float) $this->profileConstant("combat-window-ticks")) {
+		if ($attackTicks > $this->profileFloatConstant("combat-window-ticks", 0.0)) {
 			$this->setBuffer($damagerAPI, max(0, $this->getBuffer($damagerAPI) - 1));
 			return;
 		}
@@ -84,7 +86,9 @@ class Hitbox extends Check {
 		$eye = $damager->getEyePos();
 		$box = $victim->getBoundingBox();
 		$distance = MathUtil::distanceFromComponents($eye->x, $eye->y, $eye->z, $victim->getEyePos()->x, $victim->getEyePos()->y, $victim->getEyePos()->z);
-		if ($distance < (float) $this->profileConstant("min-distance") || $distance > (float) $this->profileConstant("max-distance")) {
+		$minDistance = $this->profileFloatConstant("min-distance", 0.0);
+		$maxDistance = $this->profileFloatConstant("max-distance", 0.0);
+		if ($distance < $minDistance || $distance > $maxDistance) {
 			return;
 		}
 
@@ -108,8 +112,8 @@ class Hitbox extends Check {
 		$rayZ = $eye->z + ($dir->z * $projection);
 		$missDistance = MathUtil::distanceFromComponents($rayX, $rayY, $rayZ, $closestX, $closestY, $closestZ);
 		$ping = (int) $damagerAPI->getPing();
-		$minDot = (float) $this->profileConstant("min-dot") - min(0.18, $ping * (float) $this->profileConstant("dot-ping-compensation"));
-		$missLimit = (float) $this->profileConstant("max-miss-distance") + min(0.45, $ping * (float) $this->profileConstant("miss-ping-compensation"));
+		$minDot = $this->profileFloatConstant("min-dot", 0.0) - min(0.18, $ping * $this->profileFloatConstant("dot-ping-compensation", 0.0));
+		$missLimit = $this->profileFloatConstant("max-miss-distance", 0.0) + min(0.45, $ping * $this->profileFloatConstant("miss-ping-compensation", 0.0));
 
 		$suspicious = $alignment < $minDot || $missDistance > $missLimit;
 		$this->dispatchAsyncCheck($damager->getName(), [
@@ -122,7 +126,7 @@ class Hitbox extends Check {
 			"missLimit" => $missLimit,
 			"attackTicks" => $attackTicks,
 			"ping" => $ping,
-			"bufferLimit" => (int) $this->profileConstant("buffer-limit"),
+			"bufferLimit" => $this->profileIntConstant("buffer-limit", 3),
 		]);
 	}
 
@@ -131,19 +135,35 @@ class Hitbox extends Check {
 			return [];
 		}
 
-		$buffer = (int) ($payload["buffer"] ?? 0);
+		$bufferRaw = $payload["buffer"] ?? 0;
+		$buffer = is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 		if ((bool) ($payload["suspicious"] ?? false)) {
 			$buffer++;
 		} else {
 			$buffer = max(0, $buffer - 1);
 		}
 
+		$alignmentRaw = $payload["alignment"] ?? 0.0;
+		$missDistanceRaw = $payload["missDistance"] ?? 0.0;
+		$minDotRaw = $payload["minDot"] ?? 0.0;
+		$missLimitRaw = $payload["missLimit"] ?? 0.0;
+		$attackTicksRaw = $payload["attackTicks"] ?? 0.0;
+		$pingRaw = $payload["ping"] ?? 0;
+		$alignment = is_numeric($alignmentRaw) ? (float) $alignmentRaw : 0.0;
+		$missDistance = is_numeric($missDistanceRaw) ? (float) $missDistanceRaw : 0.0;
+		$minDot = is_numeric($minDotRaw) ? (float) $minDotRaw : 0.0;
+		$missLimit = is_numeric($missLimitRaw) ? (float) $missLimitRaw : 0.0;
+		$attackTicks = is_numeric($attackTicksRaw) ? (float) $attackTicksRaw : 0.0;
+		$ping = is_numeric($pingRaw) ? (int) $pingRaw : 0;
+
 		$result = [
 			"set" => [self::BUFFER_KEY => $buffer],
-			"debug" => "alignment=" . (float) ($payload["alignment"] ?? 0.0) . ", missDistance=" . (float) ($payload["missDistance"] ?? 0.0) . ", minDot=" . (float) ($payload["minDot"] ?? 0.0) . ", missLimit=" . (float) ($payload["missLimit"] ?? 0.0) . ", attackTicks=" . (float) ($payload["attackTicks"] ?? 0.0) . ", ping=" . (int) ($payload["ping"] ?? 0) . ", buffer={$buffer}",
+			"debug" => "alignment={$alignment}, missDistance={$missDistance}, minDot={$minDot}, missLimit={$missLimit}, attackTicks={$attackTicks}, ping={$ping}, buffer={$buffer}",
 		];
 
-		if ($buffer >= (int) ($payload["bufferLimit"] ?? 0)) {
+		$bufferLimitRaw = $payload["bufferLimit"] ?? 0;
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 0;
+		if ($buffer >= $bufferLimit) {
 			$result["set"][self::BUFFER_KEY] = 0;
 			$result["failed"] = true;
 		}
@@ -156,12 +176,13 @@ class Hitbox extends Check {
 			!$damager->isSurvival() ||
 			!$victim->isSurvival() ||
 			$damagerAPI->isRecentlyCancelledEvent() ||
-			$damagerAPI->getTeleportTicks() < (float) $this->profileConstant("min-teleport-ticks") ||
-			(int) $damagerAPI->getPing() > (int) $this->profileConstant("max-ping");
+			$damagerAPI->getTeleportTicks() < $this->profileFloatConstant("min-teleport-ticks", 0.0) ||
+			(int) $damagerAPI->getPing() > $this->profileIntConstant("max-ping", 0);
 	}
 
 	private function getBuffer(PlayerAPI $playerAPI) : int {
-		return (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$raw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		return is_numeric($raw) ? (int) $raw : 0;
 	}
 
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {
@@ -170,7 +191,8 @@ class Hitbox extends Check {
 
 	private function profileConstant(string $name) : mixed {
 		$default = $this->getConstant($name);
-		$profile = strtolower((string) self::getData("zuri.check.hitbox.tuning-presets.active", "default"));
+		$profileRaw = self::getData("zuri.check.hitbox.tuning-presets.active", "default");
+		$profile = strtolower(is_string($profileRaw) ? $profileRaw : "default");
 		if ($profile === "custom") {
 			$profile = "default";
 		}
@@ -179,5 +201,15 @@ class Hitbox extends Check {
 		}
 
 		return self::getData("zuri.check.hitbox.tuning-presets." . $profile . "." . $name, $default);
+	}
+
+	private function profileFloatConstant(string $name, float $default) : float {
+		$raw = $this->profileConstant($name);
+		return is_numeric($raw) ? (float) $raw : $default;
+	}
+
+	private function profileIntConstant(string $name, int $default) : int {
+		$raw = $this->profileConstant($name);
+		return is_numeric($raw) ? (int) $raw : $default;
 	}
 }

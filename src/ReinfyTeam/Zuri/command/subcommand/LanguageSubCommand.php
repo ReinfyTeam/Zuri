@@ -38,6 +38,7 @@ use pocketmine\plugin\PluginBase;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use function implode;
+use function is_string;
 use function strtolower;
 
 class LanguageSubCommand extends BaseSubCommand {
@@ -49,8 +50,10 @@ class LanguageSubCommand extends BaseSubCommand {
 		$this->registerArgument(0, new RawStringArgument("locale", true));
 	}
 
+	/** @param array<string,mixed> $args */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
-		$requested = (string) ($args["locale"] ?? "");
+		$requestedRaw = $args["locale"] ?? "";
+		$requested = is_string($requestedRaw) ? $requestedRaw : "";
 		$available = Lang::getAvailableLocales();
 
 		if ($requested === "" || strtolower($requested) === "list") {

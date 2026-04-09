@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\ZuriAC;
+use function is_scalar;
 use function strtolower;
 
 class ListSubCommand extends BaseSubCommand {
@@ -50,6 +51,7 @@ class ListSubCommand extends BaseSubCommand {
 	protected function prepare() : void {
 	}
 
+	/** @param array<string,mixed> $args */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$sender->sendMessage(Lang::get(LangKeys::CMD_LIST_HEADER));
 		$sender->sendMessage(Lang::get(LangKeys::CMD_LIST_TITLE));
@@ -63,7 +65,7 @@ class ListSubCommand extends BaseSubCommand {
 					"name" => $name,
 					"subtypes" => $check->getAllSubTypes(),
 					"status" => $status,
-					"maxvl" => (string) $maxVl,
+					"maxvl" => is_scalar($maxVl) ? (string) $maxVl : "0",
 				]));
 				$added[$name] = true;
 			}

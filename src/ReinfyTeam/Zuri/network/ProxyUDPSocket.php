@@ -36,6 +36,7 @@ use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\utils\InternetAddress;
 use ReinfyTeam\Zuri\ZuriAC;
+use Socket;
 use function socket_bind;
 use function socket_close;
 use function socket_create;
@@ -48,7 +49,7 @@ use function socket_strerror;
 use function strlen;
 
 class ProxyUDPSocket {
-	protected $socket = null;
+	protected ?Socket $socket = null;
 	protected ?InternetAddress $bindAddress = null;
 	private bool $ready = false;
 	private bool $closed = false;

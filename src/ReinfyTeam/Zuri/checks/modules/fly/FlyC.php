@@ -43,6 +43,7 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function array_intersect;
 use function count;
 use function is_array;
+use function is_numeric;
 
 class FlyC extends Check {
 	public function getName() : string {
@@ -78,7 +79,8 @@ class FlyC extends Check {
 			$snapshot->addCachedData("inAirTicks", $player->getInAirTicks());
 			$snapshot->addCachedData("oldY", $oldPos->getY());
 			$snapshot->addCachedData("newY", $newPos->getY());
-			$snapshot->addCachedData("maxAirTicks", (int) $this->getConstant(CheckConstants::FLYC_MAX_AIR_TICKS));
+			$maxAirTicksRaw = $this->getConstant(CheckConstants::FLYC_MAX_AIR_TICKS);
+			$snapshot->addCachedData("maxAirTicks", is_numeric($maxAirTicksRaw) ? (int) $maxAirTicksRaw : 0);
 			$snapshot->addCachedData("maxY", $player->getWorld()->getHighestBlockAt((int) $newPos->getX(), (int) $newPos->getZ()));
 			$snapshot->addCachedData("surroundingBlocks", BlockUtil::getSurroundingBlocks($player));
 
@@ -90,6 +92,9 @@ class FlyC extends Check {
 		}
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(
 			$payload,
@@ -101,10 +106,10 @@ class FlyC extends Check {
 		}
 
 		if (
-			(int) ($payload["attackTicks"] ?? 0) < 40 ||
-			(int) ($payload["teleportTicks"] ?? 0) < 60 ||
-			(int) ($payload["teleportCommandTicks"] ?? 0) < 60 ||
-			(int) ($payload["hurtTicks"] ?? 0) < 20 ||
+			(is_numeric($payload["attackTicks"] ?? 0) ? (int) ($payload["attackTicks"] ?? 0) : 0) < 40 ||
+			(is_numeric($payload["teleportTicks"] ?? 0) ? (int) ($payload["teleportTicks"] ?? 0) : 0) < 60 ||
+			(is_numeric($payload["teleportCommandTicks"] ?? 0) ? (int) ($payload["teleportCommandTicks"] ?? 0) : 0) < 60 ||
+			(is_numeric($payload["hurtTicks"] ?? 0) ? (int) ($payload["hurtTicks"] ?? 0) : 0) < 20 ||
 			(bool) ($payload["inWeb"] ?? false) ||
 			(bool) ($payload["onGround"] ?? false) ||
 			(bool) ($payload["onAdhesion"] ?? false) ||
@@ -126,11 +131,21 @@ class FlyC extends Check {
 		}
 
 		if (!(bool) ($cachedData["creative"] ?? false) && !(bool) ($cachedData["spectator"] ?? false) && !(bool) ($cachedData["allowFlight"] ?? false)) {
-			if ((float) ($cachedData["oldY"] ?? 0) <= (float) ($cachedData["newY"] ?? 0)) {
-				if ((int) ($cachedData["inAirTicks"] ?? 0) > (int) ($cachedData["maxAirTicks"] ?? 0)) {
+			$oldYRaw = $cachedData["oldY"] ?? 0;
+			$newYRaw = $cachedData["newY"] ?? 0;
+			$oldY = is_numeric($oldYRaw) ? (float) $oldYRaw : 0.0;
+			$newY = is_numeric($newYRaw) ? (float) $newYRaw : 0.0;
+			if ($oldY <= $newY) {
+				$inAirTicksRaw = $cachedData["inAirTicks"] ?? 0;
+				$inAirTicks = is_numeric($inAirTicksRaw) ? (int) $inAirTicksRaw : 0;
+				$maxAirTicksRaw = $cachedData["maxAirTicks"] ?? 0;
+				$maxAirTicks = is_numeric($maxAirTicksRaw) ? (int) $maxAirTicksRaw : 0;
+				if ($inAirTicks > $maxAirTicks) {
 					$surroundingBlocks = $cachedData["surroundingBlocks"] ?? [];
-					$maxY = (int) ($cachedData["maxY"] ?? 0);
-					$newY = (float) ($cachedData["newY"] ?? 0);
+					$maxYRaw = $cachedData["maxY"] ?? 0;
+					$maxY = is_numeric($maxYRaw) ? (int) $maxYRaw : 0;
+					$newYRaw = $cachedData["newY"] ?? 0;
+					$newY = is_numeric($newYRaw) ? (float) $newYRaw : 0.0;
 					if ($newY - 1 > $maxY) {
 						if (!is_array($surroundingBlocks) || count(array_intersect($surroundingBlocks, [
 							BlockTypeIds::OAK_FENCE,

@@ -41,6 +41,7 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
+use function is_numeric;
 use function max;
 use function min;
 
@@ -77,6 +78,13 @@ class ReachE extends Check {
 		}
 
 		$box = $victim->getBoundingBox();
+		$edgePingCompensationRaw = $this->getConstant(CheckConstants::REACHE_EDGE_PING_COMPENSATION);
+		$edgeReachLimitRaw = $this->getConstant(CheckConstants::REACHE_EDGE_REACH_LIMIT);
+		$edgeBufferLimitRaw = $this->getConstant(CheckConstants::REACHE_EDGE_BUFFER_LIMIT);
+		$edgePingCompensation = is_numeric($edgePingCompensationRaw) ? (float) $edgePingCompensationRaw : 0.0;
+		$edgeReachLimit = is_numeric($edgeReachLimitRaw) ? (float) $edgeReachLimitRaw : 3.15;
+		$edgeBufferLimit = is_numeric($edgeBufferLimitRaw) ? (int) $edgeBufferLimitRaw : 3;
+
 		$snapshot = new CombatSnapshot("ReachE", $damager, $damagerAPI, $victim, $victimAPI);
 		$snapshot->addCachedData("buffer", $this->getBuffer($damagerAPI));
 		$snapshot->addCachedData("victimMinX", $box->minX);
@@ -85,9 +93,9 @@ class ReachE extends Check {
 		$snapshot->addCachedData("victimMaxX", $box->maxX);
 		$snapshot->addCachedData("victimMaxY", $box->maxY);
 		$snapshot->addCachedData("victimMaxZ", $box->maxZ);
-		$snapshot->addCachedData("edgePingCompensation", (float) $this->getConstant(CheckConstants::REACHE_EDGE_PING_COMPENSATION));
-		$snapshot->addCachedData("edgeReachLimit", (float) $this->getConstant(CheckConstants::REACHE_EDGE_REACH_LIMIT));
-		$snapshot->addCachedData("edgeBufferLimit", (int) $this->getConstant(CheckConstants::REACHE_EDGE_BUFFER_LIMIT));
+		$snapshot->addCachedData("edgePingCompensation", $edgePingCompensation);
+		$snapshot->addCachedData("edgeReachLimit", $edgeReachLimit);
+		$snapshot->addCachedData("edgeBufferLimit", $edgeBufferLimit);
 		$snapshot->validate();
 		$this->dispatchAsyncCheck($damager->getName(), $snapshot->build());
 	}
@@ -118,13 +126,39 @@ class ReachE extends Check {
 		}
 
 		$cachedData = (array) ($payload["cachedData"] ?? []);
-		$eyeX = (float) ($payload["damagerEyeX"] ?? 0.0);
-		$eyeY = (float) ($payload["damagerEyeY"] ?? 0.0);
-		$eyeZ = (float) ($payload["damagerEyeZ"] ?? 0.0);
+		$eyeXRaw = $payload["damagerEyeX"] ?? 0.0;
+		$eyeYRaw = $payload["damagerEyeY"] ?? 0.0;
+		$eyeZRaw = $payload["damagerEyeZ"] ?? 0.0;
+		$victimMinXRaw = $cachedData["victimMinX"] ?? 0.0;
+		$victimMinYRaw = $cachedData["victimMinY"] ?? 0.0;
+		$victimMinZRaw = $cachedData["victimMinZ"] ?? 0.0;
+		$victimMaxXRaw = $cachedData["victimMaxX"] ?? 0.0;
+		$victimMaxYRaw = $cachedData["victimMaxY"] ?? 0.0;
+		$victimMaxZRaw = $cachedData["victimMaxZ"] ?? 0.0;
+		$damagerPingRaw = $payload["damagerPing"] ?? 0;
+		$edgePingCompensationRaw = $cachedData["edgePingCompensation"] ?? 0.0;
+		$edgeReachLimitRaw = $cachedData["edgeReachLimit"] ?? 3.15;
+		$bufferRaw = $cachedData["buffer"] ?? 0;
+		$edgeBufferLimitRaw = $cachedData["edgeBufferLimit"] ?? 3;
 
-		$closestX = max((float) ($cachedData["victimMinX"] ?? 0.0), min($eyeX, (float) ($cachedData["victimMaxX"] ?? 0.0)));
-		$closestY = max((float) ($cachedData["victimMinY"] ?? 0.0), min($eyeY, (float) ($cachedData["victimMaxY"] ?? 0.0)));
-		$closestZ = max((float) ($cachedData["victimMinZ"] ?? 0.0), min($eyeZ, (float) ($cachedData["victimMaxZ"] ?? 0.0)));
+		$eyeX = is_numeric($eyeXRaw) ? (float) $eyeXRaw : 0.0;
+		$eyeY = is_numeric($eyeYRaw) ? (float) $eyeYRaw : 0.0;
+		$eyeZ = is_numeric($eyeZRaw) ? (float) $eyeZRaw : 0.0;
+		$victimMinX = is_numeric($victimMinXRaw) ? (float) $victimMinXRaw : 0.0;
+		$victimMinY = is_numeric($victimMinYRaw) ? (float) $victimMinYRaw : 0.0;
+		$victimMinZ = is_numeric($victimMinZRaw) ? (float) $victimMinZRaw : 0.0;
+		$victimMaxX = is_numeric($victimMaxXRaw) ? (float) $victimMaxXRaw : 0.0;
+		$victimMaxY = is_numeric($victimMaxYRaw) ? (float) $victimMaxYRaw : 0.0;
+		$victimMaxZ = is_numeric($victimMaxZRaw) ? (float) $victimMaxZRaw : 0.0;
+		$damagerPing = is_numeric($damagerPingRaw) ? (int) $damagerPingRaw : 0;
+		$edgePingCompensation = is_numeric($edgePingCompensationRaw) ? (float) $edgePingCompensationRaw : 0.0;
+		$limit = is_numeric($edgeReachLimitRaw) ? (float) $edgeReachLimitRaw : 3.15;
+		$buffer = is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
+		$edgeBufferLimit = is_numeric($edgeBufferLimitRaw) ? (int) $edgeBufferLimitRaw : 3;
+
+		$closestX = max($victimMinX, min($eyeX, $victimMaxX));
+		$closestY = max($victimMinY, min($eyeY, $victimMaxY));
+		$closestZ = max($victimMinZ, min($eyeZ, $victimMaxZ));
 
 		$distance = MathUtil::distanceFromComponents(
 			$eyeX,
@@ -134,10 +168,8 @@ class ReachE extends Check {
 			$closestY,
 			$closestZ
 		);
-		$distance -= (int) ($payload["damagerPing"] ?? 0) * (float) ($cachedData["edgePingCompensation"] ?? 0.0);
-		$limit = (float) ($cachedData["edgeReachLimit"] ?? 3.15);
+		$distance -= $damagerPing * $edgePingCompensation;
 
-		$buffer = (int) ($cachedData["buffer"] ?? 0);
 		$buffer = $distance > $limit ? $buffer + 1 : max(0, $buffer - 1);
 
 		$result = [
@@ -145,7 +177,7 @@ class ReachE extends Check {
 			"debug" => "distance={$distance}, limit={$limit}, buffer={$buffer}",
 		];
 
-		if ($buffer >= (int) ($cachedData["edgeBufferLimit"] ?? 3)) {
+		if ($buffer >= $edgeBufferLimit) {
 			$result["failed"] = true;
 			$result["set"][self::BUFFER_KEY] = 0;
 		}
@@ -154,21 +186,29 @@ class ReachE extends Check {
 	}
 
 	private function shouldSkip(Player $damager, Player $victim, PlayerAPI $damagerAPI, PlayerAPI $victimAPI) : bool {
+		$maxPingRaw = $this->getConstant(CheckConstants::REACHE_EDGE_MAX_PING);
+		$minTeleportTicksRaw = $this->getConstant(CheckConstants::REACHE_EDGE_MIN_TELEPORT_TICKS);
+		$minStabilityTicksRaw = $this->getConstant(CheckConstants::REACHE_EDGE_MIN_STABILITY_TICKS);
+		$maxPing = is_numeric($maxPingRaw) ? (int) $maxPingRaw : 0;
+		$minTeleportTicks = is_numeric($minTeleportTicksRaw) ? (float) $minTeleportTicksRaw : 0.0;
+		$minStabilityTicks = is_numeric($minStabilityTicksRaw) ? (float) $minStabilityTicksRaw : 0.0;
+
 		return
 			!$damager->isSurvival() ||
 			!$victim->isSurvival() ||
-			(int) $damagerAPI->getPing() > (int) $this->getConstant(CheckConstants::REACHE_EDGE_MAX_PING) ||
+			(int) $damagerAPI->getPing() > $maxPing ||
 			$damagerAPI->isRecentlyCancelledEvent() ||
 			$victimAPI->isRecentlyCancelledEvent() ||
-			$damagerAPI->getTeleportTicks() < (float) $this->getConstant(CheckConstants::REACHE_EDGE_MIN_TELEPORT_TICKS) ||
-			$victimAPI->getProjectileAttackTicks() < (float) $this->getConstant(CheckConstants::REACHE_EDGE_MIN_STABILITY_TICKS) ||
-			$damagerAPI->getProjectileAttackTicks() < (float) $this->getConstant(CheckConstants::REACHE_EDGE_MIN_STABILITY_TICKS) ||
-			$victimAPI->getBowShotTicks() < (float) $this->getConstant(CheckConstants::REACHE_EDGE_MIN_STABILITY_TICKS) ||
-			$damagerAPI->getBowShotTicks() < (float) $this->getConstant(CheckConstants::REACHE_EDGE_MIN_STABILITY_TICKS);
+			$damagerAPI->getTeleportTicks() < $minTeleportTicks ||
+			$victimAPI->getProjectileAttackTicks() < $minStabilityTicks ||
+			$damagerAPI->getProjectileAttackTicks() < $minStabilityTicks ||
+			$victimAPI->getBowShotTicks() < $minStabilityTicks ||
+			$damagerAPI->getBowShotTicks() < $minStabilityTicks;
 	}
 
 	private function getBuffer(PlayerAPI $playerAPI) : int {
-		return (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$bufferRaw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		return is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 	}
 
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {

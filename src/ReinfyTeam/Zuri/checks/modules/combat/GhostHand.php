@@ -44,6 +44,8 @@ use ReinfyTeam\Zuri\utils\MathUtil;
 use function ceil;
 use function floor;
 use function is_array;
+use function is_numeric;
+use function is_string;
 use function max;
 use function min;
 use function str_contains;
@@ -89,8 +91,9 @@ class GhostHand extends Check {
 			max($box->minZ, min($damagerEye->z, $box->maxZ))
 		);
 		$distance = MathUtil::distanceFromComponents($damagerEye->x, $damagerEye->y, $damagerEye->z, $target->x, $target->y, $target->z);
-		$minDistance = (float) $this->profileConstant("min-distance");
-		if ($distance < $minDistance || $distance > (float) $this->profileConstant("max-distance")) {
+		$minDistance = $this->profileFloatConstant("min-distance", 0.0);
+		$maxDistance = $this->profileFloatConstant("max-distance", 0.0);
+		if ($distance < $minDistance || $distance > $maxDistance) {
 			$this->setBuffer($damagerAPI, max(0, $this->getBuffer($damagerAPI) - 1));
 			return;
 		}
@@ -99,7 +102,7 @@ class GhostHand extends Check {
 			$damager->getWorld(),
 			$damagerEye,
 			$target,
-			(float) $this->profileConstant("ray-step"),
+			$this->profileFloatConstant("ray-step", 0.2),
 			$this->getIgnoredBlockCategories()
 		);
 		$this->dispatchAsyncCheck($damager->getName(), [
@@ -108,7 +111,7 @@ class GhostHand extends Check {
 			"isBlocked" => $isBlocked,
 			"distance" => $distance,
 			"minDistance" => $minDistance,
-			"bufferLimit" => (int) $this->profileConstant("buffer-limit"),
+			"bufferLimit" => $this->profileIntConstant("buffer-limit", 3),
 		]);
 	}
 
@@ -117,19 +120,26 @@ class GhostHand extends Check {
 			return [];
 		}
 
-		$buffer = (int) ($payload["buffer"] ?? 0);
+		$bufferRaw = $payload["buffer"] ?? 0;
+		$buffer = is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 		if ((bool) ($payload["isBlocked"] ?? false)) {
 			$buffer++;
 		} else {
 			$buffer = max(0, $buffer - 1);
 		}
+		$distanceRaw = $payload["distance"] ?? 0.0;
+		$minDistanceRaw = $payload["minDistance"] ?? 0.0;
+		$distance = is_numeric($distanceRaw) ? (float) $distanceRaw : 0.0;
+		$minDistance = is_numeric($minDistanceRaw) ? (float) $minDistanceRaw : 0.0;
 
 		$result = [
 			"set" => [self::BUFFER_KEY => $buffer],
-			"debug" => "distance=" . (float) ($payload["distance"] ?? 0.0) . ", minDistance=" . (float) ($payload["minDistance"] ?? 0.0) . ", blocked=" . ((bool) ($payload["isBlocked"] ?? false) ? "true" : "false") . ", buffer={$buffer}",
+			"debug" => "distance={$distance}, minDistance={$minDistance}, blocked=" . ((bool) ($payload["isBlocked"] ?? false) ? "true" : "false") . ", buffer={$buffer}",
 		];
 
-		if ($buffer >= (int) ($payload["bufferLimit"] ?? 0)) {
+		$bufferLimitRaw = $payload["bufferLimit"] ?? 0;
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 0;
+		if ($buffer >= $bufferLimit) {
 			$result["set"][self::BUFFER_KEY] = 0;
 			$result["failed"] = true;
 		}
@@ -137,6 +147,7 @@ class GhostHand extends Check {
 		return $result;
 	}
 
+	/** @param list<string> $ignoredCategories */
 	private function hasSolidBetween(World $world, Vector3 $from, Vector3 $to, float $step, array $ignoredCategories) : bool {
 		$dx = $to->x - $from->x;
 		$dy = $to->y - $from->y;
@@ -169,13 +180,14 @@ class GhostHand extends Check {
 			!$damager->isSurvival() ||
 			!$victim->isSurvival() ||
 			$damagerAPI->isRecentlyCancelledEvent() ||
-			$damagerAPI->getTeleportTicks() < (float) $this->profileConstant("min-teleport-ticks") ||
+			$damagerAPI->getTeleportTicks() < $this->profileFloatConstant("min-teleport-ticks", 0.0) ||
 			$damagerAPI->getHurtTicks() < 8 ||
-			(int) $damagerAPI->getPing() > (int) $this->profileConstant("max-ping");
+			(int) $damagerAPI->getPing() > $this->profileIntConstant("max-ping", 0);
 	}
 
 	private function getBuffer(PlayerAPI $playerAPI) : int {
-		return (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$raw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		return is_numeric($raw) ? (int) $raw : 0;
 	}
 
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {
@@ -184,7 +196,8 @@ class GhostHand extends Check {
 
 	private function profileConstant(string $name) : mixed {
 		$default = $this->getConstant($name);
-		$profile = strtolower((string) self::getData("zuri.check.ghosthand.tuning-presets.active", "default"));
+		$profileRaw = self::getData("zuri.check.ghosthand.tuning-presets.active", "default");
+		$profile = strtolower(is_string($profileRaw) ? $profileRaw : "default");
 		if ($profile === "custom") {
 			$profile = "default";
 		}
@@ -195,6 +208,17 @@ class GhostHand extends Check {
 		return self::getData("zuri.check.ghosthand.tuning-presets." . $profile . "." . $name, $default);
 	}
 
+	private function profileFloatConstant(string $name, float $default) : float {
+		$raw = $this->profileConstant($name);
+		return is_numeric($raw) ? (float) $raw : $default;
+	}
+
+	private function profileIntConstant(string $name, int $default) : int {
+		$raw = $this->profileConstant($name);
+		return is_numeric($raw) ? (int) $raw : $default;
+	}
+
+	/** @return list<string> */
 	private function getIgnoredBlockCategories() : array {
 		$categories = $this->profileConstant("ignore-block-categories");
 		if (!is_array($categories)) {
@@ -209,6 +233,7 @@ class GhostHand extends Check {
 		return $normalized;
 	}
 
+	/** @param list<string> $ignoredCategories */
 	private function isIgnoredSolid(string $blockName, array $ignoredCategories) : bool {
 		foreach ($ignoredCategories as $category) {
 			switch ($category) {

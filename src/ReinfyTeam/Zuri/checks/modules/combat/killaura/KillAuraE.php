@@ -41,6 +41,8 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function count;
+use function is_array;
+use function is_numeric;
 use function sqrt;
 
 class KillAuraE extends Check {
@@ -74,6 +76,7 @@ class KillAuraE extends Check {
 					return;
 				}
 				$delta = MathUtil::getDeltaDirectionVector($damagerAPI, 3);
+				$maxRangeRaw = $this->getConstant(CheckConstants::KILLAURAE_MAX_RANGE);
 				$entities = [];
 				foreach ($damager->getWorld()->getEntities() as $target) {
 					$entities[] = [
@@ -93,7 +96,7 @@ class KillAuraE extends Check {
 					"deltaX" => $delta->getX(),
 					"deltaY" => $delta->getY(),
 					"deltaZ" => $delta->getZ(),
-					"maxRange" => $this->getConstant(CheckConstants::KILLAURAE_MAX_RANGE),
+					"maxRange" => is_numeric($maxRangeRaw) ? (float) $maxRangeRaw : 0.0,
 					"entities" => $entities,
 				]);
 			}
@@ -105,24 +108,58 @@ class KillAuraE extends Check {
 			return [];
 		}
 
-		$from = new Vector3((float) ($payload["locX"] ?? 0), (float) ($payload["locY"] ?? 0) + (float) ($payload["eyeHeight"] ?? 0), (float) ($payload["locZ"] ?? 0));
-		$delta = new Vector3((float) ($payload["deltaX"] ?? 0), (float) ($payload["deltaY"] ?? 0) + (float) ($payload["eyeHeight"] ?? 0), (float) ($payload["deltaZ"] ?? 0));
+		$locXRaw = $payload["locX"] ?? 0;
+		$locYRaw = $payload["locY"] ?? 0;
+		$locZRaw = $payload["locZ"] ?? 0;
+		$eyeHeightRaw = $payload["eyeHeight"] ?? 0;
+		$deltaXRaw = $payload["deltaX"] ?? 0;
+		$deltaYRaw = $payload["deltaY"] ?? 0;
+		$deltaZRaw = $payload["deltaZ"] ?? 0;
+		$locX = is_numeric($locXRaw) ? (float) $locXRaw : 0.0;
+		$locY = is_numeric($locYRaw) ? (float) $locYRaw : 0.0;
+		$locZ = is_numeric($locZRaw) ? (float) $locZRaw : 0.0;
+		$eyeHeight = is_numeric($eyeHeightRaw) ? (float) $eyeHeightRaw : 0.0;
+		$deltaX = is_numeric($deltaXRaw) ? (float) $deltaXRaw : 0.0;
+		$deltaY = is_numeric($deltaYRaw) ? (float) $deltaYRaw : 0.0;
+		$deltaZ = is_numeric($deltaZRaw) ? (float) $deltaZRaw : 0.0;
+		$from = new Vector3($locX, $locY + $eyeHeight, $locZ);
+		$delta = new Vector3($deltaX, $deltaY + $eyeHeight, $deltaZ);
 		$to = $from->add($delta->getX(), $delta->getY(), $delta->getZ());
 		$distance = MathUtil::distance($from, $to);
 		$vector = $to->subtract($from->x, $from->y, $from->z)->normalize()->multiply(1);
+		$maxRangeRaw = $payload["maxRange"] ?? 0;
+		$maxRange = is_numeric($maxRangeRaw) ? (float) $maxRangeRaw : 0.0;
+		$entitiesPayload = $payload["entities"] ?? [];
+		$entitiesList = is_array($entitiesPayload) ? $entitiesPayload : [];
 		$entities = [];
 		for ($i = 0; $i <= $distance; ++$i) {
 			$from = $from->add($vector->x, $vector->y, $vector->z);
-			foreach (($payload["entities"] ?? []) as $target) {
+			foreach ($entitiesList as $target) {
+				if (!is_array($target)) {
+					continue;
+				}
+				$targetXRaw = $target["x"] ?? null;
+				$targetYRaw = $target["y"] ?? null;
+				$targetZRaw = $target["z"] ?? null;
+				$targetIdRaw = $target["id"] ?? null;
+				if (!is_numeric($targetXRaw) || !is_numeric($targetYRaw) || !is_numeric($targetZRaw) || !is_numeric($targetIdRaw)) {
+					continue;
+				}
+				$targetX = (float) $targetXRaw;
+				$targetY = (float) $targetYRaw;
+				$targetZ = (float) $targetZRaw;
+				$targetId = (int) $targetIdRaw;
 				$distanceA = new Vector3($from->x, $from->y, $from->z);
-				if (sqrt((($target["x"] - $distanceA->getX()) ** 2) + (($target["y"] - $distanceA->getY()) ** 2) + (($target["z"] - $distanceA->getZ()) ** 2)) <= (float) ($payload["maxRange"] ?? 0)) {
-					$entities[(int) $target["id"]] = true;
+				if (sqrt((($targetX - $distanceA->getX()) ** 2) + (($targetY - $distanceA->getY()) ** 2) + (($targetZ - $distanceA->getZ()) ** 2)) <= $maxRange) {
+					$entities[$targetId] = true;
 				}
 			}
 		}
 
 		$debug = "distance={$distance}, entities=" . count($entities);
-		if (!isset($entities[(int) ($payload["victimId"] ?? -1)])) {
+		$victimIdRaw = $payload["victimId"] ?? -1;
+		$victimId = is_numeric($victimIdRaw) ? (int) $victimIdRaw : -1;
+		if (!isset($entities[$victimId])) {
 			return ["failed" => true, "debug" => $debug];
 		}
 

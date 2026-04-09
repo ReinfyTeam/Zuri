@@ -43,6 +43,7 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function is_float;
 use function is_int;
+use function is_numeric;
 use function max;
 use function microtime;
 
@@ -91,12 +92,23 @@ class VelocityA extends Check {
 		}
 
 		$elapsedTicks = MathUtil::ticksSince((float) $hitAt);
-		if ($elapsedTicks > (float) $this->getConstant(CheckConstants::VELOCITYA_MAX_OBSERVE_TICKS)) {
+		$maxObserveTicksRaw = $this->getConstant(CheckConstants::VELOCITYA_MAX_OBSERVE_TICKS);
+		$startObserveTicksRaw = $this->getConstant(CheckConstants::VELOCITYA_START_OBSERVE_TICKS);
+		$maxPingRaw = $this->getConstant(CheckConstants::VELOCITYA_MAX_PING);
+		$minResponseDistanceSquaredRaw = $this->getConstant(CheckConstants::VELOCITYA_MIN_RESPONSE_DISTANCE_SQUARED);
+		$bufferLimitRaw = $this->getConstant(CheckConstants::VELOCITYA_BUFFER_LIMIT);
+		$maxObserveTicks = is_numeric($maxObserveTicksRaw) ? (float) $maxObserveTicksRaw : 0.0;
+		$startObserveTicks = is_numeric($startObserveTicksRaw) ? (float) $startObserveTicksRaw : 0.0;
+		$maxPing = is_numeric($maxPingRaw) ? (int) $maxPingRaw : 0;
+		$minResponseDistanceSquared = is_numeric($minResponseDistanceSquaredRaw) ? (float) $minResponseDistanceSquaredRaw : 0.0;
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 0;
+
+		if ($elapsedTicks > $maxObserveTicks) {
 			$this->resetState($playerAPI);
 			return;
 		}
 
-		if ($elapsedTicks < (float) $this->getConstant(CheckConstants::VELOCITYA_START_OBSERVE_TICKS)) {
+		if ($elapsedTicks < $startObserveTicks) {
 			return;
 		}
 
@@ -115,21 +127,22 @@ class VelocityA extends Check {
 			$playerAPI->isInBoundingBox() ||
 			$playerAPI->getTeleportTicks() < 20 ||
 			$playerAPI->isRecentlyCancelledEvent() ||
-			(int) $playerAPI->getPing() > (int) $this->getConstant(CheckConstants::VELOCITYA_MAX_PING)
+			(int) $playerAPI->getPing() > $maxPing
 		) {
 			$this->resetState($playerAPI);
 			return;
 		}
 
 		$moveXZ = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo());
-		$buffer = (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$bufferRaw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$buffer = is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 		$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
 			"type" => self::TYPE,
 			"elapsedTicks" => $elapsedTicks,
 			"moveXZ" => $moveXZ,
 			"buffer" => $buffer,
-			"minResponseDistanceSquared" => (float) $this->getConstant(CheckConstants::VELOCITYA_MIN_RESPONSE_DISTANCE_SQUARED),
-			"bufferLimit" => (int) $this->getConstant(CheckConstants::VELOCITYA_BUFFER_LIMIT),
+			"minResponseDistanceSquared" => $minResponseDistanceSquared,
+			"bufferLimit" => $bufferLimit,
 		]);
 	}
 
@@ -138,9 +151,17 @@ class VelocityA extends Check {
 			return [];
 		}
 
-		$moveXZ = (float) ($payload["moveXZ"] ?? 0.0);
-		$buffer = (int) ($payload["buffer"] ?? 0);
-		if ($moveXZ < (float) ($payload["minResponseDistanceSquared"] ?? 0.0)) {
+		$moveXZRaw = $payload["moveXZ"] ?? 0.0;
+		$bufferRaw = $payload["buffer"] ?? 0;
+		$minResponseDistanceSquaredRaw = $payload["minResponseDistanceSquared"] ?? 0.0;
+		$elapsedTicksRaw = $payload["elapsedTicks"] ?? 0.0;
+		$bufferLimitRaw = $payload["bufferLimit"] ?? 0;
+		$moveXZ = is_numeric($moveXZRaw) ? (float) $moveXZRaw : 0.0;
+		$buffer = is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
+		$minResponseDistanceSquared = is_numeric($minResponseDistanceSquaredRaw) ? (float) $minResponseDistanceSquaredRaw : 0.0;
+		$elapsedTicks = is_numeric($elapsedTicksRaw) ? (float) $elapsedTicksRaw : 0.0;
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 0;
+		if ($moveXZ < $minResponseDistanceSquared) {
 			$buffer++;
 		} else {
 			$buffer = max(0, $buffer - 1);
@@ -148,10 +169,10 @@ class VelocityA extends Check {
 
 		$result = [
 			"set" => [self::BUFFER_KEY => $buffer],
-			"debug" => "elapsedTicks=" . (float) ($payload["elapsedTicks"] ?? 0.0) . ", moveXZ={$moveXZ}, buffer={$buffer}",
+			"debug" => "elapsedTicks={$elapsedTicks}, moveXZ={$moveXZ}, buffer={$buffer}",
 		];
 
-		if ($buffer >= (int) ($payload["bufferLimit"] ?? 0)) {
+		if ($buffer >= $bufferLimit) {
 			$result["set"][self::BUFFER_KEY] = 0;
 			$result["unset"] = [self::HIT_AT_KEY];
 			$result["failed"] = true;

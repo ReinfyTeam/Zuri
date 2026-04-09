@@ -39,6 +39,7 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\Utils;
+use function is_string;
 
 class EditionFakerB extends Check {
 	public function getName() : string {
@@ -60,8 +61,8 @@ class EditionFakerB extends Check {
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ( $packet instanceof LoginPacket ) {
-			$authData = Utils::fetchAuthData($packet->chainDataJwt);
-			$titleId = $authData->titleId;
+			$authData = Utils::fetchAuthData($packet->authInfoJson);
+			$titleId = is_string($authData["titleId"] ?? null) ? $authData["titleId"] : "";
 			$givenOS = $playerAPI->getDeviceOS();
 
 			$expectedOS = match ($titleId) {
@@ -81,6 +82,9 @@ class EditionFakerB extends Check {
 		}
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];
 	}

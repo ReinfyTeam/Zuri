@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 
 class AntiImmobile extends Check {
 	public function getName() : string {
@@ -83,6 +84,9 @@ class AntiImmobile extends Check {
 		}
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(
 			$payload,
@@ -94,9 +98,19 @@ class AntiImmobile extends Check {
 		}
 
 		$cachedData = (array) ($payload["cachedData"] ?? []);
-		if ((float) ($cachedData["fromX"] ?? 0) !== (float) ($cachedData["toX"] ?? 0) ||
-			(float) ($cachedData["fromY"] ?? 0) !== (float) ($cachedData["toY"] ?? 0) ||
-			(float) ($cachedData["fromZ"] ?? 0) !== (float) ($cachedData["toZ"] ?? 0)) {
+		$fromXRaw = $cachedData["fromX"] ?? 0;
+		$toXRaw = $cachedData["toX"] ?? 0;
+		$fromYRaw = $cachedData["fromY"] ?? 0;
+		$toYRaw = $cachedData["toY"] ?? 0;
+		$fromZRaw = $cachedData["fromZ"] ?? 0;
+		$toZRaw = $cachedData["toZ"] ?? 0;
+		$fromX = is_numeric($fromXRaw) ? (float) $fromXRaw : 0.0;
+		$toX = is_numeric($toXRaw) ? (float) $toXRaw : 0.0;
+		$fromY = is_numeric($fromYRaw) ? (float) $fromYRaw : 0.0;
+		$toY = is_numeric($toYRaw) ? (float) $toYRaw : 0.0;
+		$fromZ = is_numeric($fromZRaw) ? (float) $fromZRaw : 0.0;
+		$toZ = is_numeric($toZRaw) ? (float) $toZRaw : 0.0;
+		if ($fromX !== $toX || $fromY !== $toY || $fromZ !== $toZ) {
 			return ["failed" => true];
 		}
 

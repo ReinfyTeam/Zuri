@@ -39,6 +39,7 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 use function microtime;
 
 class AutoClickB extends Check {
@@ -59,13 +60,15 @@ class AutoClickB extends Check {
 		}
 		if ($packet instanceof LevelSoundEventPacket) {
 			if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
+				$diffTimeRaw = $this->getConstant(CheckConstants::AUTOCLICKB_DIFF_TIME);
+				$diffTicksRaw = $this->getConstant(CheckConstants::AUTOCLICKB_DIFF_TICKS);
 				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
 					"type" => "AutoClickB",
 					"placingTicks" => $playerAPI->getPlacingTicks(),
 					"ticks" => $playerAPI->getExternalData(CacheData::AUTOCLICK_B_TICKS),
 					CacheData::AUTOCLICK_B_LAST_CLICK => $playerAPI->getExternalData(CacheData::AUTOCLICK_B_LAST_CLICK),
-					"diffTime" => (float) $this->getConstant(CheckConstants::AUTOCLICKB_DIFF_TIME),
-					"diffTicks" => (int) $this->getConstant(CheckConstants::AUTOCLICKB_DIFF_TICKS),
+					"diffTime" => is_numeric($diffTimeRaw) ? (float) $diffTimeRaw : 0.0,
+					"diffTicks" => is_numeric($diffTicksRaw) ? (int) $diffTicksRaw : 0,
 					"now" => microtime(true),
 				]);
 			}
@@ -77,7 +80,8 @@ class AutoClickB extends Check {
 			return [];
 		}
 
-		$placingTicks = (int) ($payload["placingTicks"] ?? 0);
+		$placingTicksRaw = $payload["placingTicks"] ?? 0;
+		$placingTicks = is_numeric($placingTicksRaw) ? (int) $placingTicksRaw : 0;
 		if ($placingTicks < 100) {
 			return [];
 		}
@@ -88,15 +92,24 @@ class AutoClickB extends Check {
 			return ["set" => [CacheData::AUTOCLICK_B_TICKS => 0, CacheData::AUTOCLICK_B_LAST_CLICK => $payload["now"] ?? microtime(true)]];
 		}
 
-		$diff = (float) ($payload["now"] ?? microtime(true)) - (float) $lastClick;
-		if ($diff > (float) ($payload["diffTime"] ?? 0.0)) {
-			$result = ["unset" => [CacheData::AUTOCLICK_B_TICKS, CacheData::AUTOCLICK_B_LAST_CLICK], "debug" => "diff={$diff}, lastClick={$lastClick}, ticks={$ticks}"];
-			if ((int) $ticks >= (int) ($payload["diffTicks"] ?? 0)) {
+		$nowRaw = $payload["now"] ?? microtime(true);
+		$now = is_numeric($nowRaw) ? (float) $nowRaw : microtime(true);
+		$lastClickValue = is_numeric($lastClick) ? (float) $lastClick : 0.0;
+		$diffTimeRaw = $payload["diffTime"] ?? 0.0;
+		$diffTime = is_numeric($diffTimeRaw) ? (float) $diffTimeRaw : 0.0;
+		$diff = $now - $lastClickValue;
+		if ($diff > $diffTime) {
+			$ticksValue = is_numeric($ticks) ? (int) $ticks : 0;
+			$result = ["unset" => [CacheData::AUTOCLICK_B_TICKS, CacheData::AUTOCLICK_B_LAST_CLICK], "debug" => "diff={$diff}, lastClick={$lastClickValue}, ticks={$ticksValue}"];
+			$diffTicksRaw = $payload["diffTicks"] ?? 0;
+			$diffTicks = is_numeric($diffTicksRaw) ? (int) $diffTicksRaw : 0;
+			if ($ticksValue >= $diffTicks) {
 				$result["failed"] = true;
 			}
 			return $result;
 		}
 
-		return ["set" => [CacheData::AUTOCLICK_B_TICKS => (int) $ticks + 1, CacheData::AUTOCLICK_B_LAST_CLICK => $lastClick], "debug" => "lastClick={$lastClick}, ticks={$ticks}"];
+		$ticksValue = is_numeric($ticks) ? (int) $ticks : 0;
+		return ["set" => [CacheData::AUTOCLICK_B_TICKS => $ticksValue + 1, CacheData::AUTOCLICK_B_LAST_CLICK => $lastClickValue], "debug" => "lastClick={$lastClickValue}, ticks={$ticksValue}"];
 	}
 }

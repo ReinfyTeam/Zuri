@@ -41,6 +41,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function is_array;
+use function is_numeric;
 use function max;
 use function microtime;
 
@@ -67,6 +68,8 @@ class ScaffoldF extends Check {
 		}
 
 		$player = $event->getPlayer();
+		$maxPingRaw = $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MAX_PING);
+		$maxPing = is_numeric($maxPingRaw) ? (int) $maxPingRaw : 0;
 		if (
 			!$player->isSurvival() ||
 			$player->getAllowFlight() ||
@@ -76,16 +79,17 @@ class ScaffoldF extends Check {
 			$playerAPI->isInWeb() ||
 			$playerAPI->isInLiquid() ||
 			$playerAPI->isRecentlyCancelledEvent() ||
-			(int) $playerAPI->getPing() > (int) $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MAX_PING)
+			(int) $playerAPI->getPing() > $maxPing
 		) {
 			$this->resetState($playerAPI);
 			return;
 		}
 
 		$now = microtime(true);
-		$blockPos = $event->getBlock()->getPosition();
+		$blockPos = $event->getBlockAgainst()->getPosition();
 		$playerPos = $player->getPosition();
-		$lastPlaceAt = (float) $playerAPI->getExternalData(self::LAST_PLACE_AT_KEY, 0.0);
+		$lastPlaceAtRaw = $playerAPI->getExternalData(self::LAST_PLACE_AT_KEY, 0.0);
+		$lastPlaceAt = is_numeric($lastPlaceAtRaw) ? (float) $lastPlaceAtRaw : 0.0;
 		$interval = $lastPlaceAt > 0.0 ? $now - $lastPlaceAt : 999.0;
 		$playerBlockDistanceSquared = MathUtil::XZDistanceSquared($playerPos, $blockPos);
 
@@ -97,17 +101,40 @@ class ScaffoldF extends Check {
 		$lastBlock = $playerAPI->getExternalData(self::LAST_BLOCK_KEY);
 		$lastPlayer = $playerAPI->getExternalData(self::LAST_PLAYER_KEY);
 		if (is_array($lastBlock) && is_array($lastPlayer)) {
-			$previousBlock = new Vector3((float) ($lastBlock["x"] ?? 0.0), (float) ($lastBlock["y"] ?? 0.0), (float) ($lastBlock["z"] ?? 0.0));
-			$previousPlayer = new Vector3((float) ($lastPlayer["x"] ?? 0.0), (float) ($lastPlayer["y"] ?? 0.0), (float) ($lastPlayer["z"] ?? 0.0));
+			$previousBlockXRaw = $lastBlock["x"] ?? 0.0;
+			$previousBlockYRaw = $lastBlock["y"] ?? 0.0;
+			$previousBlockZRaw = $lastBlock["z"] ?? 0.0;
+			$previousPlayerXRaw = $lastPlayer["x"] ?? 0.0;
+			$previousPlayerYRaw = $lastPlayer["y"] ?? 0.0;
+			$previousPlayerZRaw = $lastPlayer["z"] ?? 0.0;
+			$previousBlock = new Vector3(
+				is_numeric($previousBlockXRaw) ? (float) $previousBlockXRaw : 0.0,
+				is_numeric($previousBlockYRaw) ? (float) $previousBlockYRaw : 0.0,
+				is_numeric($previousBlockZRaw) ? (float) $previousBlockZRaw : 0.0
+			);
+			$previousPlayer = new Vector3(
+				is_numeric($previousPlayerXRaw) ? (float) $previousPlayerXRaw : 0.0,
+				is_numeric($previousPlayerYRaw) ? (float) $previousPlayerYRaw : 0.0,
+				is_numeric($previousPlayerZRaw) ? (float) $previousPlayerZRaw : 0.0
+			);
+
+			$maxPlaceIntervalRaw = $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MAX_PLACE_INTERVAL);
+			$minBlockStepRaw = $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MIN_BLOCK_STEP);
+			$maxPlayerStepSquaredRaw = $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MAX_PLAYER_STEP_SQUARED);
+			$minPlayerBlockDistanceSquaredRaw = $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MIN_PLAYER_BLOCK_DISTANCE_SQUARED);
+			$maxPlaceInterval = is_numeric($maxPlaceIntervalRaw) ? (float) $maxPlaceIntervalRaw : 0.0;
+			$minBlockStep = is_numeric($minBlockStepRaw) ? (float) $minBlockStepRaw : 0.0;
+			$maxPlayerStepSquared = is_numeric($maxPlayerStepSquaredRaw) ? (float) $maxPlayerStepSquaredRaw : 0.0;
+			$minPlayerBlockDistanceSquared = is_numeric($minPlayerBlockDistanceSquaredRaw) ? (float) $minPlayerBlockDistanceSquaredRaw : 0.0;
 
 			$blockStep = MathUtil::distance($previousBlock, $blockPos->asVector3());
 			$playerStepSquared = MathUtil::XZDistanceSquared($previousPlayer, $playerPos);
 			$suspicious =
-				$interval <= (float) $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MAX_PLACE_INTERVAL) &&
+				$interval <= $maxPlaceInterval &&
 				$isBelow &&
-				$blockStep >= (float) $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MIN_BLOCK_STEP) &&
-				$playerStepSquared <= (float) $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MAX_PLAYER_STEP_SQUARED) &&
-				$playerBlockDistanceSquared >= (float) $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_MIN_PLAYER_BLOCK_DISTANCE_SQUARED);
+				$blockStep >= $minBlockStep &&
+				$playerStepSquared <= $maxPlayerStepSquared &&
+				$playerBlockDistanceSquared >= $minPlayerBlockDistanceSquared;
 		}
 
 		$buffer = $this->getBuffer($playerAPI);
@@ -123,7 +150,9 @@ class ScaffoldF extends Check {
 		$playerAPI->setExternalData(self::LAST_PLAYER_KEY, ["x" => $playerPos->getX(), "y" => $playerPos->getY(), "z" => $playerPos->getZ()]);
 		$this->debug($playerAPI, "interval={$interval}, blockStep={$blockStep}, playerStepSquared={$playerStepSquared}, playerBlockDistanceSquared={$playerBlockDistanceSquared}, below={$isBelow}, buffer={$buffer}");
 
-		if ($buffer >= (int) $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_BUFFER_LIMIT)) {
+		$bufferLimitRaw = $this->getConstant(CheckConstants::SCAFFOLDF_GHOST_BUFFER_LIMIT);
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 0;
+		if ($buffer >= $bufferLimit) {
 			$this->resetState($playerAPI);
 			$this->dispatchAsyncDecision($playerAPI, true);
 		}
@@ -137,7 +166,8 @@ class ScaffoldF extends Check {
 	}
 
 	private function getBuffer(PlayerAPI $playerAPI) : int {
-		return (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$raw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		return is_numeric($raw) ? (int) $raw : 0;
 	}
 
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {

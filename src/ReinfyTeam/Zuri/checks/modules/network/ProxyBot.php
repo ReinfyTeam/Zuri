@@ -37,6 +37,8 @@ use pocketmine\utils\Internet;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
+use function is_array;
+use function is_string;
 use function json_decode;
 use function strtolower;
 
@@ -57,9 +59,15 @@ class ProxyBot extends Check {
 
 			if ($request !== null && $err === null) {
 				$data = json_decode($request->getBody(), true, 16, JSON_PARTIAL_OUTPUT_ON_ERROR);
+				if (!is_array($data)) {
+					return;
+				}
 
-				if (($data["status"] ?? null) !== "error" && isset($data[$ip])) {
-					$proxy = strtolower((string) ($data[$ip]["proxy"] ?? "no")) === "yes";
+				$status = $data["status"] ?? null;
+				$ipData = $data[$ip] ?? null;
+				if ($status !== "error" && is_array($ipData)) {
+					$proxyRaw = $ipData["proxy"] ?? "no";
+					$proxy = is_string($proxyRaw) && strtolower($proxyRaw) === "yes";
 					if ($proxy) {
 						$this->warn($event->getPlayerInfo()->getUsername());
 						$event->setKickFlag(0, Lang::get(LangKeys::ANTIBOT_MESSAGE));
@@ -69,6 +77,9 @@ class ProxyBot extends Check {
 		}
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];
 	}

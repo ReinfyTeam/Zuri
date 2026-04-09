@@ -45,13 +45,11 @@ class WrongMining extends Check {
 	}
 
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($playerAPI->getPlayer() === null) {
-			return;
-		}
-		$isCreative = $playerAPI->getPlayer()->isCreative() ? 10 : 0;
+		$player = $playerAPI->getPlayer();
+		$isCreative = $player->isCreative() ? 10 : 0;
 		if ($playerAPI->actionBreakingSpecial() && (($playerAPI->getNumberBlocksAllowBreak() + $isCreative) < $playerAPI->getBlocksBrokeASec())) {
 			$this->dispatchAsyncDecision($playerAPI, true);
-			if (!$playerAPI->getPlayer()->isConnected() || !$playerAPI->getPlayer()->isOnline()) {
+			if (!$player->isConnected() || !$player->isOnline()) {
 				return;
 			}
 			$playerAPI->setActionBreakingSpecial(false);

@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 use function microtime;
 
 class ChestStealer extends Check {
@@ -64,7 +65,8 @@ class ChestStealer extends Check {
 		}
 
 		$now = microtime(true);
-		$streak = (int) $playerAPI->getExternalData(CacheData::CHESTSTEALER_TICKS, 0);
+		$streakRaw = $playerAPI->getExternalData(CacheData::CHESTSTEALER_TICKS, 0);
+		$streak = is_numeric($streakRaw) ? (int) $streakRaw : 0;
 		$lastTime = $playerAPI->getExternalData(CacheData::CHESTSTEALER_LAST_TIME);
 		if ($lastTime === null) {
 			$playerAPI->setExternalData(CacheData::CHESTSTEALER_TICKS, 0);
@@ -72,8 +74,11 @@ class ChestStealer extends Check {
 			return;
 		}
 
-		$diff = $now - (float) $lastTime;
-		if ($diff <= (float) $this->getConstant(CheckConstants::CHESTSTEALER_DIFF_TIME)) {
+		$lastTimeFloat = is_numeric($lastTime) ? (float) $lastTime : $now;
+		$diff = $now - $lastTimeFloat;
+		$diffTimeRaw = $this->getConstant(CheckConstants::CHESTSTEALER_DIFF_TIME);
+		$diffTime = is_numeric($diffTimeRaw) ? (float) $diffTimeRaw : 0.0;
+		if ($diff <= $diffTime) {
 			$streak++;
 		} else {
 			$streak = 0;
@@ -83,7 +88,9 @@ class ChestStealer extends Check {
 		$playerAPI->setExternalData(CacheData::CHESTSTEALER_LAST_TIME, $now);
 		$this->debug($playerAPI, "streak={$streak}, diff={$diff}");
 
-		if ($streak > (int) $this->getConstant(CheckConstants::CHESTSTEALER_DIFF_TICKS)) {
+		$diffTicksRaw = $this->getConstant(CheckConstants::CHESTSTEALER_DIFF_TICKS);
+		$diffTicks = is_numeric($diffTicksRaw) ? (int) $diffTicksRaw : 0;
+		if ($streak > $diffTicks) {
 			$this->dispatchAsyncDecision($playerAPI, true);
 			$playerAPI->setExternalData(CacheData::CHESTSTEALER_TICKS, 0);
 		}

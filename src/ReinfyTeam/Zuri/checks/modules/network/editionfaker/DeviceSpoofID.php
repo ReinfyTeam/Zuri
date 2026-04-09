@@ -39,6 +39,8 @@ use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use function count_chars;
 use function in_array;
+use function is_numeric;
+use function is_string;
 use function preg_match;
 use function str_replace;
 use function strlen;
@@ -74,10 +76,13 @@ class DeviceSpoofID extends Check {
 		}
 
 		$extraData = $event->getPlayerInfo()->getExtraData();
-		$deviceId = trim((string) ($extraData["DeviceId"] ?? ""));
+		$deviceIdRaw = $extraData["DeviceId"] ?? "";
+		$deviceId = trim(is_string($deviceIdRaw) ? $deviceIdRaw : "");
 		$normalized = strtolower(str_replace(["-", "_", ":", " "], "", $deviceId));
-		$minLength = (int) $this->getConstant(CheckConstants::DEVICESPOOFID_MIN_LENGTH);
-		$maxLength = (int) $this->getConstant(CheckConstants::DEVICESPOOFID_MAX_LENGTH);
+		$minLengthRaw = $this->getConstant(CheckConstants::DEVICESPOOFID_MIN_LENGTH);
+		$maxLengthRaw = $this->getConstant(CheckConstants::DEVICESPOOFID_MAX_LENGTH);
+		$minLength = is_numeric($minLengthRaw) ? (int) $minLengthRaw : 8;
+		$maxLength = is_numeric($maxLengthRaw) ? (int) $maxLengthRaw : 128;
 
 		if ($deviceId === "" || strlen($deviceId) < $minLength || strlen($deviceId) > $maxLength) {
 			$this->kick($event);
@@ -89,12 +94,16 @@ class DeviceSpoofID extends Check {
 			return;
 		}
 
-		if ($normalized === "" || preg_match('/^(.)\1+$/', $normalized) === 1) {
+		if (preg_match('/^(.)\1+$/', $normalized) === 1) {
 			$this->kick($event);
 			return;
 		}
 
-		if (strlen(count_chars($normalized, 3)) < (int) $this->getConstant(CheckConstants::DEVICESPOOFID_MIN_UNIQUE_CHARS)) {
+		$minUniqueCharsRaw = $this->getConstant(CheckConstants::DEVICESPOOFID_MIN_UNIQUE_CHARS);
+		$minUniqueChars = is_numeric($minUniqueCharsRaw) ? (int) $minUniqueCharsRaw : 4;
+		$uniqueChars = count_chars($normalized, 3);
+		$uniqueCharsLength = is_string($uniqueChars) ? strlen($uniqueChars) : 0;
+		if ($uniqueCharsLength < $minUniqueChars) {
 			$this->kick($event);
 			return;
 		}
@@ -109,6 +118,9 @@ class DeviceSpoofID extends Check {
 		$event->setKickFlag(0, Lang::get(LangKeys::EDITIONFAKER_MESSAGE));
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];
 	}

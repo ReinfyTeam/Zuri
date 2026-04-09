@@ -39,6 +39,7 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 
 class ClickTP extends Check {
 	public function getName() : string {
@@ -76,7 +77,8 @@ class ClickTP extends Check {
 			$snapshot->addCachedData("newYaw", $newYaw);
 			$snapshot->addCachedData("oldPitch", $oldPitch);
 			$snapshot->addCachedData("newPitch", $newPitch);
-			$snapshot->addCachedData("maxDistance", (float) $this->getConstant(CheckConstants::CLICKTP_MAX_DISTANCE));
+			$maxDistanceRaw = $this->getConstant(CheckConstants::CLICKTP_MAX_DISTANCE);
+			$snapshot->addCachedData("maxDistance", is_numeric($maxDistanceRaw) ? (float) $maxDistanceRaw : 0.0);
 
 			$snapshot->validate();
 
@@ -86,6 +88,9 @@ class ClickTP extends Check {
 		}
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(
 			$payload,
@@ -97,12 +102,19 @@ class ClickTP extends Check {
 		}
 
 		$cachedData = (array) ($payload["cachedData"] ?? []);
-		$distance = (float) ($cachedData["distance"] ?? 0);
-		$oldYaw = (float) ($cachedData["oldYaw"] ?? 0);
-		$newYaw = (float) ($cachedData["newYaw"] ?? 0);
-		$oldPitch = (float) ($cachedData["oldPitch"] ?? 0);
-		$newPitch = (float) ($cachedData["newPitch"] ?? 0);
-		$maxDistance = (float) ($cachedData["maxDistance"] ?? 0);
+		$distanceRaw = $cachedData["distance"] ?? 0;
+		$oldYawRaw = $cachedData["oldYaw"] ?? 0;
+		$newYawRaw = $cachedData["newYaw"] ?? 0;
+		$oldPitchRaw = $cachedData["oldPitch"] ?? 0;
+		$newPitchRaw = $cachedData["newPitch"] ?? 0;
+		$maxDistanceRaw = $cachedData["maxDistance"] ?? 0;
+
+		$distance = is_numeric($distanceRaw) ? (float) $distanceRaw : 0;
+		$oldYaw = is_numeric($oldYawRaw) ? (float) $oldYawRaw : 0;
+		$newYaw = is_numeric($newYawRaw) ? (float) $newYawRaw : 0;
+		$oldPitch = is_numeric($oldPitchRaw) ? (float) $oldPitchRaw : 0;
+		$newPitch = is_numeric($newPitchRaw) ? (float) $newPitchRaw : 0;
+		$maxDistance = is_numeric($maxDistanceRaw) ? (float) $maxDistanceRaw : 0;
 
 		if ($distance > $maxDistance && $oldYaw === $newYaw && $oldPitch === $newPitch) {
 			return ["failed" => true];

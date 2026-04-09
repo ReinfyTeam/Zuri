@@ -42,6 +42,8 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
+use function is_int;
+use function is_string;
 use function strtolower;
 use function ucfirst;
 
@@ -56,10 +58,12 @@ class CaptchaSubCommand extends BaseSubCommand {
 	}
 
 	/**
+	 * @param array<string,mixed> $args
 	 * @throws JsonException
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
-		$option = strtolower((string) ($args["option"] ?? ""));
+		$optionRaw = $args["option"] ?? "";
+		$option = is_string($optionRaw) ? strtolower($optionRaw) : "";
 
 		$toggleConfig = static function(string $path, string $msg) use ($sender) : void {
 			$current = ConfigManager::getData($path) === true;
@@ -94,7 +98,7 @@ class CaptchaSubCommand extends BaseSubCommand {
 
 			case "length":
 				$length = $args["length"] ?? null;
-				if ($length === null || $length < 1 || $length > 15) {
+				if (!is_int($length) || $length < 1 || $length > 15) {
 					$sender->sendMessage(Lang::get(LangKeys::CMD_CAPTCHA_INVALID_LENGTH));
 					return;
 				}

@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\utils\forms;
 use pocketmine\form\FormValidationException;
 use function gettype;
 use function is_bool;
+use function is_string;
 
 class ModalForm extends Form {
 	private string $content = "";
@@ -47,7 +48,7 @@ class ModalForm extends Form {
 		$this->data["button2"] = "";
 	}
 
-	public function processData(&$data) : void {
+	public function processData(mixed &$data) : void {
 		if ($data !== null && !is_bool($data)) {
 			throw new FormValidationException("Expected a boolean response, got " . gettype($data));
 		}
@@ -62,11 +63,13 @@ class ModalForm extends Form {
 	}
 
 	public function getTitle() : string {
-		return $this->data["title"];
+		$title = $this->data["title"] ?? "";
+		return is_string($title) ? $title : "";
 	}
 
 	public function getContent() : string {
-		return $this->data["content"];
+		$content = $this->data["content"] ?? "";
+		return is_string($content) ? $content : "";
 	}
 
 	/**
@@ -86,7 +89,8 @@ class ModalForm extends Form {
 	}
 
 	public function getButton1() : string {
-		return $this->data["button1"];
+		$button1 = $this->data["button1"] ?? "";
+		return is_string($button1) ? $button1 : "";
 	}
 
 	/**
@@ -98,6 +102,7 @@ class ModalForm extends Form {
 	}
 
 	public function getButton2() : string {
-		return $this->data["button2"];
+		$button2 = $this->data["button2"] ?? "";
+		return is_string($button2) ? $button2 : "";
 	}
 }

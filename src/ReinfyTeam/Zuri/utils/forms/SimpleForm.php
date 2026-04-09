@@ -34,7 +34,9 @@ namespace ReinfyTeam\Zuri\utils\forms;
 use pocketmine\form\FormValidationException;
 use function count;
 use function gettype;
+use function is_array;
 use function is_int;
+use function is_string;
 
 class SimpleForm extends Form {
 	public const int IMAGE_TYPE_PATH = 0;
@@ -42,6 +44,7 @@ class SimpleForm extends Form {
 
 	private string $content = "";
 
+	/** @var array<int,int|string> */
 	private array $labelMap = [];
 
 	public function __construct(?callable $callable) {
@@ -52,12 +55,16 @@ class SimpleForm extends Form {
 		$this->data["buttons"] = [];
 	}
 
-	public function processData(&$data) : void {
+	public function processData(mixed &$data) : void {
 		if ($data !== null) {
 			if (!is_int($data)) {
 				throw new FormValidationException("Expected an integer response, got " . gettype($data));
 			}
-			$count = count($this->data["buttons"]);
+			$buttons = $this->data["buttons"] ?? [];
+			if (!is_array($buttons)) {
+				throw new FormValidationException("Invalid buttons data");
+			}
+			$count = count($buttons);
 			if ($data >= $count || $data < 0) {
 				throw new FormValidationException("Button $data does not exist");
 			}
@@ -74,11 +81,13 @@ class SimpleForm extends Form {
 	}
 
 	public function getTitle() : string {
-		return $this->data["title"];
+		$title = $this->data["title"] ?? "";
+		return is_string($title) ? $title : "";
 	}
 
 	public function getContent() : string {
-		return $this->data["content"];
+		$content = $this->data["content"] ?? "";
+		return is_string($content) ? $content : "";
 	}
 
 	/**
@@ -98,7 +107,12 @@ class SimpleForm extends Form {
 			$content["image"]["type"] = $imageType === 0 ? "path" : "url";
 			$content["image"]["data"] = $imagePath;
 		}
-		$this->data["buttons"][] = $content;
+		$buttons = $this->data["buttons"] ?? [];
+		if (!is_array($buttons)) {
+			$buttons = [];
+		}
+		$buttons[] = $content;
+		$this->data["buttons"] = $buttons;
 		$this->labelMap[] = $label ?? count($this->labelMap);
 		return $this;
 	}

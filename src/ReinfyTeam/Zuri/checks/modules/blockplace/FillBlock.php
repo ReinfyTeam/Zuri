@@ -49,13 +49,10 @@ class FillBlock extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if (($player = $playerAPI->getPlayer()) === null) {
-			return;
-		}
+		$player = $playerAPI->getPlayer();
 		$isCreative = $player->isCreative() ? 10 : 0;
 		if ($playerAPI->actionPlacingSpecial() && (($playerAPI->getNumberBlocksAllowPlace() + $isCreative) < $playerAPI->getBlocksPlacedASec())) {
 			$this->dispatchAsyncDecision($playerAPI, true);
-			$player = $playerAPI->getPlayer();
 			if (!$player->isConnected() || !$player->isOnline()) {
 				return;
 			}

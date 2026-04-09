@@ -36,6 +36,7 @@ use function array_key_exists;
 use function gettype;
 use function implode;
 use function is_numeric;
+use function is_string;
 use function microtime;
 
 /**
@@ -89,6 +90,7 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	/**
 	 * Build the complete payload array for async dispatch.
 	 * Must return only JSON-serializable values.
+	 * @return array<string,mixed>
 	 */
 	abstract public function build() : array;
 
@@ -109,7 +111,7 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	 * Validate schema version from a deserialized payload.
 	 * Call this at the start of evaluateAsync() to prevent desync.
 	 *
-	 * @param array $payload The deserialized payload
+	 * @param array<string,mixed> $payload The deserialized payload
 	 * @param int $expectedVersion The expected schema version
 	 * @return bool True if version matches, false if mismatch
 	 */
@@ -122,15 +124,16 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	 * Assert that a payload has the expected schema version.
 	 * Throws SnapshotException if version mismatches.
 	 *
-	 * @param array $payload The deserialized payload
+	 * @param array<string,mixed> $payload The deserialized payload
 	 * @param int $expectedVersion The expected schema version
 	 * @throws SnapshotException If version doesn't match
 	 */
 	public static function assertSchemaVersion(array $payload, int $expectedVersion) : void {
 		$version = $payload['schemaVersion'] ?? 0;
 		if ($version !== $expectedVersion) {
+			$versionString = is_numeric($version) ? (string) $version : gettype($version);
 			throw new SnapshotException(
-				"Schema version mismatch: expected {$expectedVersion}, got {$version}. " .
+				"Schema version mismatch: expected {$expectedVersion}, got {$versionString}. " .
 				"This may indicate stale async tasks during a plugin update."
 			);
 		}
@@ -139,7 +142,7 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	/**
 	 * Validate that required fields exist in a payload.
 	 *
-	 * @param array $payload The payload to validate
+	 * @param array<string,mixed> $payload The payload to validate
 	 * @param string[] $requiredFields List of required field names
 	 * @throws SnapshotException If any required field is missing
 	 */
@@ -180,7 +183,7 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	/**
 	 * Assert that a payload matches the expected type, schema, and required fields.
 	 *
-	 * @param array $payload The payload to validate
+	 * @param array<string,mixed> $payload The payload to validate
 	 * @param string $expectedType Expected payload type
 	 * @param int $expectedVersion Expected schema version
 	 * @param string[] $requiredFields Required field names
@@ -195,7 +198,8 @@ abstract class AsyncSnapshot implements JsonSerializable {
 		array $boundedFields = []
 	) : void {
 		if (($payload['type'] ?? null) !== $expectedType) {
-			$actualType = (string) ($payload['type'] ?? 'unknown');
+			$actualTypeValue = $payload['type'] ?? 'unknown';
+			$actualType = is_string($actualTypeValue) ? $actualTypeValue : gettype($actualTypeValue);
 			throw new SnapshotException("Snapshot type mismatch: expected {$expectedType}, got {$actualType}");
 		}
 
@@ -211,7 +215,7 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	 * Safe payload validation helper for evaluateAsync() methods.
 	 * Returns false instead of throwing on malformed payloads.
 	 *
-	 * @param array $payload The payload to validate
+	 * @param array<string,mixed> $payload The payload to validate
 	 * @param string $expectedType Expected payload type
 	 * @param int $expectedVersion Expected schema version
 	 * @param string[] $requiredFields Required field names

@@ -36,19 +36,22 @@ use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\ZuriAC;
 use function fclose;
 use function file_exists;
+use function is_array;
+use function is_resource;
+use function is_string;
 use function rename;
 use function stream_get_contents;
 use function yaml_parse;
 
 class ConfigManager extends ConfigPaths {
-	public static function getData(string $path, mixed $defaultValue = null) {
+	public static function getData(string $path, mixed $defaultValue = null) : mixed {
 		return ZuriAC::getInstance()->getConfig()->getNested($path, $defaultValue);
 	}
 
 	/**
 	 * @throws JsonException
 	 */
-	public static function setData(string $path, $data) : void {
+	public static function setData(string $path, mixed $data) : void {
 		ZuriAC::getInstance()->getConfig()->setNested($path, $data);
 		ZuriAC::getInstance()->getConfig()->save();
 	}
@@ -67,16 +70,25 @@ class ConfigManager extends ConfigPaths {
 		}
 
 		$pluginConfigResource = ZuriAC::getInstance()->getResource("config.yml");
-		$pluginConfig = yaml_parse(stream_get_contents($pluginConfigResource));
+		if (!is_resource($pluginConfigResource)) {
+			$log = ZuriAC::getInstance()->getServer()->getLogger();
+			$log->critical(self::getData(self::PREFIX) . TextFormat::RED . " Failed to load embedded config.yml resource.");
+			ZuriAC::getInstance()->getServer()->getPluginManager()->disablePlugin(ZuriAC::getInstance());
+			return;
+		}
+
+		$pluginConfigRaw = stream_get_contents($pluginConfigResource);
 		fclose($pluginConfigResource);
+		$pluginConfigParsed = $pluginConfigRaw === false ? false : yaml_parse($pluginConfigRaw);
 		$config = ZuriAC::getInstance()->getConfig();
 		$log = ZuriAC::getInstance()->getServer()->getLogger();
-		if (!$pluginConfig) {
+		if (!is_array($pluginConfigParsed)) {
 			$log->critical(self::getData(self::PREFIX) . TextFormat::RED . " Invalid syntax. Currupted config.yml!");
 			ZuriAC::getInstance()->getServer()->getPluginManager()->disablePlugin(ZuriAC::getInstance());
 			return;
 		}
-		if ($config->getNested("zuri.version") === $pluginConfig["zuri"]["version"]) {
+		$pluginVersion = $pluginConfigParsed["zuri"]["version"] ?? null;
+		if (is_string($pluginVersion) && $config->getNested("zuri.version") === $pluginVersion) {
 			return;
 		}
 		@rename(ZuriAC::getInstance()->getDataFolder() . "config.yml", ZuriAC::getInstance()->getDataFolder() . "old-config.yml");

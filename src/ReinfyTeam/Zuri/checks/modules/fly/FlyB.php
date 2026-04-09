@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 use function max;
 
 class FlyB extends Check {
@@ -70,9 +71,11 @@ class FlyB extends Check {
 			$snapshot->addCachedData("creative", $player->isCreative());
 			$snapshot->addCachedData("spectator", $player->isSpectator());
 			$snapshot->addCachedData("allowFlight", $player->getAllowFlight());
-			$snapshot->addCachedData("flags", $packet->flags);
-			$snapshot->addCachedData("buffer", (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0));
-			$snapshot->addCachedData("bufferLimit", (int) $this->getConstant(CheckConstants::FLYB_PACKET_BUFFER_LIMIT));
+			$snapshot->addCachedData("flags", 0);
+			$bufferRaw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+			$snapshot->addCachedData("buffer", is_numeric($bufferRaw) ? (int) $bufferRaw : 0);
+			$bufferLimitRaw = $this->getConstant(CheckConstants::FLYB_PACKET_BUFFER_LIMIT);
+			$snapshot->addCachedData("bufferLimit", is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 2);
 
 			$snapshot->validate();
 
@@ -82,6 +85,9 @@ class FlyB extends Check {
 		}
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(
 			$payload,
@@ -98,30 +104,40 @@ class FlyB extends Check {
 		}
 
 		$cachedData = (array) ($payload["cachedData"] ?? []);
+		$teleportTicksRaw = $payload["teleportTicks"] ?? 0;
+		$teleportTicks = is_numeric($teleportTicksRaw) ? (int) $teleportTicksRaw : 0;
+		$teleportCommandTicksRaw = $payload["teleportCommandTicks"] ?? 0;
+		$teleportCommandTicks = is_numeric($teleportCommandTicksRaw) ? (int) $teleportCommandTicksRaw : 0;
+		$hurtTicksRaw = $payload["hurtTicks"] ?? 0;
+		$hurtTicks = is_numeric($hurtTicksRaw) ? (int) $hurtTicksRaw : 0;
 		if (
 			(bool) ($cachedData["creative"] ?? false) ||
 			(bool) ($cachedData["spectator"] ?? false) ||
 			(bool) ($cachedData["allowFlight"] ?? false) ||
-			(int) ($payload["teleportTicks"] ?? 0) < 40 ||
-			(int) ($payload["teleportCommandTicks"] ?? 0) < 40 ||
-			(int) ($payload["hurtTicks"] ?? 0) < 20 ||
+			$teleportTicks < 40 ||
+			$teleportCommandTicks < 40 ||
+			$hurtTicks < 20 ||
 			(bool) ($payload["recentlyCancelled"] ?? false)
 		) {
 			return ["set" => [self::BUFFER_KEY => 0]];
 		}
 
-		$flags = (int) ($cachedData["flags"] ?? 0);
+		$flagsRaw = $cachedData["flags"] ?? 0;
+		$flags = is_numeric($flagsRaw) ? (int) $flagsRaw : 0;
 		$allowFlightFlag = (($flags >> 9) & 0x01) === 1;
 		$flyingFlag = (($flags >> 7) & 0x01) === 1;
 		$noclipFlag = (($flags >> 6) & 0x01) === 1;
 		$suspicious = $allowFlightFlag || $flyingFlag || $noclipFlag;
-		$buffer = (int) ($cachedData["buffer"] ?? 0);
+		$bufferRaw = $cachedData["buffer"] ?? 0;
+		$buffer = is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 		$buffer = $suspicious ? $buffer + 1 : max(0, $buffer - 1);
 		$result = [
 			"set" => [self::BUFFER_KEY => $buffer],
 			"debug" => "packetFlags={$flags}, allowFlightFlag=" . ($allowFlightFlag ? "1" : "0") . ", flyingFlag=" . ($flyingFlag ? "1" : "0") . ", noclipFlag=" . ($noclipFlag ? "1" : "0") . ", suspicious=" . ($suspicious ? "true" : "false") . ", buffer={$buffer}",
 		];
-		if ($buffer >= (int) ($cachedData["bufferLimit"] ?? 2)) {
+		$bufferLimitRaw = $cachedData["bufferLimit"] ?? 2;
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 2;
+		if ($buffer >= $bufferLimit) {
 			$result["failed"] = true;
 			$result["set"][self::BUFFER_KEY] = 0;
 		}

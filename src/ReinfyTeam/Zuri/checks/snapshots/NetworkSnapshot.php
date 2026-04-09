@@ -34,8 +34,6 @@ namespace ReinfyTeam\Zuri\checks\snapshots;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function is_array;
-use function is_string;
 use function microtime;
 
 /**
@@ -59,17 +57,19 @@ class NetworkSnapshot extends AsyncSnapshot {
 	private int $teleportTicks;
 
 	/** Packet-specific data (serialized). */
+	/** @var array<string,mixed> */
 	private array $packetData;
 
 	/** Cached network data. */
-	private mixed $cachedData = [];
+	/** @var array<string,mixed> */
+	private array $cachedData = [];
 
 	public function __construct(string $checkType, Player $player, PlayerAPI $playerAPI, DataPacket $packet) {
 		parent::__construct($checkType);
 
 		$this->packetName = $packet::class;
 		$this->packetTime = microtime(true);
-		$this->ping = $player->getNetworkSession()->getPing();
+		$this->ping = (int) ($player->getNetworkSession()->getPing() ?? 0);
 		$this->survival = $player->isSurvival();
 		$this->onlineTime = $playerAPI->getOnlineTime();
 		$this->attackTicks = $playerAPI->getAttackTicks();
@@ -95,6 +95,7 @@ class NetworkSnapshot extends AsyncSnapshot {
 		return $this;
 	}
 
+	/** @return array<string,mixed> */
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
@@ -113,11 +114,8 @@ class NetworkSnapshot extends AsyncSnapshot {
 	}
 
 	public function validate() : void {
-		if (!is_string($this->packetName)) {
+		if ($this->packetName === "") {
 			throw new SnapshotException("Invalid packet name in network snapshot");
-		}
-		if (!is_array($this->packetData)) {
-			throw new SnapshotException("Invalid packet data in network snapshot");
 		}
 	}
 }

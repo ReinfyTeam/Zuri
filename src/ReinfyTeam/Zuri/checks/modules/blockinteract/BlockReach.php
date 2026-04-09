@@ -37,6 +37,7 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 
 class BlockReach extends Check {
 	public function getName() : string {
@@ -53,7 +54,9 @@ class BlockReach extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerInteractEvent) {
 			$block = $event->getBlock();
-			if (!$playerAPI->getPlayer()->canInteract($block->getPosition()->add(0.5, 0.5, 0.5), $playerAPI->getPlayer()->isCreative() ? $this->getConstant(CheckConstants::BLOCKREACH_MAX_CREATIVE_REACH) : $this->getConstant(CheckConstants::BLOCKREACH_MAX_SURVIVAL_REACH))) {
+			$maxDistanceRaw = $playerAPI->getPlayer()->isCreative() ? $this->getConstant(CheckConstants::BLOCKREACH_MAX_CREATIVE_REACH) : $this->getConstant(CheckConstants::BLOCKREACH_MAX_SURVIVAL_REACH);
+			$maxDistance = is_numeric($maxDistanceRaw) ? (float) $maxDistanceRaw : 0.0;
+			if (!$playerAPI->getPlayer()->canInteract($block->getPosition()->add(0.5, 0.5, 0.5), $maxDistance)) {
 				$this->dispatchAsyncDecision($playerAPI, true);
 			}
 		}

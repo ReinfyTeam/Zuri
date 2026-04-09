@@ -46,6 +46,18 @@ use function zlib_encode;
 
 class ReplaceText extends ConfigManager {
 	public static function replace(string|PlayerAPI $player, string $text, string $module = "", string $subType = "") : string {
+		$onlinePlayer = is_string($player) ? Server::getInstance()->getPlayerExact($player) : $player->getPlayer();
+		$playerAPI = is_string($player)
+			? ($onlinePlayer !== null ? PlayerAPI::getAPIPlayer($onlinePlayer) : null)
+			: $player;
+		$timestamp = date("F d, Y h:i:sA", time());
+		$deflated = zlib_encode(strtolower($module . $subType . $timestamp), ZLIB_ENCODING_DEFLATE, 9);
+		$errorCode = $deflated === false ? "N/A" : base64_encode($deflated);
+
+		$realViolation = $playerAPI !== null ? $playerAPI->getRealViolation($module) : "N/A";
+		$violation = $playerAPI !== null ? $playerAPI->getViolation($module) : "N/A";
+		$captchaCode = $playerAPI !== null ? $playerAPI->getCaptchaCode() : "N/A";
+
 		$keys = [
 			"{prefix}",
 			"{player_name}",
@@ -64,13 +76,13 @@ class ReplaceText extends ConfigManager {
 			(is_string($player) ? $player : $player->getPlayer()->getName()),
 			$module,
 			$subType,
-			date("F d, Y h:i:sA", time()),
-			(is_string($player) ? (Server::getInstance()->getPlayerExact($player) === null ? "N/A" : PlayerAPI::getAPIPlayer($player)->getViolation()) : $player->getRealViolation($module)),
-			(is_string($player) ? (Server::getInstance()->getPlayerExact($player) === null ? "N/A" : PlayerAPI::getAPIPlayer($player)->getViolation()) : $player->getViolation($module)),
+			$timestamp,
+			$realViolation,
+			$violation,
 			self::getData(self::CHAT_SPAM_DELAY),
-			(is_string($player) ? (Server::getInstance()->getPlayerExact($player) === null ? "N/A" : PlayerAPI::getAPIPlayer($player)->getCaptchaCode()) : $player->getCaptchaCode()),
+			$captchaCode,
 			Server::getInstance()->getTicksPerSecond(),
-			base64_encode(zlib_encode(strtolower($module . $subType . date("F d, Y h:i:sA", time())), ZLIB_ENCODING_DEFLATE, 9))
+			$errorCode
 		];
 
 		$text = str_replace($keys, $replace, $text);

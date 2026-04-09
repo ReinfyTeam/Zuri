@@ -42,7 +42,9 @@ use function is_int;
 use function is_string;
 
 class CustomForm extends Form {
+	/** @var array<int,int|string> */
 	private array $labelMap = [];
+	/** @var array<int,callable(mixed):bool> */
 	private array $validationMethods = [];
 
 	public function __construct(?callable $callable) {
@@ -52,11 +54,15 @@ class CustomForm extends Form {
 		$this->data["content"] = [];
 	}
 
-	public function processData(&$data) : void {
+	public function processData(mixed &$data) : void {
 		if ($data !== null && !is_array($data)) {
 			throw new FormValidationException("Expected an array response, got " . gettype($data));
 		}
 		if (is_array($data)) {
+			$contentEntries = $this->data["content"] ?? [];
+			if (!is_array($contentEntries)) {
+				throw new FormValidationException("Invalid form content data");
+			}
 			$actual = count($data);
 			$expected = count($this->validationMethods);
 			if ($actual > $expected) {
@@ -65,7 +71,11 @@ class CustomForm extends Form {
 				// In 1.21.70, the client doesn't send nulls for labels, so we need to polyfill them here to
 				// maintain the old behaviour
 				$noLabelsIndexMapping = [];
-				foreach ($this->data["content"] as $index => ["type" => $r]) {
+				foreach ($contentEntries as $index => $entry) {
+					if (!is_array($entry)) {
+						continue;
+					}
+					$r = $entry["type"] ?? null;
 					if ($r !== "label") {
 						$noLabelsIndexMapping[] = $index;
 					}
@@ -121,7 +131,8 @@ class CustomForm extends Form {
 	}
 
 	public function getTitle() : string {
-		return $this->data["title"];
+		$title = $this->data["title"] ?? "";
+		return is_string($title) ? $title : "";
 	}
 
 	/**
@@ -137,7 +148,7 @@ class CustomForm extends Form {
 	/**
 	 * @return $this
 	 */
-	public function addToggle(string $text, bool $default = null, ?string $label = null) : self {
+	public function addToggle(string $text, ?bool $default = null, ?string $label = null) : self {
 		$content = ["type" => "toggle", "text" => $text];
 		if ($default !== null) {
 			$content["default"] = $default;
@@ -168,6 +179,7 @@ class CustomForm extends Form {
 	/**
 	 * @return $this
 	 */
+	/** @param list<string> $steps */
 	public function addStepSlider(string $text, array $steps, int $defaultIndex = -1, ?string $label = null) : self {
 		$content = ["type" => "step_slider", "text" => $text, "steps" => $steps];
 		if ($defaultIndex !== -1) {
@@ -182,7 +194,8 @@ class CustomForm extends Form {
 	/**
 	 * @return $this
 	 */
-	public function addDropdown(string $text, array $options, int $default = null, ?string $label = null) : self {
+	/** @param list<string> $options */
+	public function addDropdown(string $text, array $options, ?int $default = null, ?string $label = null) : self {
 		$this->addContent(["type" => "dropdown", "text" => $text, "options" => $options, "default" => $default]);
 		$this->labelMap[] = $label ?? count($this->labelMap);
 		$this->validationMethods[] = static fn($v) => is_int($v) && isset($options[$v]);
@@ -192,7 +205,7 @@ class CustomForm extends Form {
 	/**
 	 * @return $this
 	 */
-	public function addInput(string $text, string $placeholder = "", string $default = null, ?string $label = null) : self {
+	public function addInput(string $text, string $placeholder = "", ?string $default = null, ?string $label = null) : self {
 		$this->addContent(["type" => "input", "text" => $text, "placeholder" => $placeholder, "default" => $default]);
 		$this->labelMap[] = $label ?? count($this->labelMap);
 		$this->validationMethods[] = static fn($v) => is_string($v);
@@ -202,8 +215,14 @@ class CustomForm extends Form {
 	/**
 	 * @return $this
 	 */
+	/** @param array<string,mixed> $content */
 	private function addContent(array $content) : self {
-		$this->data["content"][] = $content;
+		$currentContent = $this->data["content"] ?? [];
+		if (!is_array($currentContent)) {
+			$currentContent = [];
+		}
+		$currentContent[] = $content;
+		$this->data["content"] = $currentContent;
 		return $this;
 	}
 }

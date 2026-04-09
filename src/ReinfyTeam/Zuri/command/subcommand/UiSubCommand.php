@@ -47,6 +47,7 @@ class UiSubCommand extends BaseSubCommand {
 	protected function prepare() : void {
 	}
 
+	/** @param array<string,mixed> $args */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		if (!$sender instanceof Player) {
 			$sender->sendMessage(Lang::get(LangKeys::CMD_UI_IN_GAME_ONLY));

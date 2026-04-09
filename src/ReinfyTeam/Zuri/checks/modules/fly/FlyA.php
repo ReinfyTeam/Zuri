@@ -41,6 +41,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
+use function is_numeric;
 use function microtime;
 
 class FlyA extends Check {
@@ -76,7 +77,8 @@ class FlyA extends Check {
 		$snapshot->addCachedData("lastYNoGround", $playerAPI->getExternalData(CacheData::FLY_A_LAST_Y_NO_GROUND));
 		$snapshot->addCachedData("lastTime", $playerAPI->getExternalData(CacheData::FLY_A_LAST_TIME));
 		$snapshot->addCachedData("now", microtime(true));
-		$snapshot->addCachedData("maxGroundDiff", (float) $this->getConstant(CheckConstants::FLYA_MAX_GROUND_DIFF));
+		$maxGroundDiffRaw = $this->getConstant(CheckConstants::FLYA_MAX_GROUND_DIFF);
+		$snapshot->addCachedData("maxGroundDiff", is_numeric($maxGroundDiffRaw) ? (float) $maxGroundDiffRaw : 0.0);
 
 		$snapshot->validate();
 
@@ -85,6 +87,9 @@ class FlyA extends Check {
 		$this->dispatchAsyncCheck($player->getName(), $payload);
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(
 			$payload,
@@ -101,21 +106,38 @@ class FlyA extends Check {
 		}
 
 		// Extract movement snapshot fields
+		$attackTicksRaw = $payload["attackTicks"] ?? 0;
+		$onlineTimeRaw = $payload["onlineTime"] ?? 0;
+		$jumpTicksRaw = $payload["jumpTicks"] ?? 0;
+		$teleportTicksRaw = $payload["teleportTicks"] ?? 0;
+		$teleportCommandTicksRaw = $payload["teleportCommandTicks"] ?? 0;
+		$hurtTicksRaw = $payload["hurtTicks"] ?? 0;
+		$absMotionXRaw = $payload["absMotionX"] ?? 0.0;
+		$absMotionZRaw = $payload["absMotionZ"] ?? 0.0;
+		$attackTicks = is_numeric($attackTicksRaw) ? (int) $attackTicksRaw : 0;
+		$onlineTime = is_numeric($onlineTimeRaw) ? (int) $onlineTimeRaw : 0;
+		$jumpTicks = is_numeric($jumpTicksRaw) ? (int) $jumpTicksRaw : 0;
+		$teleportTicks = is_numeric($teleportTicksRaw) ? (int) $teleportTicksRaw : 0;
+		$teleportCommandTicks = is_numeric($teleportCommandTicksRaw) ? (int) $teleportCommandTicksRaw : 0;
+		$hurtTicks = is_numeric($hurtTicksRaw) ? (int) $hurtTicksRaw : 0;
+		$absMotionX = is_numeric($absMotionXRaw) ? (float) $absMotionXRaw : 0.0;
+		$absMotionZ = is_numeric($absMotionZRaw) ? (float) $absMotionZRaw : 0.0;
+
 		if (
-			(int) ($payload["attackTicks"] ?? 0) < 40 ||
-			(int) ($payload["onlineTime"] ?? 0) <= 30 ||
-			(int) ($payload["jumpTicks"] ?? 0) < 40 ||
-			(int) ($payload["teleportTicks"] ?? 0) < 60 ||
-			(int) ($payload["teleportCommandTicks"] ?? 0) < 60 ||
-			(int) ($payload["hurtTicks"] ?? 0) < 20 ||
+			$attackTicks < 40 ||
+			$onlineTime <= 30 ||
+			$jumpTicks < 40 ||
+			$teleportTicks < 60 ||
+			$teleportCommandTicks < 60 ||
+			$hurtTicks < 20 ||
 			(bool) ($payload["inWeb"] ?? false) ||
 			(bool) ($payload["onGround"] ?? false) ||
 			(bool) ($payload["onAdhesion"] ?? false) ||
 			!(bool) ($payload["survival"] ?? false) ||
 			!(bool) ($payload["chunkLoaded"] ?? false) ||
 			(bool) ($payload["gliding"] ?? false) ||
-			(float) ($payload["absMotionX"] ?? 0.0) > 0.11 ||
-			(float) ($payload["absMotionZ"] ?? 0.0) > 0.11 ||
+			$absMotionX > 0.11 ||
+			$absMotionZ > 0.11 ||
 			(bool) ($payload["recentlyCancelled"] ?? false)
 		) {
 			return ["unset" => [CacheData::FLY_A_LAST_Y_NO_GROUND, CacheData::FLY_A_LAST_TIME]];
@@ -133,18 +155,29 @@ class FlyA extends Check {
 		$lastYNoGround = $cachedData["lastYNoGround"] ?? null;
 		$lastTime = $cachedData["lastTime"] ?? null;
 		if ($lastYNoGround !== null && $lastTime !== null) {
-			$now = (float) ($cachedData["now"] ?? microtime(true));
-			$diff = $now - (float) $lastTime;
+			$nowRaw = $cachedData["now"] ?? microtime(true);
+			$lastTimeRaw = $lastTime;
+			$lastYNoGroundRaw = $lastYNoGround;
+			$now = is_numeric($nowRaw) ? (float) $nowRaw : microtime(true);
+			$lastTimeValue = is_numeric($lastTimeRaw) ? (float) $lastTimeRaw : 0.0;
+			$lastYNoGroundValue = is_numeric($lastYNoGroundRaw) ? (float) $lastYNoGroundRaw : 0.0;
+			$diff = $now - $lastTimeValue;
 			$result = ["debug" => "diff={$diff}, lastTime={$lastTime}, lastYNoGround={$lastYNoGround}"];
-			$currentY = (float) ($payload["posY"] ?? 0.0);
-			$maxGroundDiff = (float) ($cachedData["maxGroundDiff"] ?? 0.0);
-			if ($diff > $maxGroundDiff && abs($currentY - (float) $lastYNoGround) <= 0.001) {
+			$currentYRaw = $payload["posY"] ?? 0.0;
+			$maxGroundDiffRaw = $cachedData["maxGroundDiff"] ?? 0.0;
+			$currentY = is_numeric($currentYRaw) ? (float) $currentYRaw : 0.0;
+			$maxGroundDiff = is_numeric($maxGroundDiffRaw) ? (float) $maxGroundDiffRaw : 0.0;
+			if ($diff > $maxGroundDiff && abs($currentY - $lastYNoGroundValue) <= 0.001) {
 				$result["failed"] = true;
 			}
 			$result["unset"] = [CacheData::FLY_A_LAST_Y_NO_GROUND, CacheData::FLY_A_LAST_TIME];
 			return $result;
 		}
 
-		return ["set" => [CacheData::FLY_A_LAST_Y_NO_GROUND => (float) ($payload["posY"] ?? 0.0), CacheData::FLY_A_LAST_TIME => (float) ($cachedData["now"] ?? microtime(true))]];
+		$posYRaw = $payload["posY"] ?? 0.0;
+		$nowRaw = $cachedData["now"] ?? microtime(true);
+		$posY = is_numeric($posYRaw) ? (float) $posYRaw : 0.0;
+		$now = is_numeric($nowRaw) ? (float) $nowRaw : microtime(true);
+		return ["set" => [CacheData::FLY_A_LAST_Y_NO_GROUND => $posY, CacheData::FLY_A_LAST_TIME => $now]];
 	}
 }

@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
+use function is_numeric;
 
 class AutoClickA extends Check {
 	public function getName() : string {
@@ -50,21 +51,20 @@ class AutoClickA extends Check {
 		return "A";
 	}
 
-	/**
-	 * @throws ReflectionException
-	 * @throws DiscordWebhookException
-	 */
+	/** @throws DiscordWebhookException */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof LevelSoundEventPacket) {
 			if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
+				$maxTicksRaw = $this->getConstant(CheckConstants::AUTOCLICKA_MAX_TICKS);
+				$maxDeviationRaw = $this->getConstant(CheckConstants::AUTOCLICKA_MAX_DEVIATION);
 				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
 					"type" => "AutoClickA",
 					"isDigging" => $playerAPI->isDigging(),
 					"ticks" => $playerAPI->getExternalData(CacheData::AUTOCLICK_A_TICKS),
 					CacheData::AUTOCLICK_A_AVG_SPEED => $playerAPI->getExternalData(CacheData::AUTOCLICK_A_AVG_SPEED),
 					CacheData::AUTOCLICK_A_AVG_DEVIATION => $playerAPI->getExternalData(CacheData::AUTOCLICK_A_AVG_DEVIATION),
-					"maxTicks" => (int) $this->getConstant(CheckConstants::AUTOCLICKA_MAX_TICKS),
-					"maxDeviation" => (float) $this->getConstant(CheckConstants::AUTOCLICKA_MAX_DEVIATION),
+					"maxTicks" => is_numeric($maxTicksRaw) ? (int) $maxTicksRaw : 0,
+					"maxDeviation" => is_numeric($maxDeviationRaw) ? (float) $maxDeviationRaw : 0.0,
 				]);
 			}
 		}
@@ -82,23 +82,30 @@ class AutoClickA extends Check {
 			return ["set" => [CacheData::AUTOCLICK_A_AVG_SPEED => 0, CacheData::AUTOCLICK_A_AVG_DEVIATION => 0, CacheData::AUTOCLICK_A_TICKS => 0]];
 		}
 
-		if ((bool) ($payload["isDigging"] ?? false) || (int) $ticks > (int) ($payload["maxTicks"] ?? 0)) {
+		$ticksValue = is_numeric($ticks) ? (int) $ticks : 0;
+		$avgSpeedValue = is_numeric($avgSpeed) ? (float) $avgSpeed : 0.0;
+		$avgDeviationValue = is_numeric($avgDeviation) ? (float) $avgDeviation : 0.0;
+		$maxTicksRaw = $payload["maxTicks"] ?? 0;
+		$maxTicks = is_numeric($maxTicksRaw) ? (int) $maxTicksRaw : 0;
+		if ((bool) ($payload["isDigging"] ?? false) || $ticksValue > $maxTicks) {
 			return ["unset" => [CacheData::AUTOCLICK_A_TICKS, CacheData::AUTOCLICK_A_AVG_SPEED, CacheData::AUTOCLICK_A_AVG_DEVIATION]];
 		}
 
-		$speed = (int) $ticks * 50;
-		$newAvgSpeed = (((float) $avgSpeed * 14) + $speed) / 15;
+		$speed = $ticksValue * 50;
+		$newAvgSpeed = (($avgSpeedValue * 14) + $speed) / 15;
 		$deviation = abs($speed - $newAvgSpeed);
-		$newAvgDeviation = (((float) $avgDeviation * 9) + $deviation) / 10;
+		$newAvgDeviation = (($avgDeviationValue * 9) + $deviation) / 10;
 		$result = [
 			"set" => [
-				CacheData::AUTOCLICK_A_TICKS => (int) $ticks + 1,
+				CacheData::AUTOCLICK_A_TICKS => $ticksValue + 1,
 				CacheData::AUTOCLICK_A_AVG_SPEED => $newAvgSpeed,
 				CacheData::AUTOCLICK_A_AVG_DEVIATION => $newAvgDeviation,
 			],
-			"debug" => "avgDeviation={$avgDeviation}, speed={$speed}, deviation={$deviation}, ticksClick={$ticks}, avgSpeed={$avgSpeed}",
+			"debug" => "avgDeviation={$avgDeviationValue}, speed={$speed}, deviation={$deviation}, ticksClick={$ticksValue}, avgSpeed={$avgSpeedValue}",
 		];
-		if ($newAvgDeviation < (float) ($payload["maxDeviation"] ?? 0.0)) {
+		$maxDeviationRaw = $payload["maxDeviation"] ?? 0.0;
+		$maxDeviation = is_numeric($maxDeviationRaw) ? (float) $maxDeviationRaw : 0.0;
+		if ($newAvgDeviation < $maxDeviation) {
 			$result["failed"] = true;
 		}
 		return $result;

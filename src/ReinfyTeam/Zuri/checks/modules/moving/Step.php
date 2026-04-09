@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 
 class Step extends Check {
 	public function getName() : string {
@@ -54,11 +55,10 @@ class Step extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerMoveEvent) {
 			$player = $event->getPlayer();
-			if ($playerAPI->getPlayer() === null) {
-				return;
-			}
+			$pingLaggingRaw = self::getData(self::PING_LAGGING);
+			$pingLagging = is_numeric($pingLaggingRaw) ? (int) $pingLaggingRaw : 0;
 			if (
-				$playerAPI->getPing() > self::getData(self::PING_LAGGING) ||
+				$playerAPI->getPing() > $pingLagging ||
 				!$playerAPI->isOnGround() ||
 				!$player->isSurvival() ||
 				$player->getAllowFlight() ||
@@ -75,16 +75,22 @@ class Step extends Check {
 			}
 			$lastY = $playerAPI->getExternalData(CacheData::STEP_LAST_Y);
 			$locationPlayer = $player->getLocation();
-			$limit = $this->getConstant(CheckConstants::STEP_Y_LIMIT);
-			if ($lastY !== null) {
-				$diff = $locationPlayer->getY() - $lastY;
-				$limit += $playerAPI->isOnStairs() ? $this->getConstant(CheckConstants::STEP_STAIRS_LIMIT) : 0;
-				$limit += $playerAPI->getJumpTicks() < 40 ? $this->getConstant(CheckConstants::STEP_JUMP_LIMIT) : 0;
+			$limitRaw = $this->getConstant(CheckConstants::STEP_Y_LIMIT);
+			$limit = is_numeric($limitRaw) ? (float) $limitRaw : 0.0;
+			if (is_numeric($lastY)) {
+				$lastYFloat = (float) $lastY;
+				$diff = $locationPlayer->getY() - $lastYFloat;
+				$stairsLimitRaw = $this->getConstant(CheckConstants::STEP_STAIRS_LIMIT);
+				$stairsLimit = is_numeric($stairsLimitRaw) ? (float) $stairsLimitRaw : 0.0;
+				$jumpLimitRaw = $this->getConstant(CheckConstants::STEP_JUMP_LIMIT);
+				$jumpLimit = is_numeric($jumpLimitRaw) ? (float) $jumpLimitRaw : 0.0;
+				$limit += $playerAPI->isOnStairs() ? $stairsLimit : 0;
+				$limit += $playerAPI->getJumpTicks() < 40 ? $jumpLimit : 0;
 				if ($diff > $limit) {
 					$this->dispatchAsyncDecision($playerAPI, true);
 				}
 				$playerAPI->unsetExternalData(CacheData::STEP_LAST_Y);
-				$this->debug($playerAPI, "lastY=$lastY, limit=$limit, diff=$diff");
+				$this->debug($playerAPI, "lastY={$lastYFloat}, limit={$limit}, diff={$diff}");
 			} else {
 				$playerAPI->setExternalData(CacheData::STEP_LAST_Y, $locationPlayer->getY());
 			}

@@ -41,6 +41,7 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 use function max;
 use function microtime;
 
@@ -66,14 +67,17 @@ class ChestAura extends Check {
 		}
 
 		$timeOpenChest = $playerAPI->getExternalData(CacheData::CHESTAURA_TIME_OPEN_CHEST);
-		$countTransaction = (int) $playerAPI->getExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION, 0);
+		$countTransactionRaw = $playerAPI->getExternalData(CacheData::CHESTAURA_COUNT_TRANSACTION, 0);
+		$countTransaction = is_numeric($countTransactionRaw) ? (int) $countTransactionRaw : 0;
 
 		if ($event instanceof InventoryCloseEvent) {
 			if ($timeOpenChest !== null) {
-				$timeDiff = microtime(true) - (float) $timeOpenChest;
+				$timeDiff = microtime(true) - (is_numeric($timeOpenChest) ? (float) $timeOpenChest : microtime(true));
+				$transactionDivisibleRaw = $this->getConstant(CheckConstants::CHESTAURA_TRANSACTION_DIVISIBLE);
+				$transactionDivisible = is_numeric($transactionDivisibleRaw) ? (float) $transactionDivisibleRaw : 0.0;
 				$rate = $countTransaction / max(0.001, $timeDiff);
 				$this->debug($playerAPI, "timeDiff={$timeDiff}, count={$countTransaction}, rate={$rate}");
-				if ($countTransaction >= 6 && $rate > (float) $this->getConstant(CheckConstants::CHESTAURA_TRANSACTION_DIVISIBLE)) {
+				if ($countTransaction >= 6 && $rate > $transactionDivisible) {
 					$this->dispatchAsyncDecision($playerAPI, true);
 				}
 			}

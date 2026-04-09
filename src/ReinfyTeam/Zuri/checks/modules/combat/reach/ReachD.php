@@ -39,6 +39,8 @@ use ReinfyTeam\Zuri\checks\snapshots\CombatSnapshot;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\MathUtil;
+use function is_array;
+use function is_numeric;
 
 class ReachD extends Check {
 	public function getName() : string {
@@ -62,13 +64,20 @@ class ReachD extends Check {
 					return;
 				}
 
+				$defaultEyeDistanceRaw = $this->getConstant(CheckConstants::REACHD_DEFAULT_EYE_DISTANCE);
+				$victimSprintingDistanceRaw = $this->getConstant(CheckConstants::REACHD_SPRINTING_EYE_DISTANCE);
+				$victimNotSprintingDistanceRaw = $this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_EYE_DISTANCE);
+				$damagerSprintingDistanceRaw = $this->getConstant(CheckConstants::REACHD_DAMAGER_SPRINTING_EYE_DISTANCE);
+				$damagerNotSprintingDistanceRaw = $this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_DAMAGER_EYE_DISTANCE);
+				$limitRaw = $this->getConstant(CheckConstants::REACHD_REACH_EYE_LIMIT);
+
 				$snapshot = new CombatSnapshot("ReachD", $damager, $damagerAPI, $victim, $victimAPI);
-				$snapshot->addCachedData("defaultEyeDistance", (float) ($this->getConstant(CheckConstants::REACHD_DEFAULT_EYE_DISTANCE) ?? 0.0041));
-				$snapshot->addCachedData("victimSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_SPRINTING_EYE_DISTANCE) ?? 0.97));
-				$snapshot->addCachedData("victimNotSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_EYE_DISTANCE) ?? 0.87));
-				$snapshot->addCachedData("damagerSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_DAMAGER_SPRINTING_EYE_DISTANCE) ?? 0.77));
-				$snapshot->addCachedData("damagerNotSprintingDistance", (float) ($this->getConstant(CheckConstants::REACHD_NOT_SPRINTING_DAMAGER_EYE_DISTANCE) ?? 0.67));
-				$snapshot->addCachedData("limit", (float) ($this->getConstant(CheckConstants::REACHD_REACH_EYE_LIMIT) ?? 3.0));
+				$snapshot->addCachedData("defaultEyeDistance", is_numeric($defaultEyeDistanceRaw) ? (float) $defaultEyeDistanceRaw : 0.0041);
+				$snapshot->addCachedData("victimSprintingDistance", is_numeric($victimSprintingDistanceRaw) ? (float) $victimSprintingDistanceRaw : 0.97);
+				$snapshot->addCachedData("victimNotSprintingDistance", is_numeric($victimNotSprintingDistanceRaw) ? (float) $victimNotSprintingDistanceRaw : 0.87);
+				$snapshot->addCachedData("damagerSprintingDistance", is_numeric($damagerSprintingDistanceRaw) ? (float) $damagerSprintingDistanceRaw : 0.77);
+				$snapshot->addCachedData("damagerNotSprintingDistance", is_numeric($damagerNotSprintingDistanceRaw) ? (float) $damagerNotSprintingDistanceRaw : 0.67);
+				$snapshot->addCachedData("limit", is_numeric($limitRaw) ? (float) $limitRaw : 3.0);
 				$snapshot->validate();
 				$this->dispatchAsyncCheck($damager->getName(), $snapshot->build());
 			}
@@ -95,38 +104,77 @@ class ReachD extends Check {
 			return [];
 		}
 
+		$victimProjectileTicksRaw = $payload["victimProjectileTicks"] ?? 0;
+		$damagerProjectileTicksRaw = $payload["damagerProjectileTicks"] ?? 0;
+		$victimBowTicksRaw = $payload["victimBowTicks"] ?? 0;
+		$damagerBowTicksRaw = $payload["damagerBowTicks"] ?? 0;
+		$victimProjectileTicks = is_numeric($victimProjectileTicksRaw) ? (int) $victimProjectileTicksRaw : 0;
+		$damagerProjectileTicks = is_numeric($damagerProjectileTicksRaw) ? (int) $damagerProjectileTicksRaw : 0;
+		$victimBowTicks = is_numeric($victimBowTicksRaw) ? (int) $victimBowTicksRaw : 0;
+		$damagerBowTicks = is_numeric($damagerBowTicksRaw) ? (int) $damagerBowTicksRaw : 0;
+
 		if (
 			!(bool) ($payload["damagerSurvival"] ?? false) ||
 			!(bool) ($payload["victimSurvival"] ?? false) ||
-			(int) ($payload["victimProjectileTicks"] ?? 0) < 40 ||
-			(int) ($payload["damagerProjectileTicks"] ?? 0) < 40 ||
-			(int) ($payload["victimBowTicks"] ?? 0) < 40 ||
-			(int) ($payload["damagerBowTicks"] ?? 0) < 40 ||
+			$victimProjectileTicks < 40 ||
+			$damagerProjectileTicks < 40 ||
+			$victimBowTicks < 40 ||
+			$damagerBowTicks < 40 ||
 			(bool) ($payload["victimRecentlyCancelled"] ?? false) ||
 			(bool) ($payload["damagerRecentlyCancelled"] ?? false)
 		) {
 			return [];
 		}
 
-		$cachedData = $payload["cachedData"] ?? [];
-		$distance = MathUtil::distanceFromComponents(
-			(float) ($payload["damagerEyeX"] ?? 0.0),
-			(float) ($payload["damagerEyeY"] ?? 0.0),
-			(float) ($payload["damagerEyeZ"] ?? 0.0),
-			(float) ($payload["victimEyeX"] ?? 0.0),
-			(float) ($payload["victimEyeY"] ?? 0.0),
-			(float) ($payload["victimEyeZ"] ?? 0.0)
-		);
-		$distance -= (int) ($payload["damagerPing"] ?? 0) * (float) ($cachedData["defaultEyeDistance"] ?? 0.0041);
-		$distance -= (int) ($payload["victimPing"] ?? 0) * (float) ($cachedData["defaultEyeDistance"] ?? 0.0041);
-		$distance -= (bool) ($payload["victimSprinting"] ?? false)
-			? (float) ($cachedData["victimSprintingDistance"] ?? 0.97)
-			: (float) ($cachedData["victimNotSprintingDistance"] ?? 0.87);
-		$distance -= (bool) ($payload["damagerSprinting"] ?? false)
-			? (float) ($cachedData["damagerSprintingDistance"] ?? 0.77)
-			: (float) ($cachedData["damagerNotSprintingDistance"] ?? 0.67);
+		$cachedDataRaw = $payload["cachedData"] ?? [];
+		$cachedData = is_array($cachedDataRaw) ? $cachedDataRaw : [];
+		$damagerEyeXRaw = $payload["damagerEyeX"] ?? 0.0;
+		$damagerEyeYRaw = $payload["damagerEyeY"] ?? 0.0;
+		$damagerEyeZRaw = $payload["damagerEyeZ"] ?? 0.0;
+		$victimEyeXRaw = $payload["victimEyeX"] ?? 0.0;
+		$victimEyeYRaw = $payload["victimEyeY"] ?? 0.0;
+		$victimEyeZRaw = $payload["victimEyeZ"] ?? 0.0;
+		$damagerPingRaw = $payload["damagerPing"] ?? 0;
+		$victimPingRaw = $payload["victimPing"] ?? 0;
+		$defaultEyeDistanceRaw = $cachedData["defaultEyeDistance"] ?? 0.0041;
+		$victimSprintingDistanceRaw = $cachedData["victimSprintingDistance"] ?? 0.97;
+		$victimNotSprintingDistanceRaw = $cachedData["victimNotSprintingDistance"] ?? 0.87;
+		$damagerSprintingDistanceRaw = $cachedData["damagerSprintingDistance"] ?? 0.77;
+		$damagerNotSprintingDistanceRaw = $cachedData["damagerNotSprintingDistance"] ?? 0.67;
+		$limitRaw = $cachedData["limit"] ?? 3.0;
 
-		$limit = (float) ($cachedData["limit"] ?? 3.0);
+		$damagerEyeX = is_numeric($damagerEyeXRaw) ? (float) $damagerEyeXRaw : 0.0;
+		$damagerEyeY = is_numeric($damagerEyeYRaw) ? (float) $damagerEyeYRaw : 0.0;
+		$damagerEyeZ = is_numeric($damagerEyeZRaw) ? (float) $damagerEyeZRaw : 0.0;
+		$victimEyeX = is_numeric($victimEyeXRaw) ? (float) $victimEyeXRaw : 0.0;
+		$victimEyeY = is_numeric($victimEyeYRaw) ? (float) $victimEyeYRaw : 0.0;
+		$victimEyeZ = is_numeric($victimEyeZRaw) ? (float) $victimEyeZRaw : 0.0;
+		$damagerPing = is_numeric($damagerPingRaw) ? (int) $damagerPingRaw : 0;
+		$victimPing = is_numeric($victimPingRaw) ? (int) $victimPingRaw : 0;
+		$defaultEyeDistance = is_numeric($defaultEyeDistanceRaw) ? (float) $defaultEyeDistanceRaw : 0.0041;
+		$victimSprintingDistance = is_numeric($victimSprintingDistanceRaw) ? (float) $victimSprintingDistanceRaw : 0.97;
+		$victimNotSprintingDistance = is_numeric($victimNotSprintingDistanceRaw) ? (float) $victimNotSprintingDistanceRaw : 0.87;
+		$damagerSprintingDistance = is_numeric($damagerSprintingDistanceRaw) ? (float) $damagerSprintingDistanceRaw : 0.77;
+		$damagerNotSprintingDistance = is_numeric($damagerNotSprintingDistanceRaw) ? (float) $damagerNotSprintingDistanceRaw : 0.67;
+		$limit = is_numeric($limitRaw) ? (float) $limitRaw : 3.0;
+
+		$distance = MathUtil::distanceFromComponents(
+			$damagerEyeX,
+			$damagerEyeY,
+			$damagerEyeZ,
+			$victimEyeX,
+			$victimEyeY,
+			$victimEyeZ
+		);
+		$distance -= $damagerPing * $defaultEyeDistance;
+		$distance -= $victimPing * $defaultEyeDistance;
+		$distance -= (bool) ($payload["victimSprinting"] ?? false)
+			? $victimSprintingDistance
+			: $victimNotSprintingDistance;
+		$distance -= (bool) ($payload["damagerSprinting"] ?? false)
+			? $damagerSprintingDistance
+			: $damagerNotSprintingDistance;
+
 		$debug = "distance={$distance}, limit={$limit}";
 		if ($distance > $limit) {
 			return ["failed" => true, "debug" => $debug];

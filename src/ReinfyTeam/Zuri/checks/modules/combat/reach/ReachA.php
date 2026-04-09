@@ -40,6 +40,8 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
+use function is_array;
+use function is_numeric;
 use function sqrt;
 
 class ReachA extends Check {
@@ -80,8 +82,10 @@ class ReachA extends Check {
 			return;
 		}
 
+		$maxDistanceRaw = $this->getConstant(CheckConstants::REACHA_SURVIVAL_MAX_DISTANCE);
+		$maxDistance = is_numeric($maxDistanceRaw) ? (float) $maxDistanceRaw : 0.0;
 		$snapshot = new CombatSnapshot("ReachA", $damager, $damagerAPI, $entity, $playerAPI);
-		$snapshot->addCachedData("maxDistance", (float) $this->getConstant(CheckConstants::REACHA_SURVIVAL_MAX_DISTANCE));
+		$snapshot->addCachedData("maxDistance", $maxDistance);
 		$snapshot->validate();
 		$this->dispatchAsyncCheck($damager->getName(), $snapshot->build());
 	}
@@ -104,20 +108,31 @@ class ReachA extends Check {
 			return [];
 		}
 
+		$victimProjectileTicksRaw = $payload["victimProjectileTicks"] ?? 0;
+		$damagerProjectileTicksRaw = $payload["damagerProjectileTicks"] ?? 0;
+		$victimBowTicksRaw = $payload["victimBowTicks"] ?? 0;
+		$damagerBowTicksRaw = $payload["damagerBowTicks"] ?? 0;
+		$victimProjectileTicks = is_numeric($victimProjectileTicksRaw) ? (int) $victimProjectileTicksRaw : 0;
+		$damagerProjectileTicks = is_numeric($damagerProjectileTicksRaw) ? (int) $damagerProjectileTicksRaw : 0;
+		$victimBowTicks = is_numeric($victimBowTicksRaw) ? (int) $victimBowTicksRaw : 0;
+		$damagerBowTicks = is_numeric($damagerBowTicksRaw) ? (int) $damagerBowTicksRaw : 0;
+
 		if (
 			!(bool) ($payload["damagerSurvival"] ?? false) ||
 			!(bool) ($payload["victimSurvival"] ?? false) ||
-			(int) ($payload["victimProjectileTicks"] ?? 0) < 40 ||
-			(int) ($payload["damagerProjectileTicks"] ?? 0) < 40 ||
-			(int) ($payload["victimBowTicks"] ?? 0) < 40 ||
-			(int) ($payload["damagerBowTicks"] ?? 0) < 40 ||
+			$victimProjectileTicks < 40 ||
+			$damagerProjectileTicks < 40 ||
+			$victimBowTicks < 40 ||
+			$damagerBowTicks < 40 ||
 			(bool) ($payload["victimRecentlyCancelled"] ?? false) ||
 			(bool) ($payload["damagerRecentlyCancelled"] ?? false)
 		) {
 			return [];
 		}
 
-		$cachedData = $payload["cachedData"] ?? [];
+		$cachedDataRaw = $payload["cachedData"] ?? [];
+		$cachedData = is_array($cachedDataRaw) ? $cachedDataRaw : [];
+		$limitRaw = $cachedData["maxDistance"] ?? 0.0;
 		$distance = sqrt(
 			($payload["damagerEyeX"] - $payload["victimEyeX"]) ** 2 +
 			($payload["damagerEyeY"] - $payload["victimEyeY"]) ** 2 +
@@ -126,7 +141,7 @@ class ReachA extends Check {
 		$isPlayerTop = $payload["victimEyeY"] > $payload["damagerEyeY"] ?
 			abs($payload["victimEyeY"] - $payload["damagerEyeY"]) : 0;
 		$distance -= $isPlayerTop;
-		$limit = (float) ($cachedData["maxDistance"] ?? 0.0);
+		$limit = is_numeric($limitRaw) ? (float) $limitRaw : 0.0;
 		$debug = "isPlayerTop={$isPlayerTop}, distance={$distance}, limit={$limit}";
 		if ($distance > $limit) {
 			return ["failed" => true, "debug" => $debug];

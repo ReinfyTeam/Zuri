@@ -182,17 +182,18 @@ interface IPlayerAPI {
 
 	public function getViolation(string $supplier) : int;
 
-	public function addViolation(string $supplier) : void;
+	public function addViolation(string $supplier, int|float $amount = 1) : void;
 
 	public function getRealViolation(string $supplier) : int;
 
-	public function addRealViolation(string $supplier) : void;
+	public function addRealViolation(string $supplier, int|float $amount = 1) : void;
 
+	/** @return array<string, Location> */
 	public function getNLocation() : array;
 
 	public function setNLocation(Location $from, Location $to) : void;
 
-	public function getExternalData(string $dataName);
+	public function getExternalData(string $dataName, mixed $default = null) : mixed;
 
 	public function setExternalData(string $dataName, mixed $amount) : void;
 

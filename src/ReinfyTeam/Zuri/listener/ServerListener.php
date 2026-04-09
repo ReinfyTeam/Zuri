@@ -58,6 +58,7 @@ use function strtolower;
 use function trim;
 
 class ServerListener implements Listener {
+	/** @var array<string,int> */
 	private array $ip = [];
 
 	/**

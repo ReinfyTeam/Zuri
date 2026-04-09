@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use function in_array;
+use function is_string;
 use function str_contains;
 use function strlen;
 use function strtolower;
@@ -77,9 +78,12 @@ class EditionFakerA extends Check {
 			$extraData = $playerInfo->getExtraData();
 			$nickname = $playerInfo->getUsername();
 			$deviceOs = $extraData["DeviceOS"] ?? null;
-			$deviceModel = (string) ($extraData["DeviceModel"] ?? "");
-			$deviceId = (string) ($extraData["DeviceId"] ?? "");
-			$thirdPartyName = strtolower((string) ($extraData["ThirdPartyName"] ?? ""));
+			$deviceModelRaw = $extraData["DeviceModel"] ?? "";
+			$deviceModel = is_string($deviceModelRaw) ? $deviceModelRaw : "";
+			$deviceIdRaw = $extraData["DeviceId"] ?? "";
+			$deviceId = is_string($deviceIdRaw) ? $deviceIdRaw : "";
+			$thirdPartyNameRaw = $extraData["ThirdPartyName"] ?? "";
+			$thirdPartyName = strtolower(is_string($thirdPartyNameRaw) ? $thirdPartyNameRaw : "");
 
 			if (!in_array($deviceOs, self::DEVICE_OS_LIST, true)) {
 				$this->warn($nickname);
@@ -120,6 +124,9 @@ class EditionFakerA extends Check {
 		}
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];
 	}

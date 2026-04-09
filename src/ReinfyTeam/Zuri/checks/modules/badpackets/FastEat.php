@@ -43,6 +43,7 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 use function microtime;
 
 class FastEat extends Check {
@@ -61,7 +62,8 @@ class FastEat extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof ActorEventPacket) {
 			if ($packet->eventId === ActorEvent::EATING_ITEM) {
-				$lastTick = $playerAPI->getExternalData(CacheData::FASTEAT_LAST_TICK);
+				$lastTickRaw = $playerAPI->getExternalData(CacheData::FASTEAT_LAST_TICK);
+				$lastTick = is_numeric($lastTickRaw) ? (float) $lastTickRaw : null;
 				if ($lastTick === null) {
 					$playerAPI->setExternalData(CacheData::FASTEAT_LAST_TICK, microtime(true));
 				}
@@ -76,11 +78,14 @@ class FastEat extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerItemConsumeEvent) {
 			if ($event->getItem() instanceof ConsumableItem && $event->getItem() instanceof Food) {
-				$lastTick = $playerAPI->getExternalData(CacheData::FASTEAT_LAST_TICK);
+				$lastTickRaw = $playerAPI->getExternalData(CacheData::FASTEAT_LAST_TICK);
+				$lastTick = is_numeric($lastTickRaw) ? (float) $lastTickRaw : null;
 				if ($lastTick !== null) {
 					$diff = microtime(true) - $lastTick;
 					$ping = $playerAPI->getPing();
-					if ($diff < $this->getConstant(CheckConstants::FASTEAT_TIMEDIFF_LIMIT) && $ping < self::getData(self::PING_LAGGING)) {
+					$timeDiffLimitRaw = $this->getConstant(CheckConstants::FASTEAT_TIMEDIFF_LIMIT);
+					$timeDiffLimit = is_numeric($timeDiffLimitRaw) ? (float) $timeDiffLimitRaw : 0.0;
+					if ($diff < $timeDiffLimit && $ping < self::getData(self::PING_LAGGING)) {
 						$event->cancel();
 						$this->dispatchAsyncDecision($playerAPI, true);
 						$playerAPI->unsetExternalData(CacheData::FASTEAT_LAST_TICK);

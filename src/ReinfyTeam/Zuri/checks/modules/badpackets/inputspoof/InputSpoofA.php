@@ -39,6 +39,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
+use function is_numeric;
 
 class InputSpoofA extends Check {
 	public function getName() : string {
@@ -59,8 +60,10 @@ class InputSpoofA extends Check {
 
 		$moveX = $packet->getMoveVecX();
 		$moveZ = $packet->getMoveVecZ();
-		$maxAxis = (float) $this->getConstant(CheckConstants::INPUTSPOOFA_MAX_AXIS);
-		$maxVectorLength = (float) $this->getConstant(CheckConstants::INPUTSPOOFA_MAX_VECTOR_LENGTH);
+		$maxAxisRaw = $this->getConstant(CheckConstants::INPUTSPOOFA_MAX_AXIS);
+		$maxVectorLengthRaw = $this->getConstant(CheckConstants::INPUTSPOOFA_MAX_VECTOR_LENGTH);
+		$maxAxis = is_numeric($maxAxisRaw) ? (float) $maxAxisRaw : 0.0;
+		$maxVectorLength = is_numeric($maxVectorLengthRaw) ? (float) $maxVectorLengthRaw : 0.0;
 		$vectorLength = MathUtil::horizontalLength($moveX, $moveZ);
 
 		$this->debug($playerAPI, "moveX={$moveX}, moveZ={$moveZ}, vectorLength={$vectorLength}");

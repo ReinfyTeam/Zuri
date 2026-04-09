@@ -39,6 +39,7 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function in_array;
+use function is_numeric;
 
 class KillAuraA extends Check {
 	public function getName() : string {
@@ -67,8 +68,13 @@ class KillAuraA extends Check {
 			return [];
 		}
 
-		if (in_array((int) ($payload["action"] ?? -1), [PlayerAction::START_BREAK, PlayerAction::ABORT_BREAK, PlayerAction::CONTINUE_DESTROY_BLOCK, PlayerAction::INTERACT_BLOCK], true)) {
-			switch ((int) ($payload["face"] ?? -1)) {
+		$actionRaw = $payload["action"] ?? -1;
+		$faceRaw = $payload["face"] ?? -1;
+		$action = is_numeric($actionRaw) ? (int) $actionRaw : -1;
+		$face = is_numeric($faceRaw) ? (int) $faceRaw : -1;
+
+		if (in_array($action, [PlayerAction::START_BREAK, PlayerAction::ABORT_BREAK, PlayerAction::CONTINUE_DESTROY_BLOCK, PlayerAction::INTERACT_BLOCK], true)) {
+			switch ($face) {
 				case Facing::UP:
 				case Facing::DOWN:
 				case Facing::EAST:

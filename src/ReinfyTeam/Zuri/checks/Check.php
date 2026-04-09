@@ -51,6 +51,9 @@ use ReinfyTeam\Zuri\utils\ReplaceText;
 use ReinfyTeam\Zuri\ZuriAC;
 use function implode;
 use function in_array;
+use function is_array;
+use function is_numeric;
+use function is_string;
 use function max;
 use function microtime;
 use function min;
@@ -66,6 +69,7 @@ abstract class Check extends ConfigManager {
 	private ?bool $enabledCache = null;
 	private ?string $punishmentCache = null;
 	private ?int $maxViolationsCache = null;
+	/** @var array<string, mixed> */
 	private array $constantCache = [];
 
 	public abstract function getName() : string;
@@ -81,14 +85,19 @@ abstract class Check extends ConfigManager {
 	public function checkJustEvent(Event $event) : void {
 	}
 
+	/**
+	 * @param array<string,mixed> $payload
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (($payload["_type"] ?? null) === "__decision") {
-			return (array) ($payload["result"] ?? []);
+			return is_array($payload["result"] ?? null) ? $payload["result"] : [];
 		}
 
 		return [];
 	}
 
+	/** @param array<string,mixed> $payload */
 	protected function dispatchAsyncCheck(string $playerName, array $payload) : void {
 		$player = Server::getInstance()->getPlayerExact($playerName);
 		if ($player === null || !$player->isOnline() || !$player->isConnected()) {
@@ -96,10 +105,10 @@ abstract class Check extends ConfigManager {
 		}
 
 		CheckAsyncTask::configure(
-			(int) self::getData("zuri.async.max-concurrent-workers", 4),
-			(int) self::getData("zuri.async.max-queue-size", 2048),
-			(float) self::getData("zuri.async.worker-timeout-seconds", 3.0),
-			(float) self::getData("zuri.async.degraded-cooldown-seconds", 6.0)
+			self::toInt(self::getData("zuri.async.max-concurrent-workers", 4), 4),
+			self::toInt(self::getData("zuri.async.max-queue-size", 2048), 2048),
+			self::toFloat(self::getData("zuri.async.worker-timeout-seconds", 3.0), 3.0),
+			self::toFloat(self::getData("zuri.async.degraded-cooldown-seconds", 6.0), 6.0)
 		);
 
 		$now = microtime(true);
@@ -113,7 +122,8 @@ abstract class Check extends ConfigManager {
 		}
 
 		$key = $playerName . ":" . static::class;
-		$minInterval = (float) ($payload["_minInterval"] ?? self::getData("zuri.async.default-min-interval", 0.02));
+		$minIntervalRaw = $payload["_minInterval"] ?? self::getData("zuri.async.default-min-interval", 0.02);
+		$minInterval = self::toFloat($minIntervalRaw, 0.02);
 		if (isset($payload["_minInterval"])) {
 			unset($payload["_minInterval"]);
 		}
@@ -131,6 +141,10 @@ abstract class Check extends ConfigManager {
 		CheckAsyncTask::dispatch(static::class, $playerName, $payload, $sequence);
 	}
 
+	/**
+	 * @param array<string,mixed> $set
+	 * @param list<string> $unset
+	 */
 	protected function dispatchAsyncDecision(
 		PlayerAPI $playerAPI,
 		bool $failed = false,
@@ -139,6 +153,7 @@ abstract class Check extends ConfigManager {
 		array $unset = [],
 		float $minInterval = 0.0
 	) : void {
+		/** @var array<string,mixed> $result */
 		$result = [];
 		if ($set !== []) {
 			$result["set"] = $set;
@@ -169,7 +184,8 @@ abstract class Check extends ConfigManager {
 	}
 
 	public function getPunishment() : string {
-		return $this->punishmentCache ??= strtolower(self::getData(self::CHECK . "." . strtolower($this->getName()) . ".punishment", "FLAG"));
+		$raw = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".punishment", "FLAG");
+		return $this->punishmentCache ??= strtolower(self::toString($raw, "FLAG"));
 	}
 
 	public function setEnabledOverride(?bool $enabled) : void {
@@ -192,11 +208,13 @@ abstract class Check extends ConfigManager {
 		if ($this->enabledOverride !== null) {
 			return $this->enabledOverride;
 		}
-		return $this->enabledCache ??= self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable", false);
+		$raw = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".enable", false);
+		return $this->enabledCache ??= ($raw === true);
 	}
 
 	public function maxViolations() : int {
-		return $this->maxViolationsCache ??= self::getData(self::CHECK . "." . strtolower($this->getName()) . ".pre-vl." . strtolower($this->getSubType()), false);
+		$raw = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".pre-vl." . strtolower($this->getSubType()), 0);
+		return $this->maxViolationsCache ??= self::toInt($raw, 0);
 	}
 
 	public function getConstant(string $name) : mixed {
@@ -246,20 +264,26 @@ abstract class Check extends ConfigManager {
 
 		$notify = self::getData(self::ALERTS_ENABLE) === true;
 		$detectionsAllowedToSend = self::getData(self::DETECTION_ENABLE) === true;
-		$bypass = self::getData(self::PERMISSION_BYPASS_ENABLE) === true && $player->hasPermission(self::getData(self::PERMISSION_BYPASS_PERMISSION));
+		$bypassPermissionRaw = self::getData(self::PERMISSION_BYPASS_PERMISSION);
+		$bypassPermission = self::toString($bypassPermissionRaw, "zuri.bypass");
+		$bypass = self::getData(self::PERMISSION_BYPASS_ENABLE) === true && $player->hasPermission($bypassPermission);
 		$reachedMaxViolations = $playerAPI->getViolation($this->getName()) > $this->maxViolations();
-		$maxViolations = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".maxvl");
+		$maxViolationsRaw = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".maxvl", 0);
+		$maxViolations = self::toInt($maxViolationsRaw, 0);
 		$playerAPI->addViolation($this->getName());
 		$reachedMaxRealViolations = $playerAPI->getRealViolation($this->getName()) > $maxViolations;
 		$server = ZuriAC::getInstance()->getServer();
 
 		if (self::getData(self::WORLD_BYPASS_ENABLE) === true) {
-			if (strtolower(self::getData(self::WORLD_BYPASS_MODE)) === "blacklist") {
-				if (in_array($player->getWorld()->getFolderName(), self::getData(self::WORLD_BYPASS_LIST), true)) {
+			$worldBypassModeRaw = self::getData(self::WORLD_BYPASS_MODE);
+			$worldBypassMode = strtolower(self::toString($worldBypassModeRaw, "blacklist"));
+			$worldBypassList = self::toStringList(self::getData(self::WORLD_BYPASS_LIST, []));
+			if ($worldBypassMode === "blacklist") {
+				if (in_array($player->getWorld()->getFolderName(), $worldBypassList, true)) {
 					return false;
 				}
 			} else {
-				if (!in_array($player->getWorld()->getFolderName(), self::getData(self::WORLD_BYPASS_LIST), true)) {
+				if (!in_array($player->getWorld()->getFolderName(), $worldBypassList, true)) {
 					return false;
 				}
 			}
@@ -312,7 +336,7 @@ abstract class Check extends ConfigManager {
 					$p->sendMessage(ReplaceText::replace($playerAPI, Lang::raw(LangKeys::BAN_MESSAGE), $this->getName(), $this->getSubType()));
 				}
 			}
-			foreach (self::getData(self::BAN_COMMANDS) as $command) {
+			foreach (self::toStringList(self::getData(self::BAN_COMMANDS, [])) as $command) {
 				$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
 			}
 
@@ -332,7 +356,7 @@ abstract class Check extends ConfigManager {
 						$p->sendMessage(ReplaceText::replace($playerAPI, Lang::raw(LangKeys::KICK_MESSAGE), $this->getName(), $this->getSubType()));
 					}
 				}
-				foreach (self::getData(self::KICK_COMMANDS) as $command) {
+				foreach (self::toStringList(self::getData(self::KICK_COMMANDS, [])) as $command) {
 					$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
 				}
 			} else {
@@ -385,11 +409,11 @@ abstract class Check extends ConfigManager {
 			$playerAPI->isCurrentChunkIsLoaded(),
 			$playerAPI->getTeleportTicks() < 60,
 			$playerAPI->getHurtTicks() < 20,
-			ServerTickTask::getInstance()->isLagging(microtime(true))
+			ServerTickTask::getInstance()?->isLagging(microtime(true)) ?? false
 		);
 
 		// Get threshold from config (default 0.5 = medium confidence required)
-		$threshold = (float) self::getData("zuri.confidence.threshold", 0.5);
+		$threshold = self::toFloat(self::getData("zuri.confidence.threshold", 0.5), 0.5);
 		$finalConfidence = $result->getConfidence();
 
 		// Track confidence score for trending analysis
@@ -513,5 +537,31 @@ abstract class Check extends ConfigManager {
 				}
 			}
 		}
+	}
+
+	private static function toInt(mixed $value, int $default) : int {
+		return is_numeric($value) ? (int) $value : $default;
+	}
+
+	private static function toFloat(mixed $value, float $default) : float {
+		return is_numeric($value) ? (float) $value : $default;
+	}
+
+	private static function toString(mixed $value, string $default) : string {
+		return is_string($value) ? $value : $default;
+	}
+
+	/** @return list<string> */
+	private static function toStringList(mixed $value) : array {
+		if (!is_array($value)) {
+			return [];
+		}
+		$list = [];
+		foreach ($value as $item) {
+			if (is_string($item)) {
+				$list[] = $item;
+			}
+		}
+		return $list;
 	}
 }

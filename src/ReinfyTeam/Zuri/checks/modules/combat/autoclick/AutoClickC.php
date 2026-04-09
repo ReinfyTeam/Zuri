@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 use function microtime;
 
 class AutoClickC extends Check {
@@ -59,16 +60,12 @@ class AutoClickC extends Check {
 		}
 	}
 
-	/**
-	 * @throws ReflectionException
-	 * @throws DiscordWebhookException
-	 */
+	/** @throws DiscordWebhookException */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if ($playerAPI->getPlayer() === null) {
-			return;
-		}
 		if ($packet instanceof AnimatePacket) {
 			if ($packet->action === AnimatePacket::ACTION_SWING_ARM) {
+				$animationDiffTimeRaw = $this->getConstant(CheckConstants::AUTOCLICKC_ANIMATION_DIFF_TIME);
+				$animationDiffTicksRaw = $this->getConstant(CheckConstants::AUTOCLICKC_ANIMATION_DIFF_TICKS);
 				$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
 					"type" => "AutoClickC",
 					"isDigging" => $playerAPI->isDigging(),
@@ -78,8 +75,8 @@ class AutoClickC extends Check {
 					"canDamagable" => $this->canDamagable,
 					"ticks" => $playerAPI->getExternalData(CacheData::AUTOCLICK_C_TICKS),
 					CacheData::AUTOCLICK_C_LAST_CLICK => $playerAPI->getExternalData(CacheData::AUTOCLICK_C_LAST_CLICK),
-					"animationDiffTime" => (float) $this->getConstant(CheckConstants::AUTOCLICKC_ANIMATION_DIFF_TIME),
-					"animationDiffTicks" => (int) $this->getConstant(CheckConstants::AUTOCLICKC_ANIMATION_DIFF_TICKS),
+					"animationDiffTime" => is_numeric($animationDiffTimeRaw) ? (float) $animationDiffTimeRaw : 0.0,
+					"animationDiffTicks" => is_numeric($animationDiffTicksRaw) ? (int) $animationDiffTicksRaw : 0,
 					"now" => microtime(true),
 				]);
 			}
@@ -93,8 +90,8 @@ class AutoClickC extends Check {
 
 		if (
 			(bool) ($payload["isDigging"] ?? false) ||
-			(int) ($payload["placingTicks"] ?? 0) < 100 ||
-			(int) ($payload["attackTicks"] ?? 0) < 40 ||
+			(is_numeric($payload["placingTicks"] ?? 0) ? (int) ($payload["placingTicks"] ?? 0) : 0) < 100 ||
+			(is_numeric($payload["attackTicks"] ?? 0) ? (int) ($payload["attackTicks"] ?? 0) : 0) < 40 ||
 			!(bool) ($payload["isSurvival"] ?? false) ||
 			!(bool) ($payload["canDamagable"] ?? false)
 		) {
@@ -107,15 +104,24 @@ class AutoClickC extends Check {
 			return ["set" => [CacheData::AUTOCLICK_C_TICKS => 0, CacheData::AUTOCLICK_C_LAST_CLICK => $payload["now"] ?? microtime(true)]];
 		}
 
-		$diff = (float) ($payload["now"] ?? microtime(true)) - (float) $lastClick;
-		if ($diff > (float) ($payload["animationDiffTime"] ?? 0.0)) {
+		$nowRaw = $payload["now"] ?? microtime(true);
+		$now = is_numeric($nowRaw) ? (float) $nowRaw : microtime(true);
+		$lastClickValue = is_numeric($lastClick) ? (float) $lastClick : 0.0;
+		$animationDiffTimeRaw = $payload["animationDiffTime"] ?? 0.0;
+		$animationDiffTime = is_numeric($animationDiffTimeRaw) ? (float) $animationDiffTimeRaw : 0.0;
+		$diff = $now - $lastClickValue;
+		if ($diff > $animationDiffTime) {
 			$result = ["unset" => [CacheData::AUTOCLICK_C_TICKS, CacheData::AUTOCLICK_C_LAST_CLICK]];
-			if ((int) $ticks > (int) ($payload["animationDiffTicks"] ?? 0)) {
+			$ticksValue = is_numeric($ticks) ? (int) $ticks : 0;
+			$animationDiffTicksRaw = $payload["animationDiffTicks"] ?? 0;
+			$animationDiffTicks = is_numeric($animationDiffTicksRaw) ? (int) $animationDiffTicksRaw : 0;
+			if ($ticksValue > $animationDiffTicks) {
 				$result["failed"] = true;
 			}
 			return $result;
 		}
 
-		return ["set" => [CacheData::AUTOCLICK_C_TICKS => (int) $ticks + 1, CacheData::AUTOCLICK_C_LAST_CLICK => $lastClick]];
+		$ticksValue = is_numeric($ticks) ? (int) $ticks : 0;
+		return ["set" => [CacheData::AUTOCLICK_C_TICKS => $ticksValue + 1, CacheData::AUTOCLICK_C_LAST_CLICK => $lastClickValue]];
 	}
 }

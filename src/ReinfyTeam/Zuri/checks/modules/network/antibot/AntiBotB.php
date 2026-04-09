@@ -39,6 +39,7 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use function is_string;
 use function str_contains;
 use function strtolower;
 
@@ -66,9 +67,12 @@ class AntiBotB extends Check {
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof PlayerPreLoginEvent) {
 			$extraData = $event->getPlayerInfo()->getExtraData();
-			if (($extraData["DeviceOS"] ?? null) === DeviceOS::ANDROID) {
-				$model = strtolower((string) ($extraData["DeviceModel"] ?? ""));
-				$thirdParty = strtolower((string) ($extraData["ThirdPartyName"] ?? ""));
+			$deviceOs = $extraData["DeviceOS"] ?? null;
+			if ($deviceOs === DeviceOS::ANDROID) {
+				$modelRaw = $extraData["DeviceModel"] ?? "";
+				$model = strtolower(is_string($modelRaw) ? $modelRaw : "");
+				$thirdPartyRaw = $extraData["ThirdPartyName"] ?? "";
+				$thirdParty = strtolower(is_string($thirdPartyRaw) ? $thirdPartyRaw : "");
 
 				foreach (self::SUSPICIOUS_CLIENT_SIGNATURES as $signature) {
 					if (str_contains($model, $signature) || str_contains($thirdParty, $signature)) {
@@ -78,7 +82,7 @@ class AntiBotB extends Check {
 					}
 				}
 
-				if (str_contains($thirdParty, "lunar") && ($extraData["DeviceOS"] ?? null) !== DeviceOS::WINDOWS_10 && ($extraData["DeviceOS"] ?? null) !== DeviceOS::WIN32) {
+				if (str_contains($thirdParty, "lunar") && $deviceOs !== DeviceOS::WINDOWS_10 && $deviceOs !== DeviceOS::WIN32) {
 					$this->warn($event->getPlayerInfo()->getUsername());
 					$event->setKickFlag(0, Lang::get(LangKeys::ANTIBOT_MESSAGE));
 					return;
@@ -90,6 +94,9 @@ class AntiBotB extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];
 	}

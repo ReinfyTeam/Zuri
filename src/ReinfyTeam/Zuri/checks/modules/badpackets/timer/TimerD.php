@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_float;
 use function is_int;
+use function is_numeric;
 use function max;
 use function microtime;
 
@@ -70,12 +71,12 @@ class TimerD extends Check {
 			"samples" => $playerAPI->getExternalData(CacheData::TIMER_D_SAMPLES, 0),
 			"buffer" => $playerAPI->getExternalData(CacheData::TIMER_D_BUFFER, 0),
 			"ping" => (int) $playerAPI->getPing(),
-			"maxPing" => (int) self::getData(self::PING_LAGGING),
-			"expectedMsPerTick" => (float) $this->getConstant(CheckConstants::TIMERD_DRIFT_EXPECTED_MS_PER_TICK),
-			"maxTickJump" => (int) $this->getConstant(CheckConstants::TIMERD_DRIFT_MAX_TICK_JUMP),
-			"maxNegativeDrift" => (float) $this->getConstant(CheckConstants::TIMERD_DRIFT_MAX_NEGATIVE),
-			"warmupSamples" => (int) $this->getConstant(CheckConstants::TIMERD_DRIFT_WARMUP_SAMPLES),
-			"bufferLimit" => (int) $this->getConstant(CheckConstants::TIMERD_DRIFT_BUFFER_LIMIT),
+			"maxPing" => is_numeric(self::getData(self::PING_LAGGING)) ? (int) self::getData(self::PING_LAGGING) : 0,
+			"expectedMsPerTick" => is_numeric($this->getConstant(CheckConstants::TIMERD_DRIFT_EXPECTED_MS_PER_TICK)) ? (float) $this->getConstant(CheckConstants::TIMERD_DRIFT_EXPECTED_MS_PER_TICK) : 50.0,
+			"maxTickJump" => is_numeric($this->getConstant(CheckConstants::TIMERD_DRIFT_MAX_TICK_JUMP)) ? (int) $this->getConstant(CheckConstants::TIMERD_DRIFT_MAX_TICK_JUMP) : 4,
+			"maxNegativeDrift" => is_numeric($this->getConstant(CheckConstants::TIMERD_DRIFT_MAX_NEGATIVE)) ? (float) $this->getConstant(CheckConstants::TIMERD_DRIFT_MAX_NEGATIVE) : 28.0,
+			"warmupSamples" => is_numeric($this->getConstant(CheckConstants::TIMERD_DRIFT_WARMUP_SAMPLES)) ? (int) $this->getConstant(CheckConstants::TIMERD_DRIFT_WARMUP_SAMPLES) : 6,
+			"bufferLimit" => is_numeric($this->getConstant(CheckConstants::TIMERD_DRIFT_BUFFER_LIMIT)) ? (int) $this->getConstant(CheckConstants::TIMERD_DRIFT_BUFFER_LIMIT) : 3,
 		]);
 	}
 
@@ -84,10 +85,12 @@ class TimerD extends Check {
 			return [];
 		}
 
-		$authTick = (int) ($payload["authTick"] ?? 0);
-		$nowMs = (float) ($payload["nowMs"] ?? 0.0);
-		$lastAuthTick = $payload["lastAuthTick"];
-		$lastAtMs = $payload["lastAtMs"];
+		$authTickRaw = $payload["authTick"] ?? 0;
+		$nowMsRaw = $payload["nowMs"] ?? 0.0;
+		$authTick = is_numeric($authTickRaw) ? (int) $authTickRaw : 0;
+		$nowMs = is_numeric($nowMsRaw) ? (float) $nowMsRaw : 0.0;
+		$lastAuthTick = $payload["lastAuthTick"] ?? null;
+		$lastAtMs = $payload["lastAtMs"] ?? null;
 
 		if ((!is_int($lastAuthTick) && !is_float($lastAuthTick)) || (!is_int($lastAtMs) && !is_float($lastAtMs))) {
 			return [
@@ -102,7 +105,8 @@ class TimerD extends Check {
 		}
 
 		$tickDelta = $authTick - (int) $lastAuthTick;
-		$maxTickJump = (int) ($payload["maxTickJump"] ?? 4);
+		$maxTickJumpRaw = $payload["maxTickJump"] ?? 4;
+		$maxTickJump = is_numeric($maxTickJumpRaw) ? (int) $maxTickJumpRaw : 4;
 		if ($tickDelta <= 0 || $tickDelta > $maxTickJump) {
 			return [
 				"set" => [
@@ -125,15 +129,27 @@ class TimerD extends Check {
 			];
 		}
 
-		$expectedDelta = $tickDelta * (float) ($payload["expectedMsPerTick"] ?? 50.0);
+		$expectedMsPerTickRaw = $payload["expectedMsPerTick"] ?? 50.0;
+		$expectedMsPerTick = is_numeric($expectedMsPerTickRaw) ? (float) $expectedMsPerTickRaw : 50.0;
+		$expectedDelta = $tickDelta * $expectedMsPerTick;
 		$sampleDrift = $realDelta - $expectedDelta;
-		$drift = ((float) ($payload["drift"] ?? 0.0) * 0.8) + ($sampleDrift * 0.2);
-		$samples = (int) ($payload["samples"] ?? 0) + 1;
-		$buffer = (int) ($payload["buffer"] ?? 0);
+		$driftRaw = $payload["drift"] ?? 0.0;
+		$samplesRaw = $payload["samples"] ?? 0;
+		$bufferRaw = $payload["buffer"] ?? 0;
+		$drift = ((is_numeric($driftRaw) ? (float) $driftRaw : 0.0) * 0.8) + ($sampleDrift * 0.2);
+		$samples = (is_numeric($samplesRaw) ? (int) $samplesRaw : 0) + 1;
+		$buffer = is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 
-		$warmupSamples = (int) ($payload["warmupSamples"] ?? 6);
-		if ($samples >= $warmupSamples && (int) ($payload["ping"] ?? 0) < (int) ($payload["maxPing"] ?? 200)) {
-			if ($drift < -((float) ($payload["maxNegativeDrift"] ?? 28.0))) {
+		$warmupSamplesRaw = $payload["warmupSamples"] ?? 6;
+		$pingRaw = $payload["ping"] ?? 0;
+		$maxPingRaw = $payload["maxPing"] ?? 200;
+		$maxNegativeDriftRaw = $payload["maxNegativeDrift"] ?? 28.0;
+		$warmupSamples = is_numeric($warmupSamplesRaw) ? (int) $warmupSamplesRaw : 6;
+		$ping = is_numeric($pingRaw) ? (int) $pingRaw : 0;
+		$maxPing = is_numeric($maxPingRaw) ? (int) $maxPingRaw : 200;
+		$maxNegativeDrift = is_numeric($maxNegativeDriftRaw) ? (float) $maxNegativeDriftRaw : 28.0;
+		if ($samples >= $warmupSamples && $ping < $maxPing) {
+			if ($drift < -$maxNegativeDrift) {
 				$buffer++;
 			} else {
 				$buffer = max(0, $buffer - 1);
@@ -151,7 +167,9 @@ class TimerD extends Check {
 			"debug" => "tickDelta={$tickDelta}, realDelta={$realDelta}, expectedDelta={$expectedDelta}, drift={$drift}, buffer={$buffer}",
 		];
 
-		if ($buffer >= (int) ($payload["bufferLimit"] ?? 3)) {
+		$bufferLimitRaw = $payload["bufferLimit"] ?? 3;
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 3;
+		if ($buffer >= $bufferLimit) {
 			$result["set"][CacheData::TIMER_D_BUFFER] = 0;
 			$result["set"][CacheData::TIMER_D_DRIFT] = 0.0;
 			$result["set"][CacheData::TIMER_D_SAMPLES] = 0;

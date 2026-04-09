@@ -44,6 +44,7 @@ use function fmod;
 use function implode;
 
 class BlockUtil {
+	/** @var array<string,array<int,int>> */
 	private static array $idLookupCache = [];
 
 	public static function getBlockAbove(Player $player) : ?Block {
@@ -70,6 +71,7 @@ class BlockUtil {
 		return true;
 	}
 
+	/** @return list<int> */
 	public static function getSurroundingBlocks(Player $player) : array {
 		$world = $player->getWorld();
 
@@ -172,6 +174,7 @@ class BlockUtil {
 		return false;
 	}
 
+	/** @param list<int> $id */
 	public static function isUnderBlock(Location $location, array $id, int $down) : bool {
 		$posX = $location->getX();
 		$posZ = $location->getZ();
@@ -372,11 +375,13 @@ class BlockUtil {
 		return self::isUnderBlock($location, [BlockTypeIds::SLIME], $down);
 	}
 
-	public static function getUnderBlock(Location $location, int $deep = 1) {
+	public static function getUnderBlock(Location $location, int $deep = 1) : Block {
 		return $location->getWorld()->getBlockAt(abs((int) $location->getX()), abs((int) $location->getY()) - $deep, abs((int) $location->getZ()));
 	}
 
-	public static function distance(Position $a, Position $b) {
-		return MathUtil::distance($a->asVector3(), $b->asVector3());
+	public static function distance(Vector3|Position $a, Vector3|Position $b) : float {
+		$from = $a instanceof Position ? $a->asVector3() : $a;
+		$to = $b instanceof Position ? $b->asVector3() : $b;
+		return MathUtil::distance($from, $to);
 	}
 }

@@ -238,6 +238,7 @@ class ViolationResult {
 
 	/**
 	 * Serialize for logging/storage.
+	 * @return array{check:string, subType:string, baseConfidence:float, confidence:float, factors:array<string,float>, debug:string, timestamp:float}
 	 */
 	public function toArray() : array {
 		return [

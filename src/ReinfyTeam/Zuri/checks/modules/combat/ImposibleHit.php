@@ -52,6 +52,7 @@ class ImposibleHit extends Check {
 		return "A";
 	}
 
+	/** @var array<string, bool> */
 	private array $eating = [];
 
 	/**

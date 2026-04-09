@@ -55,9 +55,11 @@ class AntiBotA extends Check {
 		if ($event instanceof PlayerPreLoginEvent) {
 			$extraData = $event->getPlayerInfo()->getExtraData();
 			if (($extraData["DeviceOS"] ?? null) === DeviceOS::ANDROID) {
-				$model = trim((string) ($extraData["DeviceModel"] ?? ""));
-				$deviceId = (string) ($extraData["DeviceId"] ?? "");
-				if ($model === "" || strlen($deviceId) < 8 || !is_string($model) || preg_match('/[^\x20-\x7E]/', $model) === 1) {
+				$modelRaw = $extraData["DeviceModel"] ?? "";
+				$model = trim(is_string($modelRaw) ? $modelRaw : "");
+				$deviceIdRaw = $extraData["DeviceId"] ?? "";
+				$deviceId = is_string($deviceIdRaw) ? $deviceIdRaw : "";
+				if ($model === "" || strlen($deviceId) < 8 || preg_match('/[^\x20-\x7E]/', $model) === 1) {
 					$this->warn($event->getPlayerInfo()->getUsername());
 					$event->setKickFlag(0, Lang::get(LangKeys::ANTIBOT_MESSAGE));
 				}
@@ -65,6 +67,9 @@ class AntiBotA extends Check {
 		}
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];
 	}

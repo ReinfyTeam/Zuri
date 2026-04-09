@@ -53,18 +53,16 @@ class CaptchaTask extends Task {
 		self::$instance = $this;
 		ExceptionHandler::wrapVoid(function() : void {
 			foreach ($this->plugin->getServer()->getOnlinePlayers() as $player) {
-				if ($player instanceof PlayerAPI) {
-					$event = new CaptchaEvent($player);
-					$event->call();
-					if ($event->isCancelled()) {
-						return;
-					}
+				$event = new CaptchaEvent(PlayerAPI::getAPIPlayer($player));
+				$event->call();
+				if ($event->isCancelled()) {
+					return;
 				}
 			}
 		}, "CaptchaTask::onRun");
 	}
 
 	public static function getInstance() : self {
-		return self::$instance;
+		return self::$instance ?? throw new \LogicException("CaptchaTask instance is not initialized yet.");
 	}
 }

@@ -34,16 +34,19 @@ namespace ReinfyTeam\Zuri\utils\discord;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\thread\NonThreadSafeValue;
 use ReinfyTeam\Zuri\ZuriAC;
-use function array_flip;
 use function curl_close;
 use function curl_exec;
 use function curl_getinfo;
 use function curl_init;
 use function curl_setopt;
+use function in_array;
+use function is_array;
 use function json_encode;
 
 class WebhookSendTask extends AsyncTask {
+	/** @var NonThreadSafeValue<Webhook> */
 	protected NonThreadSafeValue $webhook;
+	/** @var NonThreadSafeValue<Message> */
 	protected NonThreadSafeValue $message;
 
 	public function __construct(Webhook $webhook, Message $message) {
@@ -52,21 +55,41 @@ class WebhookSendTask extends AsyncTask {
 	}
 
 	public function onRun() : void {
-		$ch = curl_init($this->webhook->deserialize()->getURL());
-		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($this->message->deserialize()));
+		/** @var Webhook $webhook */
+		$webhook = $this->webhook->deserialize();
+		/** @var Message $message */
+		$message = $this->message->deserialize();
+
+		$ch = curl_init($webhook->getURL());
+		if ($ch === false) {
+			$this->setResult(["", 0]);
+			return;
+		}
+
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($message));
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
-		$this->setResult([curl_exec($ch), curl_getinfo($ch, CURLINFO_RESPONSE_CODE)]);
+		$responseBody = (string) (curl_exec($ch) ?: "");
+		$responseCode = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+		$this->setResult([
+			$responseBody,
+			$responseCode,
+		]);
 		curl_close($ch);
 	}
 
 	public function onCompletion() : void {
-		[$responseBody, $responseCode] = $this->getResult();
+		$result = $this->getResult();
+		if (!is_array($result)) {
+			return;
+		}
+		$responseBody = (string) ($result[0] ?? "");
+		$responseCode = (int) ($result[1] ?? 0);
 
-		if (!isset(array_flip([200, 204])[$responseCode])) {
+		if (!in_array($responseCode, [200, 204], true)) {
 			ZuriAC::getInstance()->getLogger()->debug(
 				"[Discord] [ERROR]: An error occurred while sending to discord ({$responseCode}): {$responseBody}"
 			);

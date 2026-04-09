@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 use function microtime;
 
 class FastDrop extends Check {
@@ -58,12 +59,15 @@ class FastDrop extends Check {
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerDropItemEvent) {
-			$lastTick = $playerAPI->getExternalData(CacheData::FASTDROP_LAST_TICK);
+			$lastTickRaw = $playerAPI->getExternalData(CacheData::FASTDROP_LAST_TICK);
+			$lastTick = is_numeric($lastTickRaw) ? (float) $lastTickRaw : null;
 			$currentTick = microtime(true);
 			if ($lastTick !== null) {
 				$diff = $currentTick - $lastTick;
 				$ping = $playerAPI->getPing();
-				if ($diff < $this->getConstant(CheckConstants::FASTDROP_TIME_LIMIT) && $ping < self::getData(self::PING_LAGGING)) { // Wtf same as fastthrow?
+				$timeLimitRaw = $this->getConstant(CheckConstants::FASTDROP_TIME_LIMIT);
+				$timeLimit = is_numeric($timeLimitRaw) ? (float) $timeLimitRaw : 0.0;
+				if ($diff < $timeLimit && $ping < self::getData(self::PING_LAGGING)) { // Wtf same as fastthrow?
 					$event->cancel();
 					$this->dispatchAsyncDecision($playerAPI, true);
 				}

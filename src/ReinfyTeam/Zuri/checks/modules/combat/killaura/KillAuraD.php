@@ -33,10 +33,15 @@ namespace ReinfyTeam\Zuri\checks\modules\combat\killaura;
 
 use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
-use ReflectionException;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function intval;
+use function is_array;
+use function is_bool;
+use function is_float;
+use function is_int;
+use function is_string;
 
 class KillAuraD extends Check {
 	public function getName() : string {
@@ -47,14 +52,9 @@ class KillAuraD extends Check {
 		return "D";
 	}
 
-	/**
-	 * @throws ReflectionException
-	 * @throws DiscordWebhookException
-	 */
+	/** @throws DiscordWebhookException */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
-		if (($player = $playerAPI->getPlayer()) === null) {
-			return;
-		}
+		$player = $playerAPI->getPlayer();
 		if ($packet instanceof AnimatePacket) {
 			$this->dispatchAsyncCheck($player->getName(), [
 				"type" => "KillAuraD",
@@ -73,19 +73,39 @@ class KillAuraD extends Check {
 			return [];
 		}
 
+		$actionRaw = $payload["action"] ?? -1;
+		$placingTicksRaw = $payload["placingTicks"] ?? 0;
+		$attackTicksRaw = $payload["attackTicks"] ?? 0;
+		$survivalRaw = $payload["survival"];
+		$toInt = static function (mixed $value, int $default = 0) : int {
+			if (is_int($value)) {
+				return $value;
+			}
+
+			if (is_float($value) || is_string($value) || is_bool($value) || $value === null || is_array($value)) {
+				return intval($value);
+			}
+
+			return $default;
+		};
+		$action = $toInt($actionRaw, -1);
+		$placingTicks = $toInt($placingTicksRaw);
+		$attackTicks = $toInt($attackTicksRaw);
+		$survival = (bool) $survivalRaw;
+		$isDigging = (bool) ($payload["isDigging"] ?? false);
+
 		if (
-			(bool) ($payload["isDigging"] ?? false) ||
-			(int) ($payload["placingTicks"] ?? 0) < 100 ||
-			(int) ($payload["attackTicks"] ?? 0) < 20 ||
-			!(bool) ($payload["survival"] ?? false) ||
+			$isDigging ||
+			$placingTicks < 100 ||
+			$attackTicks < 20 ||
+			!$survival ||
 			(bool) ($payload["recentlyCancelled"] ?? false)
 		) {
 			return [];
 		}
 
-		$action = (int) ($payload["action"] ?? -1);
-		$debug = "isDigging=" . ((bool) ($payload["isDigging"] ?? false) ? "true" : "false") . ", placingTicks=" . (int) ($payload["placingTicks"] ?? 0) . ", attackTicks=" . (int) ($payload["attackTicks"] ?? 0) . ", isSurvival=" . ((bool) ($payload["survival"] ?? false) ? "true" : "false");
-		if ($action !== AnimatePacket::ACTION_SWING_ARM && (int) ($payload["attackTicks"] ?? 0) > 40) {
+		$debug = "isDigging=false, placingTicks={$placingTicks}, attackTicks={$attackTicks}, isSurvival=true";
+		if ($action !== AnimatePacket::ACTION_SWING_ARM && $attackTicks > 40) {
 			return ["failed" => true, "debug" => $debug];
 		}
 

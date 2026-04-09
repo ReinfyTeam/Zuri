@@ -41,6 +41,7 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
+use function is_string;
 use function strtolower;
 
 class BanModeSubCommand extends BaseSubCommand {
@@ -53,10 +54,12 @@ class BanModeSubCommand extends BaseSubCommand {
 	}
 
 	/**
+	 * @param array<string,mixed> $args
 	 * @throws JsonException
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
-		if (strtolower((string) ($args["mode"] ?? "")) !== "toggle") {
+		$mode = $args["mode"] ?? "";
+		if (!is_string($mode) || strtolower($mode) !== "toggle") {
 			$sender->sendMessage(Lang::get(LangKeys::CMD_BANMODE_USAGE));
 			return;
 		}

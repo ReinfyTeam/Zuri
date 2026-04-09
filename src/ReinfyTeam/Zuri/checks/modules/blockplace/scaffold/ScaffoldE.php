@@ -41,6 +41,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function is_array;
+use function is_numeric;
 use function max;
 use function microtime;
 
@@ -66,6 +67,8 @@ class ScaffoldE extends Check {
 		}
 
 		$player = $event->getPlayer();
+		$maxPingRaw = $this->getConstant(CheckConstants::SCAFFOLDE_EXPANSION_MAX_PING);
+		$maxPing = is_numeric($maxPingRaw) ? (int) $maxPingRaw : 0;
 		if (
 			!$player->isSurvival() ||
 			$player->getAllowFlight() ||
@@ -75,27 +78,41 @@ class ScaffoldE extends Check {
 			$playerAPI->isInWeb() ||
 			$playerAPI->isInLiquid() ||
 			$playerAPI->isRecentlyCancelledEvent() ||
-			(int) $playerAPI->getPing() > (int) $this->getConstant(CheckConstants::SCAFFOLDE_EXPANSION_MAX_PING)
+			(int) $playerAPI->getPing() > $maxPing
 		) {
 			$this->setBuffer($playerAPI, 0);
 			return;
 		}
 
-		$blockPos = $event->getBlock()->getPosition();
+		$blockPos = $event->getBlockAgainst()->getPosition();
 		$now = microtime(true);
-		$lastPlaceAt = (float) $playerAPI->getExternalData(self::LAST_PLACE_AT_KEY, 0.0);
+		$lastPlaceAtRaw = $playerAPI->getExternalData(self::LAST_PLACE_AT_KEY, 0.0);
+		$lastPlaceAt = is_numeric($lastPlaceAtRaw) ? (float) $lastPlaceAtRaw : 0.0;
 		$interval = $lastPlaceAt > 0 ? $now - $lastPlaceAt : 999.0;
 
 		$horizontalDistanceSquared = MathUtil::XZDistanceSquared($player->getPosition(), $blockPos);
-		$suspicious = $interval <= (float) $this->getConstant(CheckConstants::SCAFFOLDE_MAX_PLACE_INTERVAL) &&
-			$horizontalDistanceSquared > (float) $this->getConstant(CheckConstants::SCAFFOLDE_MAX_HORIZONTAL_DISTANCE_SQUARED);
+		$maxPlaceIntervalRaw = $this->getConstant(CheckConstants::SCAFFOLDE_MAX_PLACE_INTERVAL);
+		$maxHorizontalDistanceSquaredRaw = $this->getConstant(CheckConstants::SCAFFOLDE_MAX_HORIZONTAL_DISTANCE_SQUARED);
+		$maxPlaceInterval = is_numeric($maxPlaceIntervalRaw) ? (float) $maxPlaceIntervalRaw : 0.0;
+		$maxHorizontalDistanceSquared = is_numeric($maxHorizontalDistanceSquaredRaw) ? (float) $maxHorizontalDistanceSquaredRaw : 0.0;
+		$suspicious = $interval <= $maxPlaceInterval &&
+			$horizontalDistanceSquared > $maxHorizontalDistanceSquared;
 
 		$sequentialDistance = 0.0;
 		$lastBlock = $playerAPI->getExternalData(self::LAST_BLOCK_KEY);
 		if (is_array($lastBlock)) {
-			$previousBlock = new Vector3((float) ($lastBlock["x"] ?? 0.0), (float) ($lastBlock["y"] ?? 0.0), (float) ($lastBlock["z"] ?? 0.0));
+			$previousBlockXRaw = $lastBlock["x"] ?? 0.0;
+			$previousBlockYRaw = $lastBlock["y"] ?? 0.0;
+			$previousBlockZRaw = $lastBlock["z"] ?? 0.0;
+			$previousBlock = new Vector3(
+				is_numeric($previousBlockXRaw) ? (float) $previousBlockXRaw : 0.0,
+				is_numeric($previousBlockYRaw) ? (float) $previousBlockYRaw : 0.0,
+				is_numeric($previousBlockZRaw) ? (float) $previousBlockZRaw : 0.0
+			);
 			$sequentialDistance = MathUtil::distance($previousBlock, $blockPos->asVector3());
-			if ($interval <= (float) $this->getConstant(CheckConstants::SCAFFOLDE_MAX_PLACE_INTERVAL) && $sequentialDistance > (float) $this->getConstant(CheckConstants::SCAFFOLDE_MAX_SEQUENTIAL_DISTANCE)) {
+			$maxSequentialDistanceRaw = $this->getConstant(CheckConstants::SCAFFOLDE_MAX_SEQUENTIAL_DISTANCE);
+			$maxSequentialDistance = is_numeric($maxSequentialDistanceRaw) ? (float) $maxSequentialDistanceRaw : 0.0;
+			if ($interval <= $maxPlaceInterval && $sequentialDistance > $maxSequentialDistance) {
 				$suspicious = true;
 			}
 		}
@@ -112,14 +129,17 @@ class ScaffoldE extends Check {
 		$playerAPI->setExternalData(self::LAST_BLOCK_KEY, ["x" => $blockPos->getX(), "y" => $blockPos->getY(), "z" => $blockPos->getZ()]);
 		$this->debug($playerAPI, "horizontalDistanceSquared={$horizontalDistanceSquared}, sequentialDistance={$sequentialDistance}, interval={$interval}, buffer={$buffer}");
 
-		if ($buffer >= (int) $this->getConstant(CheckConstants::SCAFFOLDE_EXPANSION_BUFFER_LIMIT)) {
+		$bufferLimitRaw = $this->getConstant(CheckConstants::SCAFFOLDE_EXPANSION_BUFFER_LIMIT);
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 0;
+		if ($buffer >= $bufferLimit) {
 			$this->setBuffer($playerAPI, 0);
 			$this->dispatchAsyncDecision($playerAPI, true);
 		}
 	}
 
 	private function getBuffer(PlayerAPI $playerAPI) : int {
-		return (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$raw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		return is_numeric($raw) ? (int) $raw : 0;
 	}
 
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {

@@ -34,8 +34,6 @@ namespace ReinfyTeam\Zuri\checks\snapshots;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function abs;
-use function is_bool;
-use function is_float;
 
 /**
  * Captures immutable movement state for async worker evaluation.
@@ -91,7 +89,8 @@ class MovementSnapshot extends AsyncSnapshot {
 	private int $ping;
 
 	/** Cached data results. */
-	private mixed $cachedData = [];
+	/** @var array<string,mixed> */
+	private array $cachedData = [];
 
 	public function __construct(string $checkType, Player $player, PlayerAPI $playerAPI) {
 		parent::__construct($checkType);
@@ -130,7 +129,7 @@ class MovementSnapshot extends AsyncSnapshot {
 		$this->hurtTicks = $playerAPI->getHurtTicks();
 		$this->onlineTime = $playerAPI->getOnlineTime();
 
-		$this->ping = $player->getNetworkSession()->getPing();
+		$this->ping = (int) ($player->getNetworkSession()->getPing() ?? 0);
 	}
 
 	/**
@@ -151,6 +150,7 @@ class MovementSnapshot extends AsyncSnapshot {
 		return $this;
 	}
 
+	/** @return array<string,mixed> */
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
@@ -189,12 +189,8 @@ class MovementSnapshot extends AsyncSnapshot {
 	}
 
 	public function validate() : void {
-		// All fields are mandatory for movement checks
-		if (!is_float($this->posX) || !is_float($this->posY) || !is_float($this->posZ)) {
-			throw new SnapshotException("Invalid position data in movement snapshot");
-		}
-		if (!is_bool($this->survival)) {
-			throw new SnapshotException("Missing survival state in movement snapshot");
+		if ($this->ping < 0) {
+			throw new SnapshotException("Invalid ping in movement snapshot");
 		}
 	}
 }

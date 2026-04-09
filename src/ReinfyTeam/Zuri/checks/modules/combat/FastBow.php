@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function array_key_exists;
+use function is_numeric;
 
 class FastBow extends Check {
 	private const string TYPE = "FastBowA";
@@ -59,15 +60,20 @@ class FastBow extends Check {
 		if ($event instanceof EntityShootBowEvent) {
 			$tick = Server::getInstance()->getTick();
 			$tps = (float) Server::getInstance()->getTicksPerSecond();
-			$shootFirstTick = (int) $playerAPI->getExternalData(CacheData::FASTBOW_SHOOT_FIRST_TICK, -1);
+			$shootFirstTickRaw = $playerAPI->getExternalData(CacheData::FASTBOW_SHOOT_FIRST_TICK, -1);
+			$shootFirstTick = is_numeric($shootFirstTickRaw) ? (int) $shootFirstTickRaw : -1;
 			if ($shootFirstTick === -1) {
 				$shootFirstTick = $tick - 30;
 			}
 
-			$currentHsIndex = (int) $playerAPI->getExternalData(CacheData::FASTBOW_CURRENT_HS_INDEX, 0);
-			$hsTimeSum = (float) $playerAPI->getExternalData(CacheData::FASTBOW_HS_TIME_SUM, 0.0);
+			$currentHsIndexRaw = $playerAPI->getExternalData(CacheData::FASTBOW_CURRENT_HS_INDEX, 0);
+			$hsTimeSumRaw = $playerAPI->getExternalData(CacheData::FASTBOW_HS_TIME_SUM, 0.0);
+			$currentHsIndex = is_numeric($currentHsIndexRaw) ? (int) $currentHsIndexRaw : 0;
+			$hsTimeSum = is_numeric($hsTimeSumRaw) ? (float) $hsTimeSumRaw : 0.0;
 			$hsTimeList = (array) $playerAPI->getExternalData(CacheData::FASTBOW_HS_TIME_LIST, []);
-			$previousIndexValue = array_key_exists($currentHsIndex, $hsTimeList) ? (float) $hsTimeList[$currentHsIndex] : 0.0;
+			$previousIndexRaw = array_key_exists($currentHsIndex, $hsTimeList) ? $hsTimeList[$currentHsIndex] : 0.0;
+			$previousIndexValue = is_numeric($previousIndexRaw) ? (float) $previousIndexRaw : 0.0;
+			$maxHitTimeRaw = $this->getConstant(CheckConstants::FASTBOW_MAX_HIT_TIME);
 
 			$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
 				"type" => self::TYPE,
@@ -78,7 +84,7 @@ class FastBow extends Check {
 				"currentHsIndex" => $currentHsIndex,
 				"hsTimeList" => $hsTimeList,
 				"previousIndexValue" => $previousIndexValue,
-				"maxHitTime" => (float) $this->getConstant(CheckConstants::FASTBOW_MAX_HIT_TIME),
+				"maxHitTime" => is_numeric($maxHitTimeRaw) ? (float) $maxHitTimeRaw : 0.0,
 			]);
 		}
 	}
@@ -88,13 +94,19 @@ class FastBow extends Check {
 			return [];
 		}
 
-		$tick = (int) ($payload["tick"] ?? 0);
-		$tps = (float) ($payload["tps"] ?? 20.0);
-		$shootFirstTick = (int) ($payload["shootFirstTick"] ?? -1);
-		$hsTimeSum = (float) ($payload["hsTimeSum"] ?? 0.0);
-		$currentHsIndex = (int) ($payload["currentHsIndex"] ?? 0);
+		$tickRaw = $payload["tick"] ?? 0;
+		$tpsRaw = $payload["tps"] ?? 20.0;
+		$shootFirstTickRaw = $payload["shootFirstTick"] ?? -1;
+		$hsTimeSumRaw = $payload["hsTimeSum"] ?? 0.0;
+		$currentHsIndexRaw = $payload["currentHsIndex"] ?? 0;
+		$tick = is_numeric($tickRaw) ? (int) $tickRaw : 0;
+		$tps = is_numeric($tpsRaw) ? (float) $tpsRaw : 20.0;
+		$shootFirstTick = is_numeric($shootFirstTickRaw) ? (int) $shootFirstTickRaw : -1;
+		$hsTimeSum = is_numeric($hsTimeSumRaw) ? (float) $hsTimeSumRaw : 0.0;
+		$currentHsIndex = is_numeric($currentHsIndexRaw) ? (int) $currentHsIndexRaw : 0;
 		$hsTimeList = (array) ($payload["hsTimeList"] ?? []);
-		$previousIndexValue = (float) ($payload["previousIndexValue"] ?? 0.0);
+		$previousIndexValueRaw = $payload["previousIndexValue"] ?? 0.0;
+		$previousIndexValue = is_numeric($previousIndexValueRaw) ? (float) $previousIndexValueRaw : 0.0;
 
 		if ($tps <= 0.0) {
 			return [];
@@ -118,7 +130,9 @@ class FastBow extends Check {
 			"debug" => "tick={$tick}, tickDiff={$tickDiff}, tps={$tps}, shootFirstTick={$shootFirstTick}, hsTimeSum={$hsTimeSum}, currentHsIndex={$currentHsIndex}, delta={$delta}, hsHitTime={$hsHitTime}",
 		];
 
-		if ($hsHitTime < (float) ($payload["maxHitTime"] ?? 0.0)) {
+		$maxHitTimeRaw = $payload["maxHitTime"] ?? 0.0;
+		$maxHitTime = is_numeric($maxHitTimeRaw) ? (float) $maxHitTimeRaw : 0.0;
+		if ($hsHitTime < $maxHitTime) {
 			$result["failed"] = true;
 		}
 

@@ -39,6 +39,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
+use function is_numeric;
 
 class WrongPitch extends Check {
 	public function getName() : string {
@@ -73,6 +74,9 @@ class WrongPitch extends Check {
 		}
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(
 			$payload,
@@ -87,7 +91,11 @@ class WrongPitch extends Check {
 		}
 
 		$cachedData = (array) ($payload["cachedData"] ?? []);
-		if ((int) ($payload["teleportTicks"] ?? 0) > 100 && (float) ($cachedData["pitch"] ?? 0) > 90) {
+		$teleportTicksRaw = $payload["teleportTicks"] ?? 0;
+		$teleportTicks = is_numeric($teleportTicksRaw) ? (int) $teleportTicksRaw : 0;
+		$pitchRaw = $cachedData["pitch"] ?? 0;
+		$pitch = is_numeric($pitchRaw) ? (float) $pitchRaw : 0.0;
+		if ($teleportTicks > 100 && $pitch > 90) {
 			return ["failed" => true];
 		}
 

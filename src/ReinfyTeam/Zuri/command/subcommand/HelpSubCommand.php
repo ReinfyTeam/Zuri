@@ -44,6 +44,7 @@ class HelpSubCommand extends BaseSubCommand {
 	protected function prepare() : void {
 	}
 
+	/** @param array<string,mixed> $args */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$sender->sendMessage(ZuriCommand::buildHelpMessage("zuri"));
 	}

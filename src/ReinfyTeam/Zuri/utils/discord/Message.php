@@ -32,11 +32,15 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\utils\discord;
 
 use JsonSerializable;
+use function is_array;
+use function is_string;
 
 class Message implements JsonSerializable {
+	/** @var array<string,mixed> */
 	protected array $data = [];
 
-	public function __construct(array $embeds = null) {
+	/** @param list<Embed>|null $embeds */
+	public function __construct(?array $embeds = null) {
 		if ($embeds !== null) {
 			foreach ($embeds as $embed) {
 				$this->addEmbed($embed);
@@ -50,11 +54,13 @@ class Message implements JsonSerializable {
 	}
 
 	public function getContent() : ?string {
-		return $this->data["content"];
+		$content = $this->data["content"] ?? null;
+		return is_string($content) ? $content : null;
 	}
 
 	public function getUsername() : ?string {
-		return $this->data["username"];
+		$username = $this->data["username"] ?? null;
+		return is_string($username) ? $username : null;
 	}
 
 	public function setUsername(string $username) : self {
@@ -63,7 +69,8 @@ class Message implements JsonSerializable {
 	}
 
 	public function getAvatarURL() : ?string {
-		return $this->data["avatar_url"];
+		$avatarUrl = $this->data["avatar_url"] ?? null;
+		return is_string($avatarUrl) ? $avatarUrl : null;
 	}
 
 	public function setAvatarURL(string $avatarURL) : self {
@@ -73,7 +80,12 @@ class Message implements JsonSerializable {
 
 	public function addEmbed(Embed $embed) : ?self {
 		if (!empty(($arr = $embed->asArray()))) {
-			$this->data["embeds"][] = $arr;
+			$embeds = $this->data["embeds"] ?? [];
+			if (!is_array($embeds)) {
+				$embeds = [];
+			}
+			$embeds[] = $arr;
+			$this->data["embeds"] = $embeds;
 			return $this;
 		}
 		return null;
@@ -84,11 +96,13 @@ class Message implements JsonSerializable {
 		return $this;
 	}
 
+	/** @return array<string,mixed> */
 	public function jsonSerialize() : array {
 		return $this->data;
 	}
 
-	public static function create(array $embeds = null) : Message {
+	/** @param list<Embed>|null $embeds */
+	public static function create(?array $embeds = null) : Message {
 		return new Message($embeds);
 	}
 }

@@ -50,6 +50,7 @@ class BypassSubCommand extends BaseSubCommand {
 	}
 
 	/**
+	 * @param array<string,mixed> $args
 	 * @throws JsonException
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {

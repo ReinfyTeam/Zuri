@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri\command;
 
 use CortexPE\Commando\BaseCommand;
 use pocketmine\command\CommandSender;
+use pocketmine\plugin\PluginBase;
 use ReinfyTeam\Zuri\command\subcommand\AboutSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\AsyncStatusSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\BanModeSubCommand;
@@ -55,20 +56,25 @@ class ZuriCommand extends BaseCommand {
 	}
 
 	protected function prepare() : void {
+		$plugin = $this->plugin;
+		if (!$plugin instanceof PluginBase) {
+			return;
+		}
 		$this->setPermission("zuri.command");
-		$this->registerSubCommand(new AboutSubCommand($this->plugin));
-		$this->registerSubCommand(new NotifySubCommand($this->plugin));
-		$this->registerSubCommand(new BanModeSubCommand($this->plugin));
-		$this->registerSubCommand(new CaptchaSubCommand($this->plugin));
-		$this->registerSubCommand(new BypassSubCommand($this->plugin));
-		$this->registerSubCommand(new DebugSubCommand($this->plugin));
-		$this->registerSubCommand(new AsyncStatusSubCommand($this->plugin));
-		$this->registerSubCommand(new ListSubCommand($this->plugin));
-		$this->registerSubCommand(new UiSubCommand($this->plugin));
-		$this->registerSubCommand(new LanguageSubCommand($this->plugin));
-		$this->registerSubCommand(new HelpSubCommand($this->plugin));
+		$this->registerSubCommand(new AboutSubCommand($plugin));
+		$this->registerSubCommand(new NotifySubCommand($plugin));
+		$this->registerSubCommand(new BanModeSubCommand($plugin));
+		$this->registerSubCommand(new CaptchaSubCommand($plugin));
+		$this->registerSubCommand(new BypassSubCommand($plugin));
+		$this->registerSubCommand(new DebugSubCommand($plugin));
+		$this->registerSubCommand(new AsyncStatusSubCommand($plugin));
+		$this->registerSubCommand(new ListSubCommand($plugin));
+		$this->registerSubCommand(new UiSubCommand($plugin));
+		$this->registerSubCommand(new LanguageSubCommand($plugin));
+		$this->registerSubCommand(new HelpSubCommand($plugin));
 	}
 
+	/** @param array<string,mixed> $args */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$sender->sendMessage(self::buildHelpMessage($this->getName()));
 	}

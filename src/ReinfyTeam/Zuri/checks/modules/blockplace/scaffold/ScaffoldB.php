@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
+use function is_numeric;
 
 class ScaffoldB extends Check {
 	public function getName() : string {
@@ -60,10 +61,13 @@ class ScaffoldB extends Check {
 		if ($event instanceof BlockPlaceEvent) {
 			$pitch = abs($playerAPI->getLocation()->getPitch());
 			$distanceY = $event->getBlockAgainst()->getPosition()->getY() < $playerAPI->getLocation()->getY();
-			$oldPitch = $playerAPI->getExternalData(CacheData::SCAFFOLD_B_OLD_PITCH) ?? 0;
-			$this->debug($playerAPI, "oldPitch=$oldPitch distanceY=$distanceY, newPitch=$pitch, ping=" . $playerAPI->getPing());
+			$oldPitchRaw = $playerAPI->getExternalData(CacheData::SCAFFOLD_B_OLD_PITCH) ?? 0;
+			$oldPitch = is_numeric($oldPitchRaw) ? (float) $oldPitchRaw : 0.0;
+			$this->debug($playerAPI, "oldPitch={$oldPitch} distanceY={$distanceY}, newPitch={$pitch}, ping=" . $playerAPI->getPing());
+			$suspiciousPitchLimitRaw = $this->getConstant(CheckConstants::SCAFFOLDB_SUSPECIOUS_PITCH_LIMIT);
+			$suspiciousPitchLimit = is_numeric($suspiciousPitchLimitRaw) ? (float) $suspiciousPitchLimitRaw : 0.0;
 			if (
-				$pitch < $this->getConstant(CheckConstants::SCAFFOLDB_SUSPECIOUS_PITCH_LIMIT) && // is this has good calculation enough?
+				$pitch < $suspiciousPitchLimit && // is this has good calculation enough?
 				$distanceY && // it depends on block placed is under the player..
 				$oldPitch === $pitch && // for using bedrock long bridging lol anti-false kick
 				$playerAPI->getPing() < self::getData(self::PING_LAGGING)

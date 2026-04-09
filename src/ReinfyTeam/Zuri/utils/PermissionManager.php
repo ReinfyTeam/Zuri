@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\utils;
 use AllowDynamicProperties;
 use pocketmine\permission\DefaultPermissions;
 use pocketmine\permission\Permission as PMPermission;
+use pocketmine\permission\PermissionAttachment;
 use pocketmine\permission\PermissionManager as PMPermissionManager;
 use pocketmine\player\Player;
 use pocketmine\utils\NotCloneable;
@@ -48,12 +49,14 @@ use ReinfyTeam\Zuri\ZuriAC;
 
 	/** @var string[] */
 	private array $perm = [];
+	private ?PermissionAttachment $attachment = null;
 
 	public const int USER = 0;
 	public const int OPERATOR = 1;
 	public const int CONSOLE = 3;
 	public const int NONE = -1;
 
+	/** @param array<string,bool> $childPermission */
 	public function register(string $permission, int $permAccess, array $childPermission = []) : void {
 		$this->perm[] = $permission;
 
@@ -78,6 +81,7 @@ use ReinfyTeam\Zuri\ZuriAC;
 	}
 
 
+	/** @param array<string,bool> $permissions */
 	public function addPlayerPermissions(Player $player, array $permissions) : void {
 		if ($this->attachment === null) {
 			$this->attachment = $player->addAttachment(ZuriAC::getInstance());
@@ -93,6 +97,7 @@ use ReinfyTeam\Zuri\ZuriAC;
 		$this->attachment->clearPermissions();
 	}
 
+	/** @return list<string> */
 	public function getAllPermissions() : array {
 		return $this->perm;
 	}

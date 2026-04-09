@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 use function microtime;
 use function round;
 
@@ -55,13 +56,14 @@ class TimerB extends Check {
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
+			$diffBalanceRaw = $this->getConstant(CheckConstants::TIMERB_DIFF_BALANCE);
 			$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
 				"type" => "TimerB",
 				"alive" => $playerAPI->getPlayer()->isAlive(),
 				"currentTime" => microtime(true) * 1000,
 				"lastTime" => $playerAPI->getExternalData(CacheData::TIMER_A_LAST_TIME),
 				"balance" => $playerAPI->getExternalData(CacheData::TIMER_A_BALANCE, 0),
-				"diffBalance" => (float) $this->getConstant(CheckConstants::TIMERB_DIFF_BALANCE),
+				"diffBalance" => is_numeric($diffBalanceRaw) ? (float) $diffBalanceRaw : 0.0,
 			]);
 		}
 	}
@@ -71,16 +73,20 @@ class TimerB extends Check {
 			return ["set" => [CacheData::TIMER_A_BALANCE => 0], "unset" => [CacheData::TIMER_A_LAST_TIME],];
 		}
 
-		$currentTime = (float) ($payload["currentTime"] ?? 0.0);
+		$currentTimeRaw = $payload["currentTime"] ?? 0.0;
+		$currentTime = is_numeric($currentTimeRaw) ? (float) $currentTimeRaw : 0.0;
 		$lastTime = $payload["lastTime"] ?? null;
-		$balance = (float) ($payload["balance"] ?? 0.0);
-		$diffBalance = (float) ($payload["diffBalance"] ?? 0.0);
+		$balanceRaw = $payload["balance"] ?? 0.0;
+		$diffBalanceRaw = $payload["diffBalance"] ?? 0.0;
+		$balance = is_numeric($balanceRaw) ? (float) $balanceRaw : 0.0;
+		$diffBalance = is_numeric($diffBalanceRaw) ? (float) $diffBalanceRaw : 0.0;
 
 		if ($lastTime === null) {
 			return ["set" => [CacheData::TIMER_A_LAST_TIME => $currentTime, CacheData::TIMER_A_BALANCE => $balance]];
 		}
 
-		$timeDiff = round(($currentTime - (float) $lastTime) / 50, 2);
+		$lastTimeValue = is_numeric($lastTime) ? (float) $lastTime : $currentTime;
+		$timeDiff = round(($currentTime - $lastTimeValue) / 50, 2);
 		$newBalance = ($balance - 1) + $timeDiff;
 		$result = [
 			"set" => [

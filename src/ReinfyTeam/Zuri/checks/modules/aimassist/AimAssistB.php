@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
+use function is_numeric;
 use function round;
 
 class AimAssistB extends Check {
@@ -84,8 +85,10 @@ class AimAssistB extends Check {
 			return [];
 		}
 
-		$toYaw = (float) ($payload["toYaw"] ?? 0.0);
-		$fromYaw = (float) ($payload["fromYaw"] ?? 0.0);
+		$toYawRaw = $payload["toYaw"] ?? 0.0;
+		$fromYawRaw = $payload["fromYaw"] ?? 0.0;
+		$toYaw = is_numeric($toYawRaw) ? (float) $toYawRaw : 0.0;
+		$fromYaw = is_numeric($fromYawRaw) ? (float) $fromYawRaw : 0.0;
 		$yawDiff = MathUtil::angleDiff($fromYaw, $toYaw);
 		if ($yawDiff >= 1.0 && self::isQuantizedStep($yawDiff)) {
 			if (self::isApproxMultiple($yawDiff, 1.0) || self::isApproxMultiple($yawDiff, 10.0) || self::isApproxMultiple($yawDiff, 30.0)) {
@@ -93,8 +96,10 @@ class AimAssistB extends Check {
 			}
 		}
 
-		$toPitch = (float) ($payload["toPitch"] ?? 0.0);
-		$fromPitch = (float) ($payload["fromPitch"] ?? 0.0);
+		$toPitchRaw = $payload["toPitch"] ?? 0.0;
+		$fromPitchRaw = $payload["fromPitch"] ?? 0.0;
+		$toPitch = is_numeric($toPitchRaw) ? (float) $toPitchRaw : 0.0;
+		$fromPitch = is_numeric($fromPitchRaw) ? (float) $fromPitchRaw : 0.0;
 		$pitchDiff = abs($toPitch - $fromPitch);
 		if ($pitchDiff >= 1.0 && self::isQuantizedStep($pitchDiff)) {
 			if (self::isApproxMultiple($pitchDiff, 1.0) || self::isApproxMultiple($pitchDiff, 10.0) || self::isApproxMultiple($pitchDiff, 30.0)) {

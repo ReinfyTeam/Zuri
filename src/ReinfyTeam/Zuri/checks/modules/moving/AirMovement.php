@@ -31,11 +31,14 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\checks\modules\moving;
 
+use pocketmine\lang\Translatable;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
+use function is_string;
 
 class AirMovement extends Check {
 	public function getName() : string {
@@ -56,7 +59,14 @@ class AirMovement extends Check {
 			return;
 		} // Effect::$effectInstance bug fix
 		foreach ($player->getEffects()->all() as $effect) {
-			$transtable = $effect->getType()->getName()->getText();
+			$typeName = $effect->getType()->getName();
+			if ($typeName instanceof Translatable) {
+				$transtable = $typeName->getText();
+			} elseif (is_string($typeName)) {
+				$transtable = $typeName;
+			} else {
+				continue;
+			}
 			$effects[$transtable] = $effect->getEffectLevel() + 1;
 		}
 		$nLocation = $playerAPI->getNLocation();
@@ -80,8 +90,18 @@ class AirMovement extends Check {
 				!$playerAPI->isRecentlyCancelledEvent()
 			) {
 				$distance = $nLocation["to"]->getY() - $playerAPI->getLastGroundY();
-				$limit = $this->getConstant(CheckConstants::AIRMOVEMENT_AIR_LIMIT);
-				$limit += isset($effects["potion.jump"]) ? ((($effects["potion.jump"] + $this->getConstant(CheckConstants::AIRMOVEMENT_EFFECT_AMPLIFIER)) ** $this->getConstant(CheckConstants::AIRMOVEMENT_EFFECT_MULTIPLIER)) / $this->getConstant(CheckConstants::AIRMOVEMENT_EFFECT_CONST)) : 0;
+				$limitRaw = $this->getConstant(CheckConstants::AIRMOVEMENT_AIR_LIMIT);
+				$amplifierRaw = $this->getConstant(CheckConstants::AIRMOVEMENT_EFFECT_AMPLIFIER);
+				$multiplierRaw = $this->getConstant(CheckConstants::AIRMOVEMENT_EFFECT_MULTIPLIER);
+				$constRaw = $this->getConstant(CheckConstants::AIRMOVEMENT_EFFECT_CONST);
+				$limit = is_numeric($limitRaw) ? (float) $limitRaw : 0.0;
+				$amplifier = is_numeric($amplifierRaw) ? (float) $amplifierRaw : 0.0;
+				$multiplier = is_numeric($multiplierRaw) ? (float) $multiplierRaw : 1.0;
+				$effectConst = is_numeric($constRaw) ? (float) $constRaw : 1.0;
+				if (isset($effects["potion.jump"]) && $effectConst != 0.0) {
+					$jumpLevel = (float) $effects["potion.jump"];
+					$limit += (($jumpLevel + $amplifier) ** $multiplier) / $effectConst;
+				}
 				if ($distance > $limit) {
 					$this->dispatchAsyncDecision($playerAPI, true);
 				}

@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
+use function is_numeric;
 use function max;
 
 class NoSlowA extends Check {
@@ -84,13 +85,17 @@ class NoSlowA extends Check {
 			return;
 		}
 
-		if ((int) $playerAPI->getPing() > (int) $this->getConstant(CheckConstants::NOSLOWA_MAX_PING)) {
+		$maxPingRaw = $this->getConstant(CheckConstants::NOSLOWA_MAX_PING);
+		$maxPing = is_numeric($maxPingRaw) ? (int) $maxPingRaw : 0;
+		if ((int) $playerAPI->getPing() > $maxPing) {
 			return;
 		}
 
 		$moveXZ = MathUtil::XZDistanceSquared($event->getFrom(), $event->getTo());
 		$buffer = $this->getBuffer($playerAPI);
-		if ($moveXZ > (float) $this->getConstant(CheckConstants::NOSLOWA_MAX_XZ_DISTANCE_SQUARED)) {
+		$maxDistanceRaw = $this->getConstant(CheckConstants::NOSLOWA_MAX_XZ_DISTANCE_SQUARED);
+		$maxDistance = is_numeric($maxDistanceRaw) ? (float) $maxDistanceRaw : 0.0;
+		if ($moveXZ > $maxDistance) {
 			$buffer++;
 		} else {
 			$buffer = max(0, $buffer - 1);
@@ -99,14 +104,17 @@ class NoSlowA extends Check {
 		$this->setBuffer($playerAPI, $buffer);
 		$this->debug($playerAPI, "moveXZ={$moveXZ}, buffer={$buffer}, ping=" . (int) $playerAPI->getPing());
 
-		if ($buffer >= (int) $this->getConstant(CheckConstants::NOSLOWA_BUFFER_LIMIT)) {
+		$bufferLimitRaw = $this->getConstant(CheckConstants::NOSLOWA_BUFFER_LIMIT);
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 0;
+		if ($buffer >= $bufferLimit) {
 			$this->setBuffer($playerAPI, 0);
 			$this->dispatchAsyncDecision($playerAPI, true);
 		}
 	}
 
 	private function getBuffer(PlayerAPI $playerAPI) : int {
-		return (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$bufferRaw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		return is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 	}
 
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {

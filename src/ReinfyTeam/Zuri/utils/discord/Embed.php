@@ -33,25 +33,30 @@ namespace ReinfyTeam\Zuri\utils\discord;
 
 use DateTime;
 use DateTimeZone;
+use function is_array;
 
 class Embed {
+	/** @var array<string,mixed> */
 	protected array $data = [];
 
+	/** @return array<string,mixed> */
 	public function asArray() : array {
 		return $this->data;
 	}
 
-	public function setAuthor(string $name, string $url = null, string $iconURL = null) : self {
-		if (!isset($this->data["author"])) {
-			$this->data["author"] = [];
+	public function setAuthor(string $name, ?string $url = null, ?string $iconURL = null) : self {
+		$author = $this->data["author"] ?? [];
+		if (!is_array($author)) {
+			$author = [];
 		}
-		$this->data["author"]["name"] = $name;
+		$author["name"] = $name;
 		if ($url !== null) {
-			$this->data["author"]["url"] = $url;
+			$author["url"] = $url;
 		}
 		if ($iconURL !== null) {
-			$this->data["author"]["icon_url"] = $iconURL;
+			$author["icon_url"] = $iconURL;
 		}
+		$this->data["author"] = $author;
 		return $this;
 	}
 
@@ -71,41 +76,49 @@ class Embed {
 	}
 
 	public function addField(string $name, string $value, bool $inline = false) : self {
-		if (!isset($this->data["fields"])) {
-			$this->data["fields"] = [];
+		$fields = $this->data["fields"] ?? [];
+		if (!is_array($fields)) {
+			$fields = [];
 		}
-		$this->data["fields"][] = [
+		$fields[] = [
 			"name" => $name,
 			"value" => $value,
 			"inline" => $inline,
 		];
+		$this->data["fields"] = $fields;
 		return $this;
 	}
 
 	public function setThumbnail(string $url) : self {
-		if (!isset($this->data["thumbnail"])) {
-			$this->data["thumbnail"] = [];
+		$thumbnail = $this->data["thumbnail"] ?? [];
+		if (!is_array($thumbnail)) {
+			$thumbnail = [];
 		}
-		$this->data["thumbnail"]["url"] = $url;
+		$thumbnail["url"] = $url;
+		$this->data["thumbnail"] = $thumbnail;
 		return $this;
 	}
 
 	public function setImage(string $url) : self {
-		if (!isset($this->data["image"])) {
-			$this->data["image"] = [];
+		$image = $this->data["image"] ?? [];
+		if (!is_array($image)) {
+			$image = [];
 		}
-		$this->data["image"]["url"] = $url;
+		$image["url"] = $url;
+		$this->data["image"] = $image;
 		return $this;
 	}
 
-	public function setFooter(string $text, string $iconURL = null) : self {
-		if (!isset($this->data["footer"])) {
-			$this->data["footer"] = [];
+	public function setFooter(string $text, ?string $iconURL = null) : self {
+		$footer = $this->data["footer"] ?? [];
+		if (!is_array($footer)) {
+			$footer = [];
 		}
-		$this->data["footer"]["text"] = $text;
+		$footer["text"] = $text;
 		if ($iconURL !== null) {
-			$this->data["footer"]["icon_url"] = $iconURL;
+			$footer["icon_url"] = $iconURL;
 		}
+		$this->data["footer"] = $footer;
 		return $this;
 	}
 

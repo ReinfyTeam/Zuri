@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
 use function microtime;
 
 class SpamA extends Check {
@@ -56,19 +57,23 @@ class SpamA extends Check {
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerChatEvent) {
-			$chatTick = $playerAPI->getExternalData(CacheData::SPAM_A_TICK);
+			$chatTickRaw = $playerAPI->getExternalData(CacheData::SPAM_A_TICK);
+			$chatTick = is_numeric($chatTickRaw) ? (float) $chatTickRaw : null;
 			if (!$playerAPI->getPlayer()->isConnected() || !$playerAPI->getPlayer()->isOnline()) {
 				return;
 			}
-			$violationChat = $playerAPI->getExternalData(CacheData::SPAM_A_VIOLATION);
+			$violationChatRaw = $playerAPI->getExternalData(CacheData::SPAM_A_VIOLATION);
+			$violationChat = is_numeric($violationChatRaw) ? (int) $violationChatRaw : null;
 			if (!$event->isCancelled()) {
 				if ($chatTick !== null || $violationChat !== null) {
-					$diff = microtime(true) - $chatTick;
+					$diff = microtime(true) - ($chatTick ?? microtime(true));
 					if ($diff <= self::getData(self::CHAT_SPAM_DELAY)) {
-						if ($violationChat <= $this->getConstant(CheckConstants::SPAMA_MAX_VIOLATION_RATE)) {
+						$maxViolationRateRaw = $this->getConstant(CheckConstants::SPAMA_MAX_VIOLATION_RATE);
+						$maxViolationRate = is_numeric($maxViolationRateRaw) ? (int) $maxViolationRateRaw : 0;
+						if (($violationChat ?? 0) <= $maxViolationRate) {
 							$playerAPI->getPlayer()->sendMessage($this->replaceText($playerAPI, Lang::raw(LangKeys::CHAT_SPAM_TEXT), $this->getName(), $this->getSubType()));
 							$playerAPI->setExternalData(CacheData::SPAM_A_TICK, microtime(true));
-							$playerAPI->setExternalData(CacheData::SPAM_A_VIOLATION, $violationChat + 1);
+							$playerAPI->setExternalData(CacheData::SPAM_A_VIOLATION, ($violationChat ?? 0) + 1);
 							$this->dispatchAsyncDecision($playerAPI, true);
 						} else {
 							$playerAPI->setExternalData(CacheData::SPAM_A_TICK, microtime(true));

@@ -38,6 +38,8 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
+use function is_string;
 
 class TimerC extends Check {
 	public function getName() : string {
@@ -61,20 +63,22 @@ class TimerC extends Check {
 	}
 
 	public static function evaluateAsync(array $payload) : array {
-		$type = (string) ($payload["type"] ?? "other");
+		$typeRaw = $payload["type"] ?? "other";
+		$type = is_string($typeRaw) ? $typeRaw : "other";
 		$delay = $payload["delay"] ?? null;
 
 		if ($type === "auth") {
 			if ($delay === null) {
 				return ["set" => [CacheData::TIMER_C_DELAY_COUNTER => 0]];
 			}
-			return ["set" => [CacheData::TIMER_C_DELAY_COUNTER => (int) $delay + 1]];
+			$delayValue = is_numeric($delay) ? (int) $delay : 0;
+			return ["set" => [CacheData::TIMER_C_DELAY_COUNTER => $delayValue + 1]];
 		}
 
 		if ($type === "move") {
-			$delay = (int) ($delay ?? 0);
-			if ((bool) ($payload["noClientPredictions"] ?? false) && (bool) ($payload["alive"] ?? false) && $delay < 2) {
-				return ["set" => [CacheData::TIMER_C_DELAY_COUNTER => 0], "failed" => true, "debug" => "delay={$delay}"];
+			$delayValue = is_numeric($delay) ? (int) $delay : 0;
+			if ((bool) ($payload["noClientPredictions"] ?? false) && (bool) ($payload["alive"] ?? false) && $delayValue < 2) {
+				return ["set" => [CacheData::TIMER_C_DELAY_COUNTER => 0], "failed" => true, "debug" => "delay={$delayValue}"];
 			}
 			return ["set" => [CacheData::TIMER_C_DELAY_COUNTER => 0]];
 		}

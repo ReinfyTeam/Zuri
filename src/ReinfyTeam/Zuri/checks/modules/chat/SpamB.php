@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function count;
 use function explode;
+use function is_string;
 use function str_split;
 use function strtolower;
 
@@ -60,7 +61,7 @@ class SpamB extends Check {
 				if (!$playerAPI->getPlayer()->isConnected() || !$playerAPI->getPlayer()->isOnline()) {
 					return;
 				}
-				if ($lastMessage !== null) {
+				if (is_string($lastMessage)) {
 					$violation = false;
 					$explode = explode(" ", $message);
 					$explode2 = explode(" ", $lastMessage);

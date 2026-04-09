@@ -43,6 +43,8 @@ use ReflectionProperty;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function count;
 use function exp;
+use function is_int;
+use function is_numeric;
 use function max;
 use function microtime;
 use function min;
@@ -104,9 +106,9 @@ class PlayerAPI implements IPlayerAPI {
 	private int $blocksPlacedASec = 0;
 	private int $numberBlocksAllowBreak = 2; //2 is normal action
 	private int $numberBlocksAllowPlace = 2; //2 is normal action
-	/** @var array<string, int> */
+	/** @var array<string, list<float>> */
 	private array $violations = [];
-	/** @var array<string, float> */
+	/** @var array<string, list<float>> */
 	private array $realViolations = [];
 	/** @var array<string, int> */
 	private array $asyncSequences = [];
@@ -219,7 +221,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function isRecentlyCancelledEvent() : bool {
-		if ($this->eventCancelled === 0) {
+		if ($this->eventCancelled === 0.0) {
 			return false;
 		}
 		if (!MathUtil::isRecent($this->eventCancelled, 40)) {
@@ -248,7 +250,14 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	public function getDeviceOS() : int {
-		return $this->getPlayer()->getPlayerInfo()->getExtraData()["DeviceOS"];
+		$deviceOS = $this->getPlayer()->getPlayerInfo()->getExtraData()["DeviceOS"] ?? 0;
+		if (is_int($deviceOS)) {
+			return $deviceOS;
+		}
+		if (is_numeric($deviceOS)) {
+			return (int) $deviceOS;
+		}
+		return 0;
 	}
 
 	//On plant
@@ -408,9 +417,6 @@ class PlayerAPI implements IPlayerAPI {
 	 */
 	private function getBlockBreakHandler() : ?SurvivalBlockBreakHandler {
 		static $ref = null;
-		if ($this->getPlayer() === null) {
-			return null;
-		}
 		if ($ref === null) {
 			$ref = new ReflectionProperty($this->getPlayer(), "blockBreakHandler");
 		}
@@ -769,6 +775,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	//Location
+	/** @return array<string, Location> */
 	public function getNLocation() : array {
 		return $this->nLocation;
 	}
@@ -778,7 +785,7 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	//External Data
-	public function getExternalData(string $dataName, mixed $default = null) {
+	public function getExternalData(string $dataName, mixed $default = null) : mixed {
 		if (isset($this->externalData[$dataName])) {
 			return $this->externalData[$dataName];
 		}
@@ -804,10 +811,7 @@ class PlayerAPI implements IPlayerAPI {
 		$this->captchaCode = $data;
 	}
 
-	public function getInventory() : PlayerInventory|static {
-		if ($this->getPlayer() === null) {
-			return $this;
-		}
+	public function getInventory() : PlayerInventory {
 		return $this->getPlayer()->getInventory();
 	}
 
@@ -876,7 +880,7 @@ class PlayerAPI implements IPlayerAPI {
 		}
 
 		// Skip checks right after teleport (2 seconds)
-		if ($this->getTicksSinceTeleport() < 40) { // 40 ticks = 2 seconds
+		if ($this->getTeleportTicks() < 40) { // 40 ticks = 2 seconds
 			return true;
 		}
 

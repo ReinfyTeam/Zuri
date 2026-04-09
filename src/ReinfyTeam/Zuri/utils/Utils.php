@@ -31,15 +31,11 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
-use JsonMapper;
-use JsonMapper_Exception;
 use pocketmine\entity\Attribute;
 use pocketmine\entity\Living;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\JwtException;
 use pocketmine\network\mcpe\JwtUtils;
-use pocketmine\network\mcpe\protocol\types\login\AuthenticationData;
-use pocketmine\network\mcpe\protocol\types\login\JwtChain;
 use pocketmine\network\PacketHandlingException;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
@@ -47,12 +43,13 @@ use function array_keys;
 use function array_values;
 use function is_array;
 use function is_string;
+use function json_decode;
 use function mt_getrandmax;
 use function mt_rand;
 use function str_replace;
 
 class Utils {
-	public static function ParseColors($text, bool $reverse = false) : string {
+	public static function ParseColors(mixed $text, bool $reverse = false) : string {
 		if (!is_string($text)) {
 			return "";
 		}
@@ -104,7 +101,9 @@ class Utils {
 		if ($f <= 0) {
 			return null;
 		}
-		if (mt_rand() / mt_getrandmax() > $player->getAttributeMap()->get(Attribute::KNOCKBACK_RESISTANCE)->getValue()) {
+		$knockbackResistanceAttr = $player->getAttributeMap()->get(Attribute::KNOCKBACK_RESISTANCE);
+		$knockbackResistance = $knockbackResistanceAttr !== null ? $knockbackResistanceAttr->getValue() : 0.0;
+		if (mt_rand() / mt_getrandmax() > $knockbackResistance) {
 			$f = 1 / $f;
 
 			$motionX = $player->getMotion()->x / 2;
@@ -125,10 +124,23 @@ class Utils {
 		return null;
 	}
 
-	public static function fetchAuthData(JwtChain $chain) : AuthenticationData {
-		/** @var AuthenticationData|null $extraData */
+	/** @return array<string,mixed> */
+	public static function fetchAuthData(string $authInfoJson) : array {
+		$decoded = json_decode($authInfoJson, true);
+		if (!is_array($decoded)) {
+			throw new PacketHandlingException("Invalid authInfoJson payload");
+		}
+
+		$chain = $decoded["chain"] ?? null;
+		if (!is_array($chain)) {
+			throw new PacketHandlingException("'chain' not found in authInfoJson");
+		}
+
 		$extraData = null;
-		foreach ($chain->chain as $jwt) {
+		foreach ($chain as $jwt) {
+			if (!is_string($jwt)) {
+				continue;
+			}
 			// Validate every chain element
 			try {
 				[, $claims,] = JwtUtils::parse($jwt);
@@ -143,19 +155,10 @@ class Utils {
 				if (!is_array($claims["extraData"])) {
 					throw new PacketHandlingException("'extraData' key should be an array");
 				}
-				$mapper = new JsonMapper;
-				$mapper->bEnforceMapType = false; //TODO: we don't really need this as an array, but right now we don't have enough models
-				$mapper->bExceptionOnMissingData = true;
-				$mapper->bExceptionOnUndefinedProperty = true;
-				try {
-					/** @var AuthenticationData $extraData */
-					$extraData = $mapper->map($claims["extraData"], new AuthenticationData);
-				} catch(JsonMapper_Exception $e) {
-					throw PacketHandlingException::wrap($e);
-				}
+				$extraData = $claims["extraData"];
 			}
 		}
-		if ($extraData === null) {
+		if (!is_array($extraData)) {
 			throw new PacketHandlingException("'extraData' not found in chain data");
 		}
 		return $extraData;

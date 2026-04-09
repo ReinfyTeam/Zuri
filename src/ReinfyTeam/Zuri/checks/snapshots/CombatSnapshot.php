@@ -33,8 +33,6 @@ namespace ReinfyTeam\Zuri\checks\snapshots;
 
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function is_bool;
-use function is_float;
 
 /**
  * Captures immutable combat state for async worker evaluation.
@@ -74,7 +72,8 @@ class CombatSnapshot extends AsyncSnapshot {
 	private bool $victimRecentlyCancelled;
 
 	/** Cached combat data. */
-	private mixed $cachedData = [];
+	/** @var array<string,mixed> */
+	private array $cachedData = [];
 
 	public function __construct(
 		string $checkType,
@@ -91,14 +90,14 @@ class CombatSnapshot extends AsyncSnapshot {
 		$this->damagerEyeX = $damagerEye->getX();
 		$this->damagerEyeY = $damagerEye->getY();
 		$this->damagerEyeZ = $damagerEye->getZ();
-		$this->damagerPing = $damager->getNetworkSession()->getPing();
+		$this->damagerPing = (int) ($damager->getNetworkSession()->getPing() ?? 0);
 		$this->damagerSprinting = $damager->isSprinting();
 		$this->damagerSurvival = $damager->isSurvival();
 
 		$this->victimEyeX = $victimEye->getX();
 		$this->victimEyeY = $victimEye->getY();
 		$this->victimEyeZ = $victimEye->getZ();
-		$this->victimPing = $victim->getNetworkSession()->getPing();
+		$this->victimPing = (int) ($victim->getNetworkSession()->getPing() ?? 0);
 		$this->victimSprinting = $victim->isSprinting();
 		$this->victimSurvival = $victim->isSurvival();
 
@@ -121,6 +120,7 @@ class CombatSnapshot extends AsyncSnapshot {
 		return $this;
 	}
 
+	/** @return array<string,mixed> */
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
@@ -151,11 +151,8 @@ class CombatSnapshot extends AsyncSnapshot {
 	}
 
 	public function validate() : void {
-		if (!is_float($this->damagerEyeX) || !is_float($this->victimEyeX)) {
-			throw new SnapshotException("Invalid combat position data in snapshot");
-		}
-		if (!is_bool($this->damagerSurvival) || !is_bool($this->victimSurvival)) {
-			throw new SnapshotException("Missing survival state in combat snapshot");
+		if ($this->damagerPing < 0 || $this->victimPing < 0) {
+			throw new SnapshotException("Invalid ping value in combat snapshot");
 		}
 	}
 }

@@ -45,6 +45,7 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
+use function is_numeric;
 use function max;
 
 class OmniSprint extends Check {
@@ -69,7 +70,8 @@ class OmniSprint extends Check {
 		}
 
 		$player = $playerAPI->getPlayer();
-		$maxPing = (int) ($this->getConstant(CheckConstants::OMNISPRINT_MAX_PING) ?? self::getData(self::PING_LAGGING));
+		$maxPingRaw = $this->getConstant(CheckConstants::OMNISPRINT_MAX_PING) ?? self::getData(self::PING_LAGGING);
+		$maxPing = is_numeric($maxPingRaw) ? (int) $maxPingRaw : 0;
 		if ($this->isExempt($playerAPI) || $playerAPI->getHurtTicks() < 20 || (int) $playerAPI->getPing() > $maxPing) {
 			$this->resetState($playerAPI);
 			return;
@@ -91,20 +93,25 @@ class OmniSprint extends Check {
 		$invalidDirection = $backward || $sidewaysOnly;
 
 		$inputLength = MathUtil::horizontalLength($packet->getMoveVecX(), $packet->getMoveVecZ());
-		$minInputLength = (float) ($this->getConstant(CheckConstants::OMNISPRINT_MIN_INPUT_LENGTH) ?? 0.75);
-		$maxSpeed = (float) ($this->getConstant(CheckConstants::OMNISPRINT_MAX_SPEED) ?? 0.09);
+		$minInputLengthRaw = $this->getConstant(CheckConstants::OMNISPRINT_MIN_INPUT_LENGTH) ?? 0.75;
+		$maxSpeedRaw = $this->getConstant(CheckConstants::OMNISPRINT_MAX_SPEED) ?? 0.09;
+		$minInputLength = is_numeric($minInputLengthRaw) ? (float) $minInputLengthRaw : 0.75;
+		$maxSpeed = is_numeric($maxSpeedRaw) ? (float) $maxSpeedRaw : 0.09;
 		$currentTick = Server::getInstance()->getTick();
-		$lastMoveTick = (int) $playerAPI->getExternalData(self::LAST_MOVE_TICK_KEY, 0);
+		$lastMoveTickRaw = $playerAPI->getExternalData(self::LAST_MOVE_TICK_KEY, 0);
+		$lastMoveTick = is_numeric($lastMoveTickRaw) ? (int) $lastMoveTickRaw : 0;
 		if ($lastMoveTick <= 0 || ($currentTick - $lastMoveTick) > 3) {
 			$this->resetState($playerAPI);
 			return;
 		}
 
-		$moveXZ = (float) $playerAPI->getExternalData(self::LAST_MOVE_XZ_KEY, 0.0);
+		$moveXZRaw = $playerAPI->getExternalData(self::LAST_MOVE_XZ_KEY, 0.0);
+		$moveXZ = is_numeric($moveXZRaw) ? (float) $moveXZRaw : 0.0;
 		$movingFast = $moveXZ > $maxSpeed;
 		$movingByInput = $inputLength >= $minInputLength;
 
-		$buffer = (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$bufferRaw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$buffer = is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 		if ($player->isSprinting() && $invalidDirection && $movingFast && $movingByInput) {
 			$buffer++;
 		} else {
@@ -114,7 +121,8 @@ class OmniSprint extends Check {
 		$playerAPI->setExternalData(self::BUFFER_KEY, $buffer);
 		$this->debug($playerAPI, "left=" . ($left ? "1" : "0") . ", right=" . ($right ? "1" : "0") . ", down=" . ($down ? "1" : "0") . ", up=" . ($up ? "1" : "0") . ", inputLength={$inputLength}, moveXZ={$moveXZ}, movingFast=" . ($movingFast ? "1" : "0") . ", invalidDirection=" . ($invalidDirection ? "1" : "0") . ", buffer={$buffer}");
 
-		$bufferLimit = (int) ($this->getConstant(CheckConstants::OMNISPRINT_BUFFER_LIMIT) ?? 3);
+		$bufferLimitRaw = $this->getConstant(CheckConstants::OMNISPRINT_BUFFER_LIMIT) ?? 3;
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 3;
 		if ($buffer >= $bufferLimit) {
 			$playerAPI->setExternalData(self::BUFFER_KEY, 0);
 			$this->dispatchAsyncDecision($playerAPI, true);

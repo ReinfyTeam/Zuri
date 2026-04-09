@@ -40,6 +40,7 @@ use function array_key_exists;
 use function array_shift;
 use function count;
 use function is_array;
+use function is_numeric;
 use function is_string;
 use function json_decode;
 use function max;
@@ -47,7 +48,7 @@ use function method_exists;
 use function microtime;
 
 class CheckAsyncTask {
-	/** @var list<array{0:string,1:string,2:array,3:int,4:float,5:float,6:int}> */
+	/** @var list<array{0:string,1:string,2:array<string,mixed>,3:int,4:float,5:float,6:int}> */
 	private static array $queue = [];
 	private static int $inFlight = 0;
 	private static int $maxConcurrentWorkers = 4;
@@ -56,7 +57,7 @@ class CheckAsyncTask {
 	private static float $degradedCooldownSeconds = 6.0;
 	private static float $degradedUntil = 0.0;
 
-	/** @var array<string,array{startedAt:float,queuedAt:float,capturedAt:float,checkClass:string,playerName:string,payload:array,sequence:int,attempt:int}> */
+	/** @var array<string,array{startedAt:float,queuedAt:float,capturedAt:float,checkClass:string,playerName:string,payload:array<string,mixed>,sequence:int,attempt:int}> */
 	private static array $activeTasks = [];
 
 	private static int $totalDispatched = 0;
@@ -75,6 +76,7 @@ class CheckAsyncTask {
 	private static float $totalBuildDelayTime = 0.0;
 	private static float $totalMergeTime = 0.0;
 
+	/** @return array<string,int|float|bool> */
 	public static function getMetrics() : array {
 		$now = microtime(true);
 		self::runHealthCheck($now);
@@ -113,6 +115,7 @@ class CheckAsyncTask {
 		self::$degradedCooldownSeconds = $degradedCooldownSeconds > 0.1 ? $degradedCooldownSeconds : 0.1;
 	}
 
+	/** @param array<string,mixed> $payload */
 	public static function dispatch(string $checkClass, string $playerName, array $payload, int $sequence) : void {
 		$now = microtime(true);
 		self::runHealthCheck($now);
@@ -130,7 +133,8 @@ class CheckAsyncTask {
 		}
 
 		$queuedAt = $now;
-		$capturedAt = (float) ($payload["captureTime"] ?? $queuedAt);
+		$capturedAtValue = $payload["captureTime"] ?? $queuedAt;
+		$capturedAt = is_numeric($capturedAtValue) ? (float) $capturedAtValue : $queuedAt;
 		self::$queue[] = [$checkClass, $playerName, $payload, $sequence, $queuedAt, $capturedAt, 0];
 		self::$lastDispatchAt = $queuedAt;
 		self::drain();
@@ -140,11 +144,16 @@ class CheckAsyncTask {
 		self::runHealthCheck(microtime(true));
 
 		while (self::$inFlight < self::$maxConcurrentWorkers && self::$queue !== []) {
-			[$checkClass, $playerName, $payload, $sequence, $queuedAt, $capturedAt, $attempt] = array_shift(self::$queue);
+			$next = array_shift(self::$queue);
+			if (!is_array($next)) {
+				continue;
+			}
+			[$checkClass, $playerName, $payload, $sequence, $queuedAt, $capturedAt, $attempt] = $next;
 			self::startTask($checkClass, $playerName, $payload, $sequence, $queuedAt, $capturedAt, $attempt);
 		}
 	}
 
+	/** @param array<string,mixed> $payload */
 	private static function startTask(string $checkClass, string $playerName, array $payload, int $sequence, float $queuedAt, float $capturedAt, int $attempt) : void {
 		self::$inFlight++;
 		self::$totalDispatched++;
@@ -218,6 +227,7 @@ class CheckAsyncTask {
 		});
 	}
 
+	/** @param array<string,mixed> $payload */
 	private static function executeSyncFallback(string $checkClass, string $playerName, array $payload, int $sequence) : void {
 		self::$totalSyncFallback++;
 
@@ -373,12 +383,20 @@ class CheckAsyncTask {
 		self::$inFlight++;
 	}
 
+	/** @param array<string,mixed> $result */
 	private static function applyResult(Check $check, PlayerAPI $playerAPI, array $result) : void {
-		foreach (($result['set'] ?? []) as $key => $value) {
-			$playerAPI->setExternalData((string) $key, $value);
+		$setValues = $result['set'] ?? [];
+		if (is_array($setValues)) {
+			foreach ($setValues as $key => $value) {
+				$playerAPI->setExternalData((string) $key, $value);
+			}
 		}
-		foreach (($result['unset'] ?? []) as $key) {
-			$playerAPI->unsetExternalData((string) $key);
+
+		$unsetValues = $result['unset'] ?? [];
+		if (is_array($unsetValues)) {
+			foreach ($unsetValues as $key) {
+				$playerAPI->unsetExternalData((string) $key);
+			}
 		}
 
 		if (isset($result['debug']) && is_string($result['debug']) && $result['debug'] !== '') {

@@ -45,8 +45,6 @@ class ServerLagEvent extends Event {
 	use CancellableTrait;
 
 	private PlayerAPI $player;
-	private string $moduleName;
-	private string $subType;
 
 	public function __construct(PlayerAPI $player) {
 		$this->player = $player;

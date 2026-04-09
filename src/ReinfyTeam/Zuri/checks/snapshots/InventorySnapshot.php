@@ -33,7 +33,6 @@ namespace ReinfyTeam\Zuri\checks\snapshots;
 
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function is_array;
 
 /**
  * Captures immutable inventory state for async worker evaluation.
@@ -44,14 +43,14 @@ use function is_array;
 class InventorySnapshot extends AsyncSnapshot {
 	public const SCHEMA_VERSION = 1;
 
-	/** Inventory contents snapshot (serializable). */
+	/** @var array<int,array{id:int,count:int,meta:int}> Inventory contents snapshot (serializable). */
 	private array $inventoryContents;
 
-	/** Armor contents snapshot (serializable). */
+	/** @var array<int,array{id:int,count:int,meta:int}> Armor contents snapshot (serializable). */
 	private array $armorContents;
 
-	/** Cursor item (serializable). */
-	private mixed $cursorItem;
+	/** @var array{id:int,count:int,meta:int} Cursor item (serializable). */
+	private array $cursorItem;
 
 	/** Selected slot. */
 	private int $selectedSlot;
@@ -62,8 +61,8 @@ class InventorySnapshot extends AsyncSnapshot {
 	private int $attackTicks;
 	private int $teleportTicks;
 
-	/** Cached inventory data. */
-	private mixed $cachedData = [];
+	/** @var array<string,mixed> Cached inventory data. */
+	private array $cachedData = [];
 
 	public function __construct(string $checkType, Player $player, PlayerAPI $playerAPI) {
 		parent::__construct($checkType);
@@ -75,30 +74,30 @@ class InventorySnapshot extends AsyncSnapshot {
 		$this->inventoryContents = [];
 		foreach ($inventory->getContents() as $slot => $item) {
 			$this->inventoryContents[$slot] = [
-				"id" => $item->getId(),
+				"id" => $item->getTypeId(),
 				"count" => $item->getCount(),
-				"meta" => $item->getMeta(),
+				"meta" => $item->getStateId(),
 			];
 		}
 
 		$this->armorContents = [];
 		foreach ($armorInventory->getContents() as $slot => $item) {
 			$this->armorContents[$slot] = [
-				"id" => $item->getId(),
+				"id" => $item->getTypeId(),
 				"count" => $item->getCount(),
-				"meta" => $item->getMeta(),
+				"meta" => $item->getStateId(),
 			];
 		}
 
-		$cursorItem = $inventory->getCursorItem();
+		$cursorItem = $inventory->getItemInHand();
 		$this->cursorItem = [
-			"id" => $cursorItem->getId(),
+			"id" => $cursorItem->getTypeId(),
 			"count" => $cursorItem->getCount(),
-			"meta" => $cursorItem->getMeta(),
+			"meta" => $cursorItem->getStateId(),
 		];
 
 		$this->selectedSlot = $inventory->getHeldItemIndex();
-		$this->ping = $player->getNetworkSession()->getPing();
+		$this->ping = (int) ($player->getNetworkSession()->getPing() ?? 0);
 		$this->survival = $player->isSurvival();
 		$this->attackTicks = $playerAPI->getAttackTicks();
 		$this->teleportTicks = $playerAPI->getTeleportTicks();
@@ -112,6 +111,7 @@ class InventorySnapshot extends AsyncSnapshot {
 		return $this;
 	}
 
+	/** @return array<string,mixed> */
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
@@ -130,9 +130,6 @@ class InventorySnapshot extends AsyncSnapshot {
 	}
 
 	public function validate() : void {
-		if (!is_array($this->inventoryContents) || !is_array($this->armorContents)) {
-			throw new SnapshotException("Invalid inventory contents in snapshot");
-		}
 		if ($this->selectedSlot < 0 || $this->selectedSlot >= 9) {
 			throw new SnapshotException("Invalid selected slot in inventory snapshot");
 		}

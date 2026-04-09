@@ -41,6 +41,7 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
+use function is_string;
 use function strtolower;
 
 class NotifySubCommand extends BaseSubCommand {
@@ -53,10 +54,12 @@ class NotifySubCommand extends BaseSubCommand {
 	}
 
 	/**
+	 * @param array<string,mixed> $args
 	 * @throws JsonException
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
-		$key = strtolower((string) ($args["mode"] ?? ""));
+		$modeRaw = $args["mode"] ?? "";
+		$key = is_string($modeRaw) ? strtolower($modeRaw) : "";
 		if ($key !== "toggle" && $key !== "admin") {
 			$sender->sendMessage(Lang::get(LangKeys::CMD_NOTIFY_USAGE));
 			return;

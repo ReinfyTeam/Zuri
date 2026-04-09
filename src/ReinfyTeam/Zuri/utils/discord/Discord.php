@@ -38,6 +38,9 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 use ReinfyTeam\Zuri\ZuriAC;
 use function hexdec;
+use function is_array;
+use function is_bool;
+use function is_string;
 use function str_replace;
 
 class Discord extends ConfigManager {
@@ -49,9 +52,26 @@ class Discord extends ConfigManager {
 
 	public static ?Config $config = null;
 
+	private static function nestedString(Config $config, string $path, string $default = "") : string {
+		$value = $config->getNested($path, $default);
+		return is_string($value) ? $value : $default;
+	}
+
+	private static function nestedBool(Config $config, string $path, bool $default = false) : bool {
+		$value = $config->getNested($path, $default);
+		return is_bool($value) ? $value : $default;
+	}
+
+	/** @return array<string,mixed> */
+	private static function nestedArray(Config $config, string $path) : array {
+		$value = $config->getNested($path, []);
+		return is_array($value) ? $value : [];
+	}
+
 	/**
 	 * @throws DiscordWebhookException
 	 */
+	/** @param array{name:string,subType:string}|null $moduleInfo */
 	public static function Send(PlayerAPI $playerAPI, int $type, ?array $moduleInfo = null) : void {
 		$sendType = match ($type) {
 			self::BAN => "ban",
@@ -71,66 +91,81 @@ class Discord extends ConfigManager {
 		}
 
 		$webhookConfig = self::getWebhookConfig();
-		$webhook = new Webhook($webhookConfig->getNested("discord.webhook_url"));
+		$webhook = new Webhook(self::nestedString($webhookConfig, "discord.webhook_url"));
 
 		if (!$webhook->isValid()) {
 			throw new DiscordWebhookException("Discord Webhook URL is not valid an url. Please refer to the instruction on the github wiki!");
 		}
 		$message = new Message();
-		if ($webhookConfig->getNested("$sendType.enable", false) === true) {
-			$message->setContent($webhookConfig->getNested("$sendType.message", "`Empty message in the configuration!`"));
+		$moduleName = $moduleInfo["name"] ?? "";
+		$moduleSubType = $moduleInfo["subType"] ?? "";
+		if (self::nestedBool($webhookConfig, "$sendType.enable", false)) {
+			$message->setContent(self::nestedString($webhookConfig, "$sendType.message", "`Empty message in the configuration!`"));
 
-			if (!empty($webhookConfig->getNested("discord.username", ""))) {
-				$message->setUsername($webhookConfig->getNested("discord.username"));
+			$username = self::nestedString($webhookConfig, "discord.username", "");
+			if ($username !== "") {
+				$message->setUsername($username);
 			}
 
-			if ($webhookConfig->getNested("discord.icon.enable", false) === true) {
-				$message->setAvatarURL($webhookConfig->getNested("discord.icon.url"));
+			if (self::nestedBool($webhookConfig, "discord.icon.enable", false)) {
+				$message->setAvatarURL(self::nestedString($webhookConfig, "discord.icon.url", ""));
 			}
 
-			if ($webhookConfig->getNested("$sendType.embed.enable", false) === true) {
+			if (self::nestedBool($webhookConfig, "$sendType.embed.enable", false)) {
 				$embed = new Embed();
 
-				if ($webhookConfig->getNested("$sendType.embed.author.enable", false) === true) {
-					$embed->setAuthor(ReplaceText::replace($playerAPI, $webhookConfig->getNested("$sendType.embed.author.value", "ReinfyTeam"), ($moduleInfo !== null ? $moduleInfo["name"] : ""), ($moduleInfo !== null ? $moduleInfo["subType"] : "")), ($webhookConfig->getNested("$sendType.embed.author.url", "") === "" ? null : $webhookConfig->getNested("$sendType.embed.author.url", "")), ($webhookConfig->getNested("$sendType.embed.author.iconUrl", "") === "" ? null : $webhookConfig->getNested("$sendType.embed.author.iconUrl")));
+				if (self::nestedBool($webhookConfig, "$sendType.embed.author.enable", false)) {
+					$authorUrl = self::nestedString($webhookConfig, "$sendType.embed.author.url", "");
+					$authorIconUrl = self::nestedString($webhookConfig, "$sendType.embed.author.iconUrl", "");
+					$embed->setAuthor(
+						ReplaceText::replace($playerAPI, self::nestedString($webhookConfig, "$sendType.embed.author.value", "ReinfyTeam"), $moduleName, $moduleSubType),
+						$authorUrl === "" ? null : $authorUrl,
+						$authorIconUrl === "" ? null : $authorIconUrl
+					);
 				}
 
-				if ($webhookConfig->getNested("$sendType.embed.title.enable", false) === true) {
-					$embed->setTitle(ReplaceText::replace($playerAPI, $webhookConfig->getNested("$sendType.embed.title.value", "`Embed Title is empty in the webhook.yml!`"), ($moduleInfo !== null ? $moduleInfo["name"] : ""), ($moduleInfo !== null ? $moduleInfo["subType"] : "")));
+				if (self::nestedBool($webhookConfig, "$sendType.embed.title.enable", false)) {
+					$embed->setTitle(ReplaceText::replace($playerAPI, self::nestedString($webhookConfig, "$sendType.embed.title.value", "`Embed Title is empty in the webhook.yml!`"), $moduleName, $moduleSubType));
 				}
 
-				if ($webhookConfig->getNested("$sendType.embed.description.enable", false) === true) {
-					$embed->setDescription(ReplaceText::replace($playerAPI, $webhookConfig->getNested("$sendType.embed.description.value", "`Embed Description is empty in the webhook.yml!`"), ($moduleInfo !== null ? $moduleInfo["name"] : ""), ($moduleInfo !== null ? $moduleInfo["subType"] : "")));
+				if (self::nestedBool($webhookConfig, "$sendType.embed.description.enable", false)) {
+					$embed->setDescription(ReplaceText::replace($playerAPI, self::nestedString($webhookConfig, "$sendType.embed.description.value", "`Embed Description is empty in the webhook.yml!`"), $moduleName, $moduleSubType));
 				}
 
-				if ($webhookConfig->getNested("$sendType.embed.footer.enable", false) === true) {
-					$embed->setFooter(ReplaceText::replace($playerAPI, $webhookConfig->getNested("$sendType.embed.footer.value", "`Embed Footer is empty in the webhook.yml!`"), ($moduleInfo !== null ? $moduleInfo["name"] : ""), ($moduleInfo !== null ? $moduleInfo["subType"] : "")), ($webhookConfig->getNested("$sendType.embed.footer.iconUrl", "") === "" ? null : $webhookConfig->getNested("$sendType.embed.footer.iconUrl")));
+				if (self::nestedBool($webhookConfig, "$sendType.embed.footer.enable", false)) {
+					$footerIconUrl = self::nestedString($webhookConfig, "$sendType.embed.footer.iconUrl", "");
+					$embed->setFooter(
+						ReplaceText::replace($playerAPI, self::nestedString($webhookConfig, "$sendType.embed.footer.value", "`Embed Footer is empty in the webhook.yml!`"), $moduleName, $moduleSubType),
+						$footerIconUrl === "" ? null : $footerIconUrl
+					);
 				}
 
-				if ($webhookConfig->getNested("$sendType.embed.thumbnail.enable", false) === true) {
-					$embed->setThumbnail($webhookConfig->getNested("$sendType.embed.thumbnail.value"));
+				if (self::nestedBool($webhookConfig, "$sendType.embed.thumbnail.enable", false)) {
+					$embed->setThumbnail(self::nestedString($webhookConfig, "$sendType.embed.thumbnail.value", ""));
 				}
 
-				if ($webhookConfig->getNested("$sendType.embed.image.enable", false) === true) {
-					$embed->setImage($webhookConfig->getNested("$sendType.embed.image.value"));
+				if (self::nestedBool($webhookConfig, "$sendType.embed.image.enable", false)) {
+					$embed->setImage(self::nestedString($webhookConfig, "$sendType.embed.image.value", ""));
 				}
 
-				if ($webhookConfig->getNested("$sendType.embed.image.enable", false) === true) {
-					$embed->setImage($webhookConfig->getNested("$sendType.embed.image.value"));
-				}
-
-				if ($webhookConfig->getNested("$sendType.embed.timestamp", false) === true) {
+				if (self::nestedBool($webhookConfig, "$sendType.embed.timestamp", false)) {
 					$embed->setTimestamp(new DateTime("NOW"));
 				}
 
-				$embed->setColor(self::textToHex($webhookConfig->getNested("$sendType.embed.color", "#000000"))); // hex decimal color
+				$embed->setColor((int) self::textToHex(self::nestedString($webhookConfig, "$sendType.embed.color", "#000000"))); // hex decimal color
 
 				// Fields
 
-				if ($webhookConfig->getNested("$sendType.embed.fields.enable", false) === true) {
-					foreach ($webhookConfig->getNested("$sendType.embed.fields.value") as $field_name => $fieldInfo) {
-						if (!empty($fieldInfo["title"]) && !empty($fieldInfo["value"]) && !empty($fieldInfo["inline"])) { // Assuming that these info's are not empty!
-							$embed->addField(ReplaceText::replace($playerAPI, $fieldInfo["title"], ($moduleInfo !== null ? $moduleInfo["name"] : ""), ($moduleInfo !== null ? $moduleInfo["subType"] : "")), ReplaceText::replace($playerAPI, $fieldInfo["value"], ($moduleInfo !== null ? $moduleInfo["name"] : ""), ($moduleInfo !== null ? $moduleInfo["subType"] : "")), $fieldInfo["inline"]);
+				if (self::nestedBool($webhookConfig, "$sendType.embed.fields.enable", false)) {
+					foreach (self::nestedArray($webhookConfig, "$sendType.embed.fields.value") as $field_name => $fieldInfo) {
+						if (!is_string($field_name) || !is_array($fieldInfo)) {
+							continue;
+						}
+						$fieldTitle = $fieldInfo["title"] ?? null;
+						$fieldValue = $fieldInfo["value"] ?? null;
+						$fieldInline = $fieldInfo["inline"] ?? null;
+						if (is_string($fieldTitle) && $fieldTitle !== "" && is_string($fieldValue) && $fieldValue !== "" && is_bool($fieldInline)) {
+							$embed->addField(ReplaceText::replace($playerAPI, $fieldTitle, $moduleName, $moduleSubType), ReplaceText::replace($playerAPI, $fieldValue, $moduleName, $moduleSubType), $fieldInline);
 						} else {
 							throw new DiscordWebhookException("Field \"$field_name\" has an empty required variables. Please fix them on webhook.yml!");
 						}

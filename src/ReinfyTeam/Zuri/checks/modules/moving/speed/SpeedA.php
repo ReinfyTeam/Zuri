@@ -44,6 +44,8 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
+use function is_array;
+use function is_numeric;
 
 class SpeedA extends Check {
 	public function getName() : string {
@@ -99,7 +101,8 @@ class SpeedA extends Check {
 			$snapshot->addCachedData("jumpTicks", $playerAPI->getJumpTicks());
 			$snapshot->addCachedData("lastMoveTick", $playerAPI->getLastMoveTick());
 			$snapshot->addCachedData("onIce", $playerAPI->isOnIce());
-			$snapshot->addCachedData("blockAboveSolid", BlockUtil::getBlockAbove($player)->isSolid());
+			$blockAbove = BlockUtil::getBlockAbove($player);
+			$snapshot->addCachedData("blockAboveSolid", $blockAbove !== null && $blockAbove->isSolid());
 			$snapshot->addCachedData("startJumping", $packet->getInputFlags()->get(PlayerAuthInputFlags::START_JUMPING));
 			$snapshot->addCachedData(CacheData::SPEED_A_LAST_DISTANCE_XZ, $playerAPI->getExternalData(CacheData::SPEED_A_LAST_DISTANCE_XZ, $this->getConstant(CheckConstants::SPEEDA_XZ_DISTANCE)));
 			$snapshot->addCachedData("friction", $playerAPI->isOnGround() ? $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN))->getFrictionFactor() : $this->getConstant(CheckConstants::SPEEDA_FRICTION_FACTOR));
@@ -124,6 +127,9 @@ class SpeedA extends Check {
 		}
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(
 			$payload,
@@ -139,22 +145,36 @@ class SpeedA extends Check {
 		}
 
 		$cachedData = (array) ($payload["cachedData"] ?? []);
-		$previous = new Vector3((float) ($cachedData["fromX"] ?? 0), 0, (float) ($cachedData["fromZ"] ?? 0));
-		$next = new Vector3((float) ($cachedData["toX"] ?? 0), 0, (float) ($cachedData["toZ"] ?? 0));
-		$constants = $cachedData["constants"] ?? [];
+		$fromXRaw = $cachedData["fromX"] ?? 0;
+		$fromZRaw = $cachedData["fromZ"] ?? 0;
+		$toXRaw = $cachedData["toX"] ?? 0;
+		$toZRaw = $cachedData["toZ"] ?? 0;
+		$fromX = is_numeric($fromXRaw) ? (float) $fromXRaw : 0.0;
+		$fromZ = is_numeric($fromZRaw) ? (float) $fromZRaw : 0.0;
+		$toX = is_numeric($toXRaw) ? (float) $toXRaw : 0.0;
+		$toZ = is_numeric($toZRaw) ? (float) $toZRaw : 0.0;
+		$previous = new Vector3($fromX, 0, $fromZ);
+		$next = new Vector3($toX, 0, $toZ);
+		$constants = is_array($cachedData["constants"] ?? null) ? $cachedData["constants"] : [];
+		$speedLevelRaw = $constants["speedLevel"] ?? 0;
+		$speedLevel = is_numeric($speedLevelRaw) ? (int) $speedLevelRaw : 0;
+		$slownessLevelRaw = $constants["slownessLevel"] ?? 0;
+		$slownessLevel = is_numeric($slownessLevelRaw) ? (int) $slownessLevelRaw : 0;
 		$friction = (float) ($cachedData["friction"] ?? 0.91);
 		$lastDistance = (float) ($cachedData[CacheData::SPEED_A_LAST_DISTANCE_XZ] ?? ($constants["xz-distance"] ?? 0));
 		$momentum = MathUtil::getMomentum($lastDistance, $friction);
 		$movement = MathUtil::getMovementSnapshot((bool) ($cachedData["sprinting"] ?? false), (bool) ($cachedData["sneaking"] ?? false), (bool) ($cachedData["usingItem"] ?? false), (int) ($cachedData["swiftSneakLevel"] ?? 0));
-		$effects = MathUtil::getEffectsMultiplierSnapshot((int) ($constants["speedLevel"] ?? 0), (int) ($constants["slownessLevel"] ?? 0));
+		$effects = MathUtil::getEffectsMultiplierSnapshot($speedLevel, $slownessLevel);
 		$acceleration = MathUtil::getAcceleration($movement, $effects, $friction, (bool) ($payload["onGround"] ?? false));
 		$expected = $momentum + $acceleration;
 		$expected += ((int) ($cachedData["jumpTicks"] ?? 0) < 5 && (bool) ($cachedData["blockAboveSolid"] ?? false)) ? (float) ($constants["jump-factor"] ?? 0) : 0;
 		$expected += (bool) ($payload["onGround"] ?? false) ? (float) ($constants["ground-factor"] ?? 0) : 0;
 		$expected += ((bool) ($cachedData["startJumping"] ?? false) && (float) ($cachedData["lastMoveTick"] ?? 0) > 5) ? (float) ($constants["lastjump-factor"] ?? 0) : 0;
 		$expected += ((int) ($cachedData["jumpTicks"] ?? 0) <= 20 && (bool) ($cachedData["onIce"] ?? false)) ? (float) ($constants["ice-factor"] ?? 0) : 0;
-		$motionX = abs((float) ($payload["motionX"] ?? 0));
-		$motionZ = abs((float) ($payload["motionZ"] ?? 0));
+		$motionXRaw = $payload["motionX"] ?? 0;
+		$motionZRaw = $payload["motionZ"] ?? 0;
+		$motionX = abs(is_numeric($motionXRaw) ? (float) $motionXRaw : 0.0);
+		$motionZ = abs(is_numeric($motionZRaw) ? (float) $motionZRaw : 0.0);
 		if ($motionX > 0 || $motionZ > 0) {
 			$knockback = (($motionX * $motionX) + ($motionZ * $motionZ)) * (float) ($constants["knockback-factor"] ?? 0);
 			$expected += $knockback;

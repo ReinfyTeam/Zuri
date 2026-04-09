@@ -39,6 +39,8 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use function is_numeric;
+use function is_string;
 use function max;
 use function microtime;
 use function strtolower;
@@ -86,12 +88,13 @@ class ItemLerp extends Check {
 
 		$attackTicks = $damagerAPI->getAttackTicks();
 		$cps = $damagerAPI->getCPS();
-		if ($attackTicks > (float) $this->profileConstant("combat-window-ticks") || $cps < (int) $this->profileConstant("min-cps")) {
+		if ($attackTicks > $this->profileFloatConstant("combat-window-ticks", 0.0) || $cps < $this->profileIntConstant("min-cps", 0)) {
 			$this->setBuffer($damagerAPI, max(0, $this->getBuffer($damagerAPI) - 1));
 			return;
 		}
 
-		$lastSwitch = (float) $damagerAPI->getExternalData(self::LAST_SWITCH_KEY, 0.0);
+		$lastSwitchRaw = $damagerAPI->getExternalData(self::LAST_SWITCH_KEY, 0.0);
+		$lastSwitch = is_numeric($lastSwitchRaw) ? (float) $lastSwitchRaw : 0.0;
 		if ($lastSwitch <= 0.0) {
 			return;
 		}
@@ -102,8 +105,8 @@ class ItemLerp extends Check {
 			"buffer" => $this->getBuffer($damagerAPI),
 			"attackTicks" => $attackTicks,
 			"cps" => $cps,
-			"maxSwitchTicks" => (float) $this->profileConstant("max-switch-ticks"),
-			"bufferLimit" => (int) $this->profileConstant("buffer-limit"),
+			"maxSwitchTicks" => $this->profileFloatConstant("max-switch-ticks", 0.0),
+			"bufferLimit" => $this->profileIntConstant("buffer-limit", 3),
 		]);
 	}
 
@@ -112,17 +115,23 @@ class ItemLerp extends Check {
 			return [];
 		}
 
-		$lastSwitch = (float) ($payload["lastSwitch"] ?? 0.0);
+		$lastSwitchRaw = $payload["lastSwitch"] ?? 0.0;
+		$lastSwitch = is_numeric($lastSwitchRaw) ? (float) $lastSwitchRaw : 0.0;
 		if ($lastSwitch <= 0.0) {
 			return [];
 		}
 
 		$switchTicks = (microtime(true) - $lastSwitch) * 20.0;
-		$attackTicks = (float) ($payload["attackTicks"] ?? 0.0);
-		$cps = (int) ($payload["cps"] ?? 0);
-		$buffer = (int) ($payload["buffer"] ?? 0);
+		$attackTicksRaw = $payload["attackTicks"] ?? 0.0;
+		$cpsRaw = $payload["cps"] ?? 0;
+		$bufferRaw = $payload["buffer"] ?? 0;
+		$attackTicks = is_numeric($attackTicksRaw) ? (float) $attackTicksRaw : 0.0;
+		$cps = is_numeric($cpsRaw) ? (int) $cpsRaw : 0;
+		$buffer = is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 
-		if ($switchTicks <= (float) ($payload["maxSwitchTicks"] ?? 0.0)) {
+		$maxSwitchTicksRaw = $payload["maxSwitchTicks"] ?? 0.0;
+		$maxSwitchTicks = is_numeric($maxSwitchTicksRaw) ? (float) $maxSwitchTicksRaw : 0.0;
+		if ($switchTicks <= $maxSwitchTicks) {
 			$buffer++;
 		} else {
 			$buffer = max(0, $buffer - 1);
@@ -133,7 +142,9 @@ class ItemLerp extends Check {
 			"debug" => "switchTicks={$switchTicks}, attackTicks={$attackTicks}, cps={$cps}, buffer={$buffer}",
 		];
 
-		if ($buffer >= (int) ($payload["bufferLimit"] ?? 0)) {
+		$bufferLimitRaw = $payload["bufferLimit"] ?? 0;
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 0;
+		if ($buffer >= $bufferLimit) {
 			$result["set"][self::BUFFER_KEY] = 0;
 			$result["failed"] = true;
 		}
@@ -146,13 +157,14 @@ class ItemLerp extends Check {
 			!$damager->isSurvival() ||
 			!$victim->isSurvival() ||
 			$damagerAPI->isRecentlyCancelledEvent() ||
-			$damagerAPI->getTeleportTicks() < (float) $this->profileConstant("min-teleport-ticks") ||
+			$damagerAPI->getTeleportTicks() < $this->profileFloatConstant("min-teleport-ticks", 0.0) ||
 			$damagerAPI->getHurtTicks() < 8 ||
-			(int) $damagerAPI->getPing() > (int) $this->profileConstant("max-ping");
+			(int) $damagerAPI->getPing() > $this->profileIntConstant("max-ping", 0);
 	}
 
 	private function getBuffer(PlayerAPI $playerAPI) : int {
-		return (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$raw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		return is_numeric($raw) ? (int) $raw : 0;
 	}
 
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {
@@ -161,7 +173,8 @@ class ItemLerp extends Check {
 
 	private function profileConstant(string $name) : mixed {
 		$default = $this->getConstant($name);
-		$profile = strtolower((string) self::getData("zuri.check.itemlerp.tuning-presets.active", "default"));
+		$profileRaw = self::getData("zuri.check.itemlerp.tuning-presets.active", "default");
+		$profile = strtolower(is_string($profileRaw) ? $profileRaw : "default");
 		if ($profile === "custom") {
 			$profile = "default";
 		}
@@ -170,5 +183,15 @@ class ItemLerp extends Check {
 		}
 
 		return self::getData("zuri.check.itemlerp.tuning-presets." . $profile . "." . $name, $default);
+	}
+
+	private function profileFloatConstant(string $name, float $default) : float {
+		$raw = $this->profileConstant($name);
+		return is_numeric($raw) ? (float) $raw : $default;
+	}
+
+	private function profileIntConstant(string $name, int $default) : int {
+		$raw = $this->profileConstant($name);
+		return is_numeric($raw) ? (int) $raw : $default;
 	}
 }

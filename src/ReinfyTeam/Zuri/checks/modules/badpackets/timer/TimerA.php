@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
+use function is_numeric;
 use function max;
 use function microtime;
 
@@ -57,6 +58,7 @@ class TimerA extends Check {
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
+			$maxDiffRaw = $this->getConstant(CheckConstants::TIMERA_MAX_DIFF);
 			$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
 				"type" => "TimerA",
 				"tps" => Server::getInstance()->getTicksPerSecond(),
@@ -66,7 +68,7 @@ class TimerA extends Check {
 				"lastTime" => $playerAPI->getExternalData(CacheData::TIMER_A_LAST_TIME),
 				"balance" => $playerAPI->getExternalData(CacheData::TIMER_A_BALANCE, 0.0),
 				"laggingPing" => self::getData(self::PING_LAGGING),
-				"maxDiff" => (float) $this->getConstant(CheckConstants::TIMERA_MAX_DIFF),
+				"maxDiff" => is_numeric($maxDiffRaw) ? (float) $maxDiffRaw : 0.0,
 				"now" => microtime(true),
 			]);
 		}
@@ -77,15 +79,22 @@ class TimerA extends Check {
 			return [];
 		}
 
-		$tps = (float) ($payload["tps"] ?? 20.0);
-		$ping = (int) ($payload["ping"] ?? 0);
-		$packetTick = (int) ($payload["packetTick"] ?? 0);
+		$tpsRaw = $payload["tps"] ?? 20.0;
+		$pingRaw = $payload["ping"] ?? 0;
+		$packetTickRaw = $payload["packetTick"] ?? 0;
+		$tps = is_numeric($tpsRaw) ? (float) $tpsRaw : 20.0;
+		$ping = is_numeric($pingRaw) ? (int) $pingRaw : 0;
+		$packetTick = is_numeric($packetTickRaw) ? (int) $packetTickRaw : 0;
 		$lastTick = $payload["lastTick"] ?? null;
 		$lastTime = $payload["lastTime"] ?? null;
-		$balance = (float) ($payload["balance"] ?? 0.0);
-		$laggingPing = (int) ($payload["laggingPing"] ?? 0);
-		$maxDiff = (float) ($payload["maxDiff"] ?? 0.0);
-		$now = (float) ($payload["now"] ?? microtime(true));
+		$balanceRaw = $payload["balance"] ?? 0.0;
+		$laggingPingRaw = $payload["laggingPing"] ?? 0;
+		$maxDiffRaw = $payload["maxDiff"] ?? 0.0;
+		$nowRaw = $payload["now"] ?? microtime(true);
+		$balance = is_numeric($balanceRaw) ? (float) $balanceRaw : 0.0;
+		$laggingPing = is_numeric($laggingPingRaw) ? (int) $laggingPingRaw : 0;
+		$maxDiff = is_numeric($maxDiffRaw) ? (float) $maxDiffRaw : 0.0;
+		$now = is_numeric($nowRaw) ? (float) $nowRaw : microtime(true);
 
 		if ($packetTick <= 0) {
 			return [];
@@ -111,7 +120,8 @@ class TimerA extends Check {
 			];
 		}
 
-		$tickJump = $packetTick - (int) $lastTick;
+		$lastTickValue = is_numeric($lastTick) ? (int) $lastTick : 0;
+		$tickJump = $packetTick - $lastTickValue;
 		if ($tickJump <= 0 || $tickJump > 20) {
 			return [
 				"set" => [
@@ -122,7 +132,8 @@ class TimerA extends Check {
 			];
 		}
 
-		$elapsedMs = max(1.0, ($now - (float) $lastTime) * 1000.0);
+		$lastTimeValue = is_numeric($lastTime) ? (float) $lastTime : $now;
+		$elapsedMs = max(1.0, ($now - $lastTimeValue) * 1000.0);
 		$expectedMs = $tickJump * 50.0;
 		$driftMs = $expectedMs - $elapsedMs;
 		$newBalance = max(0.0, $balance + $driftMs);

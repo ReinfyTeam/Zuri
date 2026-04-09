@@ -60,6 +60,7 @@ final class API {
 		return PlayerAPI::getAPIPlayer($found);
 	}
 
+	/** @return list<Check> */
 	public static function getAllChecks(bool $includeSubChecks = true) : array {
 		if (!$includeSubChecks) {
 			$unique = [];
@@ -71,6 +72,7 @@ final class API {
 		return ZuriAC::Checks();
 	}
 
+	/** @return list<Check> */
 	public static function getAllDisabledChecks(bool $includeSubChecks = true) : array {
 		return array_filter(
 			self::getAllChecks($includeSubChecks),
@@ -78,6 +80,7 @@ final class API {
 		);
 	}
 
+	/** @return list<Check> */
 	public static function getAllEnabledChecks(bool $includeSubChecks = true) : array {
 		return array_filter(
 			self::getAllChecks($includeSubChecks),
@@ -85,6 +88,7 @@ final class API {
 		);
 	}
 
+	/** @return list<Check> */
 	public static function getAllModules() : array {
 		return ZuriAC::Checks();
 	}
@@ -98,6 +102,7 @@ final class API {
 		return $checks[0] ?? null;
 	}
 
+	/** @return list<Check> */
 	public static function getChecksByName(string $name) : array {
 		return array_values(array_filter(
 			ZuriAC::Checks(),
@@ -128,6 +133,9 @@ final class API {
 		return self::$config ??= new ConfigManager();
 	}
 
+	/**
+	 * @return array{name:string, subType:string, punishment:string, maxViolations:int}|null
+	 */
 	public static function allModuleInfo(string $name, string $subType) : ?array {
 		$module = self::getModule($name, $subType);
 		if ($module === null) {
@@ -142,21 +150,6 @@ final class API {
 		];
 	}
 
-
-	private static function getModuleInfoField(string $name, string $field) : mixed {
-		$module = self::getCheck($name);
-		if ($module === null) {
-			return null;
-		}
-
-		return match ($field) {
-			"subType" => $module->getSubType(),
-			"maxViolations" => $module->maxViolations(),
-			"punishment" => $module->getPunishment(),
-			default => null,
-		};
-	}
-
 	public static function getModule(string $name, string $subType) : ?Check {
 		$matches = array_values(array_filter(
 			ZuriAC::Checks(),
@@ -168,15 +161,15 @@ final class API {
 
 
 	public static function getSubTypeByModule(string $name) : ?string {
-		return self::getModuleInfoField($name, "subType");
+		return self::getCheck($name)?->getSubType();
 	}
 
 	public static function getMaxViolationByModule(string $name) : ?int {
-		return self::getModuleInfoField($name, "maxViolations");
+		return self::getCheck($name)?->maxViolations();
 	}
 
 	public static function getPunishmentByModule(string $name) : ?string {
-		return self::getModuleInfoField($name, "punishment");
+		return self::getCheck($name)?->getPunishment();
 	}
 
 	public static function setPlayerFlagged(string|Player $player, bool $flagged = true) : bool {

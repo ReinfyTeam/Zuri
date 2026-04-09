@@ -42,6 +42,7 @@ use function abs;
 use function fmod;
 use function is_float;
 use function is_int;
+use function is_numeric;
 use function max;
 
 class RotationB extends Check {
@@ -68,10 +69,12 @@ class RotationB extends Check {
 		}
 
 		$player = $playerAPI->getPlayer();
+		$maxPingRaw = $this->getConstant(CheckConstants::ROTATIONB_MAX_PING);
+		$maxPing = is_numeric($maxPingRaw) ? (int) $maxPingRaw : 0;
 		if (
 			!$player->isSurvival() ||
 			$playerAPI->isRecentlyCancelledEvent() ||
-			(int) $playerAPI->getPing() > (int) $this->getConstant(CheckConstants::ROTATIONB_MAX_PING)
+			(int) $playerAPI->getPing() > $maxPing
 		) {
 			$this->setBuffer($playerAPI, 0);
 			$this->storeState($playerAPI, $packet->getYaw(), $packet->getPitch(), 0.0);
@@ -89,13 +92,24 @@ class RotationB extends Check {
 		$pitch = $packet->getPitch();
 		$deltaYaw = $this->angleDelta((float) $lastYaw, $yaw);
 		$deltaPitch = abs($pitch - (float) $lastPitch);
-		$lastDeltaYaw = (float) $playerAPI->getExternalData(self::LAST_DELTA_YAW, $deltaYaw);
+		$lastDeltaYawRaw = $playerAPI->getExternalData(self::LAST_DELTA_YAW, $deltaYaw);
+		$combatWindowTicksRaw = $this->getConstant(CheckConstants::ROTATIONB_COMBAT_WINDOW_TICKS);
+		$snapMinDeltaYawRaw = $this->getConstant(CheckConstants::ROTATIONB_SNAP_MIN_DELTA_YAW);
+		$snapRepeatEpsilonRaw = $this->getConstant(CheckConstants::ROTATIONB_SNAP_REPEAT_EPSILON);
+		$snapMaxDeltaPitchRaw = $this->getConstant(CheckConstants::ROTATIONB_SNAP_MAX_DELTA_PITCH);
+		$snapBufferLimitRaw = $this->getConstant(CheckConstants::ROTATIONB_SNAP_BUFFER_LIMIT);
+		$lastDeltaYaw = is_numeric($lastDeltaYawRaw) ? (float) $lastDeltaYawRaw : $deltaYaw;
+		$combatWindowTicks = is_numeric($combatWindowTicksRaw) ? (float) $combatWindowTicksRaw : 0.0;
+		$snapMinDeltaYaw = is_numeric($snapMinDeltaYawRaw) ? (float) $snapMinDeltaYawRaw : 0.0;
+		$snapRepeatEpsilon = is_numeric($snapRepeatEpsilonRaw) ? (float) $snapRepeatEpsilonRaw : 0.0;
+		$snapMaxDeltaPitch = is_numeric($snapMaxDeltaPitchRaw) ? (float) $snapMaxDeltaPitchRaw : 0.0;
+		$snapBufferLimit = is_numeric($snapBufferLimitRaw) ? (int) $snapBufferLimitRaw : 0;
 
-		$inCombatWindow = $playerAPI->getAttackTicks() < (float) $this->getConstant(CheckConstants::ROTATIONB_COMBAT_WINDOW_TICKS);
+		$inCombatWindow = $playerAPI->getAttackTicks() < $combatWindowTicks;
 		$looksSnapped =
-			$deltaYaw >= (float) $this->getConstant(CheckConstants::ROTATIONB_SNAP_MIN_DELTA_YAW) &&
-			abs($deltaYaw - $lastDeltaYaw) <= (float) $this->getConstant(CheckConstants::ROTATIONB_SNAP_REPEAT_EPSILON) &&
-			$deltaPitch <= (float) $this->getConstant(CheckConstants::ROTATIONB_SNAP_MAX_DELTA_PITCH);
+			$deltaYaw >= $snapMinDeltaYaw &&
+			abs($deltaYaw - $lastDeltaYaw) <= $snapRepeatEpsilon &&
+			$deltaPitch <= $snapMaxDeltaPitch;
 
 		$buffer = $this->getBuffer($playerAPI);
 		$this->storeState($playerAPI, $yaw, $pitch, $deltaYaw);
@@ -107,7 +121,7 @@ class RotationB extends Check {
 			"deltaYaw" => $deltaYaw,
 			"deltaPitch" => $deltaPitch,
 			"lastDeltaYaw" => $lastDeltaYaw,
-			"bufferLimit" => (int) $this->getConstant(CheckConstants::ROTATIONB_SNAP_BUFFER_LIMIT),
+			"bufferLimit" => $snapBufferLimit,
 		]);
 	}
 
@@ -116,19 +130,29 @@ class RotationB extends Check {
 			return [];
 		}
 
-		$buffer = (int) ($payload["buffer"] ?? 0);
+		$bufferRaw = $payload["buffer"] ?? 0;
+		$buffer = is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 		if ((bool) ($payload["inCombatWindow"] ?? false) && (bool) ($payload["looksSnapped"] ?? false)) {
 			$buffer++;
 		} else {
 			$buffer = max(0, $buffer - 1);
 		}
 
+		$deltaYawRaw = $payload["deltaYaw"] ?? 0.0;
+		$deltaPitchRaw = $payload["deltaPitch"] ?? 0.0;
+		$lastDeltaYawRaw = $payload["lastDeltaYaw"] ?? 0.0;
+		$bufferLimitRaw = $payload["bufferLimit"] ?? 0;
+		$deltaYaw = is_numeric($deltaYawRaw) ? (float) $deltaYawRaw : 0.0;
+		$deltaPitch = is_numeric($deltaPitchRaw) ? (float) $deltaPitchRaw : 0.0;
+		$lastDeltaYaw = is_numeric($lastDeltaYawRaw) ? (float) $lastDeltaYawRaw : 0.0;
+		$bufferLimit = is_numeric($bufferLimitRaw) ? (int) $bufferLimitRaw : 0;
+
 		$result = [
 			"set" => [self::BUFFER => $buffer],
-			"debug" => "deltaYaw=" . (float) ($payload["deltaYaw"] ?? 0.0) . ", deltaPitch=" . (float) ($payload["deltaPitch"] ?? 0.0) . ", lastDeltaYaw=" . (float) ($payload["lastDeltaYaw"] ?? 0.0) . ", buffer={$buffer}",
+			"debug" => "deltaYaw={$deltaYaw}, deltaPitch={$deltaPitch}, lastDeltaYaw={$lastDeltaYaw}, buffer={$buffer}",
 		];
 
-		if ($buffer >= (int) ($payload["bufferLimit"] ?? 0)) {
+		if ($buffer >= $bufferLimit) {
 			$result["set"][self::BUFFER] = 0;
 			$result["failed"] = true;
 		}
@@ -141,7 +165,8 @@ class RotationB extends Check {
 	}
 
 	private function getBuffer(PlayerAPI $playerAPI) : int {
-		return (int) $playerAPI->getExternalData(self::BUFFER, 0);
+		$bufferRaw = $playerAPI->getExternalData(self::BUFFER, 0);
+		return is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 	}
 
 	private function setBuffer(PlayerAPI $playerAPI, int $value) : void {

@@ -34,7 +34,6 @@ namespace ReinfyTeam\Zuri\checks\snapshots;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function is_array;
-use function is_string;
 use function microtime;
 use function strlen;
 
@@ -58,11 +57,12 @@ class ChatSnapshot extends AsyncSnapshot {
 	private bool $survival;
 	private int $onlineTime;
 
-	/** Chat history snapshot. */
+	/** @var array<int|string,mixed> Chat history snapshot. */
 	private array $recentMessages;
 
 	/** Cached chat data. */
-	private mixed $cachedData = [];
+	/** @var array<string,mixed> */
+	private array $cachedData = [];
 
 	public function __construct(string $checkType, Player $player, PlayerAPI $playerAPI, string $message) {
 		parent::__construct($checkType);
@@ -70,15 +70,13 @@ class ChatSnapshot extends AsyncSnapshot {
 		$this->message = $message;
 		$this->messageTime = microtime(true);
 		$this->messageLength = strlen($message);
-		$this->ping = $player->getNetworkSession()->getPing();
+		$this->ping = (int) ($player->getNetworkSession()->getPing() ?? 0);
 		$this->survival = $player->isSurvival();
 		$this->onlineTime = $playerAPI->getOnlineTime();
 
 		// Capture recent message history (last 10)
-		$this->recentMessages = $playerAPI->getExternalData("chat_history") ?? [];
-		if (!is_array($this->recentMessages)) {
-			$this->recentMessages = [];
-		}
+		$recentMessages = $playerAPI->getExternalData("chat_history") ?? [];
+		$this->recentMessages = is_array($recentMessages) ? $recentMessages : [];
 	}
 
 	/**
@@ -89,6 +87,7 @@ class ChatSnapshot extends AsyncSnapshot {
 		return $this;
 	}
 
+	/** @return array<string,mixed> */
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
@@ -106,9 +105,6 @@ class ChatSnapshot extends AsyncSnapshot {
 	}
 
 	public function validate() : void {
-		if (!is_string($this->message)) {
-			throw new SnapshotException("Invalid message in chat snapshot");
-		}
 		if ($this->messageLength < 0) {
 			throw new SnapshotException("Invalid message length in chat snapshot");
 		}

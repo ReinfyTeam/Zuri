@@ -41,6 +41,7 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function in_array;
+use function is_numeric;
 
 class RegenB extends Check {
 	public function getName() : string {
@@ -63,26 +64,34 @@ class RegenB extends Check {
 			if (!in_array($event->getRegainReason(), [EntityDamageEvent::CAUSE_MAGIC, EntityDamageEvent::CAUSE_CUSTOM], true)) {
 				$tick = Server::getInstance()->getTick();
 				$tps = Server::getInstance()->getTicksPerSecond();
-				$lastHealthTick = (int) ($playerAPI->getExternalData(CacheData::REGEN_B_LAST_HEALTH_TICK) ?? 0);
+				$lastHealthTickRaw = $playerAPI->getExternalData(CacheData::REGEN_B_LAST_HEALTH_TICK) ?? 0;
+				$lastHealthTick = is_numeric($lastHealthTickRaw) ? (int) $lastHealthTickRaw : 0;
 				$healAmount = $event->getAmount();
 				$this->debug($playerAPI, "tick=$tick, tps=$tps, lastHealthTick=$lastHealthTick, healAmount=$healAmount");
 				if ($tps > 0.0 && $lastHealthTick !== -1) {
 					$diffTicks = $tick - $lastHealthTick; // server ticks since last health regain
 					$delta = $diffTicks / $tps; // seconds since last health regain
-					$healCount = $playerAPI->getExternalData(CacheData::REGEN_B_HEAL_COUNT) ?? 0;
-					$healTime = $playerAPI->getExternalData(CacheData::REGEN_B_HEAL_TIME) ?? 0;
+					$healCountRaw = $playerAPI->getExternalData(CacheData::REGEN_B_HEAL_COUNT) ?? 0;
+					$healTimeRaw = $playerAPI->getExternalData(CacheData::REGEN_B_HEAL_TIME) ?? 0;
+					$healCount = is_numeric($healCountRaw) ? (float) $healCountRaw : 0.0;
+					$healTime = is_numeric($healTimeRaw) ? (float) $healTimeRaw : 0.0;
 					$this->debug($playerAPI, "diffTicks=$diffTicks, delta=$delta, healCount=$healCount, healTime=$healTime");
 					if ($delta < 10) {
 						$playerAPI->setExternalData(CacheData::REGEN_B_HEAL_COUNT, $healCount + $healAmount);
 						$playerAPI->setExternalData(CacheData::REGEN_B_HEAL_TIME, $healTime + $delta);
-						$healCount = $playerAPI->getExternalData(CacheData::REGEN_B_HEAL_COUNT);
-						if ($healCount >= $this->getConstant(CheckConstants::REGENB_MAX_HEALCOUNT)) {
-							if ($healTime !== 0 && $healCount !== 0) {
-								$healRate = (float) $healCount / (float) $healTime;
+						$healCountRaw = $playerAPI->getExternalData(CacheData::REGEN_B_HEAL_COUNT);
+						$healCount = is_numeric($healCountRaw) ? (float) $healCountRaw : 0.0;
+						$maxHealCountRaw = $this->getConstant(CheckConstants::REGENB_MAX_HEALCOUNT);
+						$maxHealCount = is_numeric($maxHealCountRaw) ? (float) $maxHealCountRaw : 0.0;
+						if ($healCount >= $maxHealCount) {
+							if ($healTime !== 0.0) {
+								$healRate = $healCount / $healTime;
 
 								$this->debug($playerAPI, "healRate=$healRate");
 
-								if ($healRate > $this->getConstant(CheckConstants::REGENB_MAX_HEALRATE)) {
+								$maxHealRateRaw = $this->getConstant(CheckConstants::REGENB_MAX_HEALRATE);
+								$maxHealRate = is_numeric($maxHealRateRaw) ? (float) $maxHealRateRaw : 0.0;
+								if ($healRate > $maxHealRate) {
 									$this->dispatchAsyncDecision($playerAPI, true);
 								}
 							}

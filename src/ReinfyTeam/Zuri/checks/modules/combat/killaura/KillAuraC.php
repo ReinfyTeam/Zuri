@@ -44,6 +44,8 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function count;
+use function is_array;
+use function is_numeric;
 use function sqrt;
 
 class KillAuraC extends Check {
@@ -83,6 +85,10 @@ class KillAuraC extends Check {
 		if ($packet instanceof InventoryTransactionPacket) {
 			if ($packet->trData instanceof UseItemOnEntityTransactionData) {
 				$delta = MathUtil::getDeltaDirectionVector($playerAPI, 3);
+				$maxDistanceRaw = $this->getConstant(CheckConstants::KILLAURAC_MAX_DISTANCE);
+				$suspiciousPitchRaw = $this->getConstant(CheckConstants::KILLAURAC_SUSPECIOUS_PITCH);
+				$suspiciousCountRaw = $this->getConstant(CheckConstants::KILLAURAC_SUSPECIOUS_COUNT);
+				$targetBlock = $player->getTargetBlock(10);
 				$entities = [];
 				foreach ($player->getWorld()->getEntities() as $target) {
 					$entities[] = [
@@ -103,10 +109,10 @@ class KillAuraC extends Check {
 					"deltaX" => $delta->getX(),
 					"deltaY" => $delta->getY(),
 					"deltaZ" => $delta->getZ(),
-					"maxDistance" => $this->getConstant(CheckConstants::KILLAURAC_MAX_DISTANCE),
-					"suspiciousPitch" => $this->getConstant(CheckConstants::KILLAURAC_SUSPECIOUS_PITCH),
-					"suspiciousCount" => $this->getConstant(CheckConstants::KILLAURAC_SUSPECIOUS_COUNT),
-					"targetBlockAir" => $player->getTargetBlock(10)->getTypeId() === BlockTypeIds::AIR,
+					"maxDistance" => is_numeric($maxDistanceRaw) ? (float) $maxDistanceRaw : 0.0,
+					"suspiciousPitch" => is_numeric($suspiciousPitchRaw) ? (float) $suspiciousPitchRaw : 0.0,
+					"suspiciousCount" => is_numeric($suspiciousCountRaw) ? (int) $suspiciousCountRaw : 0,
+					"targetBlockAir" => $targetBlock === null || $targetBlock->getTypeId() === BlockTypeIds::AIR,
 					"entities" => $entities,
 				]);
 			}
@@ -118,28 +124,66 @@ class KillAuraC extends Check {
 			return [];
 		}
 
-		if ((float) ($payload["pitch"] ?? 0) >= (float) ($payload["suspiciousPitch"] ?? 0)) {
+		$pitchRaw = $payload["pitch"] ?? 0;
+		$suspiciousPitchRaw = $payload["suspiciousPitch"] ?? 0;
+		$pitch = is_numeric($pitchRaw) ? (float) $pitchRaw : 0.0;
+		$suspiciousPitch = is_numeric($suspiciousPitchRaw) ? (float) $suspiciousPitchRaw : 0.0;
+		if ($pitch >= $suspiciousPitch) {
 			return [];
 		}
 
-		$from = new Vector3((float) ($payload["locX"] ?? 0), (float) ($payload["locY"] ?? 0) + (float) ($payload["eyeHeight"] ?? 0), (float) ($payload["locZ"] ?? 0));
-		$delta = new Vector3((float) ($payload["deltaX"] ?? 0), (float) ($payload["deltaY"] ?? 0) + (float) ($payload["eyeHeight"] ?? 0), (float) ($payload["deltaZ"] ?? 0));
+		$locXRaw = $payload["locX"] ?? 0;
+		$locYRaw = $payload["locY"] ?? 0;
+		$locZRaw = $payload["locZ"] ?? 0;
+		$eyeHeightRaw = $payload["eyeHeight"] ?? 0;
+		$deltaXRaw = $payload["deltaX"] ?? 0;
+		$deltaYRaw = $payload["deltaY"] ?? 0;
+		$deltaZRaw = $payload["deltaZ"] ?? 0;
+		$locX = is_numeric($locXRaw) ? (float) $locXRaw : 0.0;
+		$locY = is_numeric($locYRaw) ? (float) $locYRaw : 0.0;
+		$locZ = is_numeric($locZRaw) ? (float) $locZRaw : 0.0;
+		$eyeHeight = is_numeric($eyeHeightRaw) ? (float) $eyeHeightRaw : 0.0;
+		$deltaX = is_numeric($deltaXRaw) ? (float) $deltaXRaw : 0.0;
+		$deltaY = is_numeric($deltaYRaw) ? (float) $deltaYRaw : 0.0;
+		$deltaZ = is_numeric($deltaZRaw) ? (float) $deltaZRaw : 0.0;
+		$from = new Vector3($locX, $locY + $eyeHeight, $locZ);
+		$delta = new Vector3($deltaX, $deltaY + $eyeHeight, $deltaZ);
 		$to = $from->add($delta->getX(), $delta->getY(), $delta->getZ());
 		$distance = MathUtil::distance($from, $to);
 		$vector = $to->subtract($from->x, $from->y, $from->z)->normalize()->multiply(1);
+		$maxDistanceRaw = $payload["maxDistance"] ?? 0;
+		$maxDistance = is_numeric($maxDistanceRaw) ? (float) $maxDistanceRaw : 0.0;
+		$entitiesPayload = $payload["entities"] ?? [];
+		$entitiesList = is_array($entitiesPayload) ? $entitiesPayload : [];
 		$entities = [];
 		for ($i = 0; $i <= $distance; ++$i) {
 			$from = $from->add($vector->x, $vector->y, $vector->z);
-			foreach (($payload["entities"] ?? []) as $target) {
+			foreach ($entitiesList as $target) {
+				if (!is_array($target)) {
+					continue;
+				}
+				$targetXRaw = $target["x"] ?? null;
+				$targetYRaw = $target["y"] ?? null;
+				$targetZRaw = $target["z"] ?? null;
+				$targetIdRaw = $target["id"] ?? null;
+				if (!is_numeric($targetXRaw) || !is_numeric($targetYRaw) || !is_numeric($targetZRaw) || !is_numeric($targetIdRaw)) {
+					continue;
+				}
+				$targetX = (float) $targetXRaw;
+				$targetY = (float) $targetYRaw;
+				$targetZ = (float) $targetZRaw;
+				$targetId = (int) $targetIdRaw;
 				$distanceA = new Vector3($from->x, $from->y, $from->z);
-				if (sqrt((($target["x"] - $distanceA->getX()) ** 2) + (($target["y"] - $distanceA->getY()) ** 2) + (($target["z"] - $distanceA->getZ()) ** 2)) <= (float) ($payload["maxDistance"] ?? 0)) {
-					$entities[(int) $target["id"]] = true;
+				if (sqrt((($targetX - $distanceA->getX()) ** 2) + (($targetY - $distanceA->getY()) ** 2) + (($targetZ - $distanceA->getZ()) ** 2)) <= $maxDistance) {
+					$entities[$targetId] = true;
 				}
 			}
 		}
 
 		$debug = "distance={$distance}, entities=" . count($entities);
-		if (count($entities) < (int) ($payload["suspiciousCount"] ?? 0) && !(bool) ($payload["targetBlockAir"] ?? true)) {
+		$suspiciousCountRaw = $payload["suspiciousCount"] ?? 0;
+		$suspiciousCount = is_numeric($suspiciousCountRaw) ? (int) $suspiciousCountRaw : 0;
+		if (count($entities) < $suspiciousCount && !(bool) ($payload["targetBlockAir"] ?? true)) {
 			return ["failed" => true, "debug" => $debug];
 		}
 

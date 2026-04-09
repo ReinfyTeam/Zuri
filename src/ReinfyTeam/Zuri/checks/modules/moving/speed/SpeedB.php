@@ -42,7 +42,9 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use function is_array;
 use function is_int;
+use function is_numeric;
 use function max;
 use function round;
 
@@ -146,6 +148,9 @@ class SpeedB extends Check {
 		}
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(
 			$payload,
@@ -165,11 +170,20 @@ class SpeedB extends Check {
 			return [];
 		}
 
+		$attackTicksRaw = $payload["attackTicks"] ?? 0;
+		$teleportTicksRaw = $payload["teleportTicks"] ?? 0;
+		$hurtTicksRaw = $payload["hurtTicks"] ?? 0;
+		$teleportCommandTicksRaw = $payload["teleportCommandTicks"] ?? 0;
+		$attackTicks = is_numeric($attackTicksRaw) ? (int) $attackTicksRaw : 0;
+		$teleportTicks = is_numeric($teleportTicksRaw) ? (int) $teleportTicksRaw : 0;
+		$hurtTicks = is_numeric($hurtTicksRaw) ? (int) $hurtTicksRaw : 0;
+		$teleportCommandTicks = is_numeric($teleportCommandTicksRaw) ? (int) $teleportCommandTicksRaw : 0;
+
 		if (
-			(int) ($payload["attackTicks"] ?? 0) < 40 ||
-			(int) ($payload["teleportTicks"] ?? 0) < 60 ||
-			(int) ($payload["hurtTicks"] ?? 0) < 10 ||
-			(int) ($payload["teleportCommandTicks"] ?? 0) < 40 ||
+			$attackTicks < 40 ||
+			$teleportTicks < 60 ||
+			$hurtTicks < 10 ||
+			$teleportCommandTicks < 40 ||
 			(bool) ($payload["onAdhesion"] ?? false) ||
 			(bool) ($payload["gliding"] ?? false) ||
 			(bool) ($payload["recentlyCancelled"] ?? false)
@@ -178,25 +192,29 @@ class SpeedB extends Check {
 		}
 
 		$cachedData = (array) ($payload["cachedData"] ?? []);
-		if (
-			(int) ($cachedData["jumpTicks"] ?? 0) >= 40
-		) {
+		$jumpTicksRaw = $cachedData["jumpTicks"] ?? 0;
+		$jumpTicks = is_numeric($jumpTicksRaw) ? (int) $jumpTicksRaw : 0;
+		if ($jumpTicks >= 40) {
 			return [];
 		}
 
 		// Additional checks for projectile attack and bow shot ticks
-		if (
-			(int) ($payload["projectileAttackTicks"] ?? 0) < 20 ||
-			(int) ($payload["bowShotTicks"] ?? 0) < 20 ||
-			(int) ($cachedData["jumpTicks"] ?? 0) < 40
-		) {
+		$projectileAttackTicksRaw = $payload["projectileAttackTicks"] ?? 0;
+		$projectileAttackTicks = is_numeric($projectileAttackTicksRaw) ? (int) $projectileAttackTicksRaw : 0;
+		$bowShotTicksRaw = $payload["bowShotTicks"] ?? 0;
+		$bowShotTicks = is_numeric($bowShotTicksRaw) ? (int) $bowShotTicksRaw : 0;
+		if ($projectileAttackTicks < 20 || $bowShotTicks < 20) {
 			return [];
 		}
 
 		// Check for other problematic states
+		$slimeBlockTicksRaw = $payload["slimeBlockTicks"] ?? 0;
+		$slimeBlockTicks = is_numeric($slimeBlockTicksRaw) ? (int) $slimeBlockTicksRaw : 0;
+		$onlineTimeRaw = $payload["onlineTime"] ?? 0;
+		$onlineTime = is_numeric($onlineTimeRaw) ? (float) $onlineTimeRaw : 0.0;
 		if (
-			(int) ($payload["slimeBlockTicks"] ?? 0) < 20 ||
-			(float) ($payload["onlineTime"] ?? 0) < 2 ||
+			$slimeBlockTicks < 20 ||
+			$onlineTime < 2 ||
 			(bool) ($payload["flying"] ?? false) ||
 			(bool) ($payload["allowFlight"] ?? false) ||
 			(bool) ($payload["noClientPredictions"] ?? false) ||
@@ -205,7 +223,8 @@ class SpeedB extends Check {
 			return [];
 		}
 
-		$tickDiff = (int) ($cachedData["tickDiff"] ?? 0);
+		$tickDiffRaw = $cachedData["tickDiff"] ?? 0;
+		$tickDiff = is_numeric($tickDiffRaw) ? (int) $tickDiffRaw : 0;
 		if ($tickDiff <= 0) {
 			return [];
 		}
@@ -216,17 +235,17 @@ class SpeedB extends Check {
 		$distance = round(BlockUtil::distance($from, $to), 5);
 		$speed = round($distance / max($timeDiff, 0.00001), 5);
 
-		$constants = $cachedData["constants"] ?? [];
+		$constants = is_array($cachedData["constants"] ?? null) ? $cachedData["constants"] : [];
 		$speedLimit = (float) ($constants["walking-speed-limit"] ?? 0);
 		$speedLimit += (bool) ($cachedData["sprinting"] ?? false) ? (float) ($constants["sprinting-speed-limit"] ?? 0) : 0;
-		$speedLimit += (int) ($cachedData["jumpTicks"] ?? 0) < 40 ? (float) ($constants["jump-speed-limit"] ?? 0) : 0;
+		$speedLimit += (float) ($constants["jump-speed-limit"] ?? 0);
 		$speedLimit += (bool) ($cachedData["onIce"] ?? false) ? (float) ($constants["ice-walking-speed-limit"] ?? 0) : 0;
 		$speedLimit += (bool) ($cachedData["topBlock"] ?? false) ? (float) ($constants["top-block-limit"] ?? 0) : 0;
 		$speedLimit += (bool) ($cachedData["onStairs"] ?? false) ? (float) ($constants["stairs-speed-limit"] ?? 0) : 0;
 		$timeLimit = (float) ($constants["time-limit"] ?? 0);
 		$distanceLimit = (float) ($constants["wakling-distance-limit"] ?? 0);
 		$distanceLimit += (bool) ($cachedData["sprinting"] ?? false) ? (float) ($constants["sprinting-distance-limit"] ?? 0) : 0;
-		$distanceLimit += (int) ($cachedData["jumpTicks"] ?? 0) < 40 ? (float) ($constants["jump-distance-limit"] ?? 0) : 0;
+		$distanceLimit += (float) ($constants["jump-distance-limit"] ?? 0);
 		$distanceLimit += (bool) ($cachedData["onIce"] ?? false) ? (float) ($constants["ice-walking-distance-limit"] ?? 0) : 0;
 		$distanceLimit += (bool) ($cachedData["onStairs"] ?? false) ? (float) ($constants["stairs-walking-distance-limit"] ?? 0) : 0;
 		$effectLevel = (int) ($cachedData["speedEffectLevel"] ?? 0);

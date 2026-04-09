@@ -134,14 +134,20 @@ use ReinfyTeam\Zuri\utils\InternetAddress;
 use ReinfyTeam\Zuri\utils\PermissionManager;
 use vennv\vapm\VapmPMMP;
 use function class_exists;
+use function is_numeric;
+use function is_string;
 use function version_compare;
 
 class ZuriAC extends PluginBase {
 	private static ZuriAC $instance;
 
+	/** @var list<Check> */
 	private array $checks = [];
+	/** @var list<Check> */
 	private array $packetChecks = [];
+	/** @var list<Check> */
 	private array $eventChecks = [];
+	/** @var list<Check> */
 	private array $justEventChecks = [];
 
 	private const string MINIMUM_PHP_VERSION = "8.4.0";
@@ -189,15 +195,21 @@ class ZuriAC extends PluginBase {
 		$this->getScheduler()->scheduleRepeatingTask(new ServerTickTask($this), 20);
 		$this->getScheduler()->scheduleRepeatingTask(new CaptchaTask($this), 20);
 		$this->getServer()->getAsyncPool()->submitTask(new UpdateCheckerAsyncTask($this->getDescription()->getVersion()));
-		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigPaths::PERMISSION_BYPASS_PERMISSION), PermissionManager::OPERATOR);
-		PermissionManager::getInstance()->register(ConfigManager::getData(ConfigPaths::ALERTS_PERMISSION), PermissionManager::OPERATOR);
+		$permissionBypassRaw = ConfigManager::getData(ConfigPaths::PERMISSION_BYPASS_PERMISSION);
+		$alertsPermissionRaw = ConfigManager::getData(ConfigPaths::ALERTS_PERMISSION);
+		$permissionBypass = is_string($permissionBypassRaw) ? $permissionBypassRaw : "zuri.bypass";
+		$alertsPermission = is_string($alertsPermissionRaw) ? $alertsPermissionRaw : "zuri.alerts";
+		PermissionManager::getInstance()->register($permissionBypass, PermissionManager::OPERATOR);
+		PermissionManager::getInstance()->register($alertsPermission, PermissionManager::OPERATOR);
 		$this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
 		$this->getServer()->getPluginManager()->registerEvents(new ServerListener(), $this);
 		$this->getServer()->getCommandMap()->register("zuri", new ZuriCommand($this));
 		$proxyUDPSocket = new ProxyUDPSocket();
 		if (ConfigManager::getData(ConfigPaths::PROXY_ENABLE)) {
-			$ip = ConfigManager::getData(ConfigPaths::PROXY_IP);
-			$port = ConfigManager::getData(ConfigPaths::PROXY_PORT);
+			$ipRaw = ConfigManager::getData(ConfigPaths::PROXY_IP);
+			$portRaw = ConfigManager::getData(ConfigPaths::PROXY_PORT);
+			$ip = is_string($ipRaw) ? $ipRaw : "0.0.0.0";
+			$port = is_numeric($portRaw) ? (int) $portRaw : 0;
 			try {
 				$proxyUDPSocket->bind(new InternetAddress($ip, $port));
 			} catch (Exception $exception) {
@@ -400,18 +412,22 @@ class ZuriAC extends PluginBase {
 		return (new ReflectionMethod($check, $method))->getDeclaringClass()->getName() !== Check::class;
 	}
 
+	/** @return list<Check> */
 	public static function Checks() : array {
 		return ZuriAC::getInstance()->checks;
 	}
 
+	/** @return list<Check> */
 	public static function PacketChecks() : array {
 		return ZuriAC::getInstance()->packetChecks;
 	}
 
+	/** @return list<Check> */
 	public static function EventChecks() : array {
 		return ZuriAC::getInstance()->eventChecks;
 	}
 
+	/** @return list<Check> */
 	public static function JustEventChecks() : array {
 		return ZuriAC::getInstance()->justEventChecks;
 	}

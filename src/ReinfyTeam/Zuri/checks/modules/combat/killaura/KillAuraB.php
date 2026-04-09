@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function cos;
+use function is_numeric;
 
 class KillAuraB extends Check {
 	public function getName() : string {
@@ -54,6 +55,8 @@ class KillAuraB extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();
+			$deltaPitchRaw = $this->getConstant(CheckConstants::KILLAURAB_DELTA_PITCH);
+			$deltaYawRaw = $this->getConstant(CheckConstants::KILLAURAB_DELTA_YAW);
 			$this->dispatchAsyncCheck($player->getName(), [
 				"type" => "KillAuraB",
 				"flying" => $player->isFlying(),
@@ -64,8 +67,8 @@ class KillAuraB extends Check {
 				"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
 				"pitch" => $packet->getPitch(),
 				"yaw" => $packet->getYaw(),
-				"deltaPitch" => $this->getConstant(CheckConstants::KILLAURAB_DELTA_PITCH),
-				"deltaYaw" => $this->getConstant(CheckConstants::KILLAURAB_DELTA_YAW),
+				"deltaPitch" => is_numeric($deltaPitchRaw) ? (float) $deltaPitchRaw : 0.0,
+				"deltaYaw" => is_numeric($deltaYawRaw) ? (float) $deltaYawRaw : 0.0,
 			]);
 		}
 	}
@@ -78,17 +81,25 @@ class KillAuraB extends Check {
 		if (
 			!(bool) ($payload["flying"] ?? false) ||
 			!(bool) ($payload["allowFlight"] ?? false) ||
-			(int) ($payload["attackTicks"] ?? 0) < 100 ||
-			(int) ($payload["teleportTicks"] ?? 0) < 100 ||
+			(is_numeric($payload["attackTicks"] ?? 0) ? (int) ($payload["attackTicks"] ?? 0) : 0) < 100 ||
+			(is_numeric($payload["teleportTicks"] ?? 0) ? (int) ($payload["teleportTicks"] ?? 0) : 0) < 100 ||
 			(bool) ($payload["survival"] ?? false) ||
 			(bool) ($payload["recentlyCancelled"] ?? false)
 		) {
 			return [];
 		}
 
-		$deltaPitch = cos((float) ($payload["pitch"] ?? 0.0));
-		$deltaYaw = cos((float) ($payload["yaw"] ?? 0.0));
-		if ($deltaPitch === (float) ($payload["deltaPitch"] ?? 0.0) && $deltaYaw === (float) ($payload["deltaYaw"] ?? 0.0)) {
+		$pitchRaw = $payload["pitch"] ?? 0.0;
+		$yawRaw = $payload["yaw"] ?? 0.0;
+		$deltaPitchConstRaw = $payload["deltaPitch"] ?? 0.0;
+		$deltaYawConstRaw = $payload["deltaYaw"] ?? 0.0;
+		$pitch = is_numeric($pitchRaw) ? (float) $pitchRaw : 0.0;
+		$yaw = is_numeric($yawRaw) ? (float) $yawRaw : 0.0;
+		$deltaPitchConst = is_numeric($deltaPitchConstRaw) ? (float) $deltaPitchConstRaw : 0.0;
+		$deltaYawConst = is_numeric($deltaYawConstRaw) ? (float) $deltaYawConstRaw : 0.0;
+		$deltaPitch = cos($pitch);
+		$deltaYaw = cos($yaw);
+		if ($deltaPitch === $deltaPitchConst && $deltaYaw === $deltaYawConst) {
 			return ["failed" => true, "debug" => "deltaPitch={$deltaPitch}, deltaYaw={$deltaYaw}"];
 		}
 

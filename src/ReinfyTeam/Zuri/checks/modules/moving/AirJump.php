@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
+use function is_numeric;
 use function round;
 
 class AirJump extends Check {
@@ -85,7 +86,8 @@ class AirJump extends Check {
 			}
 
 			$upDistance = round(($event->getTo()->getY() - $event->getFrom()->getY()), 3);
-			$lastUpDistance = $playerAPI->getExternalData(CacheData::AIRJUMP_LAST_UP_DISTANCE) ?? 0;
+			$lastUpDistanceRaw = $playerAPI->getExternalData(CacheData::AIRJUMP_LAST_UP_DISTANCE) ?? 0;
+			$lastUpDistance = is_numeric($lastUpDistanceRaw) ? (float) $lastUpDistanceRaw : 0.0;
 			$delta = abs(round(($upDistance - $lastUpDistance), 3));
 			$limit = 0.852;
 

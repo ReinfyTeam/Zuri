@@ -41,13 +41,16 @@ use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function array_flip;
 use function array_keys;
+use function is_numeric;
 use function max;
 
 class Phase extends Check {
 	private const string BUFFER_KEY = CacheData::PHASE_A_BUFFER;
 	private const int BUFFER_LIMIT = 3;
 
+	/** @var array<int,int>|null */
 	private static ?array $skipFlipped = null;
+	/** @var list<int>|null */
 	private static ?array $skipIds = null;
 
 	public function getName() : string {
@@ -109,7 +112,8 @@ class Phase extends Check {
 			return;
 		}
 
-		$buffer = (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0) + 1;
+		$bufferRaw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$buffer = (is_numeric($bufferRaw) ? (int) $bufferRaw : 0) + 1;
 		$playerAPI->setExternalData(self::BUFFER_KEY, $buffer);
 		$this->debug($playerAPI, "fromY=" . $event->getFrom()->getY() . ", toY=" . $to->getY() . ", buffer={$buffer}");
 		if ($buffer >= self::BUFFER_LIMIT) {
@@ -119,10 +123,12 @@ class Phase extends Check {
 	}
 
 	private function decreaseBuffer(PlayerAPI $playerAPI) : void {
-		$buffer = max(0, (int) $playerAPI->getExternalData(self::BUFFER_KEY, 0) - 1);
+		$bufferRaw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
+		$buffer = max(0, (is_numeric($bufferRaw) ? (int) $bufferRaw : 0) - 1);
 		$playerAPI->setExternalData(self::BUFFER_KEY, $buffer);
 	}
 
+	/** @return array<int,int> */
 	private static function getSkipFlipped() : array {
 		if (self::$skipFlipped !== null) {
 			return self::$skipFlipped;
@@ -202,6 +208,7 @@ class Phase extends Check {
 		return self::$skipFlipped;
 	}
 
+	/** @return list<int> */
 	private static function getSkipIds() : array {
 		if (self::$skipIds !== null) {
 			return self::$skipIds;

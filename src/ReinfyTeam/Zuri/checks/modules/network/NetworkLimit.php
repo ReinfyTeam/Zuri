@@ -48,6 +48,7 @@ class NetworkLimit extends Check {
 		return "A";
 	}
 
+	/** @var array<string,int> */
 	private array $ipList = [];
 
 	public function checkJustEvent(Event $event) : void {
@@ -77,6 +78,9 @@ class NetworkLimit extends Check {
 		}
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];
 	}

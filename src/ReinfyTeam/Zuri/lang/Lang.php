@@ -44,6 +44,8 @@ use function explode;
 use function file_exists;
 use function glob;
 use function is_array;
+use function is_numeric;
+use function is_string;
 use function preg_match;
 use function sort;
 use function str_replace;
@@ -53,20 +55,21 @@ use function substr;
 final class Lang {
 	private const string DEFAULT_LOCALE = 'en_US';
 
-	/** @var array<string,mixed> */
+	/** @var array<int|string,mixed> */
 	private static array $messages = [];
-	/** @var array<string,mixed> */
+	/** @var array<int|string,mixed> */
 	private static array $fallbackMessages = [];
-	/** @var array<string,array<string,mixed>> */
+	/** @var array<string,array<int|string,mixed>> */
 	private static array $allLocales = [];
 	/** @var string[] */
 	private static array $availableLocales = [];
 	private static string $activeLocale = self::DEFAULT_LOCALE;
-	private static string $fallbackLocale = self::DEFAULT_LOCALE;
 
 	public static function boot() : void {
-		$locale = (string) ConfigManager::getData(ConfigPaths::LANGUAGE_LOCALE, self::DEFAULT_LOCALE);
-		$fallbackLocale = (string) ConfigManager::getData(ConfigPaths::LANGUAGE_FALLBACK_LOCALE, self::DEFAULT_LOCALE);
+		$localeRaw = ConfigManager::getData(ConfigPaths::LANGUAGE_LOCALE, self::DEFAULT_LOCALE);
+		$fallbackLocaleRaw = ConfigManager::getData(ConfigPaths::LANGUAGE_FALLBACK_LOCALE, self::DEFAULT_LOCALE);
+		$locale = is_string($localeRaw) ? $localeRaw : self::DEFAULT_LOCALE;
+		$fallbackLocale = is_string($fallbackLocaleRaw) ? $fallbackLocaleRaw : self::DEFAULT_LOCALE;
 
 		self::ensureBaseLanguageExists();
 		self::loadAllLocales();
@@ -79,7 +82,6 @@ final class Lang {
 		}
 
 		self::$activeLocale = $locale;
-		self::$fallbackLocale = $fallbackLocale;
 		self::$fallbackMessages = self::$allLocales[$fallbackLocale] ?? [];
 		self::$messages = self::mergeMissingWithFallback(self::$allLocales[$locale] ?? [], self::$fallbackMessages);
 
@@ -155,7 +157,7 @@ final class Lang {
 		}
 	}
 
-	/** @return array<string,mixed> */
+	/** @return array<int|string,mixed> */
 	private static function loadLocale(string $locale) : array {
 		$path = ZuriAC::getInstance()->getDataFolder() . "lang/{$locale}.yml";
 		if (!file_exists($path)) {
@@ -168,7 +170,7 @@ final class Lang {
 
 		try {
 			$data = (new Config($path, Config::YAML))->getAll();
-			return is_array($data) ? $data : [];
+			return $data;
 		} catch (\Throwable $e) {
 			ZuriAC::getInstance()->getLogger()->warning("Failed to load language file '{$path}': " . $e->getMessage());
 			return [];
@@ -192,7 +194,8 @@ final class Lang {
 		return $m[1];
 	}
 
-	/** @return string[] */
+	/** @param array<int|string,mixed> $source
+	 *  @return string[] */
 	private static function flattenKeys(array $source, string $prefix = '') : array {
 		$result = [];
 		foreach ($source as $k => $v) {
@@ -209,7 +212,10 @@ final class Lang {
 		return $result;
 	}
 
-	/** @param array<string,mixed> $locale @param array<string,mixed> $fallback */
+	/** @param array<int|string,mixed> $locale
+	 *  @param array<int|string,mixed> $fallback
+	 *  @return array<int|string,mixed>
+	 */
 	private static function mergeMissingWithFallback(array $locale, array $fallback) : array {
 		$merged = $fallback;
 		foreach ($locale as $k => $v) {
@@ -246,14 +252,24 @@ final class Lang {
 		if ($value === null) {
 			$value = $default !== '' ? $default : $key;
 		}
-		return (string) $value;
+		if (is_string($value)) {
+			return $value;
+		}
+		if (is_numeric($value)) {
+			return (string) $value;
+		}
+		if ($default !== '') {
+			return $default;
+		}
+		return $key;
 	}
 
 	/** @param array<string,string|int|float> $replacements */
 	public static function get(string $key, array $replacements = [], string $default = '') : string {
 		$text = self::raw($key, $default);
 		if (!array_key_exists('prefix', $replacements)) {
-			$replacements['prefix'] = (string) ConfigManager::getData(ConfigPaths::PREFIX, '');
+			$prefixRaw = ConfigManager::getData(ConfigPaths::PREFIX, '');
+			$replacements['prefix'] = is_string($prefixRaw) ? $prefixRaw : '';
 		}
 		foreach ($replacements as $token => $value) {
 			$text = str_replace('{' . $token . '}', (string) $value, $text);
@@ -261,6 +277,7 @@ final class Lang {
 		return Utils::ParseColors($text);
 	}
 
+	/** @param array<int|string,mixed> $source */
 	private static function resolve(array $source, string $path) : mixed {
 		$segments = explode('.', $path);
 		$cursor = $source;

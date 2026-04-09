@@ -87,6 +87,9 @@ class AntiVoid extends Check {
 		$this->dispatchAsyncCheck($player->getName(), $payload);
 	}
 
+	/** @param array<string,mixed> $payload
+	 *  @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(
 			$payload,

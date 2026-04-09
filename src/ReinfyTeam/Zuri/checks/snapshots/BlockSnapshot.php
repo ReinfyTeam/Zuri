@@ -33,7 +33,6 @@ namespace ReinfyTeam\Zuri\checks\snapshots;
 
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use function is_float;
 
 /**
  * Captures immutable block interaction state for async worker evaluation.
@@ -72,7 +71,8 @@ class BlockSnapshot extends AsyncSnapshot {
 	private bool $recentlyCancelled;
 
 	/** Cached block data. */
-	private mixed $cachedData = [];
+	/** @var array<string,mixed> */
+	private array $cachedData = [];
 
 	public function __construct(string $checkType, Player $player, PlayerAPI $playerAPI) {
 		parent::__construct($checkType);
@@ -88,7 +88,7 @@ class BlockSnapshot extends AsyncSnapshot {
 		$this->eyeY = $eyePos->getY();
 		$this->eyeZ = $eyePos->getZ();
 
-		$this->ping = $player->getNetworkSession()->getPing();
+		$this->ping = (int) ($player->getNetworkSession()->getPing() ?? 0);
 		$this->survival = $player->isSurvival();
 		$this->attackTicks = $playerAPI->getAttackTicks();
 		$this->teleportTicks = $playerAPI->getTeleportTicks();
@@ -116,6 +116,7 @@ class BlockSnapshot extends AsyncSnapshot {
 		return $this;
 	}
 
+	/** @return array<string,mixed> */
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
@@ -143,8 +144,8 @@ class BlockSnapshot extends AsyncSnapshot {
 	}
 
 	public function validate() : void {
-		if (!is_float($this->blockX) || !is_float($this->playerX)) {
-			throw new SnapshotException("Invalid block position data in snapshot");
+		if ($this->blockHardness < 0.0) {
+			throw new SnapshotException("Invalid block hardness in snapshot");
 		}
 	}
 }

@@ -202,12 +202,13 @@ class DynamicThreshold {
 	 */
 	public static function isServerLagging() : bool {
 		self::refreshMetrics();
-		return self::$cachedTps < 14.0 || ServerTickTask::getInstance()->isLagging(microtime(true));
+		return self::$cachedTps < 14.0 || (ServerTickTask::getInstance()?->isLagging(microtime(true)) ?? false);
 	}
 
 	/**
 	 * Get diagnostic info for debugging.
 	 */
+	/** @return array{tps:float, playerCount:int, loadFactor:float, isStressed:bool, isLagging:bool} */
 	public static function getDiagnostics() : array {
 		self::refreshMetrics();
 		return [
