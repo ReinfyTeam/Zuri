@@ -2,3 +2,7 @@ parameters:
 	level: max
 	paths:
 		- src
+	parallel:
+		maximumNumberOfProcesses: 8 # Limit max processes
+		minimumNumberOfJobsPerProcess: 2
+		jobSize: 20
