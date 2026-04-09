@@ -26,14 +26,17 @@ Also, adding :star: a **Star** is also appreciated. ✨
 
 # Features
 - This plugin has total of 40+ checks that cover the most common public cheat categories, including speed, fly, reach, scaffold, timer, and packet manipulation.
+- Checks are organized by module groups, and new modules can self-declare their name, subtype, and correlation group for easier extension.
 - You can easily configure everything in the config. ✅
    - Configure easily the max violations, punishment type, thresholds, bypass rules, and module constants without editing source code.
 - You can switch ready tuning presets for combat-sensitive detections (`custom`, `low-latency`, `high-latency`) from `zuri.tuning-presets.active`.
    - This is useful when your server has either very stable low ping PvP traffic or mixed high-latency public traffic.
 - It is more **lightweight** compared to paid anticheat. You don't have to struggle about the performance, with this anticheat, it can possible block them all easily! 💰
-   - The checks are split so the simple ones stay direct while heavier calculations are evaluated through the async pipeline.
+   - The checks are split so the simple ones stay direct while heavier calculations are evaluated through the async pipeline, with payload identity handled by module name and subtype.
 - ✨ It is easy to use when it comes at the game, you can easily debug things, manage them all at the game, and **disable checks** according to your command.
    - This is useful when a server owner wants to test a module, reduce false positives, or temporarily isolate a problem during maintenance.
+- Cross-check correlation can delay high-impact punishments until enough behavior groups are seen in the configured time window.
+  - This helps reduce over-aggressive punishments when only one detection family is active.
 - ❌ Limit players joining by their ip limit, you can change and configure on how many players can join with same ip address. *(optional)*
    - This helps reduce duplicate account flooding and simple bot joins from the same network.
 - 🌟 It also checks the player if they are using a **Proxy or VPN** *(optional)*
@@ -42,6 +45,8 @@ Also, adding :star: a **Star** is also appreciated. ✨
    - That is intended for environments that need proxy-aware packet handling beyond standard player checks.
 - 💥 You can manage plugin at the in-game using **Interactive UI** by using command! `/zuri ui`
    - The UI is meant for quick inspection and administrative control without requiring the console.
+
+If you want to create your own module, see [`TUTORIAL.md`](TUTORIAL.md).
 
 # Forks / Dependencies
 Here are the **dependencies** were used in the plugin:
