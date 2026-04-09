@@ -14,6 +14,7 @@
         "php": ">=8.2",
         "pocketmine/pocketmine-mp": "^5.42.1",
         "phpstan/phpstan": "^1.2",
+        "sof3/pharynx": "^0.3.8",
         "friendsofphp/php-cs-fixer": "^3.94.2"
     },
     "autoload": {
