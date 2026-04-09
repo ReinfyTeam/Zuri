@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "65e25ffcbb125aa063b6b7734c5aa335",
+    "content-hash": "ee1b01a27311469e2f968ee499ef2337",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -1074,12 +1074,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ReinfyTeam/DiscordWebhookAPI.git",
-                "reference": "17c12739cc98054c525f1a30833f39115bf4ffe5"
+                "reference": "6eb1b1fb13393b41276fac658521f0782eeac605"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ReinfyTeam/DiscordWebhookAPI/zipball/17c12739cc98054c525f1a30833f39115bf4ffe5",
-                "reference": "17c12739cc98054c525f1a30833f39115bf4ffe5",
+                "url": "https://api.github.com/repos/ReinfyTeam/DiscordWebhookAPI/zipball/6eb1b1fb13393b41276fac658521f0782eeac605",
+                "reference": "6eb1b1fb13393b41276fac658521f0782eeac605",
                 "shasum": ""
             },
             "require": {
@@ -1109,7 +1109,7 @@
                 "issues": "https://github.com/ReinfyTeam/DiscordWebhookAPI/issues",
                 "source": "https://github.com/ReinfyTeam/DiscordWebhookAPI/tree/master"
             },
-            "time": "2026-04-09T09:39:03+00:00"
+            "time": "2026-04-09T13:41:45+00:00"
         },
         {
             "name": "reinfyteam/libpmform",
@@ -1165,6 +1165,63 @@
                 "source": "https://github.com/ReinfyTeam/libpmform/tree/main"
             },
             "time": "2026-04-09T10:01:39+00:00"
+        },
+        {
+            "name": "reinfyteam/libvapm-pmmp",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ReinfyTeam/LibVapmPMMP.git",
+                "reference": "243613d550398ec368509561d531d28d7fc6f86b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ReinfyTeam/LibVapmPMMP/zipball/243613d550398ec368509561d531d28d7fc6f86b",
+                "reference": "243613d550398ec368509561d531d28d7fc6f86b",
+                "shasum": ""
+            },
+            "require-dev": {
+                "composer-runtime-api": "^2.0",
+                "php": ">=8.2",
+                "php-64bit": "*",
+                "phpstan/phpstan": "*",
+                "pocketmine/pocketmine-mp": "^5.17.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "virion": {
+                    "spec": "3.1",
+                    "namespace-root": "vennv\\vapm"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "vennv\\vapm\\": "src/vennv/vapm/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-2.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "VennDev",
+                    "email": "1050080275@sv.hcmunre.edu.vn"
+                }
+            ],
+            "keywords": [
+                "LibVapmPMMP",
+                "Thread",
+                "asynchronous",
+                "lib-vapm-pmmp",
+                "process",
+                "vapm-pmmp"
+            ],
+            "support": {
+                "source": "https://github.com/ReinfyTeam/LibVapmPMMP/tree/main"
+            },
+            "time": "2026-04-09T15:33:43+00:00"
         },
         {
             "name": "sof3/await-generator",
@@ -1431,70 +1488,6 @@
                 }
             ],
             "time": "2026-02-24T17:51:06+00:00"
-        },
-        {
-            "name": "vennv/vapm-pmmp",
-            "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/VennDev/LibVapmPMMP.git",
-                "reference": "46926aeb4e82bbe202ebcf08305f6f06a404e378"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/VennDev/LibVapmPMMP/zipball/46926aeb4e82bbe202ebcf08305f6f06a404e378",
-                "reference": "46926aeb4e82bbe202ebcf08305f6f06a404e378",
-                "shasum": ""
-            },
-            "require": {
-                "composer-runtime-api": "^2.0",
-                "php": ">=8.2",
-                "php-64bit": "*",
-                "pocketmine/pocketmine-mp": "^5.17.0"
-            },
-            "require-dev": {
-                "phpstan/phpstan": "*"
-            },
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "virion": {
-                    "spec": "3.0",
-                    "namespace-root": "vennv\\vapm"
-                }
-            },
-            "autoload": {
-                "files": [
-                    "src/vennv/vapm/io/functions.php",
-                    "src/vennv/vapm/ct/functions.php"
-                ],
-                "psr-4": {
-                    "vennv\\vapm\\": "src/vennv/vapm/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPL-2.0-only"
-            ],
-            "authors": [
-                {
-                    "name": "VennDev",
-                    "email": "1050080275@sv.hcmunre.edu.vn"
-                }
-            ],
-            "keywords": [
-                "LibVapmPMMP",
-                "Thread",
-                "asynchronous",
-                "lib-vapm-pmmp",
-                "process",
-                "vapm-pmmp"
-            ],
-            "support": {
-                "issues": "https://github.com/VennDev/LibVapmPMMP/issues",
-                "source": "https://github.com/VennDev/LibVapmPMMP/tree/2.5.6"
-            },
-            "time": "2024-09-02T05:40:25+00:00"
         }
     ],
     "packages-dev": [
@@ -3987,8 +3980,8 @@
         "paroxity/commando": 20,
         "reinfyteam/discordwebhookapi": 20,
         "reinfyteam/libpmform": 20,
-        "sof3/infoapi": 10,
-        "vennv/vapm-pmmp": 20
+        "reinfyteam/libvapm-pmmp": 20,
+        "sof3/infoapi": 10
     },
     "prefer-stable": true,
     "prefer-lowest": false,

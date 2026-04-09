@@ -6,7 +6,7 @@
         "paroxity/commando": "dev-master",
         "reinfyteam/discordwebhookapi": "dev-master",
         "reinfyteam/libpmform": "dev-main",
-        "vennv/vapm-pmmp": "dev-main",
+        "reinfyteam/libvapm-pmmp": "dev-main",
         "muqsit/simple-packet-handler": "0.1.5",
         "sof3/infoapi": "^2.0.0-beta.1"
     },
