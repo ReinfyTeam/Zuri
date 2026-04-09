@@ -44,6 +44,22 @@ jobs:
       - name: Build plugin phar
         run: composer run-script build
 
+      - name: Normalize phar artifact path
+        run: |
+          set -euo pipefail
+          mkdir -p build
+
+          if [ -f "build/Zuri.phar" ]; then
+            echo "Found build/Zuri.phar"
+          elif [ -f "Zuri.phar" ]; then
+            mv Zuri.phar build/Zuri.phar
+            echo "Moved Zuri.phar to build/Zuri.phar"
+          else
+            echo "Could not find built phar artifact."
+            find . -maxdepth 4 -type f -name '*.phar' -print
+            exit 1
+          fi
+
       - name: Resolve release metadata (from commit or manual input)
         id: meta
         env:
