@@ -31,7 +31,7 @@
         "format": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes",
         "format:check": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --dry-run --diff",
         "analyze": "vendor/bin/phpstan",
-        "build": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -p=Zuri.phar",
+        "build": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -p=./build/Zuri.phar",
         "build-source": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -o=./build/"
     },
     "minimum-stability": "stable",
