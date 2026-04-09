@@ -8,9 +8,9 @@ projects:
     lint: false
     icon: "icon.png"
     libs:
-      - src: VennDev/LibVapmPMMP/LibVapmPMMP
+      - src: VennDev/LibVapmPMMP
         version: 2.5.6
-      - src: ReinfyTeam/DiscordWebhookAPI/DiscordWebhookAPI
+      - src: ReinfyTeam/DiscordWebhookAPI
         version: 2.0.0
       - src: Paroxity/Commando/Commando
         version: 3.3.0
@@ -18,6 +18,6 @@ projects:
         version: 2.0.0-beta.1
       - src: CzechPMDevs/libpmform/
         version: 1.1.0
-      - src: Muqsit/SimplePacketHandler/SimplePacketHandler
+      - src: Muqsit/SimplePacketHandler
         version: 0.1.5
 ...
