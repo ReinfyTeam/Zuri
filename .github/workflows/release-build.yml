@@ -1,0 +1,124 @@
+name: Release Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (example: 1.2.3 or v1.2.3)"
+        required: true
+        type: string
+      changelog:
+        description: "Release notes/changelog"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.event.head_commit.message, 'release:') ||
+      startsWith(github.event.head_commit.message, 'release ') ||
+      startsWith(github.event.head_commit.message, 'Release:') ||
+      startsWith(github.event.head_commit.message, 'Release ')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PHP for PocketMine-MP
+        uses: pmmp/setup-php-action@3.2.0
+        with:
+          php-version: 8.2
+          pm-version-major: 5
+
+      - name: Install composer dependencies
+        run: composer install --prefer-dist
+
+      - name: Build plugin phar
+        run: composer run-script build
+
+      - name: Resolve release metadata (from commit or manual input)
+        id: meta
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RAW_MESSAGE: ${{ github.event.head_commit.message }}
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_CHANGELOG: ${{ inputs.changelog }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          normalize_version() {
+            local v="$1"
+            v="${v#v}"
+            if [[ ! "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+              echo "Invalid version format: '$1'. Expected semver-like format (e.g. 1.2.3 or v1.2.3)." >&2
+              exit 1
+            fi
+            echo "$v"
+          }
+
+          subject=""
+          body=""
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            if [[ -z "${INPUT_VERSION:-}" ]]; then
+              echo "workflow_dispatch requires input 'version'." >&2
+              exit 1
+            fi
+            version="$(normalize_version "$INPUT_VERSION")"
+            subject="release: v$version"
+            body="${INPUT_CHANGELOG:-}"
+          else
+            if [[ -z "${RAW_MESSAGE:-}" ]]; then
+              echo "Push event missing head commit message; cannot determine release metadata." >&2
+              exit 1
+            fi
+
+            subject="$(printf '%s' "$RAW_MESSAGE" | head -n 1)"
+            body="$(printf '%s' "$RAW_MESSAGE" | tail -n +2 | sed '/^[[:space:]]*$/d')"
+
+            if [[ "$subject" =~ ^[Rr]elease[:[:space:]]+v?([0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?)$ ]]; then
+              version="${BASH_REMATCH[1]}"
+            else
+              echo "Commit subject must look like: 'release: v1.2.3' (got: '$subject')." >&2
+              exit 1
+            fi
+          fi
+
+          tag="v$version"
+          title="Zuri $tag"
+
+          {
+            echo "version=$version"
+            echo "tag=$tag"
+            echo "title=$title"
+            echo "target=$SHA"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "# $title"
+            echo
+            if [[ -n "${body:-}" ]]; then
+              printf '%s\n' "$body"
+            else
+              echo "- Release $tag"
+            fi
+          } > release-notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ steps.meta.outputs.title }}
+          body_path: release-notes.md
+          target_commitish: ${{ steps.meta.outputs.target }}
+          files: build/Zuri.phar
+          fail_on_unmatched_files: true
