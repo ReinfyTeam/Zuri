@@ -46,7 +46,7 @@ use function max;
 use function min;
 
 class ReachE extends Check {
-	private const string BUFFER_KEY = CacheData::REACH_E_BUFFER;
+	private const BUFFER_KEY = CacheData::REACH_E_BUFFER;
 
 	public function getName() : string {
 		return "Reach";

@@ -9,7 +9,7 @@
         "sof3/infoapi": "^2.0.0-beta.1"
     },
     "require-dev": {
-        "php": ">=8.4",
+        "php": ">=8.2",
         "pocketmine/pocketmine-mp": "^5.42.1",
         "sof3/pharynx": "^0.3.0",
         "phpstan/phpstan": "^1.2",
@@ -19,6 +19,11 @@
         "classmap": [
             "src/"
         ]
+    },
+    "config": {
+        "platform": {
+            "php": "8.2.0"
+        }
     },
     "scripts": {
         "format": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes",

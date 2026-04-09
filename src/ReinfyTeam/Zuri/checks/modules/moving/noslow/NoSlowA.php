@@ -44,7 +44,7 @@ use function is_numeric;
 use function max;
 
 class NoSlowA extends Check {
-	private const string BUFFER_KEY = CacheData::NOSLOW_A_BUFFER;
+	private const BUFFER_KEY = CacheData::NOSLOW_A_BUFFER;
 
 	public function getName() : string {
 		return "NoSlow";

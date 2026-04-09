@@ -51,10 +51,10 @@ use ReinfyTeam\Zuri\ZuriAC;
 	private array $perm = [];
 	private ?PermissionAttachment $attachment = null;
 
-	public const int USER = 0;
-	public const int OPERATOR = 1;
-	public const int CONSOLE = 3;
-	public const int NONE = -1;
+	public const USER = 0;
+	public const OPERATOR = 1;
+	public const CONSOLE = 3;
+	public const NONE = -1;
 
 	/** @param array<string,bool> $childPermission */
 	public function register(string $permission, int $permAccess, array $childPermission = []) : void {

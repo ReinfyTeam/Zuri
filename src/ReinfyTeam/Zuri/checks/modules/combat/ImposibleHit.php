@@ -42,7 +42,7 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
 class ImposibleHit extends Check {
-	private const string TYPE = "ImposibleHitA";
+	private const TYPE = "ImposibleHitA";
 
 	public function getName() : string {
 		return "InventoryMove";

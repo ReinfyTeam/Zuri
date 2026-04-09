@@ -52,8 +52,8 @@ use function str_contains;
 use function strtolower;
 
 class GhostHand extends Check {
-	private const string TYPE = "GhostHandA";
-	private const string BUFFER_KEY = CacheData::GHOSTHAND_A_BUFFER;
+	private const TYPE = "GhostHandA";
+	private const BUFFER_KEY = CacheData::GHOSTHAND_A_BUFFER;
 
 	public function getName() : string {
 		return "GhostHand";

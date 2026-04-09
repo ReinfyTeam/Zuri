@@ -46,8 +46,8 @@ final class ExceptionHandler {
 	/** @var array<string, int> */
 	private static array $errorCounts = [];
 
-	private const int MAX_ERRORS_PER_MINUTE = 100;
-	private const float ERROR_WINDOW = 60.0;
+	private const MAX_ERRORS_PER_MINUTE = 100;
+	private const ERROR_WINDOW = 60.0;
 
 	/**
 	 * Wraps a callable in an exception boundary.

@@ -53,7 +53,7 @@ use function strpos;
 use function substr;
 
 final class Lang {
-	private const string DEFAULT_LOCALE = 'en_US';
+	private const DEFAULT_LOCALE = 'en_US';
 
 	/** @var array<int|string,mixed> */
 	private static array $messages = [];

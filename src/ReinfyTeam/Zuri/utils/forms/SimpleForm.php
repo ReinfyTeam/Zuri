@@ -39,8 +39,8 @@ use function is_int;
 use function is_string;
 
 class SimpleForm extends Form {
-	public const int IMAGE_TYPE_PATH = 0;
-	public const int IMAGE_TYPE_URL = 1;
+	public const IMAGE_TYPE_PATH = 0;
+	public const IMAGE_TYPE_URL = 1;
 
 	private string $content = "";
 

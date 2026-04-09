@@ -49,9 +49,9 @@ use function is_numeric;
 use function max;
 
 class OmniSprint extends Check {
-	private const string BUFFER_KEY = CacheData::OMNISPRINT_A_BUFFER;
-	private const string LAST_MOVE_XZ_KEY = CacheData::OMNISPRINT_A_LAST_MOVE_XZ;
-	private const string LAST_MOVE_TICK_KEY = CacheData::OMNISPRINT_A_LAST_MOVE_TICK;
+	private const BUFFER_KEY = CacheData::OMNISPRINT_A_BUFFER;
+	private const LAST_MOVE_XZ_KEY = CacheData::OMNISPRINT_A_LAST_MOVE_XZ;
+	private const LAST_MOVE_TICK_KEY = CacheData::OMNISPRINT_A_LAST_MOVE_TICK;
 
 	public function getName() : string {
 		return "OmniSprint";

@@ -48,7 +48,7 @@ use function strtolower;
 use function trim;
 
 class DeviceSpoofID extends Check {
-	private const array INVALID_DEVICE_IDS = [
+	private const INVALID_DEVICE_IDS = [
 		"",
 		"0",
 		"1",

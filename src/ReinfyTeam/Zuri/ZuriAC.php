@@ -150,7 +150,7 @@ class ZuriAC extends PluginBase {
 	/** @var list<Check> */
 	private array $justEventChecks = [];
 
-	private const string MINIMUM_PHP_VERSION = "8.4.0";
+	private const MINIMUM_PHP_VERSION = "8.2.0";
 
 	protected function onLoad() : void {
 		self::$instance = $this;

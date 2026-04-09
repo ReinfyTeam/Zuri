@@ -46,9 +46,9 @@ use function microtime;
 use function strtolower;
 
 class ItemLerp extends Check {
-	private const string TYPE = "ItemLerpA";
-	private const string BUFFER_KEY = CacheData::ITEMLERP_A_BUFFER;
-	private const string LAST_SWITCH_KEY = CacheData::ITEMLERP_A_LAST_HELD_SWITCH;
+	private const TYPE = "ItemLerpA";
+	private const BUFFER_KEY = CacheData::ITEMLERP_A_BUFFER;
+	private const LAST_SWITCH_KEY = CacheData::ITEMLERP_A_LAST_HELD_SWITCH;
 
 	public function getName() : string {
 		return "ItemLerp";

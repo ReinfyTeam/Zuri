@@ -86,7 +86,7 @@ class PlayerListener implements Listener {
 	/** @var array<string,list<float>> */
 	private array $clicksData = [];
 
-	private const int DELTAL_TIME_CLICK = 1;
+	private const DELTAL_TIME_CLICK = 1;
 
 	public function onDataPacketReceive(DataPacketReceiveEvent $event) : void {
 		$packet = $event->getPacket();

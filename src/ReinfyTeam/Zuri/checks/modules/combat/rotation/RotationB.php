@@ -46,11 +46,11 @@ use function is_numeric;
 use function max;
 
 class RotationB extends Check {
-	private const string TYPE = "RotationB";
-	private const string LAST_YAW = CacheData::ROTATION_B_LAST_YAW;
-	private const string LAST_PITCH = CacheData::ROTATION_B_LAST_PITCH;
-	private const string LAST_DELTA_YAW = CacheData::ROTATION_B_LAST_DELTA_YAW;
-	private const string BUFFER = CacheData::ROTATION_B_BUFFER;
+	private const TYPE = "RotationB";
+	private const LAST_YAW = CacheData::ROTATION_B_LAST_YAW;
+	private const LAST_PITCH = CacheData::ROTATION_B_LAST_PITCH;
+	private const LAST_DELTA_YAW = CacheData::ROTATION_B_LAST_DELTA_YAW;
+	private const BUFFER = CacheData::ROTATION_B_BUFFER;
 
 	public function getName() : string {
 		return "Rotation";

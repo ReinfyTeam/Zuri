@@ -44,11 +44,11 @@ use function is_string;
 use function str_replace;
 
 class Discord extends ConfigManager {
-	public const int BAN = 0;
-	public const int KICK = 1;
-	public const int JOIN = 2;
-	public const int LEAVE = 3;
-	public const int LAGGING = 4;
+	public const BAN = 0;
+	public const KICK = 1;
+	public const JOIN = 2;
+	public const LEAVE = 3;
+	public const LAGGING = 4;
 
 	public static ?Config $config = null;
 

@@ -44,7 +44,7 @@ use function str_contains;
 use function strtolower;
 
 class AntiBotB extends Check {
-	private const array SUSPICIOUS_CLIENT_SIGNATURES = [
+	private const SUSPICIOUS_CLIENT_SIGNATURES = [
 		"toolbox",
 		"horion",
 		"zephyr",

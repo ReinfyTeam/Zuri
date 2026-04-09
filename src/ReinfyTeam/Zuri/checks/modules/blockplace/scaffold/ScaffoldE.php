@@ -46,9 +46,9 @@ use function max;
 use function microtime;
 
 class ScaffoldE extends Check {
-	private const string BUFFER_KEY = CacheData::SCAFFOLD_E_BUFFER;
-	private const string LAST_BLOCK_KEY = CacheData::SCAFFOLD_E_LAST_BLOCK;
-	private const string LAST_PLACE_AT_KEY = CacheData::SCAFFOLD_E_LAST_PLACE_AT;
+	private const BUFFER_KEY = CacheData::SCAFFOLD_E_BUFFER;
+	private const LAST_BLOCK_KEY = CacheData::SCAFFOLD_E_LAST_BLOCK;
+	private const LAST_PLACE_AT_KEY = CacheData::SCAFFOLD_E_LAST_PLACE_AT;
 
 	public function getName() : string {
 		return "Scaffold";

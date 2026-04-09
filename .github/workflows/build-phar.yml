@@ -18,7 +18,7 @@ jobs:
       - name: Setup PHP for PocketMine-MP
         uses: pmmp/setup-php-action@3.2.0
         with:
-          php-version: 8.4
+          php-version: 8.2
           pm-version-major: 5
       
       - name: Install composer dependencies

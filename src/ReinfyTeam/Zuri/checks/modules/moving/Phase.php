@@ -45,8 +45,8 @@ use function is_numeric;
 use function max;
 
 class Phase extends Check {
-	private const string BUFFER_KEY = CacheData::PHASE_A_BUFFER;
-	private const int BUFFER_LIMIT = 3;
+	private const BUFFER_KEY = CacheData::PHASE_A_BUFFER;
+	private const BUFFER_LIMIT = 3;
 
 	/** @var array<int,int>|null */
 	private static ?array $skipFlipped = null;

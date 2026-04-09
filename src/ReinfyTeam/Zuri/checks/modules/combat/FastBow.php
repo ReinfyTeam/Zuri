@@ -43,7 +43,7 @@ use function array_key_exists;
 use function is_numeric;
 
 class FastBow extends Check {
-	private const string TYPE = "FastBowA";
+	private const TYPE = "FastBowA";
 
 	public function getName() : string {
 		return "FastBow";

@@ -44,7 +44,7 @@ use function is_numeric;
 use function max;
 
 class FlyB extends Check {
-	private const string BUFFER_KEY = CacheData::FLY_B_BUFFER;
+	private const BUFFER_KEY = CacheData::FLY_B_BUFFER;
 
 	public function getName() : string {
 		return "Fly";

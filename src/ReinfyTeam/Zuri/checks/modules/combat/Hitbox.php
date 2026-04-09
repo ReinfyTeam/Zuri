@@ -46,8 +46,8 @@ use function min;
 use function strtolower;
 
 class Hitbox extends Check {
-	private const string TYPE = "HitboxA";
-	private const string BUFFER_KEY = CacheData::HITBOX_A_BUFFER;
+	private const TYPE = "HitboxA";
+	private const BUFFER_KEY = CacheData::HITBOX_A_BUFFER;
 
 	public function getName() : string {
 		return "Hitbox";
