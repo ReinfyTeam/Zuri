@@ -35,6 +35,7 @@ use CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
+use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\checks\DynamicThreshold;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
@@ -74,14 +75,29 @@ class StatusSubCommand extends BaseSubCommand {
 		$profileMetricCount = HotPathProfiler::getMetricCount();
 		$profileTotalMs = round(HotPathProfiler::getTotalMillis(), 3);
 		$packetAvgMs = round(HotPathProfiler::getAverageMillis("packet.handler.receive"), 3);
+		$stateColor = match ($performanceState) {
+			"lagging" => TextFormat::RED,
+			"stressed" => TextFormat::YELLOW,
+			default => TextFormat::GREEN,
+		};
+		$performanceStateText = $stateColor . $performanceState . TextFormat::RESET;
+		$overloadActive = (bool) ($metrics["overloadActive"] ?? false);
+		$overloadActiveText = $overloadActive ? TextFormat::RED . "yes" . TextFormat::RESET : TextFormat::GREEN . "no" . TextFormat::RESET;
+		$syncFallbackActive = (bool) ($metrics["syncFallbackActive"] ?? false);
+		$syncFallbackActiveText = $syncFallbackActive ? TextFormat::YELLOW . "yes" . TextFormat::RESET : TextFormat::GREEN . "no" . TextFormat::RESET;
+		$queueUtilText = ($queueUtil >= 85.0 ? TextFormat::RED : ($queueUtil >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $queueUtil) . TextFormat::RESET;
+		$workerUtilText = ($workerUtil >= 85.0 ? TextFormat::RED : ($workerUtil >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $workerUtil) . TextFormat::RESET;
+		$memoryUtilText = ($memoryUtil >= 85.0 ? TextFormat::RED : ($memoryUtil >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $memoryUtil) . TextFormat::RESET;
+		$cpuLoadText = ($cpuLoad >= 85.0 ? TextFormat::RED : ($cpuLoad >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $cpuLoad) . TextFormat::RESET;
+		$asyncTpsText = (($asyncTps <= 12.0) ? TextFormat::RED : (($asyncTps <= 17.5) ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $asyncTps) . TextFormat::RESET;
 
 		$lines = [
 			Lang::get(LangKeys::ASYNC_STATUS_HEADER),
 			Lang::get(LangKeys::ASYNC_STATUS_QUEUE, ["queue" => (string) $metrics["queueSize"], "maxQueue" => (string) $metrics["maxQueueSize"]]),
 			Lang::get(LangKeys::ASYNC_STATUS_WORKERS, ["inFlight" => (string) $metrics["inFlight"], "maxWorkers" => (string) $metrics["maxConcurrentWorkers"]]),
 			Lang::get(LangKeys::ASYNC_STATUS_UTILIZATION, [
-				"queueUtil" => (string) max(0.0, $queueUtil),
-				"workerUtil" => (string) max(0.0, $workerUtil),
+				"queueUtil" => $queueUtilText,
+				"workerUtil" => $workerUtilText,
 			]),
 			Lang::get(LangKeys::ASYNC_STATUS_PLAYERS, [
 				"monitored" => (string) $monitoredPlayers,
@@ -92,14 +108,14 @@ class StatusSubCommand extends BaseSubCommand {
 				"tps" => (string) round($tps, 2),
 				"load" => (string) round($loadFactor * 100.0, 1),
 			]),
-			Lang::get(LangKeys::ASYNC_STATUS_PERFORMANCE, ["state" => $performanceState]),
+			Lang::get(LangKeys::ASYNC_STATUS_PERFORMANCE, ["state" => $performanceStateText]),
 			Lang::get(LangKeys::ASYNC_STATUS_RESOURCES, [
-				"memory" => (string) max(0.0, $memoryUtil),
-				"cpu" => (string) max(0.0, $cpuLoad),
-				"asyncTps" => (string) max(0.0, $asyncTps),
+				"memory" => $memoryUtilText,
+				"cpu" => $cpuLoadText,
+				"asyncTps" => $asyncTpsText,
 			]),
 			Lang::get(LangKeys::ASYNC_STATUS_OVERLOAD, [
-				"active" => ((bool) ($metrics["overloadActive"] ?? false)) ? "yes" : "no",
+				"active" => $overloadActiveText,
 				"alerts" => (string) ($metrics["totalOverloadAlerts"] ?? 0),
 			]),
 			Lang::get(LangKeys::ASYNC_STATUS_PROFILE, [
@@ -119,7 +135,7 @@ class StatusSubCommand extends BaseSubCommand {
 				"timeout" => (string) round((float) $metrics["workerTimeoutSeconds"], 2),
 			]),
 			Lang::get(LangKeys::ASYNC_STATUS_FALLBACK, [
-				"active" => ((bool) $metrics["syncFallbackActive"]) ? "yes" : "no",
+				"active" => $syncFallbackActiveText,
 				"count" => (string) $metrics["totalSyncFallback"],
 				"errors" => (string) $metrics["totalFallbackErrors"],
 			]),
