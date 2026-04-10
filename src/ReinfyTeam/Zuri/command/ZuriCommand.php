@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\command;
 use CortexPE\Commando\BaseCommand;
 use CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
+use pocketmine\lang\Translatable;
 use pocketmine\plugin\PluginBase;
 use ReinfyTeam\Zuri\command\subcommand\AboutSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\BanModeSubCommand;
@@ -103,7 +104,8 @@ class ZuriCommand extends BaseCommand {
 
 	private function registerAndCollectSubCommand(BaseSubCommand $subCommand) : void {
 		$this->registerSubCommand($subCommand);
-		$description = trim($subCommand->getDescription());
+		$rawDescription = $subCommand->getDescription();
+		$description = trim($rawDescription instanceof Translatable ? $rawDescription->getText() : $rawDescription);
 		self::$helpEntries[] = [
 			"name" => $subCommand->getName(),
 			"description" => $description !== "" ? $description : "No description provided.",
