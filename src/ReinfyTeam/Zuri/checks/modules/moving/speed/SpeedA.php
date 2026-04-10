@@ -83,6 +83,14 @@ class SpeedA extends Check {
 			) {
 				return;
 			}
+			if (
+				abs($packet->getPosition()->getX() - $player->getPosition()->getX()) < 0.0001 &&
+				abs($packet->getPosition()->getZ() - $player->getPosition()->getZ()) < 0.0001 &&
+				abs($packet->getMoveVecX()) < 0.0001 &&
+				abs($packet->getMoveVecZ()) < 0.0001
+			) {
+				return;
+			}
 
 			$snapshot = new MovementSnapshot("SpeedA", $player, $playerAPI);
 			$snapshot->setEnvironmentState(

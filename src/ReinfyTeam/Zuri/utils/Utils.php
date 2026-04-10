@@ -72,6 +72,7 @@ class Utils {
 			"{YELLOW}" => TextFormat::YELLOW,
 			"{WHITE}" => TextFormat::WHITE,
 			"{MINECOIN_GOLD}" => TextFormat::MINECOIN_GOLD,
+			"{RESET}" => TextFormat::RESET,
 		];
 
 		$formats = [

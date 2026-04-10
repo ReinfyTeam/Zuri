@@ -65,6 +65,14 @@ use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\inventory\ArmorInventory;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\LoginPacket;
+use pocketmine\network\mcpe\protocol\MovePlayerPacket;
+use pocketmine\network\mcpe\protocol\PlayerActionPacket;
+use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
+use pocketmine\network\mcpe\protocol\TextPacket;
+use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
+use pocketmine\network\mcpe\protocol\ActorEventPacket;
+use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\ServerboundPacket;
@@ -121,6 +129,13 @@ class PlayerListener implements Listener {
 		$player = $event->getPlayer();
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
 		if (!$this->isPlayerReady($player)) {
+			return;
+		}
+		$moved =
+			abs($event->getTo()->getX() - $event->getFrom()->getX()) >= 0.0001 ||
+			abs($event->getTo()->getY() - $event->getFrom()->getY()) >= 0.0001 ||
+			abs($event->getTo()->getZ() - $event->getFrom()->getZ()) >= 0.0001;
+		if (!$moved) {
 			return;
 		}
 
@@ -544,6 +559,9 @@ class PlayerListener implements Listener {
 		if (!$p->isOnline() || !$p->isConnected()) {
 			return;
 		}
+		if (!$this->isPacketRelevantForIdlePlayer($packet) && !$this->isPlayerActive($player)) {
+			return;
+		}
 
 		foreach (ZuriAC::PacketChecks() as $class) {
 			if (!$packet instanceof DataPacket) {
@@ -576,6 +594,29 @@ class PlayerListener implements Listener {
 
 	private function isPlayerReady(Player $player) : bool {
 		return $player->isConnected() && $player->isOnline();
+	}
+
+	private function isPlayerActive(PlayerAPI $playerAPI) : bool {
+		return $playerAPI->getLastMoveTick() <= 40
+			|| $playerAPI->getAttackTicks() <= 40
+			|| $playerAPI->getProjectileAttackTicks() <= 40
+			|| $playerAPI->getPlacingTicks() <= 40
+			|| $playerAPI->isInventoryOpen()
+			|| $playerAPI->getBlocksPlacedASec() > 0
+			|| $playerAPI->getBlocksBrokeASec() > 0;
+	}
+
+	private function isPacketRelevantForIdlePlayer(ServerboundPacket $packet) : bool {
+		return $packet instanceof PlayerAuthInputPacket
+			|| $packet instanceof MovePlayerPacket
+			|| $packet instanceof InventoryTransactionPacket
+			|| $packet instanceof PlayerActionPacket
+			|| $packet instanceof LevelSoundEventPacket
+			|| $packet instanceof AnimatePacket
+			|| $packet instanceof ActorEventPacket
+			|| $packet instanceof TextPacket
+			|| $packet instanceof LoginPacket
+			|| $packet instanceof UpdateAdventureSettingsPacket;
 	}
 
 	private function getPlayerKey(Player $player) : string {

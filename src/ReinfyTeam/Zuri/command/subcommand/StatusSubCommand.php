@@ -34,15 +34,20 @@ namespace ReinfyTeam\Zuri\command\subcommand;
 use CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
+use pocketmine\Server;
+use ReinfyTeam\Zuri\checks\DynamicThreshold;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
+use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\task\CheckAsyncTask;
+use function count;
 use function implode;
+use function max;
 use function round;
 
-class AsyncStatusSubCommand extends BaseSubCommand {
+class StatusSubCommand extends BaseSubCommand {
 	public function __construct(PluginBase $plugin) {
-		parent::__construct($plugin, "async", "Show async pipeline status.");
+		parent::__construct($plugin, "status", "Show async pipeline status.", ["async"]);
 	}
 
 	protected function prepare() : void {
@@ -51,11 +56,46 @@ class AsyncStatusSubCommand extends BaseSubCommand {
 	/** @param array<string,mixed> $args */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$metrics = CheckAsyncTask::getMetrics();
+		$server = Server::getInstance();
+		$onlinePlayers = count($server->getOnlinePlayers());
+		$maxPlayers = $server->getMaxPlayers();
+		$monitoredPlayers = count(PlayerAPI::$players);
+		$tps = DynamicThreshold::getTps();
+		$loadFactor = DynamicThreshold::getLoadFactor();
+		$performanceState = DynamicThreshold::isServerLagging() ? "lagging" : (DynamicThreshold::isServerStressed() ? "stressed" : "stable");
+		$queueUtil = round((float) ($metrics["queueUtilization"] ?? 0.0) * 100.0, 1);
+		$workerUtil = round((float) ($metrics["workerUtilization"] ?? 0.0) * 100.0, 1);
+		$memoryUtil = round((float) ($metrics["memoryUtilization"] ?? 0.0) * 100.0, 1);
+		$cpuLoad = round((float) ($metrics["cpuLoad"] ?? 0.0), 2);
+		$asyncTps = round((float) ($metrics["tps"] ?? 20.0), 2);
 
 		$lines = [
 			Lang::get(LangKeys::ASYNC_STATUS_HEADER),
 			Lang::get(LangKeys::ASYNC_STATUS_QUEUE, ["queue" => (string) $metrics["queueSize"], "maxQueue" => (string) $metrics["maxQueueSize"]]),
 			Lang::get(LangKeys::ASYNC_STATUS_WORKERS, ["inFlight" => (string) $metrics["inFlight"], "maxWorkers" => (string) $metrics["maxConcurrentWorkers"]]),
+			Lang::get(LangKeys::ASYNC_STATUS_UTILIZATION, [
+				"queueUtil" => (string) max(0.0, $queueUtil),
+				"workerUtil" => (string) max(0.0, $workerUtil),
+			]),
+			Lang::get(LangKeys::ASYNC_STATUS_PLAYERS, [
+				"monitored" => (string) $monitoredPlayers,
+				"online" => (string) $onlinePlayers,
+				"maxPlayers" => (string) $maxPlayers,
+			]),
+			Lang::get(LangKeys::ASYNC_STATUS_SERVER, [
+				"tps" => (string) round($tps, 2),
+				"load" => (string) round($loadFactor * 100.0, 1),
+			]),
+			Lang::get(LangKeys::ASYNC_STATUS_PERFORMANCE, ["state" => $performanceState]),
+			Lang::get(LangKeys::ASYNC_STATUS_RESOURCES, [
+				"memory" => (string) max(0.0, $memoryUtil),
+				"cpu" => (string) max(0.0, $cpuLoad),
+				"asyncTps" => (string) max(0.0, $asyncTps),
+			]),
+			Lang::get(LangKeys::ASYNC_STATUS_OVERLOAD, [
+				"active" => ((bool) ($metrics["overloadActive"] ?? false)) ? "yes" : "no",
+				"alerts" => (string) ($metrics["totalOverloadAlerts"] ?? 0),
+			]),
 			Lang::get(LangKeys::ASYNC_STATUS_TOTALS, [
 				"dispatched" => (string) $metrics["totalDispatched"],
 				"completed" => (string) $metrics["totalCompleted"],

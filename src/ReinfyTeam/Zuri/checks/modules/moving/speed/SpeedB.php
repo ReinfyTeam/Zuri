@@ -42,6 +42,7 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use function abs;
 use function is_array;
 use function is_int;
 use function is_numeric;
@@ -64,6 +65,14 @@ class SpeedB extends Check {
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		if ($event instanceof PlayerMoveEvent) {
+			if (
+				abs($event->getTo()->getX() - $event->getFrom()->getX()) < 0.0001 &&
+				abs($event->getTo()->getY() - $event->getFrom()->getY()) < 0.0001 &&
+				abs($event->getTo()->getZ() - $event->getFrom()->getZ()) < 0.0001
+			) {
+				return;
+			}
+
 			$groundSolid = BlockUtil::isGroundSolid($player);
 			if (
 				!$player->isSurvival() ||

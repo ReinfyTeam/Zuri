@@ -178,6 +178,7 @@ final class Lang {
 	}
 
 	private static function localeFromPath(string $path) : ?string {
+		$path = str_replace("\\", "/", $path);
 		$pos = strpos($path, '/lang/');
 		$offset = 6;
 		if ($pos === false) {

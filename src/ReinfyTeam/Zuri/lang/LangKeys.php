@@ -96,6 +96,12 @@ final class LangKeys {
 	public const ASYNC_STATUS_HEALTH = "commands.async.health";
 	public const ASYNC_STATUS_FALLBACK = "commands.async.fallback";
 	public const ASYNC_STATUS_LATENCY = "commands.async.latency";
+	public const ASYNC_STATUS_PLAYERS = "commands.async.players";
+	public const ASYNC_STATUS_SERVER = "commands.async.server";
+	public const ASYNC_STATUS_PERFORMANCE = "commands.async.performance";
+	public const ASYNC_STATUS_UTILIZATION = "commands.async.utilization";
+	public const ASYNC_STATUS_RESOURCES = "commands.async.resources";
+	public const ASYNC_STATUS_OVERLOAD = "commands.async.overload";
 
 	public const STARTUP_SOURCE_WARNING = "startup.source-warning";
 	public const STARTUP_PROXY_STOPPING = "startup.proxy-stopping";

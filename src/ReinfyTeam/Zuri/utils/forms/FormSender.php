@@ -334,7 +334,7 @@ final class FormSender extends ConfigManager {
 		$form->addLabel(($toggled ? Lang::get(LangKeys::UI_TOGGLE_MODULES_TOGGLED) : Lang::get(LangKeys::UI_TOGGLE_MODULES_CHOOSE)));
 
 		foreach (API::getAllChecks(false) as $check) {
-			$form->addToggle($check->getName(), $check->enable());
+			$form->addToggle($check->getName() . " (" . $check->getSubType() . ")", $check->enable());
 		}
 
 		$player->sendForm($form);
@@ -372,7 +372,13 @@ final class FormSender extends ConfigManager {
 				if ($check->getName() === "NetworkLimit") {
 					continue;
 				}
-				$form->addButton($check->getName() . "\n" . Lang::get(LangKeys::UI_PICK_MODULE_VIEW_INFO));
+				$form->addButton(
+					$check->getName()
+					. "\n"
+					. $check->getAllSubTypes()
+					. "\n"
+					. Lang::get(LangKeys::UI_PICK_MODULE_VIEW_INFO)
+				);
 			}
 		}
 
@@ -421,10 +427,10 @@ final class FormSender extends ConfigManager {
 			}
 		});
 
-		$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_CHANGE_PREVL));
-		$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_TOGGLE_PUNISHMENT));
+		$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_CHANGE_PREVL) . "\n" . $check->getAllSubTypes());
+		$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_TOGGLE_PUNISHMENT) . "\n" . $check->getAllSubTypes());
 		if (self::intData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl") !== 0) {
-			$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_CHANGE_MAXVL));
+			$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_CHANGE_MAXVL) . "\n" . $check->getAllSubTypes());
 		}
 		$player->sendForm($form);
 	}

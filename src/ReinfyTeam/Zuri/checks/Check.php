@@ -277,11 +277,17 @@ abstract class Check extends ConfigManager {
 		$bypassPermissionRaw = self::getData(self::PERMISSION_BYPASS_PERMISSION);
 		$bypassPermission = self::toString($bypassPermissionRaw, "zuri.bypass");
 		$bypass = self::getData(self::PERMISSION_BYPASS_ENABLE) === true && $player->hasPermission($bypassPermission);
-		$reachedMaxViolations = $playerAPI->getViolation($this->getName()) > $this->maxViolations();
+		$maxPreViolations = $this->maxViolations();
 		$maxViolationsRaw = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".maxvl", 0);
 		$maxViolations = self::toInt($maxViolationsRaw, 0);
 		$playerAPI->addViolation($this->getName());
-		$reachedMaxRealViolations = $playerAPI->getRealViolation($this->getName()) > $maxViolations;
+		$currentViolations = $playerAPI->getViolation($this->getName());
+		$reachedMaxViolations = $maxPreViolations <= 0 || $currentViolations >= $maxPreViolations;
+		if ($reachedMaxViolations) {
+			$playerAPI->addRealViolation($this->getName());
+		}
+		$currentRealViolations = $playerAPI->getRealViolation($this->getName());
+		$reachedMaxRealViolations = $maxViolations <= 0 || $currentRealViolations >= $maxViolations;
 		$server = ZuriAC::getInstance()->getServer();
 
 		$correlationEnabled = self::getData("zuri.correlation.enable", true) !== false;
@@ -321,7 +327,6 @@ abstract class Check extends ConfigManager {
 		}
 
 		if ($reachedMaxViolations) {
-			$playerAPI->addRealViolation($this->getName());
 			ZuriAC::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, Lang::raw(LangKeys::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
 			foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 				if ($p->hasPermission("zuri.admin")) {
@@ -404,7 +409,7 @@ abstract class Check extends ConfigManager {
 			return true;
 		}
 
-		if ($reachedMaxRealViolations && $this->getPunishment() === "captcha" && self::getData(self::CAPTCHA_ENABLE) === true) {
+		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "captcha" && self::getData(self::CAPTCHA_ENABLE) === true) {
 			$playerAPI->setCaptcha(true);
 			return true;
 		}
