@@ -136,6 +136,11 @@ class StatusSubCommand extends BaseSubCommand {
 				"late" => (string) $metrics["totalLateCompletions"],
 				"timeout" => (string) round((float) $metrics["workerTimeoutSeconds"], 2),
 			]),
+			Lang::get(LangKeys::ASYNC_STATUS_THREADS, [
+				"errors" => (string) ($metrics["totalThreadErrors"] ?? 0),
+				"resultErrors" => (string) ($metrics["totalThreadResultErrors"] ?? 0),
+				"retries" => (string) ($metrics["totalThreadRetries"] ?? 0),
+			]),
 			Lang::get(LangKeys::ASYNC_STATUS_FALLBACK, [
 				"active" => $syncFallbackActiveText,
 				"count" => (string) $metrics["totalSyncFallback"],

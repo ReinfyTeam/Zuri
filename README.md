@@ -55,13 +55,14 @@ Here are the **dependencies** were used in the plugin:
 - [Modified DiscordWebhookAPI](https://github.com/CortexPE/DiscordWebhookAPI/)
 - [AntiInstabreak by PMMP](https://github.com/pmmp/AntiInstabreak) (**Instabreak (A)**)
 - [Commando by Paroxity & CortexPE](https://github.com/Paroxity/Commando)
-- [LibVapmPMMP](https://github.com/VennDev/LibVapmPMMP)
+- [LibVapmPMMP](https://github.com/ReinfyTeam/LibVapmPMMP)
 - [InfoAPI](https://github.com/SOF3/InfoAPI) for API placeholders used languages for server developers.
 
 Some are for fixes and some are modified for compability.
 These libraries cover the parts that are outside the anticheat core itself, such as forms, webhook delivery, and specific block-break detection support. 
 
-Async handling now also uses [LibVapmPMMP](https://github.com/VennDev/LibVapmPMMP) as the thread/coroutine backend for heavier check evaluation, which keeps more expensive checks away from the normal event path.
+Async handling now also uses [LibVapmPMMP](https://github.com/ReinfyTeam/LibVapmPMMP) as the thread/coroutine backend for heavier check evaluation, which keeps more expensive checks away from the normal event path.
+The async pipeline now also tracks thread-promise failures and malformed thread results with automatic one-time retries before sync fallback.
 
 # Current Modules
 **BETA** - means to be in testing, and to be optimize in the next version. <br>

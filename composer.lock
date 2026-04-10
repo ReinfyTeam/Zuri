@@ -1172,12 +1172,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ReinfyTeam/LibVapmPMMP.git",
-                "reference": "2ce762ee1a1021fb34965da7662b8d647c698062"
+                "reference": "3cb4978d1a78ad6bc7123a875cee72d22e96896a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ReinfyTeam/LibVapmPMMP/zipball/2ce762ee1a1021fb34965da7662b8d647c698062",
-                "reference": "2ce762ee1a1021fb34965da7662b8d647c698062",
+                "url": "https://api.github.com/repos/ReinfyTeam/LibVapmPMMP/zipball/3cb4978d1a78ad6bc7123a875cee72d22e96896a",
+                "reference": "3cb4978d1a78ad6bc7123a875cee72d22e96896a",
                 "shasum": ""
             },
             "require-dev": {
@@ -1221,7 +1221,7 @@
             "support": {
                 "source": "https://github.com/ReinfyTeam/LibVapmPMMP/tree/main"
             },
-            "time": "2026-04-09T16:17:39+00:00"
+            "time": "2026-04-10T14:04:17+00:00"
         },
         {
             "name": "sof3/await-generator",

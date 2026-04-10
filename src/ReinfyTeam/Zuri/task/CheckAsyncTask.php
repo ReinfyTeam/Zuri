@@ -93,6 +93,9 @@ class CheckAsyncTask {
 	private static int $totalWorkerScaleUps = 0;
 	private static int $totalWorkerScaleDowns = 0;
 	private static int $totalOverloadAlerts = 0;
+	private static int $totalThreadErrors = 0;
+	private static int $totalThreadResultErrors = 0;
+	private static int $totalThreadRetries = 0;
 	private static bool $overloadActive = false;
 	private static float $lastOverloadAlertAt = 0.0;
 	private static float $overloadAlertCooldownSeconds = 10.0;
@@ -131,6 +134,9 @@ class CheckAsyncTask {
 			"totalWorkerScaleUps" => self::$totalWorkerScaleUps,
 			"totalWorkerScaleDowns" => self::$totalWorkerScaleDowns,
 			"totalOverloadAlerts" => self::$totalOverloadAlerts,
+			"totalThreadErrors" => self::$totalThreadErrors,
+			"totalThreadResultErrors" => self::$totalThreadResultErrors,
+			"totalThreadRetries" => self::$totalThreadRetries,
 			"lastDispatchAt" => self::$lastDispatchAt,
 			"lastCompleteAt" => self::$lastCompleteAt,
 			"lastHealthCheckAt" => self::$lastHealthCheckAt,
@@ -240,43 +246,92 @@ class CheckAsyncTask {
 			},
 			[$checkClass, $playerName, $payload]
 		);
-		$thread->start()->then(function(string $output) use ($id, $checkClass, $playerName, $sequence) : void {
-			if (!array_key_exists($id, self::$activeTasks)) {
-				self::$totalLateCompletions++;
+		$thread->start()
+			->then(function(string $output) use ($id) : void {
+				self::handleThreadCompletion($id, $output);
+			})
+			->catch(function(mixed $reason) use ($id) : void {
+				self::handleThreadCompletion($id, null, $reason);
+			});
+	}
+
+	private static function handleThreadCompletion(string $id, ?string $output, mixed $reason = null) : void {
+		if (!array_key_exists($id, self::$activeTasks)) {
+			self::$totalLateCompletions++;
+			return;
+		}
+
+		$taskMeta = self::$activeTasks[$id];
+		unset(self::$activeTasks[$id]);
+
+		self::$inFlight = self::$inFlight > 0 ? self::$inFlight - 1 : 0;
+		self::$lastCompleteAt = microtime(true);
+		self::$totalCompleted++;
+		self::$totalWorkerTime += max(0.0, self::$lastCompleteAt - $taskMeta["startedAt"]);
+
+		self::drain();
+
+		if ($reason !== null) {
+			self::$totalThreadErrors++;
+			if (self::retryTask($taskMeta)) {
+				self::drain();
 				return;
 			}
 
-			$taskMeta = self::$activeTasks[$id];
-			unset(self::$activeTasks[$id]);
+			self::activateDegradedMode(self::$lastCompleteAt);
+			self::executeSyncFallback($taskMeta["checkClass"], $taskMeta["playerName"], $taskMeta["payload"], $taskMeta["sequence"]);
+			return;
+		}
 
-			self::$inFlight = self::$inFlight > 0 ? self::$inFlight - 1 : 0;
-			self::$lastCompleteAt = microtime(true);
-			self::$totalCompleted++;
-
-			self::$totalWorkerTime += max(0.0, self::$lastCompleteAt - $taskMeta["startedAt"]);
-
-			self::drain();
-
-			$result = json_decode($output, true);
-			if (!is_array($result) || isset($result['error'])) {
+		$result = $output !== null ? json_decode($output, true) : null;
+		if (!is_array($result) || isset($result["error"])) {
+			self::$totalThreadResultErrors++;
+			if (self::retryTask($taskMeta)) {
+				self::drain();
 				return;
 			}
 
-			$player = Server::getInstance()->getPlayerExact($playerName);
-			if ($player === null || !$player->isOnline() || !$player->isConnected()) {
-				return;
-			}
+			self::executeSyncFallback($taskMeta["checkClass"], $taskMeta["playerName"], $taskMeta["payload"], $taskMeta["sequence"]);
+			return;
+		}
 
-			$playerAPI = PlayerAPI::getAPIPlayer($player);
-			if (!$playerAPI->isAsyncSequenceCurrent($checkClass, $sequence)) {
-				return;
-			}
-			/** @var Check $check */
-			$check = new $checkClass();
-			$mergeStartedAt = microtime(true);
-			self::applyResult($check, $playerAPI, $result);
-			self::$totalMergeTime += max(0.0, microtime(true) - $mergeStartedAt);
-		});
+		$player = Server::getInstance()->getPlayerExact($taskMeta["playerName"]);
+		if ($player === null || !$player->isOnline() || !$player->isConnected()) {
+			return;
+		}
+
+		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		if (!$playerAPI->isAsyncSequenceCurrent($taskMeta["checkClass"], $taskMeta["sequence"])) {
+			return;
+		}
+
+		$checkClass = $taskMeta["checkClass"];
+		/** @var Check $check */
+		$check = new $checkClass();
+		$mergeStartedAt = microtime(true);
+		self::applyResult($check, $playerAPI, $result);
+		self::$totalMergeTime += max(0.0, microtime(true) - $mergeStartedAt);
+	}
+
+	/**
+	 * @param array{startedAt:float,queuedAt:float,capturedAt:float,checkClass:string,playerName:string,payload:array<string,mixed>,sequence:int,attempt:int} $taskMeta
+	 */
+	private static function retryTask(array $taskMeta) : bool {
+		if ($taskMeta["attempt"] >= 1) {
+			return false;
+		}
+
+		self::$queue[] = [
+			$taskMeta["checkClass"],
+			$taskMeta["playerName"],
+			$taskMeta["payload"],
+			$taskMeta["sequence"],
+			microtime(true),
+			$taskMeta["capturedAt"],
+			$taskMeta["attempt"] + 1,
+		];
+		self::$totalThreadRetries++;
+		return true;
 	}
 
 	/** @param array<string,mixed> $payload */
@@ -509,6 +564,9 @@ class CheckAsyncTask {
 		self::$totalWorkerScaleUps = 0;
 		self::$totalWorkerScaleDowns = 0;
 		self::$totalOverloadAlerts = 0;
+		self::$totalThreadErrors = 0;
+		self::$totalThreadResultErrors = 0;
+		self::$totalThreadRetries = 0;
 		self::$lastDispatchAt = 0.0;
 		self::$lastCompleteAt = 0.0;
 		self::$lastHealthCheckAt = 0.0;

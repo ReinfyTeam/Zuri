@@ -85,6 +85,7 @@ final class LangKeys {
 	public const ASYNC_STATUS_TOTALS = "commands.async.totals";
 	public const ASYNC_STATUS_AVG = "commands.async.avg";
 	public const ASYNC_STATUS_HEALTH = "commands.async.health";
+	public const ASYNC_STATUS_THREADS = "commands.async.threads";
 	public const ASYNC_STATUS_FALLBACK = "commands.async.fallback";
 	public const ASYNC_STATUS_LATENCY = "commands.async.latency";
 	public const ASYNC_STATUS_PLAYERS = "commands.async.players";

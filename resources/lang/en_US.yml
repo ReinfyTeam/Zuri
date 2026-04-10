@@ -183,6 +183,7 @@ commands:
     profile: "§7Profiler: §fmetrics={metrics}§7, §ftotal=§f{totalMs}ms§7, §fpacketAvg=§f{packetAvgMs}ms"
     totals: "§7Total dispatched: §f{dispatched}§7, §fcompleted: §f{completed}§7, §fdropped: §f{dropped}"
     health: "§7Health: §fstuck §frecovered={stuck}§7, §frestarts={restarts}§7, §flate completions=§f{late}, §ftimeout=§f{timeout}s"
+    threads: "§7Thread outcomes: §ferrors={errors}§7, §fresultErrors={resultErrors}§7, §fretries={retries}"
     fallback: "§7Sync fallback: §factive={active}§7, §fused={count}§7, §ferrors={errors}"
     latency: "§7Latency budget avg (s): §fbuild={build}§7, §fqueue=§f{queue}§7, §fworker=§f{worker}§7, §fmerge=§f{merge}"
     avg: "§7Avg worker time: §f{avg}s"
