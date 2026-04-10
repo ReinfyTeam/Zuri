@@ -104,6 +104,21 @@ zuri:
         # - High server load (many players/entities)
         # This significantly reduces false positives during degraded conditions.
         enable: true
+    scope:
+        world:
+            # Optional global world scope for checks.
+            enable: false
+            # Use "blacklist" or "whitelist".
+            mode: blacklist
+            list:
+                - "lobby"
+        gamemode:
+            # Optional global gamemode scope for checks.
+            enable: false
+            # Allowed modes when enabled: survival, adventure, creative, spectator
+            list:
+                - "survival"
+                - "adventure"
     captcha:
         # Captcha is used to pause a player until they complete a verification challenge.
         enable: true

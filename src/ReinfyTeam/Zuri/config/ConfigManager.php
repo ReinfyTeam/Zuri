@@ -36,7 +36,10 @@ use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\ZuriAC;
 use function fclose;
 use function file_exists;
+use function implode;
 use function is_array;
+use function is_bool;
+use function is_numeric;
 use function is_resource;
 use function is_string;
 use function rename;
@@ -89,10 +92,69 @@ class ConfigManager extends ConfigPaths {
 		}
 		$pluginVersion = $pluginConfigParsed["zuri"]["version"] ?? null;
 		if (is_string($pluginVersion) && $config->getNested("zuri.version") === $pluginVersion) {
+			self::runStartupDiagnostics();
 			return;
 		}
 		@rename(ZuriAC::getInstance()->getDataFolder() . "config.yml", ZuriAC::getInstance()->getDataFolder() . "old-config.yml");
 		ZuriAC::getInstance()->saveResource("config.yml");
 		$log->notice(self::getData(self::PREFIX) . TextFormat::RED . " Outdated configuration! Your config will be renamed as old-config.yml to backup your data.");
+		self::runStartupDiagnostics();
+	}
+
+	public static function runStartupDiagnostics() : void {
+		$logger = ZuriAC::getInstance()->getServer()->getLogger();
+		$requiredPaths = [
+			self::PREFIX,
+			self::VERSION,
+			self::ALERTS_ENABLE,
+			self::BAN_ENABLE,
+			self::KICK_ENABLE,
+			self::CHECK,
+			"zuri.async.max-concurrent-workers",
+			"zuri.async.max-queue-size",
+			"zuri.async.worker-timeout-seconds",
+			"zuri.async.degraded-cooldown-seconds",
+		];
+
+		$missing = [];
+		foreach ($requiredPaths as $path) {
+			if (ZuriAC::getInstance()->getConfig()->getNested($path, null) === null) {
+				$missing[] = $path;
+			}
+		}
+		if ($missing !== []) {
+			$logger->warning("[Zuri] Startup diagnostics: missing config keys: " . implode(", ", $missing));
+		}
+
+		$maxWorkers = self::getData("zuri.async.max-concurrent-workers", 4);
+		if (!is_numeric($maxWorkers) || (int) $maxWorkers < 1 || (int) $maxWorkers > 64) {
+			$logger->warning("[Zuri] Startup diagnostics: zuri.async.max-concurrent-workers should be between 1 and 64.");
+		}
+
+		$maxQueue = self::getData("zuri.async.max-queue-size", 2048);
+		if (!is_numeric($maxQueue) || (int) $maxQueue < 32) {
+			$logger->warning("[Zuri] Startup diagnostics: zuri.async.max-queue-size should be >= 32.");
+		}
+
+		$workerTimeout = self::getData("zuri.async.worker-timeout-seconds", 3.0);
+		if (!is_numeric($workerTimeout) || (float) $workerTimeout < 0.1 || (float) $workerTimeout > 30.0) {
+			$logger->warning("[Zuri] Startup diagnostics: zuri.async.worker-timeout-seconds should be between 0.1 and 30.0.");
+		}
+
+		$degradedCooldown = self::getData("zuri.async.degraded-cooldown-seconds", 6.0);
+		if (!is_numeric($degradedCooldown) || (float) $degradedCooldown < 0.1 || (float) $degradedCooldown > 120.0) {
+			$logger->warning("[Zuri] Startup diagnostics: zuri.async.degraded-cooldown-seconds should be between 0.1 and 120.0.");
+		}
+
+		$banEnable = self::getData(self::BAN_ENABLE, true);
+		$kickEnable = self::getData(self::KICK_ENABLE, true);
+		if (!is_bool($banEnable) || !is_bool($kickEnable)) {
+			$logger->warning("[Zuri] Startup diagnostics: ban/kick enable flags should be boolean.");
+		}
+
+		$confidenceThreshold = self::getData("zuri.confidence.threshold", 0.5);
+		if (!is_numeric($confidenceThreshold) || (float) $confidenceThreshold < 0.0 || (float) $confidenceThreshold > 1.0) {
+			$logger->warning("[Zuri] Startup diagnostics: zuri.confidence.threshold should be between 0.0 and 1.0.");
+		}
 	}
 }

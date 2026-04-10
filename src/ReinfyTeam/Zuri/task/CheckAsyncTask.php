@@ -46,11 +46,11 @@ use function is_numeric;
 use function is_string;
 use function json_decode;
 use function max;
-use function method_exists;
 use function memory_get_peak_usage;
 use function memory_get_usage;
-use function min;
+use function method_exists;
 use function microtime;
+use function min;
 use function rtrim;
 use function strtoupper;
 use function substr;
@@ -154,7 +154,7 @@ class CheckAsyncTask {
 
 	public static function configure(int $maxConcurrentWorkers, int $maxQueueSize, float $workerTimeoutSeconds = 3.0, float $degradedCooldownSeconds = 6.0) : void {
 		self::$maxConcurrentWorkers = $maxConcurrentWorkers > 0 ? $maxConcurrentWorkers : 1;
-		self::$minConcurrentWorkers = max(1, (int)($maxConcurrentWorkers / 2));
+		self::$minConcurrentWorkers = max(1, (int) ($maxConcurrentWorkers / 2));
 		self::$maxQueueSize = $maxQueueSize > 0 ? $maxQueueSize : 1;
 		self::$workerTimeoutSeconds = $workerTimeoutSeconds > 0.1 ? $workerTimeoutSeconds : 0.1;
 		self::$degradedCooldownSeconds = $degradedCooldownSeconds > 0.1 ? $degradedCooldownSeconds : 0.1;
@@ -334,7 +334,7 @@ class CheckAsyncTask {
 		if ($queueUtilization > 0.75 && self::$maxConcurrentWorkers < 16) {
 			$newMax = min(16, self::$maxConcurrentWorkers + 2);
 			self::$maxConcurrentWorkers = $newMax;
-			self::$minConcurrentWorkers = max(1, (int)($newMax / 2));
+			self::$minConcurrentWorkers = max(1, (int) ($newMax / 2));
 			self::$totalWorkerScaleUps++;
 			self::drain();
 		} elseif ($queueUtilization < 0.3 && $workerUtilization < 0.5 && self::$maxConcurrentWorkers > self::$minConcurrentWorkers) {

@@ -40,10 +40,12 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 use ReinfyTeam\Zuri\ZuriAC;
+use function count;
 use function hexdec;
 use function is_array;
 use function is_bool;
 use function is_string;
+use function microtime;
 use function str_replace;
 
 class Discord extends ConfigManager {
@@ -54,6 +56,8 @@ class Discord extends ConfigManager {
 	public const LAGGING = 4;
 
 	public static ?Config $config = null;
+	/** @var array<string,float> */
+	private static array $sendThrottle = [];
 
 	private static function nestedString(Config $config, string $path, string $default = "") : string {
 		$value = $config->getNested($path, $default);
@@ -90,6 +94,10 @@ class Discord extends ConfigManager {
 		}
 
 		if (self::getData(self::DISCORD_ENABLE) === false) {
+			return;
+		}
+		$throttleKey = $sendType . ":" . $playerAPI->getPlayer()->getName();
+		if (!self::canSendNow($throttleKey, 0.75)) {
 			return;
 		}
 
@@ -180,6 +188,26 @@ class Discord extends ConfigManager {
 
 			$webhook->send($message);
 		}
+	}
+
+	private static function canSendNow(string $key, float $cooldownSeconds) : bool {
+		$now = microtime(true);
+		$nextAt = self::$sendThrottle[$key] ?? 0.0;
+		if ($nextAt > $now) {
+			return false;
+		}
+		self::$sendThrottle[$key] = $now + $cooldownSeconds;
+		if (count(self::$sendThrottle) > 4096) {
+			foreach (self::$sendThrottle as $throttleKey => $expiresAt) {
+				if ($expiresAt <= $now) {
+					unset(self::$sendThrottle[$throttleKey]);
+				}
+			}
+			if (count(self::$sendThrottle) > 4096) {
+				self::$sendThrottle = [];
+			}
+		}
+		return true;
 	}
 
 	public static function getWebhookConfig() : Config {

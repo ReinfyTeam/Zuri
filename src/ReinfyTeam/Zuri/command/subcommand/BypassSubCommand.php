@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
+use ReinfyTeam\Zuri\utils\AuditLogger;
 
 class BypassSubCommand extends BaseSubCommand {
 	public function __construct(PluginBase $plugin) {
@@ -57,6 +58,7 @@ class BypassSubCommand extends BaseSubCommand {
 		$current = ConfigManager::getData(ConfigPaths::PERMISSION_BYPASS_ENABLE) === true;
 		ConfigManager::setData(ConfigPaths::PERMISSION_BYPASS_ENABLE, !$current);
 		$status = !$current ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable";
+		AuditLogger::command($sender, "zuri bypass", ["toggledTo" => !$current ? "enabled" : "disabled"]);
 		$sender->sendMessage(Lang::get(LangKeys::CMD_BYPASS_STATUS, ["status" => $status]));
 	}
 }

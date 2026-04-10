@@ -37,6 +37,7 @@ use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
+use ReinfyTeam\Zuri\utils\AuditLogger;
 use ReinfyTeam\Zuri\utils\forms\FormSender;
 
 class UiSubCommand extends BaseSubCommand {
@@ -53,6 +54,7 @@ class UiSubCommand extends BaseSubCommand {
 			$sender->sendMessage(Lang::get(LangKeys::CMD_UI_IN_GAME_ONLY));
 			return;
 		}
+		AuditLogger::command($sender, "zuri ui");
 		FormSender::MainUI($sender);
 	}
 }

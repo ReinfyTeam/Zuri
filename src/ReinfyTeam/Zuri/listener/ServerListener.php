@@ -50,6 +50,7 @@ use ReinfyTeam\Zuri\events\player\PlayerTeleportByCommandEvent;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\Discord;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use ReinfyTeam\Zuri\utils\ExceptionHandler;
 use function count;
 use function explode;
 use function ltrim;
@@ -67,97 +68,113 @@ class ServerListener implements Listener {
 	 * @See PlayerTeleportByCommandEvent::class for more details.
 	 */
 	public function onCommandEvent(CommandEvent $event) : void {
-		$rawCommand = trim($event->getCommand());
-		if ($rawCommand === "") {
-			return;
-		}
-
-		$commandArguments = explode(" ", $rawCommand);
-		$commandName = strtolower(ltrim($commandArguments[0] ?? "", "/"));
-		$commandSender = $event->getSender();
-		if (count($commandArguments) !== 0 && ($commandName === "teleport" || $commandName === "tp")) {
-			if (isset($commandArguments[1]) && str_contains($commandArguments[1], "~") && $commandSender instanceof Player) {
-				(new PlayerTeleportByCommandEvent($commandSender))->call();
+		ExceptionHandler::wrapVoid(function() use ($event) : void {
+			$rawCommand = trim($event->getCommand());
+			if ($rawCommand === "") {
 				return;
-			} // in-game
+			}
 
-			if (isset($commandArguments[1]) && ($player = Server::getInstance()->getPlayerByPrefix($commandArguments[1])) !== null) {
-				(new PlayerTeleportByCommandEvent($player))->call();
-			} // console
-		}
+			$commandArguments = explode(" ", $rawCommand);
+			$commandName = strtolower(ltrim($commandArguments[0] ?? "", "/"));
+			$commandSender = $event->getSender();
+			if (count($commandArguments) !== 0 && ($commandName === "teleport" || $commandName === "tp")) {
+				if (isset($commandArguments[1]) && str_contains($commandArguments[1], "~") && $commandSender instanceof Player) {
+					(new PlayerTeleportByCommandEvent($commandSender))->call();
+					return;
+				} // in-game
+
+				if (isset($commandArguments[1]) && ($player = Server::getInstance()->getPlayerByPrefix($commandArguments[1])) !== null) {
+					(new PlayerTeleportByCommandEvent($player))->call();
+				} // console
+			}
+		}, "ServerListener::onCommandEvent");
 	}
 
 	public function onPlayerJoin(PlayerJoinEvent $event) : void {
-		$player = $event->getPlayer();
-		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		Discord::Send($playerAPI, Discord::JOIN);
+		ExceptionHandler::wrapVoid(function() use ($event) : void {
+			$player = $event->getPlayer();
+			$playerAPI = PlayerAPI::getAPIPlayer($player);
+			Discord::Send($playerAPI, Discord::JOIN);
+		}, "ServerListener::onPlayerJoin");
 	}
 
 	/**
 	 * @throws DiscordWebhookException
 	 */
 	public function onPlayerQuit(PlayerQuitEvent $event) : void {
-		$player = $event->getPlayer();
-		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		Discord::Send($playerAPI, Discord::LEAVE);
-		$ip = $player->getNetworkSession()->getIp();
-		if (isset($this->ip[$ip])) {
-			$this->ip[$ip] -= 1;
-		}
+		ExceptionHandler::wrapVoid(function() use ($event) : void {
+			$player = $event->getPlayer();
+			$playerAPI = PlayerAPI::getAPIPlayer($player);
+			Discord::Send($playerAPI, Discord::LEAVE);
+			$ip = $player->getNetworkSession()->getIp();
+			if (isset($this->ip[$ip])) {
+				$this->ip[$ip] -= 1;
+			}
+		}, "ServerListener::onPlayerQuit");
 	}
 
 	public function onPlayerChat(PlayerChatEvent $event) : void {
-		$player = $event->getPlayer();
-		$message = $event->getMessage();
-		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		ExceptionHandler::wrapVoid(function() use ($event) : void {
+			$player = $event->getPlayer();
+			$message = $event->getMessage();
+			$playerAPI = PlayerAPI::getAPIPlayer($player);
 
-		if ($playerAPI->isCaptcha()) {
-			if ($message === $playerAPI->getCaptchaCode()) {
-				$playerAPI->setCaptcha(false);
-				$playerAPI->setCaptchaCode("nocode");
-				$playerAPI->getPlayer()->sendMessage(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::GREEN . " Successfully completed the captcha!");
+			if ($playerAPI->isCaptcha()) {
+				if ($message === $playerAPI->getCaptchaCode()) {
+					$playerAPI->setCaptcha(false);
+					$playerAPI->setCaptchaCode("nocode");
+					$playerAPI->getPlayer()->sendMessage(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::GREEN . " Successfully completed the captcha!");
+				}
+				(new CaptchaEvent($playerAPI))->call();
+				$event->cancel();
 			}
-			(new CaptchaEvent($playerAPI))->call();
-			$event->cancel();
-		}
+		}, "ServerListener::onPlayerChat");
 	}
 
 	public function onEntityDamageByEntity(EntityDamageByEntityEvent $event) : void {
-		$damager = $event->getDamager();
-		if (!$damager instanceof Player) {
-			return;
-		}
-		$playerAPI = PlayerAPI::getAPIPlayer($damager);
-		if ($playerAPI->isCaptcha()) {
-			(new CaptchaEvent($playerAPI))->call();
-			$event->cancel();
-		}
+		ExceptionHandler::wrapVoid(function() use ($event) : void {
+			$damager = $event->getDamager();
+			if (!$damager instanceof Player) {
+				return;
+			}
+			$playerAPI = PlayerAPI::getAPIPlayer($damager);
+			if ($playerAPI->isCaptcha()) {
+				(new CaptchaEvent($playerAPI))->call();
+				$event->cancel();
+			}
+		}, "ServerListener::onEntityDamageByEntity");
 	}
 
 	public function onPlayerInteract(PlayerInteractEvent $event) : void {
-		$player = $event->getPlayer();
-		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if ($playerAPI->isCaptcha()) {
-			(new CaptchaEvent($playerAPI))->call();
-			$event->cancel();
-		}
+		ExceptionHandler::wrapVoid(function() use ($event) : void {
+			$player = $event->getPlayer();
+			$playerAPI = PlayerAPI::getAPIPlayer($player);
+			if ($playerAPI->isCaptcha()) {
+				(new CaptchaEvent($playerAPI))->call();
+				$event->cancel();
+			}
+		}, "ServerListener::onPlayerInteract");
 	}
 
 	public function onPlayerMove(PlayerMoveEvent $event) : void {
-		$player = $event->getPlayer();
-		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if ($playerAPI->isCaptcha()) {
-			(new CaptchaEvent($playerAPI))->call();
-			$event->cancel();
-		}
+		ExceptionHandler::wrapVoid(function() use ($event) : void {
+			$player = $event->getPlayer();
+			$playerAPI = PlayerAPI::getAPIPlayer($player);
+			if ($playerAPI->isCaptcha()) {
+				(new CaptchaEvent($playerAPI))->call();
+				$event->cancel();
+			}
+		}, "ServerListener::onPlayerMove");
 	}
 
 	public function onBlockBreak(BlockBreakEvent $event) : void {
-		$player = $event->getPlayer();
-		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if ($playerAPI->isCaptcha()) {
-			(new CaptchaEvent($playerAPI))->call();
-			$event->cancel();
-		}
+		ExceptionHandler::wrapVoid(function() use ($event) : void {
+			$player = $event->getPlayer();
+			$playerAPI = PlayerAPI::getAPIPlayer($player);
+			if ($playerAPI->isCaptcha()) {
+				(new CaptchaEvent($playerAPI))->call();
+				$event->cancel();
+			}
+		}, "ServerListener::onBlockBreak");
 	}
 }

@@ -40,6 +40,8 @@ use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\task\CheckAsyncTask;
+use ReinfyTeam\Zuri\utils\AuditLogger;
+use ReinfyTeam\Zuri\utils\HotPathProfiler;
 use function count;
 use function implode;
 use function max;
@@ -55,6 +57,7 @@ class StatusSubCommand extends BaseSubCommand {
 
 	/** @param array<string,mixed> $args */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
+		AuditLogger::command($sender, "zuri status");
 		$metrics = CheckAsyncTask::getMetrics();
 		$server = Server::getInstance();
 		$onlinePlayers = count($server->getOnlinePlayers());
@@ -68,6 +71,9 @@ class StatusSubCommand extends BaseSubCommand {
 		$memoryUtil = round((float) ($metrics["memoryUtilization"] ?? 0.0) * 100.0, 1);
 		$cpuLoad = round((float) ($metrics["cpuLoad"] ?? 0.0), 2);
 		$asyncTps = round((float) ($metrics["tps"] ?? 20.0), 2);
+		$profileMetricCount = HotPathProfiler::getMetricCount();
+		$profileTotalMs = round(HotPathProfiler::getTotalMillis(), 3);
+		$packetAvgMs = round(HotPathProfiler::getAverageMillis("packet.handler.receive"), 3);
 
 		$lines = [
 			Lang::get(LangKeys::ASYNC_STATUS_HEADER),
@@ -95,6 +101,11 @@ class StatusSubCommand extends BaseSubCommand {
 			Lang::get(LangKeys::ASYNC_STATUS_OVERLOAD, [
 				"active" => ((bool) ($metrics["overloadActive"] ?? false)) ? "yes" : "no",
 				"alerts" => (string) ($metrics["totalOverloadAlerts"] ?? 0),
+			]),
+			Lang::get(LangKeys::ASYNC_STATUS_PROFILE, [
+				"metrics" => (string) $profileMetricCount,
+				"totalMs" => (string) $profileTotalMs,
+				"packetAvgMs" => (string) $packetAvgMs,
 			]),
 			Lang::get(LangKeys::ASYNC_STATUS_TOTALS, [
 				"dispatched" => (string) $metrics["totalDispatched"],

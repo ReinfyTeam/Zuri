@@ -102,6 +102,7 @@ final class LangKeys {
 	public const ASYNC_STATUS_UTILIZATION = "commands.async.utilization";
 	public const ASYNC_STATUS_RESOURCES = "commands.async.resources";
 	public const ASYNC_STATUS_OVERLOAD = "commands.async.overload";
+	public const ASYNC_STATUS_PROFILE = "commands.async.profile";
 
 	public const STARTUP_SOURCE_WARNING = "startup.source-warning";
 	public const STARTUP_PROXY_STOPPING = "startup.proxy-stopping";

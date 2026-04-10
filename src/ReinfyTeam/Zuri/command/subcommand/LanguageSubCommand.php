@@ -37,6 +37,7 @@ use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
+use ReinfyTeam\Zuri\utils\AuditLogger;
 use function implode;
 use function is_string;
 use function strtolower;
@@ -66,11 +67,13 @@ class LanguageSubCommand extends BaseSubCommand {
 		}
 
 		if (!Lang::setLocale($requested, true)) {
+			AuditLogger::command($sender, "zuri language", ["requested" => $requested, "result" => "unsupported"]);
 			$sender->sendMessage(Lang::get(LangKeys::CMD_LANGUAGE_UNSUPPORTED, ["locale" => $requested]));
 			$sender->sendMessage(Lang::get(LangKeys::CMD_LANGUAGE_AVAILABLE, ["locales" => implode(", ", $available)]));
 			return;
 		}
 
+		AuditLogger::command($sender, "zuri language", ["requested" => $requested, "result" => "switched"]);
 		$sender->sendMessage(Lang::get(LangKeys::CMD_LANGUAGE_SWITCHED, ["locale" => Lang::getActiveLocale()]));
 	}
 }

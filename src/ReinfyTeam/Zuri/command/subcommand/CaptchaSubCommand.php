@@ -42,6 +42,7 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
+use ReinfyTeam\Zuri\utils\AuditLogger;
 use function is_int;
 use function is_string;
 use function strtolower;
@@ -65,10 +66,11 @@ class CaptchaSubCommand extends BaseSubCommand {
 		$optionRaw = $args["option"] ?? "";
 		$option = is_string($optionRaw) ? strtolower($optionRaw) : "";
 
-		$toggleConfig = static function(string $path, string $msg) use ($sender) : void {
+		$toggleConfig = static function(string $path, string $msg) use ($sender, $option) : void {
 			$current = ConfigManager::getData($path) === true;
 			ConfigManager::setData($path, !$current);
 			$status = !$current ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable";
+			AuditLogger::command($sender, "zuri captcha", ["option" => $option, "target" => $msg, "toggledTo" => !$current ? "enabled" : "disabled"]);
 			$sender->sendMessage(Lang::get(LangKeys::CMD_GENERIC_TOGGLE_STATUS, ["target" => $msg, "status" => $status]));
 		};
 
@@ -103,6 +105,7 @@ class CaptchaSubCommand extends BaseSubCommand {
 					return;
 				}
 				ConfigManager::setData(ConfigPaths::CAPTCHA_CODE_LENGTH, $length);
+				AuditLogger::command($sender, "zuri captcha", ["option" => "length", "length" => $length]);
 				$sender->sendMessage(Lang::get(LangKeys::CMD_CAPTCHA_LENGTH_UPDATED, ["length" => $length]));
 				return;
 		}

@@ -64,24 +64,25 @@ use pocketmine\event\server\CommandEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\inventory\ArmorInventory;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\ActorEventPacket;
+use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
+use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
-use pocketmine\network\mcpe\protocol\TextPacket;
-use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
-use pocketmine\network\mcpe\protocol\ActorEventPacket;
-use pocketmine\network\mcpe\protocol\AnimatePacket;
-use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
-use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\ServerboundPacket;
+use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
+use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\ExceptionHandler;
+use ReinfyTeam\Zuri\utils\HotPathProfiler;
 use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
@@ -93,10 +94,13 @@ class PlayerListener implements Listener {
 	private array $blockInteracted = [];
 	/** @var array<string,list<float>> */
 	private array $clicksData = [];
+	/** @var array<string,array{windowStart:float,count:int,blockedUntil:float}> */
+	private array $packetRateState = [];
 
 	private const DELTAL_TIME_CLICK = 1;
 
 	public function onDataPacketReceive(DataPacketReceiveEvent $event) : void {
+		$profileStartedAt = microtime(true);
 		$packet = $event->getPacket();
 		$player = $event->getOrigin()->getPlayer();
 
@@ -104,6 +108,9 @@ class PlayerListener implements Listener {
 			return;
 		}
 		$playerAPI = PlayerAPI::getAPIPlayer($player);
+		if ($this->isFloodingPackets($player)) {
+			return;
+		}
 
 		$this->markRecentlyCancelled($event, $playerAPI);
 
@@ -123,6 +130,7 @@ class PlayerListener implements Listener {
 				$playerAPI->setCPS($this->getCPS($playerAPI));
 			}
 		}
+		HotPathProfiler::record("packet.handler.receive", microtime(true) - $profileStartedAt);
 	}
 
 	public function onPlayerMove(PlayerMoveEvent $event) : void {
@@ -354,6 +362,7 @@ class PlayerListener implements Listener {
 	}
 
 	public function onPlayerQuit(PlayerQuitEvent $event) : void {
+		unset($this->packetRateState[$this->getPlayerKey($event->getPlayer())]);
 		PlayerAPI::removeAPIPlayer($event->getPlayer());
 	}
 
@@ -548,7 +557,11 @@ class PlayerListener implements Listener {
 
 		foreach (ZuriAC::EventChecks() as $class) {
 			ExceptionHandler::wrapVoid(
-				fn() => $class->checkEvent($event, $player),
+				function() use ($class, $event, $player) : void {
+					$startedAt = microtime(true);
+					$class->checkEvent($event, $player);
+					HotPathProfiler::record("check.event." . $class->getName() . "." . $class->getSubType(), microtime(true) - $startedAt);
+				},
 				"checkEvent:" . $class->getName() . ":" . $class->getSubType()
 			);
 		}
@@ -568,7 +581,11 @@ class PlayerListener implements Listener {
 				continue;
 			}
 			ExceptionHandler::wrapVoid(
-				fn() => $class->check($packet, $player),
+				function() use ($class, $packet, $player) : void {
+					$startedAt = microtime(true);
+					$class->check($packet, $player);
+					HotPathProfiler::record("check.packet." . $class->getName() . "." . $class->getSubType(), microtime(true) - $startedAt);
+				},
 				"check:" . $class->getName() . ":" . $class->getSubType()
 			);
 		}
@@ -577,7 +594,11 @@ class PlayerListener implements Listener {
 	private function checkJustEvent(Event $event) : void {
 		foreach (ZuriAC::JustEventChecks() as $class) {
 			ExceptionHandler::wrapVoid(
-				fn() => $class->checkJustEvent($event),
+				function() use ($class, $event) : void {
+					$startedAt = microtime(true);
+					$class->checkJustEvent($event);
+					HotPathProfiler::record("check.justevent." . $class->getName() . "." . $class->getSubType(), microtime(true) - $startedAt);
+				},
 				"checkJustEvent:" . $class->getName() . ":" . $class->getSubType()
 			);
 		}
@@ -627,5 +648,37 @@ class PlayerListener implements Listener {
 		if ($event instanceof Cancellable && $event->isCancelled()) {
 			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
+	}
+
+	private function isFloodingPackets(Player $player) : bool {
+		$key = $this->getPlayerKey($player);
+		$now = microtime(true);
+		$state = $this->packetRateState[$key] ?? ["windowStart" => $now, "count" => 0, "blockedUntil" => 0.0];
+
+		if ($state["blockedUntil"] > $now) {
+			return true;
+		}
+
+		if (($now - $state["windowStart"]) >= 1.0) {
+			$state["windowStart"] = $now;
+			$state["count"] = 0;
+		}
+
+		$state["count"]++;
+		$maxPacketsPerSecond = 1200;
+		if ($state["count"] > $maxPacketsPerSecond) {
+			$state["blockedUntil"] = $now + 1.5;
+			$this->packetRateState[$key] = $state;
+			ExceptionHandler::wrapVoid(
+				static function() use ($key, $maxPacketsPerSecond) : void {
+					ZuriAC::getInstance()->getLogger()->warning("[Zuri] Packet flood guard activated for {$key} (>" . $maxPacketsPerSecond . " packets/s)");
+				},
+				"PlayerListener::packetFloodGuard"
+			);
+			return true;
+		}
+
+		$this->packetRateState[$key] = $state;
+		return false;
 	}
 }

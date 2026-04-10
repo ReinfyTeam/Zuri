@@ -39,6 +39,7 @@ use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\AuditLogger;
 
 class DebugSubCommand extends BaseSubCommand {
 	public function __construct(PluginBase $plugin) {
@@ -59,6 +60,7 @@ class DebugSubCommand extends BaseSubCommand {
 		$newDebugStatus = !$playerAPI->isDebug();
 		$playerAPI->setDebug($newDebugStatus);
 		$status = $newDebugStatus ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable";
+		AuditLogger::command($sender, "zuri debug", ["toggledTo" => $newDebugStatus ? "enabled" : "disabled"]);
 		$sender->sendMessage(Lang::get(LangKeys::CMD_DEBUG_STATUS, ["status" => $status]));
 	}
 }

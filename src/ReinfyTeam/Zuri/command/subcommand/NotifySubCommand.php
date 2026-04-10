@@ -41,6 +41,7 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
+use ReinfyTeam\Zuri\utils\AuditLogger;
 use function is_string;
 use function strtolower;
 
@@ -70,6 +71,7 @@ class NotifySubCommand extends BaseSubCommand {
 		ConfigManager::setData($configPath, !$current);
 		$status = !$current ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable";
 		$msgKey = $key === "toggle" ? "Notify toggle" : "Notify admin mode";
+		AuditLogger::command($sender, "zuri notify", ["mode" => $key, "toggledTo" => !$current ? "enabled" : "disabled"]);
 		$sender->sendMessage(Lang::get(LangKeys::CMD_NOTIFY_STATUS, ["target" => $msgKey, "status" => $status]));
 	}
 }

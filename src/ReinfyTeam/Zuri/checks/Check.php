@@ -46,9 +46,13 @@ use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\task\CheckAsyncTask;
 use ReinfyTeam\Zuri\task\ServerTickTask;
+use ReinfyTeam\Zuri\utils\AuditLogger;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
+use ReinfyTeam\Zuri\utils\HotPathProfiler;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 use ReinfyTeam\Zuri\ZuriAC;
+use function count;
+use function explode;
 use function implode;
 use function in_array;
 use function is_array;
@@ -58,12 +62,19 @@ use function max;
 use function microtime;
 use function min;
 use function round;
+use function str_replace;
+use function strpos;
 use function strtolower;
+use function substr;
+use function trim;
 
 abstract class Check extends ConfigManager {
 	/** @var array<string, float> */
 	private static array $asyncThrottle = [];
 	private static float $lastAsyncThrottleCleanup = 0.0;
+	private static int $maxAsyncThrottleEntries = 4096;
+	/** @var array<string, float> */
+	private static array $messageThrottle = [];
 
 	private ?bool $enabledOverride = null;
 	private ?bool $enabledCache = null;
@@ -128,6 +139,16 @@ abstract class Check extends ConfigManager {
 				if ($expiresAt <= $now) {
 					unset(self::$asyncThrottle[$throttleKey]);
 				}
+			}
+		}
+		if (count(self::$asyncThrottle) > self::$maxAsyncThrottleEntries) {
+			foreach (self::$asyncThrottle as $throttleKey => $expiresAt) {
+				if ($expiresAt <= $now) {
+					unset(self::$asyncThrottle[$throttleKey]);
+				}
+			}
+			if (count(self::$asyncThrottle) > self::$maxAsyncThrottleEntries) {
+				self::$asyncThrottle = [];
 			}
 		}
 
@@ -251,171 +272,218 @@ abstract class Check extends ConfigManager {
 	 * @internal
 	 */
 	public function failed(PlayerAPI $playerAPI) : bool {
-		if (!$this->enable()) {
-			return false;
-		}
-
-		// FP Cooldown: Skip checks during lag, teleport, or world transfer windows
-		if ($playerAPI->isInFPCooldown()) {
-			return false;
-		}
-
-		if (ServerTickTask::getInstance()?->isLagging(microtime(true)) === true) {
-			// Set lag cooldown for all online players
-			foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $onlinePlayer) {
-				$api = PlayerAPI::getAPIPlayer($onlinePlayer);
-				$api->setLastLagSpike(microtime(true));
+		$profileStartedAt = microtime(true);
+		try {
+			if (!$this->enable()) {
+				return false;
 			}
-			(new ServerLagEvent($playerAPI))->call();
-			return false;
-		}
 
-		$player = $playerAPI->getPlayer();
+			// FP Cooldown: Skip checks during lag, teleport, or world transfer windows
+			if ($playerAPI->isInFPCooldown()) {
+				return false;
+			}
 
-		$notify = self::getData(self::ALERTS_ENABLE) === true;
-		$detectionsAllowedToSend = self::getData(self::DETECTION_ENABLE) === true;
-		$bypassPermissionRaw = self::getData(self::PERMISSION_BYPASS_PERMISSION);
-		$bypassPermission = self::toString($bypassPermissionRaw, "zuri.bypass");
-		$bypass = self::getData(self::PERMISSION_BYPASS_ENABLE) === true && $player->hasPermission($bypassPermission);
-		$maxPreViolations = $this->maxViolations();
-		$maxViolationsRaw = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".maxvl", 0);
-		$maxViolations = self::toInt($maxViolationsRaw, 0);
-		$playerAPI->addViolation($this->getName());
-		$currentViolations = $playerAPI->getViolation($this->getName());
-		$reachedMaxViolations = $maxPreViolations <= 0 || $currentViolations >= $maxPreViolations;
-		if ($reachedMaxViolations) {
-			$playerAPI->addRealViolation($this->getName());
-		}
-		$currentRealViolations = $playerAPI->getRealViolation($this->getName());
-		$reachedMaxRealViolations = $maxViolations <= 0 || $currentRealViolations >= $maxViolations;
-		$server = ZuriAC::getInstance()->getServer();
+			if (ServerTickTask::getInstance()?->isLagging(microtime(true)) === true) {
+				// Set lag cooldown for all online players
+				foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $onlinePlayer) {
+					$api = PlayerAPI::getAPIPlayer($onlinePlayer);
+					$api->setLastLagSpike(microtime(true));
+				}
+				(new ServerLagEvent($playerAPI))->call();
+				return false;
+			}
 
-		$correlationEnabled = self::getData("zuri.correlation.enable", true) !== false;
-		$correlationWindowSeconds = self::toFloat(self::getData("zuri.correlation.window-seconds", 10.0), 10.0);
-		$requiredGroupsRaw = self::toInt(self::getData("zuri.correlation.required-groups", 3), 3);
-		$requiredGroups = CrossCheckCorrelation::normalizeRequiredGroups($requiredGroupsRaw);
-		$storedGroupHits = $playerAPI->getExternalData("correlation.groupHits", []);
-		$typedGroupHits = is_array($storedGroupHits) ? $storedGroupHits : [];
-		[$correlatedGroups, $groupHits] = CrossCheckCorrelation::recordAndCount(
-			$typedGroupHits,
-			$this->getName(),
-			microtime(true),
-			$correlationWindowSeconds
-		);
-		$playerAPI->setExternalData("correlation.groupHits", $groupHits);
-
-		if (self::getData(self::WORLD_BYPASS_ENABLE) === true) {
-			$worldBypassModeRaw = self::getData(self::WORLD_BYPASS_MODE);
-			$worldBypassMode = strtolower(self::toString($worldBypassModeRaw, "blacklist"));
-			$worldBypassList = self::toStringList(self::getData(self::WORLD_BYPASS_LIST, []));
-			if ($worldBypassMode === "blacklist") {
-				if (in_array($player->getWorld()->getFolderName(), $worldBypassList, true)) {
+			$player = $playerAPI->getPlayer();
+			if (self::getData(self::CHECK_SCOPE_WORLD_ENABLE, false) === true) {
+				$worldMode = strtolower(self::toString(self::getData(self::CHECK_SCOPE_WORLD_MODE, "blacklist"), "blacklist"));
+				$worldList = self::toStringList(self::getData(self::CHECK_SCOPE_WORLD_LIST, []));
+				$worldName = $player->getWorld()->getFolderName();
+				$listed = in_array($worldName, $worldList, true);
+				if (($worldMode === "blacklist" && $listed) || ($worldMode !== "blacklist" && !$listed)) {
 					return false;
+				}
+			}
+			if (self::getData(self::CHECK_SCOPE_GAMEMODE_ENABLE, false) === true) {
+				$allowedModes = self::toStringList(self::getData(self::CHECK_SCOPE_GAMEMODE_LIST, ["survival"]));
+				$currentMode = match (true) {
+					$player->isCreative() => "creative",
+					$player->isSpectator() => "spectator",
+					$player->isSurvival() => "survival",
+					default => "adventure",
+				};
+				if (!in_array($currentMode, $allowedModes, true)) {
+					return false;
+				}
+			}
+
+			$notify = self::getData(self::ALERTS_ENABLE) === true;
+			$detectionsAllowedToSend = self::getData(self::DETECTION_ENABLE) === true;
+			$bypassPermissionRaw = self::getData(self::PERMISSION_BYPASS_PERMISSION);
+			$bypassPermission = self::toString($bypassPermissionRaw, "zuri.bypass");
+			$bypass = self::getData(self::PERMISSION_BYPASS_ENABLE) === true && $player->hasPermission($bypassPermission);
+			$maxPreViolations = $this->maxViolations();
+			$maxViolationsRaw = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".maxvl", 0);
+			$maxViolations = self::toInt($maxViolationsRaw, 0);
+			$playerAPI->addViolation($this->getName());
+			$currentViolations = $playerAPI->getViolation($this->getName());
+			$reachedMaxViolations = $maxPreViolations <= 0 || $currentViolations >= $maxPreViolations;
+			if ($reachedMaxViolations) {
+				$playerAPI->addRealViolation($this->getName());
+			}
+			$currentRealViolations = $playerAPI->getRealViolation($this->getName());
+			$reachedMaxRealViolations = $maxViolations <= 0 || $currentRealViolations >= $maxViolations;
+			$server = ZuriAC::getInstance()->getServer();
+
+			$correlationEnabled = self::getData("zuri.correlation.enable", true) !== false;
+			$correlationWindowSeconds = self::toFloat(self::getData("zuri.correlation.window-seconds", 10.0), 10.0);
+			$requiredGroupsRaw = self::toInt(self::getData("zuri.correlation.required-groups", 3), 3);
+			$requiredGroups = CrossCheckCorrelation::normalizeRequiredGroups($requiredGroupsRaw);
+			$storedGroupHits = $playerAPI->getExternalData("correlation.groupHits", []);
+			$typedGroupHits = is_array($storedGroupHits) ? $storedGroupHits : [];
+			[$correlatedGroups, $groupHits] = CrossCheckCorrelation::recordAndCount(
+				$typedGroupHits,
+				$this->getName(),
+				microtime(true),
+				$correlationWindowSeconds
+			);
+			$playerAPI->setExternalData("correlation.groupHits", $groupHits);
+
+			if (self::getData(self::WORLD_BYPASS_ENABLE) === true) {
+				$worldBypassModeRaw = self::getData(self::WORLD_BYPASS_MODE);
+				$worldBypassMode = strtolower(self::toString($worldBypassModeRaw, "blacklist"));
+				$worldBypassList = self::toStringList(self::getData(self::WORLD_BYPASS_LIST, []));
+				if ($worldBypassMode === "blacklist") {
+					if (in_array($player->getWorld()->getFolderName(), $worldBypassList, true)) {
+						return false;
+					}
+				} else {
+					if (!in_array($player->getWorld()->getFolderName(), $worldBypassList, true)) {
+						return false;
+					}
+				}
+			}
+
+
+			$checkEvent = new CheckFailedEvent($playerAPI, $this->getName(), $this->getSubType());
+			$checkEvent->call();
+			if ($checkEvent->isCancelled()) {
+				return false;
+			}
+
+			if ($reachedMaxViolations) {
+				$alertText = ReplaceText::replace($playerAPI, Lang::raw(LangKeys::ALERTS_MESSAGE), $this->getName(), $this->getSubType());
+				$alertKey = "alert:" . $player->getName() . ":" . strtolower($this->getName()) . ":" . strtolower($this->getSubType());
+				if (self::canEmitThrottled($alertKey, 0.5)) {
+					ZuriAC::getInstance()->getServer()->getLogger()->info($alertText);
+					foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
+						if ($p->hasPermission("zuri.admin")) {
+							$p->sendMessage($alertText);
+						}
+					}
 				}
 			} else {
-				if (!in_array($player->getWorld()->getFolderName(), $worldBypassList, true)) {
-					return false;
-				}
-			}
-		}
-
-
-		$checkEvent = new CheckFailedEvent($playerAPI, $this->getName(), $this->getSubType());
-		$checkEvent->call();
-		if ($checkEvent->isCancelled()) {
-			return false;
-		}
-
-		if ($reachedMaxViolations) {
-			ZuriAC::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, Lang::raw(LangKeys::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
-			foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
-				if ($p->hasPermission("zuri.admin")) {
-					$p->sendMessage(ReplaceText::replace($playerAPI, Lang::raw(LangKeys::ALERTS_MESSAGE), $this->getName(), $this->getSubType()));
-				}
-			}
-		} else {
-			if ($detectionsAllowedToSend) {
-				ZuriAC::getInstance()->getServer()->getLogger()->info(ReplaceText::replace($playerAPI, Lang::raw(LangKeys::DETECTION_MESSAGE), $this->getName(), $this->getSubType()));
-				foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
-					if ($p->hasPermission("zuri.admin")) {
-						$p->sendMessage(ReplaceText::replace($playerAPI, Lang::raw(LangKeys::DETECTION_MESSAGE), $this->getName(), $this->getSubType()));
+				if ($detectionsAllowedToSend) {
+					$detectionText = ReplaceText::replace($playerAPI, Lang::raw(LangKeys::DETECTION_MESSAGE), $this->getName(), $this->getSubType());
+					$detectionKey = "detection:" . $player->getName() . ":" . strtolower($this->getName()) . ":" . strtolower($this->getSubType());
+					if (self::canEmitThrottled($detectionKey, 0.4)) {
+						ZuriAC::getInstance()->getServer()->getLogger()->info($detectionText);
+						foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
+							if ($p->hasPermission("zuri.admin")) {
+								$p->sendMessage($detectionText);
+							}
+						}
 					}
 				}
 			}
-		}
 
-		if ($bypass) {
-			return false;
-		}
-
-		if ($playerAPI->isDebug()) {
-			return false;
-		}
-
-		if ($this->getPunishment() === "flag") {
-			$playerAPI->setFlagged(true);
-			return true;
-		}
-
-		$requiresEscalationCorrelation = $correlationEnabled
-			&& $reachedMaxRealViolations
-			&& $reachedMaxViolations
-			&& in_array($this->getPunishment(), ["ban", "kick", "captcha"], true);
-		if ($requiresEscalationCorrelation && $correlatedGroups < $requiredGroups) {
-			return false;
-		}
-
-		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "ban" && self::getData(self::BAN_ENABLE) === true) {
-			(new BanEvent($playerAPI, $this->getName(), $this->getSubType()))->call();
-			ZuriAC::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, Lang::raw(LangKeys::BAN_MESSAGE), $this->getName(), $this->getSubType()));
-			foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
-				if ($p->hasPermission("zuri.admin")) {
-					$p->sendMessage(ReplaceText::replace($playerAPI, Lang::raw(LangKeys::BAN_MESSAGE), $this->getName(), $this->getSubType()));
-				}
-			}
-			foreach (self::toStringList(self::getData(self::BAN_COMMANDS, [])) as $command) {
-				$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
+			if ($bypass) {
+				return false;
 			}
 
-			$playerAPI->resetViolation($this->getName());
-			$playerAPI->resetRealViolation($this->getName());
-			return true;
-		}
+			if ($playerAPI->isDebug()) {
+				return false;
+			}
 
-		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "kick" && self::getData(self::KICK_ENABLE) === true) {
-			(new KickEvent($playerAPI, $this->getName(), $this->getSubType()))->call();
-			ZuriAC::getInstance()->getServer()->getLogger()->notice(ReplaceText::replace($playerAPI, Lang::raw(LangKeys::KICK_MESSAGE), $this->getName(), $this->getSubType()));
-			if (self::getData(self::KICK_COMMANDS_ENABLED) === true) {
-				$playerAPI->resetViolation($this->getName());
-				$playerAPI->resetRealViolation($this->getName());
+			if ($this->getPunishment() === "flag") {
+				$playerAPI->setFlagged(true);
+				return true;
+			}
+
+			$requiresEscalationCorrelation = $correlationEnabled
+				&& $reachedMaxRealViolations
+				&& $reachedMaxViolations
+				&& in_array($this->getPunishment(), ["ban", "kick", "captcha"], true);
+			if ($requiresEscalationCorrelation && $correlatedGroups < $requiredGroups) {
+				return false;
+			}
+
+			if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "ban" && self::getData(self::BAN_ENABLE) === true) {
+				(new BanEvent($playerAPI, $this->getName(), $this->getSubType()))->call();
+				AuditLogger::punishment("ban", $player->getName(), $this->getName(), $this->getSubType(), [
+					"violations" => $currentViolations,
+					"realViolations" => $currentRealViolations,
+				]);
+				$banText = ReplaceText::replace($playerAPI, Lang::raw(LangKeys::BAN_MESSAGE), $this->getName(), $this->getSubType());
+				ZuriAC::getInstance()->getServer()->getLogger()->notice($banText);
 				foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
 					if ($p->hasPermission("zuri.admin")) {
-						$p->sendMessage(ReplaceText::replace($playerAPI, Lang::raw(LangKeys::KICK_MESSAGE), $this->getName(), $this->getSubType()));
+						$p->sendMessage($banText);
 					}
 				}
-				foreach (self::toStringList(self::getData(self::KICK_COMMANDS, [])) as $command) {
+				foreach (self::toStringList(self::getData(self::BAN_COMMANDS, [])) as $command) {
 					$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
 				}
-			} else {
-				foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
-					if ($p->hasPermission("zuri.admin")) {
-						$p->sendMessage(ReplaceText::replace($playerAPI, Lang::raw(LangKeys::KICK_MESSAGE), $this->getName(), $this->getSubType()));
-					}
-				}
+
 				$playerAPI->resetViolation($this->getName());
 				$playerAPI->resetRealViolation($this->getName());
-				$player->kick(Lang::get(LangKeys::KICK_DISCONNECT_REASON), null, ReplaceText::replace($playerAPI, Lang::raw(LangKeys::KICK_UI_MESSAGE), $this->getName(), $this->getSubType()));
+				return true;
 			}
-			return true;
+
+			if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "kick" && self::getData(self::KICK_ENABLE) === true) {
+				(new KickEvent($playerAPI, $this->getName(), $this->getSubType()))->call();
+				AuditLogger::punishment("kick", $player->getName(), $this->getName(), $this->getSubType(), [
+					"violations" => $currentViolations,
+					"realViolations" => $currentRealViolations,
+				]);
+				$kickText = ReplaceText::replace($playerAPI, Lang::raw(LangKeys::KICK_MESSAGE), $this->getName(), $this->getSubType());
+				ZuriAC::getInstance()->getServer()->getLogger()->notice($kickText);
+				if (self::getData(self::KICK_COMMANDS_ENABLED) === true) {
+					$playerAPI->resetViolation($this->getName());
+					$playerAPI->resetRealViolation($this->getName());
+					foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
+						if ($p->hasPermission("zuri.admin")) {
+							$p->sendMessage($kickText);
+						}
+					}
+					foreach (self::toStringList(self::getData(self::KICK_COMMANDS, [])) as $command) {
+						$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), ReplaceText::replace($playerAPI, $command, $this->getName(), $this->getSubType()));
+					}
+				} else {
+					foreach (ZuriAC::getInstance()->getServer()->getOnlinePlayers() as $p) {
+						if ($p->hasPermission("zuri.admin")) {
+							$p->sendMessage($kickText);
+						}
+					}
+					$playerAPI->resetViolation($this->getName());
+					$playerAPI->resetRealViolation($this->getName());
+					$player->kick(Lang::get(LangKeys::KICK_DISCONNECT_REASON), null, ReplaceText::replace($playerAPI, Lang::raw(LangKeys::KICK_UI_MESSAGE), $this->getName(), $this->getSubType()));
+				}
+				return true;
+			}
+
+			if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "captcha" && self::getData(self::CAPTCHA_ENABLE) === true) {
+				AuditLogger::punishment("captcha", $player->getName(), $this->getName(), $this->getSubType(), [
+					"violations" => $currentViolations,
+					"realViolations" => $currentRealViolations,
+				]);
+				$playerAPI->setCaptcha(true);
+				return true;
+			}
+
+			return false;
+		} finally {
+			HotPathProfiler::record("violation.processing." . $this->getName() . "." . $this->getSubType(), microtime(true) - $profileStartedAt);
 		}
-
-		if ($reachedMaxRealViolations && $reachedMaxViolations && $this->getPunishment() === "captcha" && self::getData(self::CAPTCHA_ENABLE) === true) {
-			$playerAPI->setCaptcha(true);
-			return true;
-		}
-
-
-		return false;
 	}
 
 	/**
@@ -458,7 +526,11 @@ abstract class Check extends ConfigManager {
 
 		// Debug output if enabled
 		if ($playerAPI->isDebug()) {
-			$this->debug($playerAPI, "Confidence: " . $result->getConfidencePercent() . "% (threshold: " . round($threshold * 100) . "%) " . $debugInfo);
+			$this->debug($playerAPI, Lang::get("messages.debug.confidence", [
+				"confidence" => (string) $result->getConfidencePercent(),
+				"threshold" => (string) round($threshold * 100),
+				"details" => $debugInfo,
+			]));
 			return false;
 		}
 
@@ -556,10 +628,20 @@ abstract class Check extends ConfigManager {
 
 		if (self::getData(self::DEBUG_ENABLE)) {
 			if ($playerAPI->isDebug()) {
-				$player->sendMessage(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
+				$localizedText = $this->localizeDebugText($text);
+				$player->sendMessage(Lang::get("messages.debug.output.self", [
+					"check" => $this->getName(),
+					"subtype" => $this->getSubType(),
+					"details" => $localizedText,
+				], "{prefix} §7[DEBUG] §c{check}§7 (§e{subtype}§7) §b{details}"));
 
 				if (self::getData(self::DEBUG_LOG_SERVER)) {
-					ZuriAC::getInstance()->getServer()->getLogger()->notice(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::YELLOW . $playerAPI->getPlayer()->getName() . ": " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
+					ZuriAC::getInstance()->getServer()->getLogger()->notice(Lang::get("messages.debug.output.server", [
+						"player" => $playerAPI->getPlayer()->getName(),
+						"check" => $this->getName(),
+						"subtype" => $this->getSubType(),
+						"details" => $localizedText,
+					], "{prefix} §7[DEBUG] §e{player}: §c{check}§7 (§e{subtype}§7) §b{details}"));
 				}
 
 				if (self::getData(self::DEBUG_LOG_ADMIN)) {
@@ -568,12 +650,51 @@ abstract class Check extends ConfigManager {
 							continue;
 						} // Skip same player. Prevent spam in the chat history.
 						if ($p->hasPermission("zuri.admin")) {
-							$p->sendMessage(self::getData(self::PREFIX) . " " . TextFormat::GRAY . "[DEBUG] " . TextFormat::YELLOW . $playerAPI->getPlayer()->getName() . ": " . TextFormat::RED . $this->getName() . TextFormat::GRAY . " (" . TextFormat::YELLOW . $this->getSubType() . TextFormat::GRAY . ") " . TextFormat::AQUA . $text);
+							$p->sendMessage(Lang::get("messages.debug.output.admin", [
+								"player" => $playerAPI->getPlayer()->getName(),
+								"check" => $this->getName(),
+								"subtype" => $this->getSubType(),
+								"details" => $localizedText,
+							], "{prefix} §7[DEBUG] §e{player}: §c{check}§7 (§e{subtype}§7) §b{details}"));
 						}
 					}
 				}
 			}
 		}
+	}
+
+	private function localizeDebugText(string $text) : string {
+		$trimmed = trim($text);
+		if ($trimmed === "") {
+			return $text;
+		}
+		if (strpos($trimmed, "=") === false) {
+			return Lang::get("messages.debug.free-text", ["details" => $trimmed], "{details}");
+		}
+
+		$segments = explode(",", $trimmed);
+		$pairs = [];
+		foreach ($segments as $segment) {
+			$segment = trim($segment);
+			if ($segment === "") {
+				continue;
+			}
+			$separatorAt = strpos($segment, "=");
+			if ($separatorAt === false) {
+				$pairs[] = $segment;
+				continue;
+			}
+			$key = trim(substr($segment, 0, $separatorAt));
+			$value = trim(substr($segment, $separatorAt + 1));
+			$labelKey = "messages.debug.labels." . strtolower(str_replace([" ", "-", "."], "_", $key));
+			$translatedLabel = Lang::raw($labelKey, $key);
+			$pairs[] = Lang::get("messages.debug.pair", [
+				"key" => $translatedLabel,
+				"value" => $value,
+			], "{key}={value}");
+		}
+
+		return implode(Lang::get("messages.debug.separator", [], ", "), $pairs);
 	}
 
 	private static function toInt(mixed $value, int $default) : int {
@@ -586,6 +707,28 @@ abstract class Check extends ConfigManager {
 
 	private static function toString(mixed $value, string $default) : string {
 		return is_string($value) ? $value : $default;
+	}
+
+	private static function canEmitThrottled(string $key, float $minIntervalSeconds) : bool {
+		$now = microtime(true);
+		$nextAllowedAt = self::$messageThrottle[$key] ?? 0.0;
+		if ($nextAllowedAt > $now) {
+			return false;
+		}
+
+		self::$messageThrottle[$key] = $now + max(0.05, $minIntervalSeconds);
+		if (count(self::$messageThrottle) > 8192) {
+			foreach (self::$messageThrottle as $throttleKey => $expiresAt) {
+				if ($expiresAt <= $now) {
+					unset(self::$messageThrottle[$throttleKey]);
+				}
+			}
+			if (count(self::$messageThrottle) > 8192) {
+				self::$messageThrottle = [];
+			}
+		}
+
+		return true;
 	}
 
 	/** @return list<string> */

@@ -84,6 +84,11 @@ abstract class ConfigPaths {
 	public const CHAT_COMMAND_SPAM_COMMANDS = "zuri.chat.command.commands";
 
 	public const CHECK = "zuri.check";
+	public const CHECK_SCOPE_WORLD_ENABLE = "zuri.scope.world.enable";
+	public const CHECK_SCOPE_WORLD_MODE = "zuri.scope.world.mode";
+	public const CHECK_SCOPE_WORLD_LIST = "zuri.scope.world.list";
+	public const CHECK_SCOPE_GAMEMODE_ENABLE = "zuri.scope.gamemode.enable";
+	public const CHECK_SCOPE_GAMEMODE_LIST = "zuri.scope.gamemode.list";
 
 	public const DETECTION_ENABLE = "zuri.detection.enable";
 

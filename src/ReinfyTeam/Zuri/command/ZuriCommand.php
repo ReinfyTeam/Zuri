@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\command;
 
 use CortexPE\Commando\BaseCommand;
+use CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
 use ReinfyTeam\Zuri\command\subcommand\AboutSubCommand;
@@ -49,8 +50,12 @@ use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\ZuriAC;
 use function implode;
+use function trim;
 
 class ZuriCommand extends BaseCommand {
+	/** @var list<array{name:string,description:string,aliases:list<string>}> */
+	private static array $helpEntries = [];
+
 	public function __construct(ZuriAC $plugin) {
 		parent::__construct($plugin, "zuri", "Zuri Anticheat", ["anticheat", "ac"]);
 	}
@@ -61,17 +66,18 @@ class ZuriCommand extends BaseCommand {
 			return;
 		}
 		$this->setPermission("zuri.command");
-		$this->registerSubCommand(new AboutSubCommand($plugin));
-		$this->registerSubCommand(new NotifySubCommand($plugin));
-		$this->registerSubCommand(new BanModeSubCommand($plugin));
-		$this->registerSubCommand(new CaptchaSubCommand($plugin));
-		$this->registerSubCommand(new BypassSubCommand($plugin));
-		$this->registerSubCommand(new DebugSubCommand($plugin));
-		$this->registerSubCommand(new StatusSubCommand($plugin));
-		$this->registerSubCommand(new ListSubCommand($plugin));
-		$this->registerSubCommand(new UiSubCommand($plugin));
-		$this->registerSubCommand(new LanguageSubCommand($plugin));
-		$this->registerSubCommand(new HelpSubCommand($plugin));
+		self::$helpEntries = [];
+		$this->registerAndCollectSubCommand(new AboutSubCommand($plugin));
+		$this->registerAndCollectSubCommand(new NotifySubCommand($plugin));
+		$this->registerAndCollectSubCommand(new BanModeSubCommand($plugin));
+		$this->registerAndCollectSubCommand(new CaptchaSubCommand($plugin));
+		$this->registerAndCollectSubCommand(new BypassSubCommand($plugin));
+		$this->registerAndCollectSubCommand(new DebugSubCommand($plugin));
+		$this->registerAndCollectSubCommand(new StatusSubCommand($plugin));
+		$this->registerAndCollectSubCommand(new ListSubCommand($plugin));
+		$this->registerAndCollectSubCommand(new UiSubCommand($plugin));
+		$this->registerAndCollectSubCommand(new LanguageSubCommand($plugin));
+		$this->registerAndCollectSubCommand(new HelpSubCommand($plugin));
 	}
 
 	/** @param array<string,mixed> $args */
@@ -82,20 +88,26 @@ class ZuriCommand extends BaseCommand {
 	public static function buildHelpMessage(string $namecmd = "zuri") : string {
 		$version = ZuriAC::getInstance()->getDescription()->getVersion();
 		$author = ZuriAC::getInstance()->getDescription()->getAuthors()[0] ?? 'Unknown';
-		return implode("\n", [
+		$lines = [
 			Lang::get(LangKeys::CMD_HELP_HEADER),
 			Lang::get(LangKeys::CMD_HELP_BUILD_AUTHOR, ["version" => $version, "author" => $author]),
 			"",
-			Lang::get(LangKeys::CMD_HELP_ABOUT, ["command" => $namecmd]),
-			Lang::get(LangKeys::CMD_HELP_NOTIFY, ["command" => $namecmd]),
-			Lang::get(LangKeys::CMD_HELP_BANMODE, ["command" => $namecmd]),
-			Lang::get(LangKeys::CMD_HELP_CAPTCHA, ["command" => $namecmd]),
-			Lang::get(LangKeys::CMD_HELP_BYPASS, ["command" => $namecmd]),
-			Lang::get(LangKeys::CMD_HELP_DEBUG, ["command" => $namecmd]),
-			Lang::get(LangKeys::CMD_HELP_LIST, ["command" => $namecmd]),
-			Lang::get(LangKeys::CMD_HELP_UI, ["command" => $namecmd]),
-			Lang::get(LangKeys::CMD_HELP_LANGUAGE, ["command" => $namecmd]),
-			Lang::get(LangKeys::CMD_HELP_FOOTER)
-		]);
+		];
+		foreach (self::$helpEntries as $entry) {
+			$aliasText = $entry["aliases"] !== [] ? " §8(§7aliases: " . implode(", ", $entry["aliases"]) . "§8)" : "";
+			$lines[] = "§c/{$namecmd} §r{$entry["name"]}§7 - {$entry["description"]}{$aliasText}";
+		}
+		$lines[] = Lang::get(LangKeys::CMD_HELP_FOOTER);
+		return implode("\n", $lines);
+	}
+
+	private function registerAndCollectSubCommand(BaseSubCommand $subCommand) : void {
+		$this->registerSubCommand($subCommand);
+		$description = trim($subCommand->getDescription());
+		self::$helpEntries[] = [
+			"name" => $subCommand->getName(),
+			"description" => $description !== "" ? $description : "No description provided.",
+			"aliases" => $subCommand->getAliases(),
+		];
 	}
 }

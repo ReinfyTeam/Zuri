@@ -37,7 +37,6 @@ use czechpmdevs\libpmform\type\SimpleForm;
 use pocketmine\player\Player;
 use pocketmine\utils\NotCloneable;
 use pocketmine\utils\NotSerializable;
-use pocketmine\utils\TextFormat;
 use ReinfyTeam\Zuri\API;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\config\ConfigManager;

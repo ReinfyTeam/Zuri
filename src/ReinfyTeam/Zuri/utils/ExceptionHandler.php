@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\utils;
 
 use pocketmine\Server;
+use ReinfyTeam\Zuri\lang\Lang;
 use Throwable;
 use function get_class;
 use function microtime;
@@ -105,11 +106,17 @@ final class ExceptionHandler {
 		// Rate limit logging to prevent log spam
 		if (self::$errorCount <= self::MAX_ERRORS_PER_MINUTE) {
 			$logger = Server::getInstance()->getLogger();
-			$logger->error("[Zuri] Exception in {$context}: " . get_class($e) . ": " . $e->getMessage());
-			$logger->debug("[Zuri] Stack trace: " . $e->getTraceAsString());
+			$logger->error(Lang::get("messages.debug.system.exception-error", [
+				"context" => $context,
+				"type" => get_class($e),
+				"message" => $e->getMessage(),
+			], "[Zuri] Exception in {context}: {type}: {message}"));
+			$logger->debug(Lang::get("messages.debug.system.exception-stack-trace", [
+				"trace" => $e->getTraceAsString(),
+			], "[Zuri] Stack trace: {trace}"));
 		} elseif (self::$errorCount === self::MAX_ERRORS_PER_MINUTE + 1) {
 			$logger = Server::getInstance()->getLogger();
-			$logger->error("[Zuri] Too many exceptions, suppressing further logging for 60 seconds");
+			$logger->error(Lang::get("messages.debug.system.exception-suppressed", [], "[Zuri] Too many exceptions, suppressing further logging for 60 seconds"));
 		}
 	}
 
