@@ -68,6 +68,6 @@ final class AuditLogger {
 		$payload = $timestamp . "|" . $category . "|" . $action . "|" . $actor . "|" . implode("|", $detailPairs) . "|" . self::$lastHash;
 		$currentHash = hash("sha256", $payload);
 		self::$lastHash = $currentHash;
-		Server::getInstance()->getLogger()->notice("[Zuri][Audit] category={$category} action={$action} actor={$actor}{$detailText} chain={$currentHash}");
+		Server::getInstance()->getLogger()->debug("[DEBUG] AUDIT (" . $category . ") actor=" . $actor . ", action=" . $action . $detailText . " [chain=" . $currentHash . "]");
 	}
 }

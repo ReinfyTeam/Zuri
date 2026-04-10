@@ -50,15 +50,6 @@ final class LangKeys {
 
 	public const CMD_HELP_HEADER = "commands.help.header";
 	public const CMD_HELP_BUILD_AUTHOR = "commands.help.build-author";
-	public const CMD_HELP_ABOUT = "commands.help.about";
-	public const CMD_HELP_NOTIFY = "commands.help.notify";
-	public const CMD_HELP_BANMODE = "commands.help.banmode";
-	public const CMD_HELP_CAPTCHA = "commands.help.captcha";
-	public const CMD_HELP_BYPASS = "commands.help.bypass";
-	public const CMD_HELP_DEBUG = "commands.help.debug";
-	public const CMD_HELP_LIST = "commands.help.list";
-	public const CMD_HELP_UI = "commands.help.ui";
-	public const CMD_HELP_LANGUAGE = "commands.help.language";
 	public const CMD_HELP_FOOTER = "commands.help.footer";
 
 	public const CMD_BANMODE_USAGE = "commands.banmode.usage";

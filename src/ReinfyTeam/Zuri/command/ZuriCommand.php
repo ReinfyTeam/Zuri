@@ -54,7 +54,7 @@ use function implode;
 use function trim;
 
 class ZuriCommand extends BaseCommand {
-	/** @var list<array{name:string,description:string,aliases:list<string>}> */
+	/** @var list<array{name:string,description:string,usage:string,aliases:list<string>}> */
 	private static array $helpEntries = [];
 
 	public function __construct(ZuriAC $plugin) {
@@ -95,8 +95,9 @@ class ZuriCommand extends BaseCommand {
 			"",
 		];
 		foreach (self::$helpEntries as $entry) {
+			$usageText = " §8(§7usage: {$entry["usage"]}§8)";
 			$aliasText = $entry["aliases"] !== [] ? " §8(§7aliases: " . implode(", ", $entry["aliases"]) . "§8)" : "";
-			$lines[] = "§c/{$namecmd} §r{$entry["name"]}§7 - {$entry["description"]}{$aliasText}";
+			$lines[] = "§c/{$namecmd} §r{$entry["name"]}§7 - {$entry["description"]}{$usageText}{$aliasText}";
 		}
 		$lines[] = Lang::get(LangKeys::CMD_HELP_FOOTER);
 		return implode("\n", $lines);
@@ -106,9 +107,15 @@ class ZuriCommand extends BaseCommand {
 		$this->registerSubCommand($subCommand);
 		$rawDescription = $subCommand->getDescription();
 		$description = trim($rawDescription instanceof Translatable ? $rawDescription->getText() : $rawDescription);
+		$rawUsage = $subCommand->getUsage();
+		$usage = trim($rawUsage);
+		if ($usage === "") {
+			$usage = "/zuri " . $subCommand->getName();
+		}
 		self::$helpEntries[] = [
 			"name" => $subCommand->getName(),
 			"description" => $description !== "" ? $description : "No description provided.",
+			"usage" => $usage,
 			"aliases" => $subCommand->getAliases(),
 		];
 	}

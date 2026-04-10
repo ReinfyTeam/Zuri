@@ -24,10 +24,9 @@
 ## Performance and Stability
 
 - [x] Add continuous hot-path profiling for checks, packet handlers, and violation processing.
-- [ ] Introduce object pooling for frequently allocated packet analysis structures.
 - [x] Add memory pressure watchdog and rolling cache eviction strategy.
 - [x] Add startup self-diagnostics for missing config keys, invalid values, and stale cache data.
-- [ ] Add panic-safe exception boundaries around all scheduled tasks and event listeners.
+- [x] Add panic-safe exception boundaries around all scheduled tasks and event listeners.
 
 ## Punishment and Action System
 
@@ -37,7 +36,6 @@
 
 ## Security and Abuse Resistance
 
-- [ ] Harden webhook pipeline with signed payload validation and replay protection.
 - [x] Add command permission audit for every admin and debug command.
 - [x] Add anti-spam protections for alert dispatch and webhook posting.
 - [x] Add tamper-evident audit logs for punishments, config edits, and override actions.
@@ -49,16 +47,12 @@
 - [x] Add config schema validation with clear startup error reporting.
 - [x] Add in-game diagnostic command set (pipeline status, queue depth, worker health).
 - [x] Add per-world and per-gamemode check toggles.
-- [ ] Add temporary player exemptions with auto-expiry support.
 - [ ] Add localization support for staff-facing messages and alerts.
 
 ## Observability and Tooling
 
 - [ ] Add structured logging format with correlation IDs per player/session.
 - [ ] Add metrics export endpoint (check runtime, queue depth, violations per check, false-positive ratio).
-- [ ] Add dashboard-ready timeseries aggregation for operational visibility.
-- [ ] Add deterministic debug replay mode from packet/session traces.
-- [ ] Add safe redaction rules for sensitive player and server metadata.
 
 ## Testing and QA
 
@@ -74,20 +68,17 @@
 - [ ] Add architecture docs for thread model, data flow, and module boundaries.
 - [ ] Add incident playbook for high false-positive events and emergency rollbacks.
 - [ ] Add changelog discipline with migration notes and breaking-change callouts.
-- [ ] Add release channel strategy (nightly, beta, stable) with staged rollout guidance.
-- [ ] Add contribution guidelines for check design, naming conventions, and testing expectations.
+- [ ] Add contribution guidelines (CONTRIBUTING.md) for check design, naming conventions, and testing expectations.
 
 ## Low-End Server Optimization
 
 - [ ] Add adaptive check scheduler that reduces heavy module frequency when TPS drops below configurable thresholds.
 - [ ] Add per-check CPU budget caps with automatic cooldown/defer when a check exceeds runtime limits.
-- [ ] Add lightweight mode presets (ultra-low, low, balanced) for one-click performance tuning.
 - [ ] Add dynamic packet sampling for non-critical checks during high player count or high packet pressure.
 - [ ] Add max checks-per-tick cap with fair round-robin distribution across online players.
 - [ ] Add incremental cache warm-up on startup to avoid lag spikes on first player joins.
 - [ ] Add async worker auto-downscale during low activity and auto-upscale under controlled load.
 - [ ] Add low-memory mode to disable non-essential profiling/history buffers automatically.
 - [ ] Add configurable alert verbosity levels to reduce log and chat spam overhead.
-- [ ] Add per-device/per-network profile heuristics to skip expensive checks for low-risk sessions.
 - [ ] Add compact in-memory snapshot representation to reduce allocation and GC pressure.
 - [ ] Add check batching windows for movement/combat packets to minimize redundant calculations.

@@ -72,6 +72,7 @@ class StatusSubCommand extends BaseSubCommand {
 		$memoryUtil = round((float) ($metrics["memoryUtilization"] ?? 0.0) * 100.0, 1);
 		$cpuLoad = round((float) ($metrics["cpuLoad"] ?? 0.0), 2);
 		$asyncTps = round((float) ($metrics["tps"] ?? 20.0), 2);
+		$loadPercent = round($loadFactor * 100.0, 1);
 		$profileMetricCount = HotPathProfiler::getMetricCount();
 		$profileTotalMs = round(HotPathProfiler::getTotalMillis(), 3);
 		$packetAvgMs = round(HotPathProfiler::getAverageMillis("packet.handler.receive"), 3);
@@ -85,10 +86,11 @@ class StatusSubCommand extends BaseSubCommand {
 		$overloadActiveText = $overloadActive ? TextFormat::RED . "yes" . TextFormat::RESET : TextFormat::GREEN . "no" . TextFormat::RESET;
 		$syncFallbackActive = (bool) ($metrics["syncFallbackActive"] ?? false);
 		$syncFallbackActiveText = $syncFallbackActive ? TextFormat::YELLOW . "yes" . TextFormat::RESET : TextFormat::GREEN . "no" . TextFormat::RESET;
-		$queueUtilText = ($queueUtil >= 85.0 ? TextFormat::RED : ($queueUtil >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $queueUtil) . TextFormat::RESET;
-		$workerUtilText = ($workerUtil >= 85.0 ? TextFormat::RED : ($workerUtil >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $workerUtil) . TextFormat::RESET;
-		$memoryUtilText = ($memoryUtil >= 85.0 ? TextFormat::RED : ($memoryUtil >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $memoryUtil) . TextFormat::RESET;
-		$cpuLoadText = ($cpuLoad >= 85.0 ? TextFormat::RED : ($cpuLoad >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $cpuLoad) . TextFormat::RESET;
+		$queueUtilText = ($queueUtil >= 85.0 ? TextFormat::RED : ($queueUtil >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $queueUtil) . "%" . TextFormat::RESET;
+		$workerUtilText = ($workerUtil >= 85.0 ? TextFormat::RED : ($workerUtil >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $workerUtil) . "%" . TextFormat::RESET;
+		$loadText = ($loadPercent >= 85.0 ? TextFormat::RED : ($loadPercent >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $loadPercent) . "%" . TextFormat::RESET;
+		$memoryUtilText = ($memoryUtil >= 85.0 ? TextFormat::RED : ($memoryUtil >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $memoryUtil) . "%" . TextFormat::RESET;
+		$cpuLoadText = ($cpuLoad >= 85.0 ? TextFormat::RED : ($cpuLoad >= 65.0 ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $cpuLoad) . "%" . TextFormat::RESET;
 		$asyncTpsText = (($asyncTps <= 12.0) ? TextFormat::RED : (($asyncTps <= 17.5) ? TextFormat::YELLOW : TextFormat::GREEN)) . max(0.0, $asyncTps) . TextFormat::RESET;
 
 		$lines = [
@@ -106,7 +108,7 @@ class StatusSubCommand extends BaseSubCommand {
 			]),
 			Lang::get(LangKeys::ASYNC_STATUS_SERVER, [
 				"tps" => (string) round($tps, 2),
-				"load" => (string) round($loadFactor * 100.0, 1),
+				"load" => $loadText,
 			]),
 			Lang::get(LangKeys::ASYNC_STATUS_PERFORMANCE, ["state" => $performanceStateText]),
 			Lang::get(LangKeys::ASYNC_STATUS_RESOURCES, [
