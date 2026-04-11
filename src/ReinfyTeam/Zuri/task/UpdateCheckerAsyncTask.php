@@ -45,9 +45,12 @@ use function is_numeric;
 use function is_object;
 use function is_string;
 use function json_decode;
+use function ltrim;
 use function method_exists;
 use function round;
 use function strtotime;
+use function trim;
+use function version_compare;
 
 class UpdateCheckerAsyncTask extends AsyncTask {
 	private string $currentVersion;
@@ -95,10 +98,20 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 			return;
 		}
 
-		$latestVersion = is_string($json["tag_name"] ?? null) ? $json["tag_name"] : "";
-		$currentVersionTag = "v" . $this->currentVersion;
+		$latestVersion = is_string($json["tag_name"] ?? null) ? trim($json["tag_name"]) : "";
+		$currentVersion = trim($this->currentVersion);
+		$currentVersionTag = "v" . $currentVersion;
+		$latestComparable = self::normalizeVersion($latestVersion);
+		$currentComparable = self::normalizeVersion($currentVersion);
 
-		if ($latestVersion === $currentVersionTag) {
+		$isUpToDate = false;
+		if ($latestVersion === "" || $latestComparable === "" || $currentComparable === "") {
+			$isUpToDate = $latestVersion === $currentVersionTag || $latestVersion === $currentVersion;
+		} else {
+			$isUpToDate = version_compare($latestComparable, $currentComparable, "<=");
+		}
+
+		if ($isUpToDate) {
 			$server->getLogger()->notice(Lang::get(LangKeys::UPDATE_NONE));
 			return;
 		}
@@ -128,5 +141,10 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 		$server->getLogger()->warning(Lang::get(LangKeys::UPDATE_LATEST, ["latestVersion" => $versionLabel, "branch" => $branch]));
 		$server->getLogger()->warning(Lang::get(LangKeys::UPDATE_DOWNLOADS, ["downloadCount" => $downloadCount]));
 		$server->getLogger()->warning(Lang::get(LangKeys::UPDATE_DOWNLOAD_URL, ["downloadUrl" => $downloadUrl, "fileSizeKB" => $fileSizeKB]));
+	}
+
+	private static function normalizeVersion(string $version) : string {
+		$normalized = ltrim(trim($version), "vV");
+		return $normalized;
 	}
 }

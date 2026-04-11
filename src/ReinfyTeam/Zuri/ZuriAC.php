@@ -222,7 +222,7 @@ class ZuriAC extends PluginBase {
 				$proxyUDPSocket->bind(new InternetAddress($ip, $port));
 			} catch (Exception $exception) {
 				$this->getServer()->getLogger()->notice(Lang::get(LangKeys::STARTUP_PROXY_STOPPING, ["error" => $exception->getMessage()]));
-				AuditLogger::crash("Proxy startup failure: " . $exception->getMessage());
+				AuditLogger::crashThrowable("Proxy startup failure", $exception);
 				return;
 			}
 		}

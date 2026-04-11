@@ -35,11 +35,16 @@ use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\config\ConfigPaths;
+use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\task\CheckAsyncTask;
 use ReinfyTeam\Zuri\ZuriAC;
+use Throwable;
+use function array_slice;
 use function count;
 use function date;
 use function error_get_last;
+use function file;
 use function file_exists;
 use function file_put_contents;
 use function filemtime;
@@ -50,9 +55,13 @@ use function in_array;
 use function is_array;
 use function is_bool;
 use function is_dir;
+use function is_float;
+use function is_int;
 use function is_numeric;
+use function is_readable;
 use function is_string;
 use function ksort;
+use function max;
 use function microtime;
 use function mkdir;
 use function pathinfo;
@@ -61,6 +70,7 @@ use function register_shutdown_function;
 use function round;
 use function sprintf;
 use function str_repeat;
+use function str_replace;
 use function strtotime;
 use function trim;
 use function unlink;
@@ -123,6 +133,19 @@ final class AuditLogger {
 		self::appendLine(self::crashesPath(self::fileName("crash", "crash.log")), self::timestamp() . " " . $message);
 	}
 
+	public static function crashThrowable(string $context, Throwable $throwable) : void {
+		$summary = $context
+			. ": type=" . $throwable::class
+			. ", message=" . $throwable->getMessage()
+			. ", file=" . $throwable->getFile()
+			. ", line=" . $throwable->getLine();
+		self::crash($summary);
+		$trace = trim($throwable->getTraceAsString());
+		if ($trace !== "") {
+			self::crash("Stack trace (" . $context . "): " . str_replace(["\r", "\n"], ["", " | "], $trace));
+		}
+	}
+
 	public static function createReportFile() : string {
 		self::bootIfNeeded();
 		$server = Server::getInstance();
@@ -137,37 +160,70 @@ final class AuditLogger {
 				$disabledChecks++;
 			}
 		}
+		$queueSize = self::metricInt($metrics, "queueSize");
+		$maxQueueSize = max(1, self::metricInt($metrics, "maxQueueSize"));
+		$inFlight = self::metricInt($metrics, "inFlight");
+		$maxWorkers = max(1, self::metricInt($metrics, "maxConcurrentWorkers"));
+		$totalDispatched = self::metricInt($metrics, "totalDispatched");
+		$totalCompleted = self::metricInt($metrics, "totalCompleted");
+		$totalDropped = self::metricInt($metrics, "totalDropped");
+		$throughput = $totalDispatched > 0 ? ($totalCompleted / $totalDispatched) : 0.0;
+		$dropRate = $totalDispatched > 0 ? ($totalDropped / $totalDispatched) : 0.0;
+
 		$lines = [
-			"Zuri Report",
-			"Generated: " . date("Y-m-d H:i:s"),
-			"Plugin: " . ZuriAC::getInstance()->getDescription()->getVersion(),
-			"PMMP: " . $server->getVersion(),
-			"PHP: " . PHP_VERSION,
-			"Online players: " . count($server->getOnlinePlayers()) . "/" . $server->getMaxPlayers(),
-			"TPS: " . $server->getTicksPerSecond(),
-			"Checks enabled/disabled: {$enabledChecks}/{$disabledChecks}",
+			self::tr("commands.report.content.title", [], "Zuri Report"),
+			self::tr("commands.report.content.generated", ["date" => date("Y-m-d H:i:s")], "Generated: {date}"),
 			"",
-			"Async:",
-			"- queue: " . ($metrics["queueSize"] ?? 0) . "/" . ($metrics["maxQueueSize"] ?? 0),
-			"- inFlight: " . ($metrics["inFlight"] ?? 0) . "/" . ($metrics["maxConcurrentWorkers"] ?? 0),
-			"- dispatched/completed/dropped: " . ($metrics["totalDispatched"] ?? 0) . "/" . ($metrics["totalCompleted"] ?? 0) . "/" . ($metrics["totalDropped"] ?? 0),
-			"- threadErrors/resultErrors/retries: " . ($metrics["totalThreadErrors"] ?? 0) . "/" . ($metrics["totalThreadResultErrors"] ?? 0) . "/" . ($metrics["totalThreadRetries"] ?? 0),
-			"- syncFallback/errors: " . ($metrics["totalSyncFallback"] ?? 0) . "/" . ($metrics["totalFallbackErrors"] ?? 0),
-			"- avgWorkerSeconds: " . round((float) ($metrics["avgWorkerTime"] ?? 0.0), 4),
-			"- latency(build/queue/worker/merge): "
-				. round((float) ($metrics["avgBuildDelay"] ?? 0.0), 4) . "/"
-				. round((float) ($metrics["avgQueueWait"] ?? 0.0), 4) . "/"
-				. round((float) ($metrics["avgWorkerTime"] ?? 0.0), 4) . "/"
-				. round((float) ($metrics["avgMergeTime"] ?? 0.0), 4),
-			"- workerTargetMs: " . round((float) ($metrics["workerTargetMs"] ?? 20.0), 2),
+			self::tr("commands.report.content.section-system", [], "System"),
+			self::tr("commands.report.content.plugin-version", ["version" => ZuriAC::getInstance()->getDescription()->getVersion()], "- Plugin version: {version}"),
+			self::tr("commands.report.content.pmmp-version", ["version" => $server->getVersion()], "- PMMP version: {version}"),
+			self::tr("commands.report.content.php-version", ["version" => PHP_VERSION], "- PHP version: {version}"),
+			self::tr("commands.report.content.players", ["online" => count($server->getOnlinePlayers()), "max" => $server->getMaxPlayers()], "- Players: {online}/{max}"),
+			self::tr("commands.report.content.tps", ["tps" => round((float) $server->getTicksPerSecond(), 2)], "- TPS: {tps}"),
+			self::tr("commands.report.content.checks", ["enabled" => $enabledChecks, "disabled" => $disabledChecks], "- Checks enabled/disabled: {enabled}/{disabled}"),
 			"",
-			"Profiler:",
-			"- metrics: " . HotPathProfiler::getMetricCount(),
-			"- totalMs: " . round(HotPathProfiler::getTotalMillis(), 3),
-			"- packetAvgMs: " . round(HotPathProfiler::getAverageMillis("packet.handler.receive"), 3),
+			self::tr("commands.report.content.section-async", [], "Async pipeline"),
+			self::tr("commands.report.content.async-queue", ["queue" => $queueSize, "maxQueue" => $maxQueueSize, "utilization" => self::formatPercent($queueSize / $maxQueueSize)], "- Queue: {queue}/{maxQueue} ({utilization})"),
+			self::tr("commands.report.content.async-batches", ["classGroups" => self::metricInt($metrics, "queueClassGroups"), "batchUnits" => self::metricInt($metrics, "queueBatchUnits"), "batchSize" => self::metricInt($metrics, "batchSize")], "- Queue groups/batches@size: {classGroups}/{batchUnits}@{batchSize}"),
+			self::tr("commands.report.content.async-workers", ["inFlight" => $inFlight, "maxWorkers" => $maxWorkers, "utilization" => self::formatPercent($inFlight / $maxWorkers), "minWorkers" => self::metricInt($metrics, "minConcurrentWorkers")], "- Workers: {inFlight}/{maxWorkers} ({utilization}, min={minWorkers})"),
+			self::tr("commands.report.content.async-throughput", ["dispatched" => $totalDispatched, "completed" => $totalCompleted, "throughput" => self::formatPercent($throughput), "dropped" => $totalDropped, "dropRate" => self::formatPercent($dropRate)], "- Throughput: dispatched={dispatched}, completed={completed} ({throughput}), dropped={dropped} ({dropRate})"),
+			self::tr("commands.report.content.async-threads", ["threadErrors" => self::metricInt($metrics, "totalThreadErrors"), "resultErrors" => self::metricInt($metrics, "totalThreadResultErrors"), "retries" => self::metricInt($metrics, "totalThreadRetries"), "late" => self::metricInt($metrics, "totalLateCompletions")], "- Thread outcomes: errors={threadErrors}, resultErrors={resultErrors}, retries={retries}, late={late}"),
+			self::tr("commands.report.content.async-fallback", ["active" => self::formatBool(($metrics["syncFallbackActive"] ?? false)), "count" => self::metricInt($metrics, "totalSyncFallback"), "errors" => self::metricInt($metrics, "totalFallbackErrors")], "- Sync fallback: active={active}, used={count}, errors={errors}"),
+			self::tr("commands.report.content.async-scaling", ["optimizations" => self::metricInt($metrics, "totalQueueOptimizations"), "scaleUps" => self::metricInt($metrics, "totalWorkerScaleUps"), "scaleDowns" => self::metricInt($metrics, "totalWorkerScaleDowns"), "overloadAlerts" => self::metricInt($metrics, "totalOverloadAlerts"), "overloadActive" => self::formatBool(($metrics["overloadActive"] ?? false))], "- Optimizer: runs={optimizations}, up={scaleUps}, down={scaleDowns}, alerts={overloadAlerts}, overload={overloadActive}"),
+			self::tr("commands.report.content.async-latency", ["build" => round(self::metricFloat($metrics, "avgBuildDelay"), 4), "queue" => round(self::metricFloat($metrics, "avgQueueWait"), 4), "worker" => round(self::metricFloat($metrics, "avgWorkerTime"), 4), "merge" => round(self::metricFloat($metrics, "avgMergeTime"), 4), "targetMs" => round(self::metricFloat($metrics, "workerTargetMs", 20.0), 2)], "- Latency avg (s): build={build}, queue={queue}, worker={worker}, merge={merge}, targetMs={targetMs}"),
+			self::tr("commands.report.content.async-resources", ["memoryUsage" => self::metricInt($metrics, "memoryUsageBytes"), "memoryPeak" => self::metricInt($metrics, "memoryPeakBytes"), "memoryLimit" => self::metricInt($metrics, "memoryLimitBytes"), "memoryUtilization" => self::formatPercent(self::metricFloat($metrics, "memoryUtilization")), "cpuLoad" => round(self::metricFloat($metrics, "cpuLoad"), 3), "asyncTps" => round(self::metricFloat($metrics, "tps"), 2)], "- Resources: mem={memoryUsage}/{memoryLimit} ({memoryUtilization}), peak={memoryPeak}, cpu={cpuLoad}, tps={asyncTps}"),
+			self::tr("commands.report.content.async-guards", ["maxLag" => self::metricInt($metrics, "maxAllowedSequenceLag"), "maxAge" => round(self::metricFloat($metrics, "maxAllowedResultAgeSeconds"), 3), "timeout" => round(self::metricFloat($metrics, "workerTimeoutSeconds"), 3), "degradedUntil" => round(self::metricFloat($metrics, "degradedUntil"), 3), "lastDispatchAt" => round(self::metricFloat($metrics, "lastDispatchAt"), 3), "lastCompleteAt" => round(self::metricFloat($metrics, "lastCompleteAt"), 3), "lastHealthCheckAt" => round(self::metricFloat($metrics, "lastHealthCheckAt"), 3)], "- Guards: maxLag={maxLag}, maxAge={maxAge}s, timeout={timeout}s, degradedUntil={degradedUntil}, lastDispatch={lastDispatchAt}, lastComplete={lastCompleteAt}, lastHealth={lastHealthCheckAt}"),
 			"",
-			"Safe exceptions (last window): " . ExceptionHandler::getErrorCount(),
+			self::tr("commands.report.content.section-profiler", [], "Profiler"),
+			self::tr("commands.report.content.profiler-metrics", ["metrics" => HotPathProfiler::getMetricCount()], "- Metrics: {metrics}"),
+			self::tr("commands.report.content.profiler-total", ["totalMs" => round(HotPathProfiler::getTotalMillis(), 3)], "- Total ms: {totalMs}"),
+			self::tr("commands.report.content.profiler-packet", ["packetAvgMs" => round(HotPathProfiler::getAverageMillis("packet.handler.receive"), 3)], "- Packet avg ms: {packetAvgMs}"),
+			self::tr("commands.report.content.safe-exceptions", ["count" => ExceptionHandler::getErrorCount()], "- Safe exceptions (window): {count}"),
+			"",
+			self::tr("commands.report.content.section-config", [], "Configuration snapshot"),
+			self::tr("commands.report.content.cfg-language", ["locale" => self::cfgString(ConfigPaths::LANGUAGE_LOCALE, "en_US"), "fallback" => self::cfgString(ConfigPaths::LANGUAGE_FALLBACK_LOCALE, "en_US")], "- Language: locale={locale}, fallback={fallback}"),
+			self::tr("commands.report.content.cfg-alerts", ["enable" => self::formatBool(ConfigManager::getData(ConfigPaths::ALERTS_ENABLE, true)), "adminOnly" => self::formatBool(ConfigManager::getData(ConfigPaths::ALERTS_ADMIN, false)), "permission" => self::cfgString(ConfigPaths::ALERTS_PERMISSION, "zuri.admin")], "- Alerts: enable={enable}, adminOnly={adminOnly}, permission={permission}"),
+			self::tr("commands.report.content.cfg-punishments", ["ban" => self::formatBool(ConfigManager::getData(ConfigPaths::BAN_ENABLE, true)), "kick" => self::formatBool(ConfigManager::getData(ConfigPaths::KICK_ENABLE, true)), "detection" => self::formatBool(ConfigManager::getData(ConfigPaths::DETECTION_ENABLE, false)), "warning" => self::formatBool(ConfigManager::getData(ConfigPaths::WARNING_ENABLE, true))], "- Actions: ban={ban}, kick={kick}, detection={detection}, warning={warning}"),
+			self::tr("commands.report.content.cfg-debug", ["debug" => self::formatBool(ConfigManager::getData(ConfigPaths::DEBUG_ENABLE, false)), "logAdmin" => self::formatBool(ConfigManager::getData(ConfigPaths::DEBUG_LOG_ADMIN, true)), "logServer" => self::formatBool(ConfigManager::getData(ConfigPaths::DEBUG_LOG_SERVER, false))], "- Debug: enabled={debug}, logAdmin={logAdmin}, logServer={logServer}"),
+			self::tr("commands.report.content.cfg-captcha", ["enable" => self::formatBool(ConfigManager::getData(ConfigPaths::CAPTCHA_ENABLE, true)), "message" => self::formatBool(ConfigManager::getData(ConfigPaths::CAPTCHA_MESSAGE, true)), "tip" => self::formatBool(ConfigManager::getData(ConfigPaths::CAPTCHA_TIP, false)), "title" => self::formatBool(ConfigManager::getData(ConfigPaths::CAPTCHA_TITLE, false)), "randomize" => self::formatBool(ConfigManager::getData(ConfigPaths::CAPTCHA_RANDOMIZE, false)), "length" => self::cfgInt(ConfigPaths::CAPTCHA_CODE_LENGTH, 5)], "- Captcha: enable={enable}, message={message}, tip={tip}, title={title}, randomize={randomize}, length={length}"),
+			self::tr("commands.report.content.cfg-async", ["workers" => self::cfgInt("zuri.async.max-concurrent-workers", 4), "batchSize" => self::cfgInt("zuri.async.batch-size", 64), "targetMs" => self::cfgFloat("zuri.async.worker-target-ms", 20.0), "maxQueue" => self::cfgInt("zuri.async.max-queue-size", 2048), "timeout" => self::cfgFloat("zuri.async.worker-timeout-seconds", 3.0), "degraded" => self::cfgFloat("zuri.async.degraded-cooldown-seconds", 6.0)], "- Async cfg: workers={workers}, batch={batchSize}, targetMs={targetMs}, maxQueue={maxQueue}, timeout={timeout}, degradedCooldown={degraded}"),
+			self::tr("commands.report.content.cfg-safety", ["confidence" => self::cfgFloat("zuri.confidence.threshold", 0.5), "dynamicThresholds" => self::formatBool(ConfigManager::getData("zuri.dynamic-thresholds.enable", true)), "correlation" => self::formatBool(ConfigManager::getData("zuri.correlation.enable", true)), "correlationWindow" => self::cfgFloat("zuri.correlation.window-seconds", 10.0), "correlationGroups" => self::cfgInt("zuri.correlation.required-groups", 3), "forceMultiplier" => self::cfgFloat("zuri.correlation.force-escalation-multiplier", 2.5), "forceExtraVl" => self::cfgInt("zuri.correlation.force-escalation-extra-real-vl", 3)], "- Safety cfg: confidence={confidence}, dynamicThresholds={dynamicThresholds}, correlation={correlation}, window={correlationWindow}, groups={correlationGroups}, forceMultiplier={forceMultiplier}, forceExtraVl={forceExtraVl}"),
+			self::tr("commands.report.content.cfg-logging", ["enable" => self::formatBool(ConfigManager::getData("zuri.logging.enable", true)), "logsFolder" => self::cfgString("zuri.logging.folders.logs", "logs"), "crashesFolder" => self::cfgString("zuri.logging.folders.crashes", "crashes"), "retentionDays" => self::cfgInt("zuri.logging.cleanup.max-age-days", 30), "deleteBeforeDate" => self::cfgString("zuri.logging.cleanup.delete-before-date", "")], "- Logging: enable={enable}, folders={logsFolder}/{crashesFolder}, retentionDays={retentionDays}, deleteBeforeDate={deleteBeforeDate}"),
+			self::tr("commands.report.content.cfg-log-channels", ["anticheat" => self::formatBool(ConfigManager::getData("zuri.logging.channels.anticheat.enable", true)), "punishment" => self::formatBool(ConfigManager::getData("zuri.logging.channels.punishment.enable", true)), "thread" => self::formatBool(ConfigManager::getData("zuri.logging.channels.thread.enable", true)), "crash" => self::formatBool(ConfigManager::getData("zuri.logging.channels.crash.enable", true)), "report" => self::formatBool(ConfigManager::getData("zuri.logging.channels.report.enable", true))], "- Log channels: anticheat={anticheat}, punishment={punishment}, thread={thread}, crash={crash}, report={report}"),
 		];
+		$recentCrashes = self::readRecentLines(
+			self::crashesPath(self::fileName("crash", "crash.log")),
+			15
+		);
+		$lines[] = "";
+		$lines[] = self::tr("commands.report.content.recent-crashes-header", ["count" => 15], "Recent crashes (latest {count} lines):");
+		if ($recentCrashes === []) {
+			$lines[] = self::tr("commands.report.content.recent-crashes-none", [], "- none");
+		} else {
+			foreach ($recentCrashes as $crashLine) {
+				$lines[] = self::tr("commands.report.content.recent-crashes-entry", ["line" => $crashLine], "- {line}");
+			}
+		}
 		$file = self::logsPath(self::fileName("report", "report.txt"));
 		self::appendLine($file, implode(PHP_EOL, $lines) . PHP_EOL . str_repeat("-", 72));
 		return $file;
@@ -268,6 +324,74 @@ final class AuditLogger {
 		return trim($text);
 	}
 
+	/** @param array<string,int|float|bool> $metrics */
+	private static function metricInt(array $metrics, string $key, int $default = 0) : int {
+		$value = $metrics[$key] ?? $default;
+		if (is_int($value)) {
+			return $value;
+		}
+		if (is_numeric($value)) {
+			return (int) $value;
+		}
+		return $default;
+	}
+
+	/** @param array<string,int|float|bool> $metrics */
+	private static function metricFloat(array $metrics, string $key, float $default = 0.0) : float {
+		$value = $metrics[$key] ?? $default;
+		if (is_float($value)) {
+			return $value;
+		}
+		if (is_int($value)) {
+			return (float) $value;
+		}
+		return $default;
+	}
+
+	private static function formatBool(mixed $value) : string {
+		if (is_bool($value)) {
+			return self::tr(
+				$value ? "commands.report.content.bool-true" : "commands.report.content.bool-false",
+				[],
+				$value ? "true" : "false"
+			);
+		}
+		return self::tr("commands.report.content.bool-false", [], "false");
+	}
+
+	private static function formatPercent(float $value) : string {
+		return round($value * 100.0, 2) . "%";
+	}
+
+	private static function cfgString(string $path, string $default) : string {
+		$value = ConfigManager::getData($path, $default);
+		return is_string($value) ? $value : $default;
+	}
+
+	private static function cfgInt(string $path, int $default) : int {
+		$value = ConfigManager::getData($path, $default);
+		if (is_int($value)) {
+			return $value;
+		}
+		return is_numeric($value) ? (int) $value : $default;
+	}
+
+	private static function cfgFloat(string $path, float $default) : float {
+		$value = ConfigManager::getData($path, $default);
+		if (is_float($value)) {
+			return $value;
+		}
+		if (is_int($value) || is_numeric($value)) {
+			return (float) $value;
+		}
+		return $default;
+	}
+
+	/** @param array<string,string|int|float> $replacements */
+	private static function tr(string $key, array $replacements = [], string $default = "") : string {
+		return Lang::get($key, $replacements, $default);
+	}
+
 	private static function isEnabled(string $bucket) : bool {
 		$globalRaw = ConfigManager::getData("zuri.logging.enable", true);
 		$global = !is_bool($globalRaw) || $globalRaw;
@@ -314,5 +438,24 @@ final class AuditLogger {
 				}
 			}
 		}
+	}
+
+	/** @return list<string> */
+	private static function readRecentLines(string $filePath, int $maxLines) : array {
+		if ($maxLines <= 0 || !file_exists($filePath) || !is_readable($filePath)) {
+			return [];
+		}
+		$rawLines = file($filePath, FILE_IGNORE_NEW_LINES);
+		if (!is_array($rawLines) || $rawLines === []) {
+			return [];
+		}
+		$tail = array_slice($rawLines, -$maxLines);
+		$result = [];
+		foreach ($tail as $line) {
+			if (is_string($line) && trim($line) !== "") {
+				$result[] = $line;
+			}
+		}
+		return $result;
 	}
 }

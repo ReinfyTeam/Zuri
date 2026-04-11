@@ -115,7 +115,7 @@ final class ExceptionHandler {
 			$logger->debug(Lang::get("messages.debug.system.exception-stack-trace", [
 				"trace" => $e->getTraceAsString(),
 			], "{prefix} Stack trace: {trace}"));
-			AuditLogger::crash("Safe-crash captured: context={$context}, type=" . get_class($e) . ", message=" . $e->getMessage());
+			AuditLogger::crashThrowable("Safe-crash boundary context={$context}", $e);
 		} elseif (self::$errorCount === self::MAX_ERRORS_PER_MINUTE + 1) {
 			$logger = Server::getInstance()->getLogger();
 			$logger->error(Lang::get("messages.debug.system.exception-suppressed", [], "{prefix} Too many exceptions, suppressing further logging for 60 seconds"));
