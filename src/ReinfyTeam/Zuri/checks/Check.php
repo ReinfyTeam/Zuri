@@ -151,7 +151,8 @@ abstract class Check extends ConfigManager {
 			self::toInt(self::getData("zuri.async.max-queue-size", 2048), 2048),
 			self::toFloat(self::getData("zuri.async.worker-timeout-seconds", 3.0), 3.0),
 			self::toFloat(self::getData("zuri.async.degraded-cooldown-seconds", 6.0), 6.0),
-			self::toInt(self::getData("zuri.async.batch-size", 64), 64)
+			self::toInt(self::getData("zuri.async.batch-size", 64), 64),
+			self::toFloat(self::getData("zuri.async.worker-target-ms", 20.0), 20.0)
 		);
 
 		$now = microtime(true);
@@ -395,6 +396,11 @@ abstract class Check extends ConfigManager {
 			}
 
 			if ($reachedMaxViolations) {
+				AuditLogger::detection("pre-vl-reached", $player->getName(), $this->getName(), $this->getSubType(), [
+					"violations" => $currentViolations,
+					"realViolations" => $currentRealViolations,
+					"threshold" => $maxPreViolations,
+				]);
 				$alertText = ReplaceText::replace($playerAPI, Lang::raw(LangKeys::ALERTS_MESSAGE), $this->getName(), $this->getSubType());
 				$alertKey = "alert:" . $player->getName() . ":" . strtolower($this->getName()) . ":" . strtolower($this->getSubType());
 				if (self::canEmitThrottled($alertKey, 0.5)) {
@@ -406,6 +412,10 @@ abstract class Check extends ConfigManager {
 					}
 				}
 			} else {
+				AuditLogger::detection("detection", $player->getName(), $this->getName(), $this->getSubType(), [
+					"violations" => $currentViolations,
+					"threshold" => $maxPreViolations,
+				]);
 				if ($detectionsAllowedToSend) {
 					$detectionText = ReplaceText::replace($playerAPI, Lang::raw(LangKeys::DETECTION_MESSAGE), $this->getName(), $this->getSubType());
 					$detectionKey = "detection:" . $player->getName() . ":" . strtolower($this->getName()) . ":" . strtolower($this->getSubType());

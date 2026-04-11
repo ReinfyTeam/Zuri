@@ -84,7 +84,7 @@ final class HotPathProfiler {
 		$logger->debug(Lang::get("messages.debug.system.hotpath-window", [
 			"calls" => (string) $totalCalls,
 			"duration" => (string) round($windowSeconds, 2),
-		], "[Zuri] Hot-path profile window: calls={calls}, duration={duration}s"));
+		], "{prefix} Hot-path profile window: calls={calls}, duration={duration}s"));
 
 		foreach (self::$metrics as $metric => $entry) {
 			$avg = $entry["total"] / max(1, $entry["count"]);
@@ -93,7 +93,7 @@ final class HotPathProfiler {
 				"count" => (string) $entry["count"],
 				"avg" => (string) round($avg * 1000.0, 3),
 				"max" => (string) round($entry["max"] * 1000.0, 3),
-			], "[Zuri] Profile {metric}: count={count}, avg={avg}ms, max={max}ms"));
+			], "{prefix} Profile {metric}: count={count}, avg={avg}ms, max={max}ms"));
 		}
 
 		self::$metrics = [];

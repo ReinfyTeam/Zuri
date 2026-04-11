@@ -45,16 +45,19 @@ use ReinfyTeam\Zuri\command\subcommand\HelpSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\LanguageSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\ListSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\NotifySubCommand;
+use ReinfyTeam\Zuri\command\subcommand\ReportSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\StatusSubCommand;
 use ReinfyTeam\Zuri\command\subcommand\UiSubCommand;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\ZuriAC;
+use function explode;
 use function implode;
+use function preg_replace;
 use function trim;
 
 class ZuriCommand extends BaseCommand {
-	/** @var list<array{name:string,description:string,usage:string,aliases:list<string>}> */
+	/** @var list<array{name:string,usage:string,description:string}> */
 	private static array $helpEntries = [];
 
 	public function __construct(ZuriAC $plugin) {
@@ -75,6 +78,7 @@ class ZuriCommand extends BaseCommand {
 		$this->registerAndCollectSubCommand(new BypassSubCommand($plugin));
 		$this->registerAndCollectSubCommand(new DebugSubCommand($plugin));
 		$this->registerAndCollectSubCommand(new StatusSubCommand($plugin));
+		$this->registerAndCollectSubCommand(new ReportSubCommand($plugin));
 		$this->registerAndCollectSubCommand(new ListSubCommand($plugin));
 		$this->registerAndCollectSubCommand(new UiSubCommand($plugin));
 		$this->registerAndCollectSubCommand(new LanguageSubCommand($plugin));
@@ -96,8 +100,7 @@ class ZuriCommand extends BaseCommand {
 		];
 		foreach (self::$helpEntries as $entry) {
 			$usageText = " §8(§7usage: {$entry["usage"]}§8)";
-			$aliasText = $entry["aliases"] !== [] ? " §8(§7aliases: " . implode(", ", $entry["aliases"]) . "§8)" : "";
-			$lines[] = "§c/{$namecmd} §r{$entry["name"]}§7 - {$entry["description"]}{$usageText}{$aliasText}";
+			$lines[] = "§c/{$namecmd} §r{$entry["name"]}{$usageText}§7: {$entry["description"]}";
 		}
 		$lines[] = Lang::get(LangKeys::CMD_HELP_FOOTER);
 		return implode("\n", $lines);
@@ -109,14 +112,20 @@ class ZuriCommand extends BaseCommand {
 		$description = trim($rawDescription instanceof Translatable ? $rawDescription->getText() : $rawDescription);
 		$rawUsage = $subCommand->getUsage();
 		$usage = trim($rawUsage);
+		if ($usage !== "") {
+			$usage = trim((string) preg_replace('/^\s*usage:\s*/i', '', $usage));
+			$usage = trim(explode(":", $usage, 2)[0] ?? $usage);
+		}
 		if ($usage === "") {
+			$usage = "/zuri " . $subCommand->getName();
+		}
+		if ($usage[0] !== "/") {
 			$usage = "/zuri " . $subCommand->getName();
 		}
 		self::$helpEntries[] = [
 			"name" => $subCommand->getName(),
-			"description" => $description !== "" ? $description : "No description provided.",
 			"usage" => $usage,
-			"aliases" => $subCommand->getAliases(),
+			"description" => $description !== "" ? $description : "No description provided.",
 		];
 	}
 }

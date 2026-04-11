@@ -42,11 +42,10 @@ use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\server\CommandEvent;
 use pocketmine\player\Player;
 use pocketmine\Server;
-use pocketmine\utils\TextFormat;
-use ReinfyTeam\Zuri\config\ConfigManager;
-use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\events\CaptchaEvent;
 use ReinfyTeam\Zuri\events\player\PlayerTeleportByCommandEvent;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\Discord;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
@@ -123,7 +122,7 @@ class ServerListener implements Listener {
 				if ($message === $playerAPI->getCaptchaCode()) {
 					$playerAPI->setCaptcha(false);
 					$playerAPI->setCaptchaCode("nocode");
-					$playerAPI->getPlayer()->sendMessage(ConfigManager::getData(ConfigPaths::PREFIX) . TextFormat::GREEN . " Successfully completed the captcha!");
+					$playerAPI->getPlayer()->sendMessage(Lang::get(LangKeys::CAPTCHA_COMPLETED_MESSAGE));
 				}
 				(new CaptchaEvent($playerAPI))->call();
 				$event->cancel();

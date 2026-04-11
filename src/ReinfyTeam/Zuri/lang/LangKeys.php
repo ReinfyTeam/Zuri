@@ -40,6 +40,7 @@ final class LangKeys {
 	public const KICK_DISCONNECT_REASON = "messages.kick.disconnect-reason";
 	public const WARNING_MESSAGE = "messages.warning.message";
 	public const CAPTCHA_TEXT = "messages.captcha.text";
+	public const CAPTCHA_COMPLETED_MESSAGE = "messages.captcha.completed";
 	public const SERVER_LAGGING_MESSAGE = "messages.server.lagging";
 	public const ANTIBOT_MESSAGE = "messages.antibot.message";
 	public const EDITIONFAKER_MESSAGE = "messages.editionfaker.message";
@@ -47,6 +48,10 @@ final class LangKeys {
 	public const CHAT_SPAM_TEXT = "messages.chat.spam";
 	public const CHAT_COMMAND_TEXT = "messages.chat.command";
 	public const CHAT_REPEAT_TEXT = "messages.chat.repeat";
+	public const DEBUG_ASYNC_OVERLOAD = "messages.debug.system.async-overload";
+	public const DEBUG_UI_CONFIG_SAVE_FAILED = "messages.debug.system.ui-config-save-failed";
+	public const DEBUG_UI_RELOAD_FAILED = "messages.debug.system.ui-reload-failed";
+	public const DEBUG_PACKET_FLOOD_GUARD = "messages.debug.system.packet-flood-guard";
 
 	public const CMD_HELP_HEADER = "commands.help.header";
 	public const CMD_HELP_BUILD_AUTHOR = "commands.help.build-author";
@@ -69,6 +74,7 @@ final class LangKeys {
 	public const CMD_LANGUAGE_AVAILABLE = "commands.language.available";
 	public const CMD_LANGUAGE_SWITCHED = "commands.language.switched";
 	public const CMD_LANGUAGE_UNSUPPORTED = "commands.language.unsupported";
+	public const CMD_REPORT_READY = "commands.report.ready";
 
 	public const CMD_LIST_HEADER = "commands.list.header";
 	public const CMD_LIST_TITLE = "commands.list.title";
@@ -81,6 +87,9 @@ final class LangKeys {
 
 	public const ASYNC_STATUS_HEADER = "commands.async.header";
 	public const ASYNC_STATUS_QUEUE = "commands.async.queue";
+	public const ASYNC_STATUS_QUEUE_CLASS_COMBINED = "commands.async.queue-class-combined";
+	public const ASYNC_STATUS_QUEUE_BATCHES = "commands.async.queue-batches";
+	public const ASYNC_STATUS_QUEUE_BATCH_SIZE = "commands.async.queue-batch-size";
 	public const ASYNC_STATUS_WORKERS = "commands.async.workers";
 	public const ASYNC_STATUS_TOTALS = "commands.async.totals";
 	public const ASYNC_STATUS_AVG = "commands.async.avg";
@@ -108,6 +117,17 @@ final class LangKeys {
 	public const UPDATE_LATEST = "startup.update.latest";
 	public const UPDATE_DOWNLOADS = "startup.update.downloads";
 	public const UPDATE_DOWNLOAD_URL = "startup.update.download-url";
+	public const STARTUP_DIAG_MISSING_KEYS = "startup.diagnostics.missing-keys";
+	public const STARTUP_DIAG_MAX_WORKERS_RANGE = "startup.diagnostics.max-workers-range";
+	public const STARTUP_DIAG_BATCH_SIZE_RANGE = "startup.diagnostics.batch-size-range";
+	public const STARTUP_DIAG_MAX_QUEUE_MIN = "startup.diagnostics.max-queue-min";
+	public const STARTUP_DIAG_WORKER_TIMEOUT_RANGE = "startup.diagnostics.worker-timeout-range";
+	public const STARTUP_DIAG_DEGRADED_COOLDOWN_RANGE = "startup.diagnostics.degraded-cooldown-range";
+	public const STARTUP_DIAG_WORKER_TARGET_RANGE = "startup.diagnostics.worker-target-range";
+	public const STARTUP_DIAG_CORRELATION_MULTIPLIER_RANGE = "startup.diagnostics.correlation-multiplier-range";
+	public const STARTUP_DIAG_CORRELATION_EXTRA_RANGE = "startup.diagnostics.correlation-extra-range";
+	public const STARTUP_DIAG_BAN_KICK_BOOL = "startup.diagnostics.ban-kick-bool";
+	public const STARTUP_DIAG_CONFIDENCE_RANGE = "startup.diagnostics.confidence-range";
 
 	public const PROXY_CREATE_FAILED = "proxy.create-failed";
 	public const PROXY_BANNER_LINE = "proxy.banner.line";
@@ -134,6 +154,8 @@ final class LangKeys {
 	public const UI_MAIN_CAPTCHA_SETTINGS = "ui.main.captcha-settings";
 	public const UI_MAIN_ADMIN_SETTINGS = "ui.main.admin-settings";
 	public const UI_MAIN_ADVANCE_TOOLS = "ui.main.advance-tools";
+	public const UI_MAIN_CONFIG_EDITOR = "ui.main.config-editor";
+	public const UI_MAIN_CONFIG_CATEGORIES = "ui.main.config-categories";
 
 	public const UI_MANAGE_MODULES_TITLE = "ui.manage-modules.title";
 	public const UI_MANAGE_MODULES_CHOOSE = "ui.manage-modules.choose";
@@ -168,6 +190,31 @@ final class LangKeys {
 	public const UI_ADVANCE_TOOLS_PROXY_UDP = "ui.advance-tools.proxy-udp";
 	public const UI_ADVANCE_TOOLS_DISCORD_ALERTS = "ui.advance-tools.discord-alerts";
 
+	public const UI_CONFIG_EDITOR_TITLE = "ui.config-editor.title";
+	public const UI_CONFIG_EDITOR_CHOOSE = "ui.config-editor.choose";
+	public const UI_CONFIG_EDITOR_UPDATED = "ui.config-editor.updated";
+	public const UI_CONFIG_EDITOR_INVALID_PATH = "ui.config-editor.invalid-path";
+	public const UI_CONFIG_EDITOR_INVALID_VALUE = "ui.config-editor.invalid-value";
+	public const UI_CONFIG_EDITOR_PATH = "ui.config-editor.path";
+	public const UI_CONFIG_EDITOR_TYPE = "ui.config-editor.type";
+	public const UI_CONFIG_EDITOR_VALUE = "ui.config-editor.value";
+	public const UI_CONFIG_EDITOR_RELOAD = "ui.config-editor.reload";
+	public const UI_CONFIG_EDITOR_TYPE_AUTO = "ui.config-editor.type-auto";
+	public const UI_CONFIG_EDITOR_TYPE_STRING = "ui.config-editor.type-string";
+	public const UI_CONFIG_EDITOR_TYPE_INTEGER = "ui.config-editor.type-integer";
+	public const UI_CONFIG_EDITOR_TYPE_FLOAT = "ui.config-editor.type-float";
+	public const UI_CONFIG_EDITOR_TYPE_BOOLEAN = "ui.config-editor.type-boolean";
+	public const UI_CONFIG_EDITOR_TYPE_JSON = "ui.config-editor.type-json";
+	public const UI_CONFIG_EDITOR_TYPE_NULL = "ui.config-editor.type-null";
+	public const UI_CONFIG_EDITOR_REASON_EXPECTED_INTEGER = "ui.config-editor.reason-expected-integer";
+	public const UI_CONFIG_EDITOR_REASON_EXPECTED_FLOAT = "ui.config-editor.reason-expected-float";
+	public const UI_CONFIG_EDITOR_REASON_EXPECTED_BOOLEAN = "ui.config-editor.reason-expected-boolean";
+	public const UI_CONFIG_EDITOR_CATEGORY_TITLE = "ui.config-editor.category-title";
+	public const UI_CONFIG_EDITOR_CATEGORY_CHOOSE = "ui.config-editor.category-choose";
+	public const UI_CONFIG_EDITOR_CATEGORY_BACK = "ui.config-editor.category-back";
+	public const UI_CONFIG_EDITOR_CATEGORY_GROUP = "ui.config-editor.category-group";
+	public const UI_CONFIG_EDITOR_CATEGORY_VALUE = "ui.config-editor.category-value";
+
 	public const UI_TOGGLE_MODULES_TITLE = "ui.toggle-modules.title";
 	public const UI_TOGGLE_MODULES_CHOOSE = "ui.toggle-modules.choose";
 	public const UI_TOGGLE_MODULES_TOGGLED = "ui.toggle-modules.toggled";
@@ -178,6 +225,7 @@ final class LangKeys {
 
 	public const UI_MODULE_INFO_TITLE = "ui.module-info.title";
 	public const UI_MODULE_INFO_BODY = "ui.module-info.body";
+	public const UI_MODULE_INFO_BUTTON_TOGGLE_STATUS = "ui.module-info.button-toggle-status";
 	public const UI_MODULE_INFO_BUTTON_CHANGE_PREVL = "ui.module-info.button-change-prevl";
 	public const UI_MODULE_INFO_BUTTON_TOGGLE_PUNISHMENT = "ui.module-info.button-toggle-punishment";
 	public const UI_MODULE_INFO_BUTTON_CHANGE_MAXVL = "ui.module-info.button-change-maxvl";
@@ -198,6 +246,7 @@ final class LangKeys {
 	public const UI_TOGGLE_PUNISHMENT_TOGGLED = "ui.toggle-punishment.toggled";
 	public const UI_TOGGLE_PUNISHMENT_KICK = "ui.toggle-punishment.kick";
 	public const UI_TOGGLE_PUNISHMENT_BAN = "ui.toggle-punishment.ban";
+	public const UI_TOGGLE_PUNISHMENT_CAPTCHA = "ui.toggle-punishment.captcha";
 	public const UI_TOGGLE_PUNISHMENT_FLAG = "ui.toggle-punishment.flag";
 	public const UI_TOGGLE_PUNISHMENT_BUTTON = "ui.toggle-punishment.button";
 
@@ -205,4 +254,5 @@ final class LangKeys {
 	public const UI_COMMON_DISABLED = "ui.common.disabled";
 	public const UI_COMMON_YES = "ui.common.yes";
 	public const UI_COMMON_NO = "ui.common.no";
+	public const UI_COMMON_ERROR = "ui.common.error";
 }

@@ -77,6 +77,7 @@ class Utils {
 
 		$formats = [
 			"&" => TextFormat::ESCAPE,
+			"§" => TextFormat::ESCAPE,
 			"{ESCAPE}" => TextFormat::ESCAPE,
 			"{OBFUSCATED}" => TextFormat::OBFUSCATED,
 			"{BOLD}" => TextFormat::BOLD,

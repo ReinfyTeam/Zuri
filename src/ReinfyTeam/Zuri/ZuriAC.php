@@ -131,10 +131,12 @@ use ReinfyTeam\Zuri\network\ProxyUDPSocket;
 use ReinfyTeam\Zuri\task\CaptchaTask;
 use ReinfyTeam\Zuri\task\ServerTickTask;
 use ReinfyTeam\Zuri\task\UpdateCheckerAsyncTask;
+use ReinfyTeam\Zuri\utils\AuditLogger;
 use ReinfyTeam\Zuri\utils\InternetAddress;
 use ReinfyTeam\Zuri\utils\PermissionManager;
 use vennv\vapm\VapmPMMP;
 use function class_exists;
+use function count;
 use function is_numeric;
 use function is_string;
 use function version_compare;
@@ -185,8 +187,10 @@ class ZuriAC extends PluginBase {
 	}
 
 	protected function onEnable() : void {
+		AuditLogger::bootIfNeeded();
 		if (!class_exists(VapmPMMP::class)) {
 			$this->getLogger()->error(Lang::get(LangKeys::STARTUP_VAPM_MISSING));
+			AuditLogger::crash("Startup failure: missing LibVapmPMMP");
 			$this->getServer()->getPluginManager()->disablePlugin($this);
 			return;
 		}
@@ -205,6 +209,9 @@ class ZuriAC extends PluginBase {
 		$this->getServer()->getPluginManager()->registerEvents(new PlayerListener(), $this);
 		$this->getServer()->getPluginManager()->registerEvents(new ServerListener(), $this);
 		$this->getServer()->getCommandMap()->register("zuri", new ZuriCommand($this));
+		$localeRaw = ConfigManager::getData("zuri.language.locale", "en_US");
+		$locale = is_string($localeRaw) ? $localeRaw : "en_US";
+		AuditLogger::anticheat("Plugin enabled. checks=" . count($this->checks) . ", locale=" . $locale);
 		$proxyUDPSocket = new ProxyUDPSocket();
 		if (ConfigManager::getData(ConfigPaths::PROXY_ENABLE)) {
 			$ipRaw = ConfigManager::getData(ConfigPaths::PROXY_IP);
@@ -215,6 +222,7 @@ class ZuriAC extends PluginBase {
 				$proxyUDPSocket->bind(new InternetAddress($ip, $port));
 			} catch (Exception $exception) {
 				$this->getServer()->getLogger()->notice(Lang::get(LangKeys::STARTUP_PROXY_STOPPING, ["error" => $exception->getMessage()]));
+				AuditLogger::crash("Proxy startup failure: " . $exception->getMessage());
 				return;
 			}
 		}

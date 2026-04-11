@@ -79,6 +79,8 @@ use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionD
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
 use pocketmine\player\Player;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\ExceptionHandler;
@@ -725,7 +727,10 @@ class PlayerListener implements Listener {
 			$this->packetRateState[$key] = $state;
 			ExceptionHandler::wrapVoid(
 				static function() use ($key, $maxPacketsPerSecond) : void {
-					ZuriAC::getInstance()->getLogger()->warning("[Zuri] Packet flood guard activated for {$key} (>" . $maxPacketsPerSecond . " packets/s)");
+					ZuriAC::getInstance()->getLogger()->warning(Lang::get(
+						LangKeys::DEBUG_PACKET_FLOOD_GUARD,
+						["key" => $key, "limit" => (string) $maxPacketsPerSecond]
+					));
 				},
 				"PlayerListener::packetFloodGuard"
 			);

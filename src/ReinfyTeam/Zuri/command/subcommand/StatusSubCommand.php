@@ -95,7 +95,16 @@ class StatusSubCommand extends BaseSubCommand {
 
 		$lines = [
 			Lang::get(LangKeys::ASYNC_STATUS_HEADER),
-			Lang::get(LangKeys::ASYNC_STATUS_QUEUE, ["queue" => (string) $metrics["queueSize"], "maxQueue" => (string) $metrics["maxQueueSize"]]),
+			Lang::get(LangKeys::ASYNC_STATUS_QUEUE, [
+				"queue" => (string) $metrics["queueSize"],
+				"maxQueue" => (string) $metrics["maxQueueSize"],
+				"classGroups" => (string) ($metrics["queueClassGroups"] ?? 0),
+				"batchUnits" => (string) ($metrics["queueBatchUnits"] ?? 0),
+				"batchSize" => (string) ($metrics["batchSize"] ?? 0),
+				"classCombinedLabel" => Lang::get(LangKeys::ASYNC_STATUS_QUEUE_CLASS_COMBINED),
+				"batchesLabel" => Lang::get(LangKeys::ASYNC_STATUS_QUEUE_BATCHES),
+				"batchSizeLabel" => Lang::get(LangKeys::ASYNC_STATUS_QUEUE_BATCH_SIZE),
+			]),
 			Lang::get(LangKeys::ASYNC_STATUS_WORKERS, ["inFlight" => (string) $metrics["inFlight"], "maxWorkers" => (string) $metrics["maxConcurrentWorkers"]]),
 			Lang::get(LangKeys::ASYNC_STATUS_UTILIZATION, [
 				"queueUtil" => $queueUtilText,

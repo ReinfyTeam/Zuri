@@ -80,12 +80,41 @@ zuri:
         # Number of queued checks evaluated together by one worker execution.
         # Recommended: 64-128 when queue spikes above ~1000.
         batch-size: 64
+        # Soft worker processing budget in milliseconds. Lower values favor responsiveness.
+        worker-target-ms: 20.0
         # Max queued async payloads before new payloads are dropped.
         max-queue-size: 2048
         # If a worker appears stuck longer than this, recover its slot and retry once.
         worker-timeout-seconds: 3.0
         # Duration to stay in sync-safe fallback mode after async degradation.
         degraded-cooldown-seconds: 6.0
+    logging:
+        enable: true
+        folders:
+            logs: "logs"
+            crashes: "crashes"
+        channels:
+            anticheat:
+                enable: true
+                file: "anticheat.log"
+            punishment:
+                enable: true
+                file: "punishment.log"
+            thread:
+                enable: true
+                file: "thread.log"
+            crash:
+                enable: true
+                file: "crash.log"
+            report:
+                enable: true
+                file: "report.txt"
+        cleanup:
+            # Removes old files from logs/ and crashes/ folders.
+            # Set max-age-days to 0 to disable age-based cleanup.
+            max-age-days: 30
+            # Optional fixed cutoff date (YYYY-MM-DD). Empty disables date-based cleanup.
+            delete-before-date: ""
     confidence:
         # Confidence scoring reduces false positives by requiring a minimum certainty level
         # before triggering violations. Lower values catch more cheats but may false-positive.

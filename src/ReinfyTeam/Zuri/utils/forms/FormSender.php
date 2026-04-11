@@ -43,21 +43,44 @@ use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\AuditLogger;
 use ReinfyTeam\Zuri\ZuriAC;
 use function array_key_exists;
+use function array_keys;
+use function array_pop;
 use function array_search;
+use function count;
+use function explode;
+use function implode;
 use function intval;
 use function is_array;
 use function is_bool;
+use function is_float;
 use function is_int;
 use function is_numeric;
 use function is_string;
+use function json_decode;
+use function json_encode;
+use function json_last_error;
+use function json_last_error_msg;
+use function max;
+use function min;
+use function str_contains;
+use function str_starts_with;
+use function strlen;
 use function strtolower;
 use function strtoupper;
+use function substr;
+use function trim;
 
 final class FormSender extends ConfigManager {
 	use NotCloneable;
 	use NotSerializable;
+
+	/** @var array<string,string> */
+	private static array $lastConfigEditorPath = [];
+	/** @var array<string,int> */
+	private static array $lastConfigEditorType = [];
 
 	private static function boolData(string $path, bool $default = false) : bool {
 		$value = self::getData($path, $default);
@@ -105,6 +128,308 @@ final class FormSender extends ConfigManager {
 		return array_key_exists(0, $data) && $data[0] === null ? 1 : 0;
 	}
 
+	private static function safeSetData(Player $player, string $path, mixed $value) : bool {
+		try {
+			self::setData($path, $value);
+			return true;
+		} catch (\Throwable $throwable) {
+			$message = Lang::get(LangKeys::DEBUG_UI_CONFIG_SAVE_FAILED, [
+				"path" => $path,
+				"error" => $throwable->getMessage(),
+			]);
+			ZuriAC::getInstance()->getLogger()->warning($message);
+			AuditLogger::anticheat($message);
+			$player->sendMessage(Lang::get(LangKeys::UI_COMMON_ERROR, ["reason" => $throwable->getMessage()]));
+			return false;
+		}
+	}
+
+	private static function safeReloadChecks(Player $player) : bool {
+		try {
+			ZuriAC::getInstance()->loadChecks();
+			return true;
+		} catch (\Throwable $throwable) {
+			$message = Lang::get(LangKeys::DEBUG_UI_RELOAD_FAILED, ["error" => $throwable->getMessage()]);
+			ZuriAC::getInstance()->getLogger()->warning($message);
+			AuditLogger::anticheat($message);
+			$player->sendMessage(Lang::get(LangKeys::UI_COMMON_ERROR, ["reason" => $throwable->getMessage()]));
+			return false;
+		}
+	}
+
+	private static function configEditorPlayerKey(Player $player) : string {
+		return strtolower($player->getName());
+	}
+
+	private static function stringifyConfigEditorValue(mixed $value) : string {
+		if (is_bool($value)) {
+			return $value ? "true" : "false";
+		}
+		if ($value === null) {
+			return "null";
+		}
+		if (is_string($value) || is_numeric($value)) {
+			return (string) $value;
+		}
+		$encoded = json_encode($value, JSON_UNESCAPED_UNICODE);
+		return is_string($encoded) ? $encoded : "";
+	}
+
+	private static function parseConfigEditorValue(int $typeIndex, string $raw, string &$error) : mixed {
+		$trimmed = trim($raw);
+		$lower = strtolower($trimmed);
+		$error = "";
+
+		switch ($typeIndex) {
+			case 0: // Auto
+				if ($lower === "true") {
+					return true;
+				}
+				if ($lower === "false") {
+					return false;
+				}
+				if ($lower === "null") {
+					return null;
+				}
+				if (is_numeric($trimmed)) {
+					return str_contains($trimmed, ".") || str_contains($lower, "e") ? (float) $trimmed : (int) $trimmed;
+				}
+				if (str_starts_with($trimmed, "{") || str_starts_with($trimmed, "[")) {
+					$decoded = json_decode($trimmed, true);
+					if (json_last_error() !== JSON_ERROR_NONE) {
+						$error = json_last_error_msg();
+						return null;
+					}
+					return $decoded;
+				}
+				return $raw;
+			case 1: // String
+				return $raw;
+			case 2: // Integer
+				if (!is_numeric($trimmed)) {
+					$error = Lang::get(LangKeys::UI_CONFIG_EDITOR_REASON_EXPECTED_INTEGER);
+					return null;
+				}
+				return (int) $trimmed;
+			case 3: // Float
+				if (!is_numeric($trimmed)) {
+					$error = Lang::get(LangKeys::UI_CONFIG_EDITOR_REASON_EXPECTED_FLOAT);
+					return null;
+				}
+				return (float) $trimmed;
+			case 4: // Boolean
+				if ($lower === "true" || $lower === "1" || $lower === "yes" || $lower === "on") {
+					return true;
+				}
+				if ($lower === "false" || $lower === "0" || $lower === "no" || $lower === "off") {
+					return false;
+				}
+				$error = Lang::get(LangKeys::UI_CONFIG_EDITOR_REASON_EXPECTED_BOOLEAN);
+				return null;
+			case 5: // JSON
+				$decoded = json_decode($trimmed, true);
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					$error = json_last_error_msg();
+					return null;
+				}
+				return $decoded;
+			case 6: // Null
+				return null;
+			default:
+				return $raw;
+		}
+	}
+
+	/** @return list<string> */
+	private static function configEditorTypeOptions() : array {
+		return [
+			Lang::get(LangKeys::UI_CONFIG_EDITOR_TYPE_AUTO),
+			Lang::get(LangKeys::UI_CONFIG_EDITOR_TYPE_STRING),
+			Lang::get(LangKeys::UI_CONFIG_EDITOR_TYPE_INTEGER),
+			Lang::get(LangKeys::UI_CONFIG_EDITOR_TYPE_FLOAT),
+			Lang::get(LangKeys::UI_CONFIG_EDITOR_TYPE_BOOLEAN),
+			Lang::get(LangKeys::UI_CONFIG_EDITOR_TYPE_JSON),
+			Lang::get(LangKeys::UI_CONFIG_EDITOR_TYPE_NULL),
+		];
+	}
+
+	private static function guessConfigEditorTypeIndex(mixed $value) : int {
+		if ($value === null) {
+			return 6;
+		}
+		if (is_bool($value)) {
+			return 4;
+		}
+		if (is_int($value)) {
+			return 2;
+		}
+		if (is_float($value)) {
+			return 3;
+		}
+		if (is_array($value)) {
+			return 5;
+		}
+		if (is_string($value)) {
+			return 1;
+		}
+		return 0;
+	}
+
+	private static function parentConfigPath(string $path) : string {
+		$parts = explode(".", $path);
+		if (count($parts) <= 1) {
+			return "zuri";
+		}
+		array_pop($parts);
+		$parent = implode(".", $parts);
+		return $parent !== "" ? $parent : "zuri";
+	}
+
+	private static function shortenValue(string $value, int $max = 48) : string {
+		if (strlen($value) <= $max) {
+			return $value;
+		}
+		return substr($value, 0, $max - 1) . "...";
+	}
+
+	public static function ConfigCategoryEditor(Player $player, string $basePath = "zuri") : void {
+		$node = self::getData($basePath, null);
+		if (!is_array($node)) {
+			self::ConfigEditor($player, $basePath);
+			return;
+		}
+
+		/** @var list<array{path:string,isGroup:bool}> $entries */
+		$entries = [];
+		$form = new SimpleForm(
+			Lang::get(LangKeys::UI_CONFIG_EDITOR_CATEGORY_TITLE, ["path" => $basePath]),
+			Lang::get(LangKeys::UI_CONFIG_EDITOR_CATEGORY_CHOOSE, ["path" => $basePath])
+		);
+		$form->setCallback(function(Player $player, FormResponse $response) use ($basePath, &$entries) : void {
+			$data = $response->getData();
+			if (!is_int($data)) {
+				self::MainUI($player);
+				return;
+			}
+			$entry = $entries[$data] ?? null;
+			if (!is_array($entry)) {
+				self::ConfigCategoryEditor($player, $basePath);
+				return;
+			}
+			$path = $entry["path"];
+			if ($path === "__back") {
+				$parent = self::parentConfigPath($basePath);
+				if ($basePath === "zuri") {
+					self::MainUI($player);
+					return;
+				}
+				self::ConfigCategoryEditor($player, $parent);
+				return;
+			}
+			if ($entry["isGroup"]) {
+				self::ConfigCategoryEditor($player, $path);
+				return;
+			}
+			self::ConfigEditor($player, $path);
+		});
+
+		if ($basePath !== "zuri") {
+			$form->addButton(Lang::get(LangKeys::UI_CONFIG_EDITOR_CATEGORY_BACK));
+			$entries[] = ["path" => "__back", "isGroup" => true];
+		}
+
+		foreach (array_keys($node) as $key) {
+			if (!is_string($key)) {
+				continue;
+			}
+			$path = $basePath . "." . $key;
+			$value = self::getData($path, null);
+			if (is_array($value)) {
+				$form->addButton(Lang::get(LangKeys::UI_CONFIG_EDITOR_CATEGORY_GROUP, ["name" => $key]));
+				$entries[] = ["path" => $path, "isGroup" => true];
+				continue;
+			}
+			$preview = self::shortenValue(self::stringifyConfigEditorValue($value));
+			$form->addButton(Lang::get(LangKeys::UI_CONFIG_EDITOR_CATEGORY_VALUE, [
+				"name" => $key,
+				"value" => $preview,
+			]));
+			$entries[] = ["path" => $path, "isGroup" => false];
+		}
+
+		$player->sendForm($form);
+	}
+
+	public static function ConfigEditor(Player $player, ?string $preferredPath = null, bool $saved = false, string $statusMessage = "") : void {
+		$playerKey = self::configEditorPlayerKey($player);
+		$path = trim($preferredPath ?? (self::$lastConfigEditorPath[$playerKey] ?? "zuri.alerts.enable"));
+		if ($path === "") {
+			$path = "zuri.alerts.enable";
+		}
+		self::$lastConfigEditorPath[$playerKey] = $path;
+
+		$currentValue = self::getData($path, "");
+		$typeOptions = self::configEditorTypeOptions();
+		$defaultTypeRaw = self::$lastConfigEditorType[$playerKey] ?? self::guessConfigEditorTypeIndex($currentValue);
+		$defaultType = max(0, min(6, (int) $defaultTypeRaw));
+		$defaultValue = self::stringifyConfigEditorValue($currentValue);
+
+		$form = new CustomForm(Lang::get(LangKeys::UI_CONFIG_EDITOR_TITLE));
+		$form->setCallback(function(Player $player, FormResponse $response) : void {
+			$data = $response->getData();
+			if ($data === null) {
+				self::MainUI($player);
+				return;
+			}
+			if (!is_array($data)) {
+				self::ConfigEditor($player);
+				return;
+			}
+
+			$offset = self::leadingLabelOffset($data);
+			$path = trim((string) ($data[0 + $offset] ?? ""));
+			$typeIndex = (int) ($data[1 + $offset] ?? 0);
+			$rawValue = (string) ($data[2 + $offset] ?? "");
+			$reload = (bool) ($data[3 + $offset] ?? false);
+
+			if ($path === "") {
+				self::ConfigEditor($player, null, false, Lang::get(LangKeys::UI_CONFIG_EDITOR_INVALID_PATH));
+				return;
+			}
+
+			$error = "";
+			$parsed = self::parseConfigEditorValue($typeIndex, $rawValue, $error);
+			if ($error !== "") {
+				self::ConfigEditor($player, $path, false, Lang::get(LangKeys::UI_CONFIG_EDITOR_INVALID_VALUE, ["reason" => $error]));
+				return;
+			}
+			if (!self::safeSetData($player, $path, $parsed)) {
+				return;
+			}
+			if ($reload && !self::safeReloadChecks($player)) {
+				return;
+			}
+
+			$playerKey = self::configEditorPlayerKey($player);
+			self::$lastConfigEditorPath[$playerKey] = $path;
+			self::$lastConfigEditorType[$playerKey] = $typeIndex;
+			self::ConfigEditor($player, $path, true, Lang::get(LangKeys::UI_CONFIG_EDITOR_UPDATED, [
+				"path" => $path,
+				"value" => self::stringifyConfigEditorValue($parsed),
+			]));
+		});
+
+		$message = $statusMessage !== ""
+			? $statusMessage
+			: ($saved ? Lang::get(LangKeys::UI_CONFIG_EDITOR_UPDATED, ["path" => $path, "value" => $defaultValue]) : Lang::get(LangKeys::UI_CONFIG_EDITOR_CHOOSE));
+		$form->addLabel($message);
+		$form->addInput(Lang::get(LangKeys::UI_CONFIG_EDITOR_PATH), "zuri.alerts.enable", $path);
+		$form->addDropdown(Lang::get(LangKeys::UI_CONFIG_EDITOR_TYPE), $typeOptions, $defaultType);
+		$form->addInput(Lang::get(LangKeys::UI_CONFIG_EDITOR_VALUE), "", $defaultValue);
+		$form->addToggle(Lang::get(LangKeys::UI_CONFIG_EDITOR_RELOAD), false);
+		$player->sendForm($form);
+	}
+
 	public static function MainUI(Player $player) : void {
 		$form = new SimpleForm(Lang::get(LangKeys::UI_MAIN_TITLE), Lang::get(LangKeys::UI_MAIN_CHOOSE));
 		$form->setCallback(function(Player $player, FormResponse $response) {
@@ -126,6 +451,12 @@ final class FormSender extends ConfigManager {
 				case 3:
 					self::AdvanceTools($player);
 					break;
+				case 4:
+					self::ConfigCategoryEditor($player);
+					break;
+				case 5:
+					self::ConfigEditor($player);
+					break;
 			}
 		});
 
@@ -133,6 +464,8 @@ final class FormSender extends ConfigManager {
 		$form->addButton(Lang::get(LangKeys::UI_MAIN_CAPTCHA_SETTINGS));
 		$form->addButton(Lang::get(LangKeys::UI_MAIN_ADMIN_SETTINGS));
 		$form->addButton(Lang::get(LangKeys::UI_MAIN_ADVANCE_TOOLS));
+		$form->addButton(Lang::get(LangKeys::UI_MAIN_CONFIG_CATEGORIES));
+		$form->addButton(Lang::get(LangKeys::UI_MAIN_CONFIG_EDITOR));
 		$player->sendForm($form);
 	}
 
@@ -157,7 +490,7 @@ final class FormSender extends ConfigManager {
 					break;
 				case 2:
 					self::ManageModules($player, true);
-					ZuriAC::getInstance()->loadChecks();
+					self::safeReloadChecks($player);
 					break;
 			}
 		});
@@ -182,18 +515,32 @@ final class FormSender extends ConfigManager {
 			}
 
 			$offset = self::leadingLabelOffset($data);
-			self::setData(self::CAPTCHA_ENABLE, (bool) ($data[0 + $offset] ?? false));
+			if (!self::safeSetData($player, self::CAPTCHA_ENABLE, (bool) ($data[0 + $offset] ?? false))) {
+				return;
+			}
 
 			if ((bool) ($data[0 + $offset] ?? false)) {
-				self::setData(self::CAPTCHA_CODE_LENGTH, (int) ($data[1 + $offset] ?? 6));
+				if (!self::safeSetData($player, self::CAPTCHA_CODE_LENGTH, (int) ($data[1 + $offset] ?? 6))) {
+					return;
+				}
 
 				if (!self::getData(self::CAPTCHA_RANDOMIZE)) {
-					self::setData(self::CAPTCHA_TIP, (bool) ($data[2 + $offset] ?? false));
-					self::setData(self::CAPTCHA_MESSAGE, (bool) ($data[3 + $offset] ?? false));
-					self::setData(self::CAPTCHA_TITLE, (bool) ($data[4 + $offset] ?? false));
-					self::setData(self::CAPTCHA_RANDOMIZE, (bool) ($data[5 + $offset] ?? false));
+					if (!self::safeSetData($player, self::CAPTCHA_TIP, (bool) ($data[2 + $offset] ?? false))) {
+						return;
+					}
+					if (!self::safeSetData($player, self::CAPTCHA_MESSAGE, (bool) ($data[3 + $offset] ?? false))) {
+						return;
+					}
+					if (!self::safeSetData($player, self::CAPTCHA_TITLE, (bool) ($data[4 + $offset] ?? false))) {
+						return;
+					}
+					if (!self::safeSetData($player, self::CAPTCHA_RANDOMIZE, (bool) ($data[5 + $offset] ?? false))) {
+						return;
+					}
 				} else {
-					self::setData(self::CAPTCHA_RANDOMIZE, (bool) ($data[2 + $offset] ?? false));
+					if (!self::safeSetData($player, self::CAPTCHA_RANDOMIZE, (bool) ($data[2 + $offset] ?? false))) {
+						return;
+					}
 				}
 			}
 
@@ -231,16 +578,32 @@ final class FormSender extends ConfigManager {
 			}
 
 			$offset = self::leadingLabelOffset($data);
-			self::setData(self::BAN_ENABLE, (bool) ($data[0 + $offset] ?? false));
-			self::setData(self::KICK_ENABLE, (bool) ($data[1 + $offset] ?? false));
-			self::setData(self::PERMISSION_BYPASS_ENABLE, (bool) ($data[2 + $offset] ?? false));
-			self::setData(self::ALERTS_ENABLE, (bool) ($data[3 + $offset] ?? false));
-			self::setData(self::DETECTION_ENABLE, (bool) ($data[4 + $offset] ?? false));
-			self::setData(self::NETWORK_LIMIT_ENABLE, (bool) ($data[5 + $offset] ?? false));
-			if ((bool) ($data[5 + $offset] ?? false) === true && isset($data[6 + $offset])) {
-				self::setData(self::NETWORK_LIMIT, (int) $data[6 + $offset]);
+			if (!self::safeSetData($player, self::BAN_ENABLE, (bool) ($data[0 + $offset] ?? false))) {
+				return;
 			}
-			ZuriAC::getInstance()->loadChecks();
+			if (!self::safeSetData($player, self::KICK_ENABLE, (bool) ($data[1 + $offset] ?? false))) {
+				return;
+			}
+			if (!self::safeSetData($player, self::PERMISSION_BYPASS_ENABLE, (bool) ($data[2 + $offset] ?? false))) {
+				return;
+			}
+			if (!self::safeSetData($player, self::ALERTS_ENABLE, (bool) ($data[3 + $offset] ?? false))) {
+				return;
+			}
+			if (!self::safeSetData($player, self::DETECTION_ENABLE, (bool) ($data[4 + $offset] ?? false))) {
+				return;
+			}
+			if (!self::safeSetData($player, self::NETWORK_LIMIT_ENABLE, (bool) ($data[5 + $offset] ?? false))) {
+				return;
+			}
+			if ((bool) ($data[5 + $offset] ?? false) === true && isset($data[6 + $offset])) {
+				if (!self::safeSetData($player, self::NETWORK_LIMIT, (int) $data[6 + $offset])) {
+					return;
+				}
+			}
+			if (!self::safeReloadChecks($player)) {
+				return;
+			}
 			self::AdminSettings($player, true);
 		});
 
@@ -282,8 +645,12 @@ final class FormSender extends ConfigManager {
 			Lang::setLocale($selectedLocale, true);
 
 			PlayerAPI::getAPIPlayer($player)->setDebug((bool) ($data[1 + $offset] ?? false));
-			self::setData(self::PROXY_ENABLE, (bool) ($data[2 + $offset] ?? false));
-			self::setData(self::DISCORD_ENABLE, (bool) ($data[3 + $offset] ?? false));
+			if (!self::safeSetData($player, self::PROXY_ENABLE, (bool) ($data[2 + $offset] ?? false))) {
+				return;
+			}
+			if (!self::safeSetData($player, self::DISCORD_ENABLE, (bool) ($data[3 + $offset] ?? false))) {
+				return;
+			}
 			self::AdvanceTools($player, true);
 		});
 
@@ -325,7 +692,7 @@ final class FormSender extends ConfigManager {
 				if (!$module instanceof Check) {
 					continue;
 				}
-				self::setData(self::CHECK . "." . strtolower($module->getName()) . ".enable", $toggle);
+				self::safeSetData($player, self::CHECK . "." . strtolower($module->getName()) . ".enable", $toggle);
 			}
 			self::ToggleModules($player, true);
 		});
@@ -342,6 +709,8 @@ final class FormSender extends ConfigManager {
 	public static function PickAModule(Player $player) : void {
 		/** @var list<string> $modules */
 		$modules = [];
+		/** @var array<string,true> $seen */
+		$seen = [];
 		$form = new SimpleForm(Lang::get(LangKeys::UI_PICK_MODULE_TITLE), Lang::get(LangKeys::UI_PICK_MODULE_CHOOSE));
 		$form->setCallback(function(Player $player, FormResponse $response) use (&$modules) {
 			$data = $response->getData();
@@ -366,19 +735,19 @@ final class FormSender extends ConfigManager {
 		});
 
 		foreach (ZuriAC::Checks() as $check) {
-			if (!isset($modules[$check->getName()])) {
-				$modules[] = $check->getName();
-				if ($check->getName() === "NetworkLimit") {
-					continue;
-				}
-				$form->addButton(
-					$check->getName()
-					. "\n"
-					. $check->getAllSubTypes()
-					. "\n"
-					. Lang::get(LangKeys::UI_PICK_MODULE_VIEW_INFO)
-				);
+			$name = $check->getName();
+			if (isset($seen[$name]) || $name === "NetworkLimit") {
+				continue;
 			}
+			$seen[$name] = true;
+			$modules[] = $name;
+			$form->addButton(
+				$name
+				. "\n"
+				. $check->getAllSubTypes()
+				. "\n"
+				. Lang::get(LangKeys::UI_PICK_MODULE_VIEW_INFO)
+			);
 		}
 
 		$player->sendForm($form);
@@ -415,23 +784,42 @@ final class FormSender extends ConfigManager {
 
 			switch($data) {
 				case 0:
-					self::ChangePreVL($player, $check);
+					self::ToggleModuleStatus($player, $check);
 					break;
 				case 1:
-					self::TogglePunishment($player, $check);
+					self::ChangePreVL($player, $check);
 					break;
 				case 2:
+					self::TogglePunishment($player, $check);
+					break;
+				case 3:
 					self::ChangeMaxVL($player, $check);
 					break;
 			}
 		});
 
+		$form->addButton(
+			Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_BUTTON, [
+				"mode" => Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_TOGGLE_STATUS),
+				"status" => $check->enable() ? Lang::get(LangKeys::UI_COMMON_ENABLED) : Lang::get(LangKeys::UI_COMMON_DISABLED),
+			])
+		);
 		$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_CHANGE_PREVL) . "\n" . $check->getAllSubTypes());
 		$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_TOGGLE_PUNISHMENT) . "\n" . $check->getAllSubTypes());
-		if (self::intData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl") !== 0) {
-			$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_CHANGE_MAXVL) . "\n" . $check->getAllSubTypes());
-		}
+		$form->addButton(Lang::get(LangKeys::UI_MODULE_INFO_BUTTON_CHANGE_MAXVL) . "\n" . $check->getAllSubTypes());
 		$player->sendForm($form);
+	}
+
+	private static function ToggleModuleStatus(Player $player, Check $check) : void {
+		$path = self::CHECK . "." . strtolower($check->getName()) . ".enable";
+		$newState = !self::boolData($path, $check->enable());
+		if (!self::safeSetData($player, $path, $newState)) {
+			return;
+		}
+		if (!self::safeReloadChecks($player)) {
+			return;
+		}
+		self::ModuleInformation($player, $check);
 	}
 
 	public static function ChangeMaxVL(Player $player, Check $check, bool $saved = false) : void {
@@ -449,7 +837,9 @@ final class FormSender extends ConfigManager {
 
 			$offset = self::leadingLabelOffset($data);
 			if (($data[0 + $offset] ?? null) !== null) {
-				self::setData(self::CHECK . "." . strtolower($check->getName()) . ".maxvl", intval($data[0 + $offset]));
+				if (!self::safeSetData($player, self::CHECK . "." . strtolower($check->getName()) . ".maxvl", intval($data[0 + $offset]))) {
+					return;
+				}
 				self::ChangeMaxVL($player, $check, true);
 			}
 		});
@@ -480,7 +870,7 @@ final class FormSender extends ConfigManager {
 				if (!is_string($subType) || !is_numeric($value)) {
 					continue;
 				}
-				self::setData(self::CHECK . "." . strtolower($check->getName()) . ".pre-vl." . $subType, (int) $value);
+				self::safeSetData($player, self::CHECK . "." . strtolower($check->getName()) . ".pre-vl." . $subType, (int) $value);
 			}
 
 			self::ChangePreVL($player, $check, true);
@@ -514,13 +904,24 @@ final class FormSender extends ConfigManager {
 
 			switch($data) {
 				case 0:
-					self::setData(self::CHECK . "." . strtolower($check->getName()) . ".punishment", strtoupper("kick"));
+					if (!self::safeSetData($player, self::CHECK . "." . strtolower($check->getName()) . ".punishment", strtoupper("kick"))) {
+						return;
+					}
 					break;
 				case 1:
-					self::setData(self::CHECK . "." . strtolower($check->getName()) . ".punishment", strtoupper("ban"));
+					if (!self::safeSetData($player, self::CHECK . "." . strtolower($check->getName()) . ".punishment", strtoupper("ban"))) {
+						return;
+					}
 					break;
 				case 2:
-					self::setData(self::CHECK . "." . strtolower($check->getName()) . ".punishment", strtoupper("flag"));
+					if (!self::safeSetData($player, self::CHECK . "." . strtolower($check->getName()) . ".punishment", strtoupper("captcha"))) {
+						return;
+					}
+					break;
+				case 3:
+					if (!self::safeSetData($player, self::CHECK . "." . strtolower($check->getName()) . ".punishment", strtoupper("flag"))) {
+						return;
+					}
 					break;
 			}
 			self::TogglePunishment($player, $check, true);
@@ -533,6 +934,10 @@ final class FormSender extends ConfigManager {
 		$form->addButton(Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_BUTTON, [
 			"mode" => Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_BAN),
 			"status" => (strtolower(self::stringData(self::CHECK . "." . strtolower($check->getName()) . ".punishment")) === "ban" ? Lang::get(LangKeys::UI_COMMON_ENABLED) : Lang::get(LangKeys::UI_COMMON_DISABLED)),
+		]));
+		$form->addButton(Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_BUTTON, [
+			"mode" => Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_CAPTCHA),
+			"status" => (strtolower(self::stringData(self::CHECK . "." . strtolower($check->getName()) . ".punishment")) === "captcha" ? Lang::get(LangKeys::UI_COMMON_ENABLED) : Lang::get(LangKeys::UI_COMMON_DISABLED)),
 		]));
 		$form->addButton(Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_BUTTON, [
 			"mode" => Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_FLAG),

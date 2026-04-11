@@ -106,17 +106,19 @@ final class ExceptionHandler {
 		// Rate limit logging to prevent log spam
 		if (self::$errorCount <= self::MAX_ERRORS_PER_MINUTE) {
 			$logger = Server::getInstance()->getLogger();
+			AuditLogger::anticheat("Safe-crash boundary: context={$context}, type=" . get_class($e) . ", message=" . $e->getMessage());
 			$logger->error(Lang::get("messages.debug.system.exception-error", [
 				"context" => $context,
 				"type" => get_class($e),
 				"message" => $e->getMessage(),
-			], "[Zuri] Exception in {context}: {type}: {message}"));
+			], "{prefix} Exception in {context}: {type}: {message}"));
 			$logger->debug(Lang::get("messages.debug.system.exception-stack-trace", [
 				"trace" => $e->getTraceAsString(),
-			], "[Zuri] Stack trace: {trace}"));
+			], "{prefix} Stack trace: {trace}"));
+			AuditLogger::crash("Safe-crash captured: context={$context}, type=" . get_class($e) . ", message=" . $e->getMessage());
 		} elseif (self::$errorCount === self::MAX_ERRORS_PER_MINUTE + 1) {
 			$logger = Server::getInstance()->getLogger();
-			$logger->error(Lang::get("messages.debug.system.exception-suppressed", [], "[Zuri] Too many exceptions, suppressing further logging for 60 seconds"));
+			$logger->error(Lang::get("messages.debug.system.exception-suppressed", [], "{prefix} Too many exceptions, suppressing further logging for 60 seconds"));
 		}
 	}
 

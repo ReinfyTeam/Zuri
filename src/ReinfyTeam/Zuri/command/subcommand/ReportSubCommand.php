@@ -31,38 +31,26 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\command\subcommand;
 
-use CortexPE\Commando\args\RawStringArgument;
 use CortexPE\Commando\BaseSubCommand;
-use JsonException;
 use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
-use pocketmine\utils\TextFormat;
-use ReinfyTeam\Zuri\config\ConfigManager;
-use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\utils\AuditLogger;
 
-class BanModeSubCommand extends BaseSubCommand {
+final class ReportSubCommand extends BaseSubCommand {
 	public function __construct(PluginBase $plugin) {
-		parent::__construct($plugin, "banmode", "Use to on/off ban mode.", ["ban"]);
+		parent::__construct($plugin, "report", "Generate anti-cheat report file.", []);
 	}
 
 	protected function prepare() : void {
-		$this->registerArgument(0, new RawStringArgument("mode"));
 	}
 
-	/**
-	 * @param array<string,mixed> $args
-	 * @throws JsonException
-	 */
+	/** @param array<string,mixed> $args */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
-		$mode = $args["mode"] ?? "";
-
-		$current = ConfigManager::getData(ConfigPaths::BAN_ENABLE) === true;
-		ConfigManager::setData(ConfigPaths::BAN_ENABLE, !$current);
-		$status = !$current ? TextFormat::GREEN . "enable" : TextFormat::RED . "disable";
-		AuditLogger::command($sender, "zuri banmode", ["toggledTo" => !$current ? "enabled" : "disabled"]);
-		$sender->sendMessage(Lang::get(LangKeys::CMD_BANMODE_STATUS, ["status" => $status]));
+		AuditLogger::command($sender, "zuri report");
+		$file = AuditLogger::createReportFile();
+		$sender->sendMessage(Lang::get(LangKeys::CMD_REPORT_READY, ["file" => $file]));
 	}
 }
+

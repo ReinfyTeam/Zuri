@@ -33,24 +33,37 @@ namespace ReinfyTeam\Zuri\task;
 
 use pocketmine\Server;
 use ReinfyTeam\Zuri\checks\Check;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
+use ReinfyTeam\Zuri\utils\AuditLogger;
 use Throwable;
 use vennv\vapm\ClosureThread;
 use function array_slice;
+use function base64_decode;
+use function base64_encode;
+use function ceil;
 use function count;
+use function floor;
 use function function_exists;
 use function ini_get;
 use function is_array;
+use function is_bool;
+use function is_int;
 use function is_numeric;
 use function is_string;
 use function json_decode;
+use function json_encode;
 use function max;
 use function memory_get_peak_usage;
 use function memory_get_usage;
 use function method_exists;
 use function microtime;
 use function min;
+use function round;
 use function rtrim;
+use function strpos;
+use function strrpos;
 use function strtoupper;
 use function substr;
 use function sys_getloadavg;
@@ -73,6 +86,7 @@ class CheckAsyncTask {
 	private static float $degradedUntil = 0.0;
 	private static float $lastQueueOptimizationAt = 0.0;
 	private static float $queueOptimizationIntervalSeconds = 2.0;
+	private static float $workerTargetMilliseconds = 20.0;
 
 	/** @var array<string,array{startedAt:float,queuedAt:float,capturedAt:float,checkClass:string,playerName:string,payload:array<string,mixed>,sequence:int,attempt:int,batchId:string,dedupeKey:string}> */
 	private static array $activeTasks = [];
@@ -116,6 +130,8 @@ class CheckAsyncTask {
 
 		$completed = self::$totalCompleted > 0 ? self::$totalCompleted : 1;
 		$pendingQueue = self::pendingQueueSize();
+		$pendingClassGroups = self::pendingClassGroupCount();
+		$pendingBatchUnits = self::pendingBatchUnitCount($pendingQueue);
 		$queueUtilization = self::$maxQueueSize > 0 ? ($pendingQueue / self::$maxQueueSize) : 0.0;
 		$workerUtilization = self::$maxConcurrentWorkers > 0 ? (self::$inFlight / self::$maxConcurrentWorkers) : 0.0;
 		$memoryLimit = self::parseMemoryLimitBytes();
@@ -125,6 +141,8 @@ class CheckAsyncTask {
 		$cpuLoad = function_exists("sys_getloadavg") ? (sys_getloadavg()[0] ?? 0.0) : 0.0;
 		return [
 			"queueSize" => $pendingQueue,
+			"queueClassGroups" => $pendingClassGroups,
+			"queueBatchUnits" => $pendingBatchUnits,
 			"inFlight" => self::$inFlight,
 			"maxConcurrentWorkers" => self::$maxConcurrentWorkers,
 			"minConcurrentWorkers" => self::$minConcurrentWorkers,
@@ -167,10 +185,11 @@ class CheckAsyncTask {
 			"avgQueueWait" => self::$totalQueueWaitTime / $completed,
 			"avgWorkerTime" => self::$totalWorkerTime / $completed,
 			"avgMergeTime" => self::$totalMergeTime / $completed,
+			"workerTargetMs" => self::$workerTargetMilliseconds,
 		];
 	}
 
-	public static function configure(int $maxConcurrentWorkers, int $maxQueueSize, float $workerTimeoutSeconds = 3.0, float $degradedCooldownSeconds = 6.0, int $batchSize = 16) : void {
+	public static function configure(int $maxConcurrentWorkers, int $maxQueueSize, float $workerTimeoutSeconds = 3.0, float $degradedCooldownSeconds = 6.0, int $batchSize = 16, float $workerTargetMilliseconds = 20.0) : void {
 		self::$configuredMaxConcurrentWorkers = max(1, min(16, $maxConcurrentWorkers));
 		self::$maxConcurrentWorkers = self::$configuredMaxConcurrentWorkers;
 		self::$minConcurrentWorkers = 1;
@@ -179,6 +198,7 @@ class CheckAsyncTask {
 		self::$maxQueueSize = $maxQueueSize > 0 ? $maxQueueSize : 1;
 		self::$workerTimeoutSeconds = $workerTimeoutSeconds > 0.1 ? $workerTimeoutSeconds : 0.1;
 		self::$degradedCooldownSeconds = $degradedCooldownSeconds > 0.1 ? $degradedCooldownSeconds : 0.1;
+		self::$workerTargetMilliseconds = $workerTargetMilliseconds > 1.0 ? min(250.0, $workerTargetMilliseconds) : 20.0;
 	}
 
 	/** @param array<string,mixed> $payload */
@@ -240,13 +260,13 @@ class CheckAsyncTask {
 
 		while (self::$inFlight < self::$maxConcurrentWorkers && self::pendingQueueSize() > 0) {
 			$pendingQueue = self::pendingQueueSize();
-			$targetBatchSize = self::$batchSize;
+			$targetBatchSize = self::computeTargetBatchSize($pendingQueue);
 			if ($pendingQueue >= ($targetBatchSize * 8)) {
-				$targetBatchSize = min(256, $targetBatchSize * 8);
+				$targetBatchSize = min(128, $targetBatchSize * 4);
 			} elseif ($pendingQueue >= ($targetBatchSize * 4)) {
-				$targetBatchSize = min(256, $targetBatchSize * 4);
+				$targetBatchSize = min(128, $targetBatchSize * 2);
 			} elseif ($pendingQueue >= ($targetBatchSize * 2)) {
-				$targetBatchSize = min(256, $targetBatchSize * 2);
+				$targetBatchSize = min(128, $targetBatchSize + max(1, (int) ($targetBatchSize / 2)));
 			}
 
 			$batch = [];
@@ -307,10 +327,21 @@ class CheckAsyncTask {
 		];
 		self::$inFlight++;
 		self::$totalDispatched += count($taskIds);
+		$encodedBatchPayloadRaw = json_encode(
+			$batchPayload,
+			JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
+		);
+		$encodedBatchPayload = is_string($encodedBatchPayloadRaw) ? base64_encode($encodedBatchPayloadRaw) : "";
 
 		$thread = new ClosureThread(
-			static function (array $tasks) : array {
+			static function (string $encodedTasks) : string {
 				$results = [];
+				$decodedPayload = base64_decode($encodedTasks, true);
+				$tasks = is_string($decodedPayload) ? json_decode($decodedPayload, true) : null;
+				if (!is_array($tasks)) {
+					$failed = json_encode(["error" => "Unable to decode batch payload", "results" => []]);
+					return is_string($failed) ? $failed : "{\"results\":{}}";
+				}
 				/** @var array<string,list<array{id:string,payload:array<string,mixed>}>> $grouped */
 				$grouped = [];
 				foreach ($tasks as $task) {
@@ -359,9 +390,13 @@ class CheckAsyncTask {
 						}
 					}
 				}
-				return ["results" => $results];
+				$encoded = json_encode(
+					["results" => $results],
+					JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
+				);
+				return is_string($encoded) ? $encoded : "{\"results\":{}}";
 			},
-			[$batchPayload]
+			[$encodedBatchPayload]
 		);
 		$thread->start()
 			->then(function(mixed $output) use ($batchId) : mixed {
@@ -388,6 +423,7 @@ class CheckAsyncTask {
 		self::drain();
 
 		if ($reason !== null) {
+			$reasonText = self::normalizeErrorReason($reason);
 			foreach ($batchMeta["taskIds"] as $id) {
 				$taskMeta = self::$activeTasks[$id] ?? null;
 				if (!is_array($taskMeta)) {
@@ -398,9 +434,11 @@ class CheckAsyncTask {
 				self::$totalCompleted++;
 				self::$totalWorkerTime += $batchDuration;
 				self::$totalThreadErrors++;
+				self::logTaskFailure("thread-error", $batchId, $taskMeta, $reasonText);
 				if (self::retryTask($taskMeta)) {
 					continue;
 				}
+				self::logTaskFailure("thread-error-fallback", $batchId, $taskMeta, $reasonText);
 				self::executeSyncFallback($taskMeta["checkClass"], $taskMeta["playerName"], $taskMeta["payload"], $taskMeta["sequence"]);
 			}
 			self::activateDegradedMode(self::$lastCompleteAt);
@@ -408,8 +446,53 @@ class CheckAsyncTask {
 			return;
 		}
 
-		$payload = is_string($output) ? json_decode($output, true) : null;
-		$results = is_array($payload) && is_array($payload["results"] ?? null) ? $payload["results"] : [];
+		$decoded = null;
+		if (is_string($output)) {
+			$decoded = json_decode($output, true);
+			if (!is_array($decoded)) {
+				$start = strpos($output, "{");
+				$end = strrpos($output, "}");
+				if (is_int($start) && is_int($end) && $end >= $start) {
+					$fragment = substr($output, $start, ($end - $start) + 1);
+					$decoded = json_decode($fragment, true);
+				}
+			}
+		} elseif (is_array($output)) {
+			$decoded = $output;
+		}
+		$results = [];
+		if (is_array($decoded)) {
+			if (is_array($decoded["results"] ?? null)) {
+				$results = $decoded["results"];
+			} else {
+				// Some runtimes may return the id=>result map directly.
+				$results = $decoded;
+			}
+		}
+		$topLevelError = is_array($decoded) && is_string($decoded["error"] ?? null) ? $decoded["error"] : null;
+		if ($topLevelError !== null && $results === []) {
+			$reasonText = "Thread output error: " . $topLevelError;
+			foreach ($batchMeta["taskIds"] as $id) {
+				$taskMeta = self::$activeTasks[$id] ?? null;
+				if (!is_array($taskMeta)) {
+					self::$totalLateCompletions++;
+					continue;
+				}
+				unset(self::$activeTasks[$id]);
+				self::$totalCompleted++;
+				self::$totalWorkerTime += $batchDuration;
+				self::$totalThreadErrors++;
+				self::logTaskFailure("thread-error", $batchId, $taskMeta, $reasonText);
+				if (self::retryTask($taskMeta)) {
+					continue;
+				}
+				self::logTaskFailure("thread-error-fallback", $batchId, $taskMeta, $reasonText);
+				self::executeSyncFallback($taskMeta["checkClass"], $taskMeta["playerName"], $taskMeta["payload"], $taskMeta["sequence"]);
+			}
+			self::activateDegradedMode(self::$lastCompleteAt);
+			self::drain();
+			return;
+		}
 
 		foreach ($batchMeta["taskIds"] as $id) {
 			$taskMeta = self::$activeTasks[$id] ?? null;
@@ -422,12 +505,26 @@ class CheckAsyncTask {
 			self::$totalWorkerTime += $batchDuration;
 
 			$result = $results[$id] ?? null;
-			if (!is_array($result) || isset($result["error"])) {
+			if (!is_array($result)) {
 				self::$totalThreadResultErrors++;
+				$reasonText = "Invalid or missing thread result payload";
+				self::logTaskFailure("result-error", $batchId, $taskMeta, $reasonText);
 				if (self::retryTask($taskMeta)) {
 					continue;
 				}
+				self::logTaskFailure("result-error-fallback", $batchId, $taskMeta, $reasonText);
+				self::executeSyncFallback($taskMeta["checkClass"], $taskMeta["playerName"], $taskMeta["payload"], $taskMeta["sequence"]);
+				continue;
+			}
 
+			if (isset($result["error"])) {
+				self::$totalThreadResultErrors++;
+				$reasonText = is_string($result["error"]) ? $result["error"] : "Invalid or missing thread result payload";
+				self::logTaskFailure("result-error", $batchId, $taskMeta, $reasonText);
+				if (self::retryTask($taskMeta)) {
+					continue;
+				}
+				self::logTaskFailure("result-error-fallback", $batchId, $taskMeta, $reasonText);
 				self::executeSyncFallback($taskMeta["checkClass"], $taskMeta["playerName"], $taskMeta["payload"], $taskMeta["sequence"]);
 				continue;
 			}
@@ -473,22 +570,34 @@ class CheckAsyncTask {
 		];
 		self::$pendingTaskIndexesByKey[$taskMeta["dedupeKey"]] = count(self::$queue) - 1;
 		self::$totalThreadRetries++;
+		self::logTaskFailure("retry-scheduled", $taskMeta["batchId"], $taskMeta, "retry attempt=" . ($taskMeta["attempt"] + 1));
 		return true;
 	}
 
 	/** @param array<string,mixed> $payload */
 	private static function executeSyncFallback(string $checkClass, string $playerName, array $payload, int $sequence) : void {
 		self::$totalSyncFallback++;
+		$context = "check={$checkClass}, player={$playerName}, sequence={$sequence}";
 
 		try {
 			if (!method_exists($checkClass, "evaluateAsync")) {
 				self::$totalFallbackErrors++;
+				self::logWarning("Async fallback failed ({$context}): Missing evaluateAsync()");
 				return;
 			}
 
 			$result = $checkClass::evaluateAsync($payload);
-			if (!is_array($result) || isset($result["error"])) {
+			if (!is_array($result)) {
 				self::$totalFallbackErrors++;
+				$reason = "Invalid fallback result payload";
+				self::logWarning("Async fallback failed ({$context}): {$reason}");
+				return;
+			}
+
+			if (isset($result["error"])) {
+				self::$totalFallbackErrors++;
+				$reason = is_string($result["error"]) ? $result["error"] : "Invalid fallback result payload";
+				self::logWarning("Async fallback failed ({$context}): {$reason}");
 				return;
 			}
 
@@ -509,9 +618,47 @@ class CheckAsyncTask {
 			$mergeStartedAt = microtime(true);
 			self::applyResult($check, $playerAPI, $result);
 			self::$totalMergeTime += max(0.0, microtime(true) - $mergeStartedAt);
-		} catch (Throwable) {
+		} catch (Throwable $throwable) {
 			self::$totalFallbackErrors++;
+			self::logWarning("Async fallback exception ({$context}): " . $throwable->getMessage());
 		}
+	}
+
+	/**
+	 * @param array{startedAt:float,queuedAt:float,capturedAt:float,checkClass:string,playerName:string,payload:array<string,mixed>,sequence:int,attempt:int,batchId:string,dedupeKey:string} $taskMeta
+	 */
+	private static function logTaskFailure(string $kind, string $batchId, array $taskMeta, string $reason) : void {
+		self::logWarning(
+			"Async {$kind}: "
+			. "check=" . $taskMeta["checkClass"]
+			. ", player=" . $taskMeta["playerName"]
+			. ", sequence=" . $taskMeta["sequence"]
+			. ", attempt=" . $taskMeta["attempt"]
+			. ", batch=" . $batchId
+			. ", reason=" . $reason
+		);
+	}
+
+	private static function logWarning(string $message) : void {
+		Server::getInstance()->getLogger()->warning($message);
+		AuditLogger::thread($message);
+	}
+
+	private static function normalizeErrorReason(mixed $reason) : string {
+		if ($reason instanceof Throwable) {
+			return $reason->getMessage();
+		}
+		if (is_string($reason)) {
+			return $reason;
+		}
+		if (is_numeric($reason) || is_bool($reason)) {
+			return (string) $reason;
+		}
+		if (is_array($reason)) {
+			$encoded = json_encode($reason);
+			return is_string($encoded) ? $encoded : "array";
+		}
+		return "unknown async error reason";
 	}
 
 	/**
@@ -536,13 +683,42 @@ class CheckAsyncTask {
 			self::$totalWorkerScaleDowns++;
 		}
 
-		if ($queueUtilization >= 0.75) {
-			self::$batchSize = min(256, max(self::$configuredBatchSize, self::$configuredBatchSize * 4));
+		$targetWorkerSeconds = self::$workerTargetMilliseconds / 1000.0;
+		$avgWorkerSeconds = self::$totalCompleted > 0 ? (self::$totalWorkerTime / self::$totalCompleted) : 0.0;
+		if ($avgWorkerSeconds > 0.0 && $avgWorkerSeconds > ($targetWorkerSeconds * 1.2)) {
+			self::$batchSize = max(1, (int) floor(self::$batchSize * 0.75));
+		} elseif ($queueUtilization >= 0.75) {
+			self::$batchSize = min(128, max(self::$configuredBatchSize, self::$configuredBatchSize * 2));
 		} elseif ($queueUtilization >= 0.40) {
-			self::$batchSize = min(256, max(self::$configuredBatchSize, self::$configuredBatchSize * 2));
+			self::$batchSize = min(128, max(self::$configuredBatchSize, self::$configuredBatchSize + (int) floor(self::$configuredBatchSize / 2)));
 		} else {
 			self::$batchSize = self::$configuredBatchSize;
 		}
+
+		if ($avgWorkerSeconds > 0.0 && $avgWorkerSeconds > ($targetWorkerSeconds * 2.0) && self::$batchSize > 1) {
+			self::$batchSize = max(1, (int) floor(self::$batchSize / 2));
+		}
+	}
+
+	private static function computeTargetBatchSize(int $pendingQueue) : int {
+		$base = max(1, self::$batchSize);
+		$completed = self::$totalCompleted;
+		if ($completed <= 0 || self::$totalWorkerTime <= 0.0) {
+			return $base;
+		}
+		$avgWorkerSeconds = self::$totalWorkerTime / $completed;
+		$targetSeconds = max(0.001, self::$workerTargetMilliseconds / 1000.0);
+		if ($avgWorkerSeconds <= 0.0) {
+			return $base;
+		}
+		$ratio = $targetSeconds / $avgWorkerSeconds;
+		if ($ratio < 1.0) {
+			$base = max(1, (int) floor($base * max(0.1, $ratio)));
+		} elseif ($pendingQueue > ($base * 2) && $ratio > 1.2) {
+			$scaleUp = min(2.0, $ratio);
+			$base = min(128, max($base, (int) ceil($base * $scaleUp)));
+		}
+		return max(1, min(128, $base));
 	}
 
 	/**
@@ -607,6 +783,27 @@ class CheckAsyncTask {
 		return $pending > 0 ? $pending : 0;
 	}
 
+	private static function pendingClassGroupCount() : int {
+		$groups = [];
+		$count = count(self::$queue);
+		for ($i = self::$queueHead; $i < $count; $i++) {
+			$entry = self::$queue[$i] ?? null;
+			if (!is_array($entry)) {
+				continue;
+			}
+			$groups[$entry[0]] = true;
+		}
+		return count($groups);
+	}
+
+	private static function pendingBatchUnitCount(int $pendingQueue) : int {
+		if ($pendingQueue <= 0) {
+			return 0;
+		}
+		$size = self::$batchSize > 0 ? self::$batchSize : 1;
+		return (int) ceil($pendingQueue / $size);
+	}
+
 	private static function compactQueueIfNeeded() : void {
 		if (self::$queueHead <= 0) {
 			return;
@@ -656,10 +853,12 @@ class CheckAsyncTask {
 		$memoryUtilization = $memoryLimit > 0 ? ($memoryUsage / $memoryLimit) : 0.0;
 		$tps = Server::getInstance()->getTicksPerSecond();
 
-		$overloaded = $queueUtilization >= 0.90
-			|| $workerUtilization >= 0.95
-			|| ($memoryLimit > 0 && $memoryUtilization >= 0.85)
-			|| $tps < 15.0;
+		$queueOverloaded = $queueUtilization >= 0.90;
+		$memoryOverloaded = $memoryLimit > 0 && $memoryUtilization >= 0.85;
+		$tpsOverloaded = $tps < 15.0;
+		// Full workers alone can be healthy; require meaningful backlog before treating it as overload.
+		$workerOverloaded = $workerUtilization >= 0.98 && $queueUtilization >= 0.25;
+		$overloaded = $queueOverloaded || $workerOverloaded || $memoryOverloaded || $tpsOverloaded;
 
 		self::$overloadActive = $overloaded;
 		if (!$overloaded) {
@@ -671,14 +870,14 @@ class CheckAsyncTask {
 
 		self::$lastOverloadAlertAt = $now;
 		self::$totalOverloadAlerts++;
-		Server::getInstance()->getLogger()->warning(
-			"[Zuri] Async overload detected: queue="
-			. self::pendingQueueSize() . "/" . self::$maxQueueSize
-			. ", inFlight=" . self::$inFlight . "/" . self::$maxConcurrentWorkers
-			. ", tps=" . $tps
-			. ", memory=" . $memoryUsage
-			. ($memoryLimit > 0 ? "/" . $memoryLimit : "")
-		);
+		self::logWarning(Lang::get(LangKeys::DEBUG_ASYNC_OVERLOAD, [
+			"queue" => (string) self::pendingQueueSize(),
+			"maxQueue" => (string) self::$maxQueueSize,
+			"inFlight" => (string) self::$inFlight,
+			"maxWorkers" => (string) self::$maxConcurrentWorkers,
+			"tps" => (string) round($tps, 2),
+			"memory" => (string) $memoryUsage . ($memoryLimit > 0 ? "/" . $memoryLimit : ""),
+		]));
 	}
 
 	private static function activateDegradedMode(float $now) : void {
@@ -729,6 +928,7 @@ class CheckAsyncTask {
 		self::$lastQueueOptimizationAt = 0.0;
 		self::$overloadActive = false;
 		self::$lastOverloadAlertAt = 0.0;
+		self::$workerTargetMilliseconds = 20.0;
 
 		self::$totalDispatched = 0;
 		self::$totalCompleted = 0;
@@ -815,8 +1015,8 @@ class CheckAsyncTask {
 				$check->failed($playerAPI);
 			} catch (Throwable $throwable) {
 				self::$totalFallbackErrors++;
-				Server::getInstance()->getLogger()->warning(
-					"[Zuri] Async failed() merge exception in "
+				self::logWarning(
+					"Async failed() merge exception in "
 					. $check->getName() . ":" . $check->getSubType()
 					. " for " . $playerAPI->getPlayer()->getName()
 					. ": " . $throwable->getMessage()
