@@ -1,4 +1,4 @@
-name: PHPUnit
+name: PHP-CS-FIXER Analyze Code Style
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  phpstan:
+  php-cs-fixer:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,5 +24,5 @@ jobs:
       - name: Install composer dependencies
         run: composer install --prefer-dist
 
-      - name: Run PHPStan
-        run: composer run-script test
+      - name: Run PHP-CS-FIXER
+        run: composer run-script format:check

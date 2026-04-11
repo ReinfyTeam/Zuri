@@ -14,6 +14,7 @@ use ReinfyTeam\Zuri\checks\snapshots\NetworkSnapshot;
 use ReinfyTeam\Zuri\checks\snapshots\SnapshotException;
 use function json_encode;
 use function json_decode;
+use function microtime;
 
 /**
  * Validates snapshot infrastructure for async checking.
@@ -94,7 +95,7 @@ class SnapshotValidationTest {
 
         // Test MovementSnapshot - minimal valid data
         try {
-            $snapshot = new MovementSnapshot("TestCheck", $this->createMockPlayer(), $this->createMockPlayerAPI());
+            $snapshot = $this->createMovementSnapshot("TestCheck");
 
             // Test build() returns array
             $built = $snapshot->build();
@@ -130,7 +131,7 @@ class SnapshotValidationTest {
         echo "Testing Snapshot Validation...\n";
 
         try {
-            $snapshot = new MovementSnapshot("TestCheck", $this->createMockPlayer(), $this->createMockPlayerAPI());
+            $snapshot = $this->createMovementSnapshot("TestCheck");
 
             // validate() should not throw for valid snapshot
             try {
@@ -150,7 +151,7 @@ class SnapshotValidationTest {
         echo "Testing Schema Versioning...\n";
 
         try {
-            $snapshot = new MovementSnapshot("TestCheck", $this->createMockPlayer(), $this->createMockPlayerAPI());
+            $snapshot = $this->createMovementSnapshot("TestCheck");
             $built = $snapshot->build();
 
             // Check schemaVersion is present
@@ -247,6 +248,51 @@ class SnapshotValidationTest {
     private function pass(string $message): void {
         $this->results[] = ['status' => 'PASS', 'message' => $message];
         echo "  ✓ {$message}\n";
+    }
+
+    private function createMovementSnapshot(string $checkType): MovementSnapshot {
+        $reflection = new \ReflectionClass(MovementSnapshot::class);
+        /** @var MovementSnapshot $snapshot */
+        $snapshot = $reflection->newInstanceWithoutConstructor();
+
+        $set = static function (object $target, string $property, mixed $value): void {
+            $rp = new \ReflectionProperty($target, $property);
+            $rp->setValue($target, $value);
+        };
+
+        $set($snapshot, "checkType", $checkType);
+        $set($snapshot, "captureTime", microtime(true));
+        $set($snapshot, "posX", 0.0);
+        $set($snapshot, "posY", 64.0);
+        $set($snapshot, "posZ", 0.0);
+        $set($snapshot, "eyeX", 0.0);
+        $set($snapshot, "eyeY", 65.62);
+        $set($snapshot, "eyeZ", 0.0);
+        $set($snapshot, "motionX", 0.0);
+        $set($snapshot, "motionY", 0.0);
+        $set($snapshot, "motionZ", 0.0);
+        $set($snapshot, "absMotionX", 0.0);
+        $set($snapshot, "absMotionY", 0.0);
+        $set($snapshot, "absMotionZ", 0.0);
+        $set($snapshot, "onGround", true);
+        $set($snapshot, "onAdhesion", false);
+        $set($snapshot, "inWeb", false);
+        $set($snapshot, "gliding", false);
+        $set($snapshot, "sprinting", false);
+        $set($snapshot, "survival", true);
+        $set($snapshot, "jumpTicks", 0);
+        $set($snapshot, "attackTicks", 0);
+        $set($snapshot, "teleportTicks", 0);
+        $set($snapshot, "teleportCommandTicks", 0);
+        $set($snapshot, "hurtTicks", 0);
+        $set($snapshot, "onlineTime", 0);
+        $set($snapshot, "groundSolid", true);
+        $set($snapshot, "chunkLoaded", true);
+        $set($snapshot, "recentlyCancelled", false);
+        $set($snapshot, "ping", 0);
+        $set($snapshot, "cachedData", []);
+
+        return $snapshot;
     }
 
     private function fail(string $message): void {

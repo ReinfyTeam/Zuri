@@ -15,8 +15,7 @@
         "pocketmine/pocketmine-mp": "^5.42.1",
         "phpstan/phpstan": "^1.2",
         "sof3/pharynx": "^0.3.8",
-        "friendsofphp/php-cs-fixer": "^3.94.2",
-        "phpunit/phpunit": "^11.5"
+        "friendsofphp/php-cs-fixer": "^3.94.2"
     },
     "autoload": {
         "classmap": [
@@ -34,7 +33,7 @@
         "analyze": "vendor/bin/phpstan --no-progress",
         "build": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -p=./build/Zuri.phar",
         "build-source": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -o=./build/",
-		"test": "php vendor/bin/phpunit --verbose --stop-on-failure"
+		"test": "for file in tests/*.php; do php -f \"$file\"; done"
     },
     "minimum-stability": "stable",
     "prefer-stable": true

@@ -20,3 +20,6 @@ build/*
 
 # github codespaces
 .devcontainer
+
+# PHPUnit tests
+.phpunit.cache/

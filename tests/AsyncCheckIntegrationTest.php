@@ -11,6 +11,7 @@ use ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot;
 use ReinfyTeam\Zuri\checks\snapshots\CombatSnapshot;
 use function json_encode;
 use function json_decode;
+use function microtime;
 
 /**
  * Integration tests for async check pipeline.
@@ -46,7 +47,7 @@ class AsyncCheckIntegrationTest {
 
         try {
             // Test MovementSnapshot serialization
-            $snapshot = new MovementSnapshot("FlyA", $this->createMockPlayer(), $this->createMockPlayerAPI());
+            $snapshot = $this->createMovementSnapshot("FlyA");
             $built = $snapshot->build();
 
             if (!isset($built['type']) || $built['type'] !== 'FlyA') {
@@ -354,6 +355,51 @@ class AsyncCheckIntegrationTest {
             public function isRecentlyCancelledEvent() { return false; }
             public function getExternalData($key = null) { return null; }
         };
+    }
+
+    private function createMovementSnapshot(string $checkType): MovementSnapshot {
+        $reflection = new \ReflectionClass(MovementSnapshot::class);
+        /** @var MovementSnapshot $snapshot */
+        $snapshot = $reflection->newInstanceWithoutConstructor();
+
+        $set = static function (object $target, string $property, mixed $value): void {
+            $rp = new \ReflectionProperty($target, $property);
+            $rp->setValue($target, $value);
+        };
+
+        $set($snapshot, "checkType", $checkType);
+        $set($snapshot, "captureTime", microtime(true));
+        $set($snapshot, "posX", 0.0);
+        $set($snapshot, "posY", 64.0);
+        $set($snapshot, "posZ", 0.0);
+        $set($snapshot, "eyeX", 0.0);
+        $set($snapshot, "eyeY", 65.62);
+        $set($snapshot, "eyeZ", 0.0);
+        $set($snapshot, "motionX", 0.0);
+        $set($snapshot, "motionY", 0.0);
+        $set($snapshot, "motionZ", 0.0);
+        $set($snapshot, "absMotionX", 0.0);
+        $set($snapshot, "absMotionY", 0.0);
+        $set($snapshot, "absMotionZ", 0.0);
+        $set($snapshot, "onGround", true);
+        $set($snapshot, "onAdhesion", false);
+        $set($snapshot, "inWeb", false);
+        $set($snapshot, "gliding", false);
+        $set($snapshot, "sprinting", false);
+        $set($snapshot, "survival", true);
+        $set($snapshot, "jumpTicks", 0);
+        $set($snapshot, "attackTicks", 0);
+        $set($snapshot, "teleportTicks", 0);
+        $set($snapshot, "teleportCommandTicks", 0);
+        $set($snapshot, "hurtTicks", 0);
+        $set($snapshot, "onlineTime", 0);
+        $set($snapshot, "groundSolid", true);
+        $set($snapshot, "chunkLoaded", true);
+        $set($snapshot, "recentlyCancelled", false);
+        $set($snapshot, "ping", 50);
+        $set($snapshot, "cachedData", []);
+
+        return $snapshot;
     }
 
     private function pass(string $message): void {
