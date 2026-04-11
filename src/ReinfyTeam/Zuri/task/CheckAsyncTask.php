@@ -36,7 +36,6 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use Throwable;
 use vennv\vapm\ClosureThread;
-use function array_key_exists;
 use function array_slice;
 use function count;
 use function function_exists;
@@ -57,26 +56,33 @@ use function substr;
 use function sys_getloadavg;
 
 class CheckAsyncTask {
-	/** @var list<array{0:string,1:string,2:array<string,mixed>,3:int,4:float,5:float,6:int}> */
+	/** @var list<array{0:string,1:string,2:array<string,mixed>,3:int,4:float,5:float,6:int,7:string}> */
 	private static array $queue = [];
 	private static int $queueHead = 0;
+	/** @var array<string,int> */
+	private static array $pendingTaskIndexesByKey = [];
 	private static int $inFlight = 0;
-	private static int $maxConcurrentWorkers = 4;
-	private static int $minConcurrentWorkers = 2;
+	private static int $maxConcurrentWorkers = 1;
+	private static int $configuredMaxConcurrentWorkers = 1;
+	private static int $minConcurrentWorkers = 1;
+	private static int $batchSize = 16;
+	private static int $configuredBatchSize = 16;
 	private static int $maxQueueSize = 2048;
 	private static float $workerTimeoutSeconds = 3.0;
 	private static float $degradedCooldownSeconds = 6.0;
 	private static float $degradedUntil = 0.0;
 	private static float $lastQueueOptimizationAt = 0.0;
 	private static float $queueOptimizationIntervalSeconds = 2.0;
-	private static float $queueFullThreshold = 0.85;
 
-	/** @var array<string,array{startedAt:float,queuedAt:float,capturedAt:float,checkClass:string,playerName:string,payload:array<string,mixed>,sequence:int,attempt:int}> */
+	/** @var array<string,array{startedAt:float,queuedAt:float,capturedAt:float,checkClass:string,playerName:string,payload:array<string,mixed>,sequence:int,attempt:int,batchId:string,dedupeKey:string}> */
 	private static array $activeTasks = [];
+	/** @var array<string,array{startedAt:float,taskIds:list<string>}> */
+	private static array $activeBatches = [];
 
 	private static int $totalDispatched = 0;
 	private static int $totalCompleted = 0;
 	private static int $totalDropped = 0;
+	private static int $totalCoalesced = 0;
 	private static int $totalRecoveredStuck = 0;
 	private static int $totalAutoRestarts = 0;
 	private static int $totalLateCompletions = 0;
@@ -96,6 +102,8 @@ class CheckAsyncTask {
 	private static int $totalThreadErrors = 0;
 	private static int $totalThreadResultErrors = 0;
 	private static int $totalThreadRetries = 0;
+	private static int $maxAllowedSequenceLag = 4;
+	private static float $maxAllowedResultAgeSeconds = 0.75;
 	private static bool $overloadActive = false;
 	private static float $lastOverloadAlertAt = 0.0;
 	private static float $overloadAlertCooldownSeconds = 10.0;
@@ -120,11 +128,13 @@ class CheckAsyncTask {
 			"inFlight" => self::$inFlight,
 			"maxConcurrentWorkers" => self::$maxConcurrentWorkers,
 			"minConcurrentWorkers" => self::$minConcurrentWorkers,
+			"batchSize" => self::$batchSize,
 			"maxQueueSize" => self::$maxQueueSize,
 			"workerTimeoutSeconds" => self::$workerTimeoutSeconds,
 			"totalDispatched" => self::$totalDispatched,
 			"totalCompleted" => self::$totalCompleted,
 			"totalDropped" => self::$totalDropped,
+			"totalCoalesced" => self::$totalCoalesced,
 			"totalRecoveredStuck" => self::$totalRecoveredStuck,
 			"totalAutoRestarts" => self::$totalAutoRestarts,
 			"totalLateCompletions" => self::$totalLateCompletions,
@@ -137,6 +147,8 @@ class CheckAsyncTask {
 			"totalThreadErrors" => self::$totalThreadErrors,
 			"totalThreadResultErrors" => self::$totalThreadResultErrors,
 			"totalThreadRetries" => self::$totalThreadRetries,
+			"maxAllowedSequenceLag" => self::$maxAllowedSequenceLag,
+			"maxAllowedResultAgeSeconds" => self::$maxAllowedResultAgeSeconds,
 			"lastDispatchAt" => self::$lastDispatchAt,
 			"lastCompleteAt" => self::$lastCompleteAt,
 			"lastHealthCheckAt" => self::$lastHealthCheckAt,
@@ -158,9 +170,12 @@ class CheckAsyncTask {
 		];
 	}
 
-	public static function configure(int $maxConcurrentWorkers, int $maxQueueSize, float $workerTimeoutSeconds = 3.0, float $degradedCooldownSeconds = 6.0) : void {
-		self::$maxConcurrentWorkers = $maxConcurrentWorkers > 0 ? $maxConcurrentWorkers : 1;
-		self::$minConcurrentWorkers = max(1, (int) ($maxConcurrentWorkers / 2));
+	public static function configure(int $maxConcurrentWorkers, int $maxQueueSize, float $workerTimeoutSeconds = 3.0, float $degradedCooldownSeconds = 6.0, int $batchSize = 16) : void {
+		self::$configuredMaxConcurrentWorkers = max(1, min(16, $maxConcurrentWorkers));
+		self::$maxConcurrentWorkers = self::$configuredMaxConcurrentWorkers;
+		self::$minConcurrentWorkers = 1;
+		self::$configuredBatchSize = max(1, min(128, $batchSize));
+		self::$batchSize = self::$configuredBatchSize;
 		self::$maxQueueSize = $maxQueueSize > 0 ? $maxQueueSize : 1;
 		self::$workerTimeoutSeconds = $workerTimeoutSeconds > 0.1 ? $workerTimeoutSeconds : 0.1;
 		self::$degradedCooldownSeconds = $degradedCooldownSeconds > 0.1 ? $degradedCooldownSeconds : 0.1;
@@ -178,20 +193,44 @@ class CheckAsyncTask {
 			return;
 		}
 
-		$queueSize = self::pendingQueueSize();
-		$queueUtilization = $queueSize / self::$maxQueueSize;
+		$dedupeKey = $checkClass . ":" . $playerName;
+		$replaceIndex = self::$pendingTaskIndexesByKey[$dedupeKey] ?? -1;
+		if ($replaceIndex >= self::$queueHead) {
+			$existing = self::$queue[$replaceIndex] ?? null;
+			if (is_array($existing)) {
+				$queuedAt = $now;
+				$capturedAtValue = $payload["captureTime"] ?? $queuedAt;
+				$capturedAt = is_numeric($capturedAtValue) ? (float) $capturedAtValue : $queuedAt;
+				self::$queue[$replaceIndex] = [$checkClass, $playerName, $payload, $sequence, $queuedAt, $capturedAt, 0, $dedupeKey];
+				self::$totalCoalesced++;
+				self::$lastDispatchAt = $queuedAt;
+				self::drain();
+				return;
+			}
+		}
 
-		if (self::$inFlight >= self::$maxConcurrentWorkers && $queueUtilization >= self::$queueFullThreshold) {
-			self::activateDegradedMode($now);
-			self::executeSyncFallback($checkClass, $playerName, $payload, $sequence);
+		if (self::pendingQueueSize() >= self::$maxQueueSize) {
+			// Drop oldest pending task to keep newest snapshots flowing and avoid sync fallback lag.
+			if (self::$queueHead < count(self::$queue)) {
+				$dropped = self::$queue[self::$queueHead] ?? null;
+				if (is_array($dropped)) {
+					$droppedKey = $dropped[7];
+					if ($droppedKey !== "" && (self::$pendingTaskIndexesByKey[$droppedKey] ?? -1) === self::$queueHead) {
+						unset(self::$pendingTaskIndexesByKey[$droppedKey]);
+					}
+				}
+				self::$queueHead++;
+			}
 			self::$totalDropped++;
-			return;
+			self::compactQueueIfNeeded();
 		}
 
 		$queuedAt = $now;
 		$capturedAtValue = $payload["captureTime"] ?? $queuedAt;
 		$capturedAt = is_numeric($capturedAtValue) ? (float) $capturedAtValue : $queuedAt;
-		self::$queue[] = [$checkClass, $playerName, $payload, $sequence, $queuedAt, $capturedAt, 0];
+		$queueIndex = count(self::$queue);
+		self::$queue[] = [$checkClass, $playerName, $payload, $sequence, $queuedAt, $capturedAt, 0, $dedupeKey];
+		self::$pendingTaskIndexesByKey[$dedupeKey] = $queueIndex;
 		self::$lastDispatchAt = $queuedAt;
 		self::drain();
 	}
@@ -200,121 +239,222 @@ class CheckAsyncTask {
 		self::runHealthCheck(microtime(true));
 
 		while (self::$inFlight < self::$maxConcurrentWorkers && self::pendingQueueSize() > 0) {
-			$next = self::$queue[self::$queueHead] ?? null;
-			self::$queueHead++;
-			if (!is_array($next)) {
-				continue;
+			$pendingQueue = self::pendingQueueSize();
+			$targetBatchSize = self::$batchSize;
+			if ($pendingQueue >= ($targetBatchSize * 8)) {
+				$targetBatchSize = min(256, $targetBatchSize * 8);
+			} elseif ($pendingQueue >= ($targetBatchSize * 4)) {
+				$targetBatchSize = min(256, $targetBatchSize * 4);
+			} elseif ($pendingQueue >= ($targetBatchSize * 2)) {
+				$targetBatchSize = min(256, $targetBatchSize * 2);
 			}
-			[$checkClass, $playerName, $payload, $sequence, $queuedAt, $capturedAt, $attempt] = $next;
-			self::startTask($checkClass, $playerName, $payload, $sequence, $queuedAt, $capturedAt, $attempt);
+
+			$batch = [];
+			while (count($batch) < $targetBatchSize) {
+				$currentIndex = self::$queueHead;
+				$next = self::$queue[$currentIndex] ?? null;
+				if (!is_array($next)) {
+					break;
+				}
+				self::$queueHead++;
+				$key = $next[7];
+				if ($key !== "" && (self::$pendingTaskIndexesByKey[$key] ?? -1) === $currentIndex) {
+					unset(self::$pendingTaskIndexesByKey[$key]);
+				}
+				$batch[] = $next;
+			}
+			if ($batch !== []) {
+				self::startBatch($batch);
+			}
 		}
 		self::compactQueueIfNeeded();
 	}
 
-	/** @param array<string,mixed> $payload */
-	private static function startTask(string $checkClass, string $playerName, array $payload, int $sequence, float $queuedAt, float $capturedAt, int $attempt) : void {
-		self::$inFlight++;
-		self::$totalDispatched++;
-
+	/**
+	 * @param list<array{0:string,1:string,2:array<string,mixed>,3:int,4:float,5:float,6:int,7:string}> $batch
+	 */
+	private static function startBatch(array $batch) : void {
 		$startedAt = microtime(true);
-		$id = self::taskId($checkClass, $playerName, $sequence, $attempt);
-		self::$activeTasks[$id] = [
+		$batchId = "batch:" . self::$totalDispatched . ":" . $startedAt;
+		$batchPayload = [];
+		$taskIds = [];
+		foreach ($batch as [$checkClass, $playerName, $payload, $sequence, $queuedAt, $capturedAt, $attempt, $dedupeKey]) {
+			$id = self::taskId($checkClass, $playerName, $sequence, $attempt);
+			$taskIds[] = $id;
+			$batchPayload[] = [
+				"id" => $id,
+				"checkClass" => $checkClass,
+				"payload" => $payload,
+			];
+			self::$activeTasks[$id] = [
+				"startedAt" => $startedAt,
+				"queuedAt" => $queuedAt,
+				"capturedAt" => $capturedAt,
+				"checkClass" => $checkClass,
+				"playerName" => $playerName,
+				"payload" => $payload,
+				"sequence" => $sequence,
+				"attempt" => $attempt,
+				"batchId" => $batchId,
+				"dedupeKey" => $dedupeKey,
+			];
+			self::$totalQueueWaitTime += max(0.0, $startedAt - $queuedAt);
+			self::$totalBuildDelayTime += max(0.0, $queuedAt - $capturedAt);
+		}
+		self::$activeBatches[$batchId] = [
 			"startedAt" => $startedAt,
-			"queuedAt" => $queuedAt,
-			"capturedAt" => $capturedAt,
-			"checkClass" => $checkClass,
-			"playerName" => $playerName,
-			"payload" => $payload,
-			"sequence" => $sequence,
-			"attempt" => $attempt,
+			"taskIds" => $taskIds,
 		];
-
-		self::$totalQueueWaitTime += max(0.0, $startedAt - $queuedAt);
-		self::$totalBuildDelayTime += max(0.0, $queuedAt - $capturedAt);
+		self::$inFlight++;
+		self::$totalDispatched += count($taskIds);
 
 		$thread = new ClosureThread(
-			static function (string $checkClass, string $playerName, array $payload) : array {
-				try {
-					if (!method_exists($checkClass, 'evaluateAsync')) {
-						return ['error' => 'Missing evaluateAsync()'];
+			static function (array $tasks) : array {
+				$results = [];
+				/** @var array<string,list<array{id:string,payload:array<string,mixed>}>> $grouped */
+				$grouped = [];
+				foreach ($tasks as $task) {
+					$checkClass = is_string($task["checkClass"] ?? null) ? $task["checkClass"] : "";
+					$id = is_string($task["id"] ?? null) ? $task["id"] : "";
+					$payload = is_array($task["payload"] ?? null) ? $task["payload"] : [];
+					if ($checkClass === "" || $id === "") {
+						continue;
+					}
+					$grouped[$checkClass][] = [
+						"id" => $id,
+						"payload" => $payload,
+					];
+				}
+
+				foreach ($grouped as $checkClass => $entries) {
+					if (method_exists($checkClass, "evaluateAsyncBatch")) {
+						try {
+							$batchResults = $checkClass::evaluateAsyncBatch($entries);
+							foreach ($entries as $entry) {
+								$id = $entry["id"];
+								$result = $batchResults[$id] ?? ["error" => "Missing batch result"];
+								$results[$id] = is_array($result) ? $result : ["error" => "Invalid batch result"];
+							}
+							continue;
+						} catch (Throwable $throwable) {
+							foreach ($entries as $entry) {
+								$results[$entry["id"]] = ["error" => $throwable->getMessage()];
+							}
+							continue;
+						}
 					}
 
-					return $checkClass::evaluateAsync($payload);
-				} catch (Throwable $throwable) {
-					return ['error' => $throwable->getMessage()];
+					if (!method_exists($checkClass, "evaluateAsync")) {
+						foreach ($entries as $entry) {
+							$results[$entry["id"]] = ["error" => "Missing evaluateAsync()"];
+						}
+						continue;
+					}
+
+					foreach ($entries as $entry) {
+						try {
+							$results[$entry["id"]] = $checkClass::evaluateAsync($entry["payload"]);
+						} catch (Throwable $throwable) {
+							$results[$entry["id"]] = ["error" => $throwable->getMessage()];
+						}
+					}
 				}
+				return ["results" => $results];
 			},
-			[$checkClass, $playerName, $payload]
+			[$batchPayload]
 		);
 		$thread->start()
-			->then(function(string $output) use ($id) : void {
-				self::handleThreadCompletion($id, $output);
+			->then(function(mixed $output) use ($batchId) : mixed {
+				self::handleBatchCompletion($batchId, $output);
+				return $output;
 			})
-			->catch(function(mixed $reason) use ($id) : void {
-				self::handleThreadCompletion($id, null, $reason);
+			->catch(function(mixed $reason) use ($batchId) : mixed {
+				self::handleBatchCompletion($batchId, null, $reason);
+				return $reason;
 			});
 	}
 
-	private static function handleThreadCompletion(string $id, ?string $output, mixed $reason = null) : void {
-		if (!array_key_exists($id, self::$activeTasks)) {
+	private static function handleBatchCompletion(string $batchId, mixed $output, mixed $reason = null) : void {
+		$batchMeta = self::$activeBatches[$batchId] ?? null;
+		if (!is_array($batchMeta)) {
 			self::$totalLateCompletions++;
 			return;
 		}
-
-		$taskMeta = self::$activeTasks[$id];
-		unset(self::$activeTasks[$id]);
-
+		unset(self::$activeBatches[$batchId]);
 		self::$inFlight = self::$inFlight > 0 ? self::$inFlight - 1 : 0;
 		self::$lastCompleteAt = microtime(true);
-		self::$totalCompleted++;
-		self::$totalWorkerTime += max(0.0, self::$lastCompleteAt - $taskMeta["startedAt"]);
+		$batchDuration = max(0.0, self::$lastCompleteAt - $batchMeta["startedAt"]);
 
 		self::drain();
 
 		if ($reason !== null) {
-			self::$totalThreadErrors++;
-			if (self::retryTask($taskMeta)) {
-				self::drain();
-				return;
+			foreach ($batchMeta["taskIds"] as $id) {
+				$taskMeta = self::$activeTasks[$id] ?? null;
+				if (!is_array($taskMeta)) {
+					self::$totalLateCompletions++;
+					continue;
+				}
+				unset(self::$activeTasks[$id]);
+				self::$totalCompleted++;
+				self::$totalWorkerTime += $batchDuration;
+				self::$totalThreadErrors++;
+				if (self::retryTask($taskMeta)) {
+					continue;
+				}
+				self::executeSyncFallback($taskMeta["checkClass"], $taskMeta["playerName"], $taskMeta["payload"], $taskMeta["sequence"]);
 			}
-
 			self::activateDegradedMode(self::$lastCompleteAt);
-			self::executeSyncFallback($taskMeta["checkClass"], $taskMeta["playerName"], $taskMeta["payload"], $taskMeta["sequence"]);
+			self::drain();
 			return;
 		}
 
-		$result = $output !== null ? json_decode($output, true) : null;
-		if (!is_array($result) || isset($result["error"])) {
-			self::$totalThreadResultErrors++;
-			if (self::retryTask($taskMeta)) {
-				self::drain();
-				return;
+		$payload = is_string($output) ? json_decode($output, true) : null;
+		$results = is_array($payload) && is_array($payload["results"] ?? null) ? $payload["results"] : [];
+
+		foreach ($batchMeta["taskIds"] as $id) {
+			$taskMeta = self::$activeTasks[$id] ?? null;
+			if (!is_array($taskMeta)) {
+				self::$totalLateCompletions++;
+				continue;
+			}
+			unset(self::$activeTasks[$id]);
+			self::$totalCompleted++;
+			self::$totalWorkerTime += $batchDuration;
+
+			$result = $results[$id] ?? null;
+			if (!is_array($result) || isset($result["error"])) {
+				self::$totalThreadResultErrors++;
+				if (self::retryTask($taskMeta)) {
+					continue;
+				}
+
+				self::executeSyncFallback($taskMeta["checkClass"], $taskMeta["playerName"], $taskMeta["payload"], $taskMeta["sequence"]);
+				continue;
 			}
 
-			self::executeSyncFallback($taskMeta["checkClass"], $taskMeta["playerName"], $taskMeta["payload"], $taskMeta["sequence"]);
-			return;
+			$player = Server::getInstance()->getPlayerExact($taskMeta["playerName"]);
+			if ($player === null || !$player->isOnline() || !$player->isConnected()) {
+				continue;
+			}
+
+			$playerAPI = PlayerAPI::getAPIPlayer($player);
+			if (!self::canMergeResult($playerAPI, $taskMeta["checkClass"], $taskMeta["sequence"], $taskMeta["queuedAt"])) {
+				continue;
+			}
+
+			$checkClass = $taskMeta["checkClass"];
+			/** @var Check $check */
+			$check = new $checkClass();
+			$mergeStartedAt = microtime(true);
+			self::applyResult($check, $playerAPI, $result);
+			self::$totalMergeTime += max(0.0, microtime(true) - $mergeStartedAt);
 		}
 
-		$player = Server::getInstance()->getPlayerExact($taskMeta["playerName"]);
-		if ($player === null || !$player->isOnline() || !$player->isConnected()) {
-			return;
-		}
-
-		$playerAPI = PlayerAPI::getAPIPlayer($player);
-		if (!$playerAPI->isAsyncSequenceCurrent($taskMeta["checkClass"], $taskMeta["sequence"])) {
-			return;
-		}
-
-		$checkClass = $taskMeta["checkClass"];
-		/** @var Check $check */
-		$check = new $checkClass();
-		$mergeStartedAt = microtime(true);
-		self::applyResult($check, $playerAPI, $result);
-		self::$totalMergeTime += max(0.0, microtime(true) - $mergeStartedAt);
+		self::drain();
 	}
 
 	/**
-	 * @param array{startedAt:float,queuedAt:float,capturedAt:float,checkClass:string,playerName:string,payload:array<string,mixed>,sequence:int,attempt:int} $taskMeta
+	 * @param array{startedAt:float,queuedAt:float,capturedAt:float,checkClass:string,playerName:string,payload:array<string,mixed>,sequence:int,attempt:int,batchId:string,dedupeKey:string} $taskMeta
 	 */
 	private static function retryTask(array $taskMeta) : bool {
 		if ($taskMeta["attempt"] >= 1) {
@@ -329,7 +469,9 @@ class CheckAsyncTask {
 			microtime(true),
 			$taskMeta["capturedAt"],
 			$taskMeta["attempt"] + 1,
+			$taskMeta["dedupeKey"],
 		];
+		self::$pendingTaskIndexesByKey[$taskMeta["dedupeKey"]] = count(self::$queue) - 1;
 		self::$totalThreadRetries++;
 		return true;
 	}
@@ -356,7 +498,9 @@ class CheckAsyncTask {
 			}
 
 			$playerAPI = PlayerAPI::getAPIPlayer($player);
-			if (!$playerAPI->isAsyncSequenceCurrent($checkClass, $sequence)) {
+			$queuedAtValue = $payload["captureTime"] ?? microtime(true);
+			$queuedAt = is_numeric($queuedAtValue) ? (float) $queuedAtValue : microtime(true);
+			if (!self::canMergeResult($playerAPI, $checkClass, $sequence, $queuedAt)) {
 				return;
 			}
 
@@ -381,23 +525,23 @@ class CheckAsyncTask {
 
 		self::$lastQueueOptimizationAt = $now;
 		self::$totalQueueOptimizations++;
+		$pending = self::pendingQueueSize();
+		$queueUtilization = self::$maxQueueSize > 0 ? ($pending / self::$maxQueueSize) : 0.0;
 
-		$queueSize = self::pendingQueueSize();
-		$queueUtilization = $queueSize / self::$maxQueueSize;
-		$workerUtilization = self::$inFlight / self::$maxConcurrentWorkers;
-
-		if ($queueUtilization > 0.75 && self::$maxConcurrentWorkers < 16) {
-			$newMax = min(16, self::$maxConcurrentWorkers + 2);
-			self::$maxConcurrentWorkers = $newMax;
-			self::$minConcurrentWorkers = max(1, (int) ($newMax / 2));
+		if ($queueUtilization >= 0.75 && self::$maxConcurrentWorkers < self::$configuredMaxConcurrentWorkers) {
+			self::$maxConcurrentWorkers++;
 			self::$totalWorkerScaleUps++;
-			self::drain();
-		} elseif ($queueUtilization < 0.3 && $workerUtilization < 0.5 && self::$maxConcurrentWorkers > self::$minConcurrentWorkers) {
-			$newMax = max(self::$minConcurrentWorkers, self::$maxConcurrentWorkers - 1);
-			if ($newMax < self::$maxConcurrentWorkers) {
-				self::$maxConcurrentWorkers = $newMax;
-				self::$totalWorkerScaleDowns++;
-			}
+		} elseif ($queueUtilization <= 0.20 && self::$maxConcurrentWorkers > self::$minConcurrentWorkers) {
+			self::$maxConcurrentWorkers--;
+			self::$totalWorkerScaleDowns++;
+		}
+
+		if ($queueUtilization >= 0.75) {
+			self::$batchSize = min(256, max(self::$configuredBatchSize, self::$configuredBatchSize * 4));
+		} elseif ($queueUtilization >= 0.40) {
+			self::$batchSize = min(256, max(self::$configuredBatchSize, self::$configuredBatchSize * 2));
+		} else {
+			self::$batchSize = self::$configuredBatchSize;
 		}
 	}
 
@@ -413,28 +557,35 @@ class CheckAsyncTask {
 		$restarted = 0;
 		$degraded = false;
 
-		foreach (self::$activeTasks as $id => $meta) {
-			if (($now - $meta["startedAt"]) <= self::$workerTimeoutSeconds) {
+		foreach (self::$activeBatches as $batchId => $batchMeta) {
+			if (($now - $batchMeta["startedAt"]) <= self::$workerTimeoutSeconds) {
 				continue;
 			}
-
-			unset(self::$activeTasks[$id]);
+			unset(self::$activeBatches[$batchId]);
 			self::$inFlight = self::$inFlight > 0 ? self::$inFlight - 1 : 0;
-			$reclaimed++;
-			self::$totalRecoveredStuck++;
-
-			if ($meta["attempt"] < 1) {
-				self::$queue[] = [
-					$meta["checkClass"],
-					$meta["playerName"],
-					$meta["payload"],
-					$meta["sequence"],
-					$now,
-					$meta["capturedAt"],
-					$meta["attempt"] + 1,
-				];
-				$restarted++;
-				self::$totalAutoRestarts++;
+			foreach ($batchMeta["taskIds"] as $taskId) {
+				$meta = self::$activeTasks[$taskId] ?? null;
+				if (!is_array($meta)) {
+					continue;
+				}
+				unset(self::$activeTasks[$taskId]);
+				$reclaimed++;
+				self::$totalRecoveredStuck++;
+				if ($meta["attempt"] < 1) {
+					self::$queue[] = [
+						$meta["checkClass"],
+						$meta["playerName"],
+						$meta["payload"],
+						$meta["sequence"],
+						$now,
+						$meta["capturedAt"],
+						$meta["attempt"] + 1,
+						$meta["dedupeKey"],
+					];
+					self::$pendingTaskIndexesByKey[$meta["dedupeKey"]] = count(self::$queue) - 1;
+					$restarted++;
+					self::$totalAutoRestarts++;
+				}
 			}
 		}
 
@@ -467,6 +618,15 @@ class CheckAsyncTask {
 
 		self::$queue = array_slice(self::$queue, self::$queueHead);
 		self::$queueHead = 0;
+		self::$pendingTaskIndexesByKey = [];
+		foreach (self::$queue as $index => $entry) {
+			if (is_array($entry)) {
+				$key = $entry[7];
+				if ($key !== "") {
+					self::$pendingTaskIndexesByKey[$key] = $index;
+				}
+			}
+		}
 	}
 
 	private static function parseMemoryLimitBytes() : int {
@@ -533,6 +693,19 @@ class CheckAsyncTask {
 		return $checkClass . ":" . $playerName . ":" . $sequence . ":" . $attempt;
 	}
 
+	private static function canMergeResult(PlayerAPI $playerAPI, string $checkClass, int $sequence, float $queuedAt) : bool {
+		if ($playerAPI->isAsyncSequenceCurrent($checkClass, $sequence)) {
+			return true;
+		}
+
+		$currentSequence = $playerAPI->getAsyncSequence($checkClass);
+		$sequenceLag = $currentSequence - $sequence;
+		$resultAge = microtime(true) - $queuedAt;
+		return $sequenceLag >= 0
+			&& $sequenceLag <= self::$maxAllowedSequenceLag
+			&& $resultAge <= self::$maxAllowedResultAgeSeconds;
+	}
+
 	/**
 	 * Test helper: reset static async pipeline state.
 	 * @internal
@@ -540,10 +713,15 @@ class CheckAsyncTask {
 	public static function resetForTesting() : void {
 		self::$queue = [];
 		self::$queueHead = 0;
+		self::$pendingTaskIndexesByKey = [];
 		self::$activeTasks = [];
+		self::$activeBatches = [];
 		self::$inFlight = 0;
-		self::$maxConcurrentWorkers = 4;
-		self::$minConcurrentWorkers = 2;
+		self::$maxConcurrentWorkers = 1;
+		self::$configuredMaxConcurrentWorkers = 1;
+		self::$minConcurrentWorkers = 1;
+		self::$batchSize = 16;
+		self::$configuredBatchSize = 16;
 		self::$maxQueueSize = 2048;
 		self::$workerTimeoutSeconds = 3.0;
 		self::$degradedCooldownSeconds = 6.0;
@@ -555,6 +733,7 @@ class CheckAsyncTask {
 		self::$totalDispatched = 0;
 		self::$totalCompleted = 0;
 		self::$totalDropped = 0;
+		self::$totalCoalesced = 0;
 		self::$totalRecoveredStuck = 0;
 		self::$totalAutoRestarts = 0;
 		self::$totalLateCompletions = 0;
@@ -567,6 +746,8 @@ class CheckAsyncTask {
 		self::$totalThreadErrors = 0;
 		self::$totalThreadResultErrors = 0;
 		self::$totalThreadRetries = 0;
+		self::$maxAllowedSequenceLag = 4;
+		self::$maxAllowedResultAgeSeconds = 0.75;
 		self::$lastDispatchAt = 0.0;
 		self::$lastCompleteAt = 0.0;
 		self::$lastHealthCheckAt = 0.0;
@@ -599,6 +780,12 @@ class CheckAsyncTask {
 			"payload" => [],
 			"sequence" => $sequence,
 			"attempt" => $attempt,
+			"batchId" => $id,
+			"dedupeKey" => $checkClass . ":" . $playerName,
+		];
+		self::$activeBatches[$id] = [
+			"startedAt" => $startedAt,
+			"taskIds" => [$id],
 		];
 		self::$inFlight++;
 	}
@@ -626,7 +813,14 @@ class CheckAsyncTask {
 		if (!empty($result['failed'])) {
 			try {
 				$check->failed($playerAPI);
-			} catch (Throwable) {
+			} catch (Throwable $throwable) {
+				self::$totalFallbackErrors++;
+				Server::getInstance()->getLogger()->warning(
+					"[Zuri] Async failed() merge exception in "
+					. $check->getName() . ":" . $check->getSubType()
+					. " for " . $playerAPI->getPlayer()->getName()
+					. ": " . $throwable->getMessage()
+				);
 			}
 		}
 	}

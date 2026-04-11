@@ -56,15 +56,22 @@ class AirJump extends Check {
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
-		$effects = [];
 		$player = $playerAPI->getPlayer();
 		if (!$player->isConnected() || !$player->isOnline()) {
 			return;
 		} // Effect::$effectInstance bug fix
 		if ($event instanceof PlayerMoveEvent) {
+			$upDistance = round(($event->getTo()->getY() - $event->getFrom()->getY()), 3);
+			$pingLaggingRaw = self::getData(self::PING_LAGGING);
+			$pingLagging = is_numeric($pingLaggingRaw) ? (int) $pingLaggingRaw : 0;
 			if (
 				$playerAPI->getJumpTicks() > 40 ||
 				!$player->isSurvival() ||
+				$playerAPI->isInFPCooldown() ||
+				($pingLagging > 0 && $playerAPI->getPing() > $pingLagging) ||
+				$playerAPI->isInLiquid() ||
+				$playerAPI->isInWeb() ||
+				$playerAPI->isOnIce() ||
 				$playerAPI->getAttackTicks() < 40 ||
 				$playerAPI->getProjectileAttackTicks() < 20 ||
 				$playerAPI->getBowShotTicks() < 20 ||
@@ -73,6 +80,7 @@ class AirJump extends Check {
 				$playerAPI->getTeleportCommandTicks() < 40 ||
 				$playerAPI->getTeleportTicks() < 60 ||
 				$playerAPI->isOnAdhesion() ||
+				$playerAPI->isOnGround() ||
 				($player->isOnGround() && $player->getInAirTicks() < 5) ||
 				$player->isFlying() ||
 				$player->getAllowFlight() ||
@@ -80,27 +88,30 @@ class AirJump extends Check {
 				!$playerAPI->isCurrentChunkIsLoaded() ||
 				BlockUtil::isGroundSolid($player) ||
 				$playerAPI->isGliding() ||
+				$player->getInAirTicks() < 2 ||
+				$upDistance <= 0.0 ||
 				$playerAPI->isRecentlyCancelledEvent()
 			) {
 				return;
 			}
 
-			$upDistance = round(($event->getTo()->getY() - $event->getFrom()->getY()), 3);
-			$lastUpDistanceRaw = $playerAPI->getExternalData(CacheData::AIRJUMP_LAST_UP_DISTANCE) ?? 0;
+			$lastUpDistanceRaw = $playerAPI->getExternalData(CacheData::AIRJUMP_LAST_UP_DISTANCE) ?? 0.0;
 			$lastUpDistance = is_numeric($lastUpDistanceRaw) ? (float) $lastUpDistanceRaw : 0.0;
 			$delta = abs(round(($upDistance - $lastUpDistance), 3));
-			$limit = 0.852;
+			// Vanilla jump ascent per move is around 0.42 (slightly more with network jitter).
+			$limit = 0.47;
 
 			if (($effect = $player->getEffects()->get(VanillaEffects::JUMP_BOOST())) !== null) {
-				$limit += round($limit * 1.4 / $effect->getEffectLevel(), 3);
+				$level = $effect->getEffectLevel() + 1;
+				$limit += (0.1 * $level) + 0.03;
 			}
 
-			if ($delta > $limit) { // what is this dumb check
-				$this->dispatchAsyncDecision($playerAPI, true);
+			if ($upDistance > $limit) {
+				$this->dispatchAsyncDecision($playerAPI, true, "", [], [], 0.10);
 			}
 
 			$playerAPI->setExternalData(CacheData::AIRJUMP_LAST_UP_DISTANCE, $upDistance);
-			$this->debug($playerAPI, "upDistance=$upDistance, lastUpDistance=$lastUpDistance, delta=$delta, limit=$limit");
+			$this->debug($playerAPI, "upDistance=$upDistance, lastUpDistance=$lastUpDistance, delta=$delta, limit=$limit, inAirTicks=" . $player->getInAirTicks());
 		}
 	}
 }

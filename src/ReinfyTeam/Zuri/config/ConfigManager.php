@@ -111,6 +111,7 @@ class ConfigManager extends ConfigPaths {
 			self::KICK_ENABLE,
 			self::CHECK,
 			"zuri.async.max-concurrent-workers",
+			"zuri.async.batch-size",
 			"zuri.async.max-queue-size",
 			"zuri.async.worker-timeout-seconds",
 			"zuri.async.degraded-cooldown-seconds",
@@ -127,8 +128,13 @@ class ConfigManager extends ConfigPaths {
 		}
 
 		$maxWorkers = self::getData("zuri.async.max-concurrent-workers", 4);
-		if (!is_numeric($maxWorkers) || (int) $maxWorkers < 1 || (int) $maxWorkers > 64) {
-			$logger->warning("[Zuri] Startup diagnostics: zuri.async.max-concurrent-workers should be between 1 and 64.");
+		if (!is_numeric($maxWorkers) || (int) $maxWorkers < 1 || (int) $maxWorkers > 16) {
+			$logger->warning("[Zuri] Startup diagnostics: zuri.async.max-concurrent-workers should be between 1 and 16.");
+		}
+
+		$batchSize = self::getData("zuri.async.batch-size", 64);
+		if (!is_numeric($batchSize) || (int) $batchSize < 1 || (int) $batchSize > 128) {
+			$logger->warning("[Zuri] Startup diagnostics: zuri.async.batch-size should be between 1 and 128.");
 		}
 
 		$maxQueue = self::getData("zuri.async.max-queue-size", 2048);
@@ -144,6 +150,16 @@ class ConfigManager extends ConfigPaths {
 		$degradedCooldown = self::getData("zuri.async.degraded-cooldown-seconds", 6.0);
 		if (!is_numeric($degradedCooldown) || (float) $degradedCooldown < 0.1 || (float) $degradedCooldown > 120.0) {
 			$logger->warning("[Zuri] Startup diagnostics: zuri.async.degraded-cooldown-seconds should be between 0.1 and 120.0.");
+		}
+
+		$correlationForceMultiplier = self::getData("zuri.correlation.force-escalation-multiplier", 2.5);
+		if (!is_numeric($correlationForceMultiplier) || (float) $correlationForceMultiplier < 1.0 || (float) $correlationForceMultiplier > 20.0) {
+			$logger->warning("[Zuri] Startup diagnostics: zuri.correlation.force-escalation-multiplier should be between 1.0 and 20.0.");
+		}
+
+		$correlationForceExtra = self::getData("zuri.correlation.force-escalation-extra-real-vl", 3);
+		if (!is_numeric($correlationForceExtra) || (int) $correlationForceExtra < 0 || (int) $correlationForceExtra > 1000) {
+			$logger->warning("[Zuri] Startup diagnostics: zuri.correlation.force-escalation-extra-real-vl should be between 0 and 1000.");
 		}
 
 		$banEnable = self::getData(self::BAN_ENABLE, true);

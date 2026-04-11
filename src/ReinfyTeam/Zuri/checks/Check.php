@@ -51,6 +51,7 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\HotPathProfiler;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 use ReinfyTeam\Zuri\ZuriAC;
+use function ceil;
 use function count;
 use function explode;
 use function implode;
@@ -118,6 +119,26 @@ abstract class Check extends ConfigManager {
 		return [];
 	}
 
+	/**
+	 * Fast-path for batched async evaluation.
+	 *
+	 * @param list<array{id:string,payload:array<string,mixed>}> $entries
+	 * @return array<string,array<string,mixed>>
+	 */
+	public static function evaluateAsyncBatch(array $entries) : array {
+		$results = [];
+		foreach ($entries as $entry) {
+			$id = $entry["id"];
+			$payload = $entry["payload"];
+			try {
+				$results[$id] = static::evaluateAsync($payload);
+			} catch (\Throwable $throwable) {
+				$results[$id] = ["error" => $throwable->getMessage()];
+			}
+		}
+		return $results;
+	}
+
 	/** @param array<string,mixed> $payload */
 	protected function dispatchAsyncCheck(string $playerName, array $payload) : void {
 		$player = Server::getInstance()->getPlayerExact($playerName);
@@ -129,7 +150,8 @@ abstract class Check extends ConfigManager {
 			self::toInt(self::getData("zuri.async.max-concurrent-workers", 4), 4),
 			self::toInt(self::getData("zuri.async.max-queue-size", 2048), 2048),
 			self::toFloat(self::getData("zuri.async.worker-timeout-seconds", 3.0), 3.0),
-			self::toFloat(self::getData("zuri.async.degraded-cooldown-seconds", 6.0), 6.0)
+			self::toFloat(self::getData("zuri.async.degraded-cooldown-seconds", 6.0), 6.0),
+			self::toInt(self::getData("zuri.async.batch-size", 64), 64)
 		);
 
 		$now = microtime(true);
@@ -338,6 +360,8 @@ abstract class Check extends ConfigManager {
 			$correlationWindowSeconds = self::toFloat(self::getData("zuri.correlation.window-seconds", 10.0), 10.0);
 			$requiredGroupsRaw = self::toInt(self::getData("zuri.correlation.required-groups", 3), 3);
 			$requiredGroups = CrossCheckCorrelation::normalizeRequiredGroups($requiredGroupsRaw);
+			$correlationForceMultiplier = self::toFloat(self::getData("zuri.correlation.force-escalation-multiplier", 2.5), 2.5);
+			$correlationForceExtra = self::toInt(self::getData("zuri.correlation.force-escalation-extra-real-vl", 3), 3);
 			$storedGroupHits = $playerAPI->getExternalData("correlation.groupHits", []);
 			$typedGroupHits = is_array($storedGroupHits) ? $storedGroupHits : [];
 			[$correlatedGroups, $groupHits] = CrossCheckCorrelation::recordAndCount(
@@ -413,7 +437,20 @@ abstract class Check extends ConfigManager {
 				&& $reachedMaxRealViolations
 				&& $reachedMaxViolations
 				&& in_array($this->getPunishment(), ["ban", "kick", "captcha"], true);
-			if ($requiresEscalationCorrelation && $correlatedGroups < $requiredGroups) {
+
+			$forceEscalationWithoutCorrelation = false;
+			if ($maxViolations <= 0) {
+				// If maxvl is unset/zero, don't let correlation permanently block escalation.
+				$forceEscalationWithoutCorrelation = true;
+			} else {
+				$requiredRealForBypass = max(
+					$maxViolations + max(1, $correlationForceExtra),
+					(int) ceil($maxViolations * max(1.0, $correlationForceMultiplier))
+				);
+				$forceEscalationWithoutCorrelation = $currentRealViolations >= $requiredRealForBypass;
+			}
+
+			if ($requiresEscalationCorrelation && $correlatedGroups < $requiredGroups && !$forceEscalationWithoutCorrelation) {
 				return false;
 			}
 
