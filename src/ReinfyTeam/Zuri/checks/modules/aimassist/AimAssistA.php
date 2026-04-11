@@ -39,16 +39,30 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
 
+/**
+ * Detects fixed-pitch aim assist snapping behavior.
+ */
 class AimAssistA extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "AimAssist";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Processes input packets for AimAssistA detection.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {

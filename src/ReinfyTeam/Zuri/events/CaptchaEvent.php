@@ -45,32 +45,54 @@ use function is_int;
 use function is_numeric;
 use function random_int;
 
+/**
+ * Sends configured captcha prompts to flagged players.
+ */
 class CaptchaEvent extends Event {
 	use CancellableTrait;
 
 	private PlayerAPI $playerAPI;
 
+	/**
+	 * Creates a captcha event payload.
+	 *
+	 * @return void
+	 */
 	public function __construct(PlayerAPI $playerAPI) {
 		$this->playerAPI = $playerAPI;
 	}
 
+	/**
+	 * Gets the player API context.
+	 */
 	public function getPlayerAPI() : PlayerAPI {
 		return $this->playerAPI;
 	}
 
+	/**
+	 * Sends the captcha as a chat message.
+	 */
 	protected function sendMessage() : void {
 		$this->playerAPI->getPlayer()->sendMessage(ReplaceText::replace($this->playerAPI, Lang::raw(LangKeys::CAPTCHA_TEXT)));
 	}
 
+	/**
+	 * Sends the captcha as a tip.
+	 */
 	protected function sendTip() : void {
 		$this->playerAPI->getPlayer()->sendTip(ReplaceText::replace($this->playerAPI, Lang::raw(LangKeys::CAPTCHA_TEXT)));
 	}
 
+	/**
+	 * Sends the captcha as a subtitle.
+	 */
 	protected function sendTitle() : void {
 		$this->playerAPI->getPlayer()->sendSubTitle(ReplaceText::replace($this->playerAPI, Lang::raw(LangKeys::CAPTCHA_TEXT)));
 	}
 
 	/**
+	 * Ensures captcha code generation and delivers prompts.
+	 *
 	 * @throws RandomException
 	 */
 	public function call() : void {

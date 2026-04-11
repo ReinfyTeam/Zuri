@@ -36,15 +36,33 @@ use pocketmine\command\CommandSender;
 use pocketmine\plugin\PluginBase;
 use ReinfyTeam\Zuri\command\ZuriCommand;
 
+/**
+ * Shows the full `/zuri` help output from inside a dedicated subcommand.
+ */
 class HelpSubCommand extends BaseSubCommand {
+	/**
+	 * Registers the `/zuri help` subcommand.
+	 *
+	 * @param PluginBase $plugin Plugin that owns this command set.
+	 * @return void
+	 */
 	public function __construct(PluginBase $plugin) {
 		parent::__construct($plugin, "help", "Show command help", ["cmd", "noarguments"]);
 	}
 
+	/**
+	 * Declares arguments for this subcommand.
+	 */
 	protected function prepare() : void {
 	}
 
-	/** @param array<string,mixed> $args */
+	/**
+	 * Sends the same generated help menu shown by the root `/zuri` command.
+	 *
+	 * @param CommandSender $sender Sender that receives the help output.
+	 * @param string $aliasUsed Alias used to execute this subcommand.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$sender->sendMessage(ZuriCommand::buildHelpMessage("zuri"));
 	}

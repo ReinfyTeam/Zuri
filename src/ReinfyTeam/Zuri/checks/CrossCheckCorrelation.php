@@ -39,6 +39,9 @@ use function max;
 use function min;
 use function strtolower;
 
+/**
+ * Provides correlation grouping utilities used for cross-check escalation logic.
+ */
 final class CrossCheckCorrelation {
 	public const GROUP_MOVEMENT = 'movement';
 	public const GROUP_COMBAT = 'combat';
@@ -53,6 +56,11 @@ final class CrossCheckCorrelation {
 	/** @var array<string, string>|null */
 	private static ?array $groupCache = null;
 
+	/**
+	 * Prevents instantiation of this static utility class.
+	 *
+	 * @return void
+	 */
 	private function __construct() {
 	}
 
@@ -87,6 +95,8 @@ final class CrossCheckCorrelation {
 	}
 
 	/**
+	 * Overrides the cached check-to-group classification map for tests.
+	 *
 	 * @param array<string, string>|null $cache
 	 * @internal For tests only.
 	 */
@@ -94,6 +104,12 @@ final class CrossCheckCorrelation {
 		self::$groupCache = $cache;
 	}
 
+	/**
+	 * Determines whether a correlation group value is recognized.
+	 *
+	 * @param string $group Correlation group identifier to validate.
+	 * @return bool True when the group is one of the supported GROUP_* constants.
+	 */
 	private static function isValidGroup(string $group) : bool {
 		return in_array($group, self::VALID_GROUPS, true);
 	}
@@ -110,6 +126,7 @@ final class CrossCheckCorrelation {
 	 * Get the correlation group for a check by name.
 	 * Automatically discovered from check's getCorrelationGroup() declaration.
 	 *
+	 * @param string $checkName Check name to classify.
 	 * @return string|null One of GROUP_* constants, or null if not in any group
 	 */
 	public static function classifyGroup(string $checkName) : ?string {
@@ -118,8 +135,12 @@ final class CrossCheckCorrelation {
 	}
 
 	/**
+	 * Removes correlation-group hits that are outside the configured time window.
+	 *
 	 * @param array<string, float> $groupHits
-	 * @return array<string, float>
+	 * @param float $now Current timestamp in seconds.
+	 * @param float $windowSeconds Correlation window length in seconds.
+	 * @return array<string, float> Filtered group hit timestamps inside the active window.
 	 */
 	public static function pruneExpired(array $groupHits, float $now, float $windowSeconds) : array {
 		$window = max(0.1, $windowSeconds);
@@ -137,6 +158,9 @@ final class CrossCheckCorrelation {
 	 * Record a check hit and count unique correlated groups active in the window.
 	 *
 	 * @param array<string, float> $groupHits
+	 * @param string $checkName Name of the check that just failed.
+	 * @param float $now Current timestamp in seconds.
+	 * @param float $windowSeconds Correlation window length in seconds.
 	 * @return array{0:int,1:array<string,float>} [count of unique groups, updated hits map]
 	 */
 	public static function recordAndCount(array $groupHits, string $checkName, float $now, float $windowSeconds) : array {
@@ -148,6 +172,12 @@ final class CrossCheckCorrelation {
 		return [count(array_unique(array_keys($pruned))), $pruned];
 	}
 
+	/**
+	 * Clamps the configured required group count to the supported range.
+	 *
+	 * @param int $requiredGroups Configured required group count.
+	 * @return int Normalized required group count between 1 and 3.
+	 */
 	public static function normalizeRequiredGroups(int $requiredGroups) : int {
 		return max(1, min(3, $requiredGroups));
 	}

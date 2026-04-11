@@ -40,16 +40,33 @@ use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_numeric;
 
+/**
+ * Detects movement updates from clients that should be immobile.
+ */
 class AntiImmobile extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "AntiImmobile";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Captures move events for anti-immobile evaluation.
+	 *
+	 * @param Event $event Triggered event.
+	 * @param PlayerAPI $playerAPI Player context.
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -84,8 +101,11 @@ class AntiImmobile extends Check {
 		}
 	}
 
-	/** @param array<string,mixed> $payload
-	 *  @return array<string,mixed>
+	/**
+	 * Evaluates an async payload for anti-immobile violations.
+	 *
+	 * @param array<string,mixed> $payload Snapshot payload.
+	 * @return array<string,mixed> Async decision data.
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(

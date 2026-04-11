@@ -43,6 +43,9 @@ use function is_string;
 use function str_contains;
 use function strtolower;
 
+/**
+ * Detects suspicious client signatures from login metadata.
+ */
 class AntiBotB extends Check {
 	private const SUSPICIOUS_CLIENT_SIGNATURES = [
 		"toolbox",
@@ -56,14 +59,25 @@ class AntiBotB extends Check {
 		"hacked",
 	];
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "AntiBot";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "B";
 	}
 
+	/**
+	 * Handles pre-login events for AntiBotB validation.
+	 *
+	 * @param Event $event Triggered event instance.
+	 */
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof PlayerPreLoginEvent) {
 			$extraData = $event->getPlayerInfo()->getExtraData();
@@ -91,11 +105,21 @@ class AntiBotB extends Check {
 		}
 	}
 
+	/**
+	 * Handles packet events for interface completeness.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 	}
 
-	/** @param array<string,mixed> $payload
-	 *  @return array<string,mixed>
+	/**
+	 * Evaluates async payload for AntiBotB checks.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];

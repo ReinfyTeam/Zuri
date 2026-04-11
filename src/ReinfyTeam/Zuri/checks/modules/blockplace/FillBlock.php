@@ -36,16 +36,30 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
+/**
+ * Detects rapid block placement bursts indicative of fill tools.
+ */
 class FillBlock extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "FillBlock";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Processes block placement packets for fill detection.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {

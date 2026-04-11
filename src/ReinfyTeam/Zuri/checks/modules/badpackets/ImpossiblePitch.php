@@ -39,20 +39,37 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 
+/**
+ * Detects impossible pitch values in movement packets.
+ */
 class ImpossiblePitch extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "ImpossiblePitch";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Gets the maximum violations before action is taken.
+	 */
 	public function maxViolations() : int {
 		return 1;
 	}
 
 	/**
+	 * Processes packets for impossible pitch detection.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {

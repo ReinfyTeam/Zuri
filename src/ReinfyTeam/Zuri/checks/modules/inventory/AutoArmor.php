@@ -36,11 +36,20 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
+/**
+ * Detects automatic armor equip behavior without inventory interaction.
+ */
 class AutoArmor extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "AutoArmor";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
@@ -48,6 +57,11 @@ class AutoArmor extends Check {
 	//This only causes cheaters to slow down their actions
 
 	/**
+	 * Processes packets related to armor transaction automation.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {

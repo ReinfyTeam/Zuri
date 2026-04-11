@@ -45,18 +45,34 @@ use ReinfyTeam\Zuri\utils\AuditLogger;
 use function is_string;
 use function strtolower;
 
+/**
+ * Manages runtime notification toggles for alerts and admin-focused messages.
+ */
 class NotifySubCommand extends BaseSubCommand {
+	/**
+	 * Registers the `/zuri notify` subcommand.
+	 *
+	 * @param PluginBase $plugin Plugin exposing this notification command.
+	 * @return void
+	 */
 	public function __construct(PluginBase $plugin) {
 		parent::__construct($plugin, "notify", "Use to on/off notify.", ["notification"]);
 	}
 
+	/**
+	 * Declares the notification mode argument.
+	 */
 	protected function prepare() : void {
 		$this->registerArgument(0, new RawStringArgument("mode"));
 	}
 
 	/**
-	 * @param array<string,mixed> $args
-	 * @throws JsonException
+	 * Toggles the selected notification flag and reports the new value.
+	 *
+	 * @param CommandSender $sender Sender requesting notification changes.
+	 * @param string $aliasUsed Alias used to invoke this subcommand.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 * @throws JsonException When config persistence fails while writing.
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$modeRaw = $args["mode"] ?? "";

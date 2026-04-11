@@ -31,6 +31,9 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\lang;
 
+/**
+ * Defines translation key constants used by runtime messages and UI labels.
+ */
 final class LangKeys {
 	public const ALERTS_MESSAGE = "messages.alerts.message";
 	public const DETECTION_MESSAGE = "messages.detection.message";
@@ -49,9 +52,42 @@ final class LangKeys {
 	public const CHAT_COMMAND_TEXT = "messages.chat.command";
 	public const CHAT_REPEAT_TEXT = "messages.chat.repeat";
 	public const DEBUG_ASYNC_OVERLOAD = "messages.debug.system.async-overload";
+	public const DEBUG_ASYNC_TASK_FAILURE = "messages.debug.system.async-task-failure";
+	public const DEBUG_ASYNC_FALLBACK_FAILED = "messages.debug.system.async-fallback-failed";
+	public const DEBUG_ASYNC_FALLBACK_EXCEPTION = "messages.debug.system.async-fallback-exception";
+	public const DEBUG_ASYNC_BACKEND_DISABLED_DECLARATIONS = "messages.debug.system.async-backend-disabled-declarations";
+	public const DEBUG_ASYNC_BACKEND_DISABLED_SHARED = "messages.debug.system.async-backend-disabled-shared";
+	public const DEBUG_ASYNC_REASON_MISSING_EVALUATE = "messages.debug.system.async-reason-missing-evaluate";
+	public const DEBUG_ASYNC_REASON_INVALID_FALLBACK_PAYLOAD = "messages.debug.system.async-reason-invalid-fallback-payload";
 	public const DEBUG_UI_CONFIG_SAVE_FAILED = "messages.debug.system.ui-config-save-failed";
 	public const DEBUG_UI_RELOAD_FAILED = "messages.debug.system.ui-reload-failed";
 	public const DEBUG_PACKET_FLOOD_GUARD = "messages.debug.system.packet-flood-guard";
+	public const DEBUG_AUDIT_LINE = "messages.debug.system.audit-line";
+	public const DEBUG_AUDIT_FILE_LINE = "messages.debug.system.audit-file-line";
+	public const DEBUG_AUDIT_THROWABLE_SUMMARY = "messages.debug.system.audit-throwable-summary";
+	public const DEBUG_AUDIT_STACK_TRACE = "messages.debug.system.audit-stack-trace";
+	public const DEBUG_AUDIT_HARD_CRASH = "messages.debug.system.audit-hard-crash";
+	public const DEBUG_SAFE_CRASH_BOUNDARY_AUDIT = "messages.debug.system.safe-crash-boundary-audit";
+	public const DEBUG_LANG_LOAD_FAILED = "messages.debug.system.lang-load-failed";
+	public const DEBUG_SNAPSHOT_SCHEMA_MISMATCH = "messages.debug.system.snapshot-schema-mismatch";
+	public const DEBUG_SNAPSHOT_MISSING_FIELDS = "messages.debug.system.snapshot-missing-fields";
+	public const DEBUG_SNAPSHOT_NON_NUMERIC_FIELD = "messages.debug.system.snapshot-non-numeric-field";
+	public const DEBUG_SNAPSHOT_BOUNDS_FIELD = "messages.debug.system.snapshot-bounds-field";
+	public const DEBUG_SNAPSHOT_TYPE_MISMATCH = "messages.debug.system.snapshot-type-mismatch";
+	public const DEBUG_SNAPSHOT_INVALID_PACKET_NAME = "messages.debug.system.snapshot-invalid-packet-name";
+	public const DEBUG_SNAPSHOT_INVALID_MOVEMENT_PING = "messages.debug.system.snapshot-invalid-movement-ping";
+	public const DEBUG_SNAPSHOT_INVALID_SELECTED_SLOT = "messages.debug.system.snapshot-invalid-selected-slot";
+	public const DEBUG_SNAPSHOT_INVALID_COMBAT_PING = "messages.debug.system.snapshot-invalid-combat-ping";
+	public const DEBUG_SNAPSHOT_INVALID_MESSAGE_LENGTH = "messages.debug.system.snapshot-invalid-message-length";
+	public const DEBUG_SNAPSHOT_INVALID_BLOCK_HARDNESS = "messages.debug.system.snapshot-invalid-block-hardness";
+	public const DEBUG_AUTH_INVALID_PAYLOAD = "messages.debug.system.auth-invalid-payload";
+	public const DEBUG_AUTH_CHAIN_MISSING = "messages.debug.system.auth-chain-missing";
+	public const DEBUG_AUTH_EXTRA_DUPLICATE = "messages.debug.system.auth-extra-duplicate";
+	public const DEBUG_AUTH_EXTRA_NOT_ARRAY = "messages.debug.system.auth-extra-not-array";
+	public const DEBUG_AUTH_EXTRA_MISSING = "messages.debug.system.auth-extra-missing";
+	public const DEBUG_CAPTCHA_TASK_UNINITIALIZED = "messages.debug.system.captcha-task-uninitialized";
+	public const DEBUG_DISCORD_INVALID_WEBHOOK_URL = "messages.debug.system.discord-invalid-webhook-url";
+	public const DEBUG_DISCORD_INVALID_FIELD_CONFIG = "messages.debug.system.discord-invalid-field-config";
 
 	public const CMD_HELP_HEADER = "commands.help.header";
 	public const CMD_HELP_BUILD_AUTHOR = "commands.help.build-author";
@@ -109,6 +145,8 @@ final class LangKeys {
 	public const STARTUP_PROXY_STOPPING = "startup.proxy-stopping";
 	public const STARTUP_PHP_TOO_OLD = "startup.php-too-old";
 	public const STARTUP_VAPM_MISSING = "startup.vapm-missing";
+	public const STARTUP_VAPM_MISSING_AUDIT = "startup.vapm-missing-audit";
+	public const STARTUP_PLUGIN_ENABLED_AUDIT = "startup.plugin-enabled-audit";
 	public const UPDATE_ERROR = "startup.update.error";
 	public const UPDATE_DECODE_FAILED = "startup.update.decode-failed";
 	public const UPDATE_NONE = "startup.update.none";
@@ -140,6 +178,8 @@ final class LangKeys {
 	public const PROXY_BOUND = "proxy.bound";
 	public const PROXY_READY = "proxy.ready";
 	public const PROXY_BIND_FAILED = "proxy.bind-failed";
+	public const PROXY_SOCKET_INIT_EXCEPTION = "proxy.socket-init-exception";
+	public const PROXY_SOCKET_BIND_EXCEPTION = "proxy.socket-bind-exception";
 
 	public const LANG_VALIDATE_MISSING = "language.validation.missing";
 

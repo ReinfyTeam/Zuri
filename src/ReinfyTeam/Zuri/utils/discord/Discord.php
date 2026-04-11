@@ -37,6 +37,8 @@ use CortexPE\DiscordWebhookAPI\Webhook;
 use DateTime;
 use pocketmine\utils\Config;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 use ReinfyTeam\Zuri\ZuriAC;
@@ -48,6 +50,9 @@ use function is_string;
 use function microtime;
 use function str_replace;
 
+/**
+ * Sends anti-cheat and player lifecycle notifications to Discord webhooks.
+ */
 class Discord extends ConfigManager {
 	public const BAN = 0;
 	public const KICK = 1;
@@ -59,26 +64,50 @@ class Discord extends ConfigManager {
 	/** @var array<string,float> */
 	private static array $sendThrottle = [];
 
+	/**
+	 * Reads a nested string setting from webhook config with fallback.
+	 *
+	 * @param Config $config Webhook configuration object.
+	 * @param string $path Nested key path.
+	 * @param string $default Default value.
+	 */
 	private static function nestedString(Config $config, string $path, string $default = "") : string {
 		$value = $config->getNested($path, $default);
 		return is_string($value) ? $value : $default;
 	}
 
+	/**
+	 * Reads a nested boolean setting from webhook config with fallback.
+	 *
+	 * @param Config $config Webhook configuration object.
+	 * @param string $path Nested key path.
+	 * @param bool $default Default value.
+	 */
 	private static function nestedBool(Config $config, string $path, bool $default = false) : bool {
 		$value = $config->getNested($path, $default);
 		return is_bool($value) ? $value : $default;
 	}
 
-	/** @return array<string,mixed> */
+	/**
+	 * Reads a nested array setting from webhook config.
+	 *
+	 * @param Config $config Webhook configuration object.
+	 * @param string $path Nested key path.
+	 * @return array<string,mixed>
+	 */
 	private static function nestedArray(Config $config, string $path) : array {
 		$value = $config->getNested($path, []);
 		return is_array($value) ? $value : [];
 	}
 
 	/**
+	 * Sends a webhook message for a specific event type and player context.
+	 *
+	 * @param PlayerAPI $playerAPI Player context.
+	 * @param int $type Webhook event type constant.
+	 * @param array{name:string,subType:string}|null $moduleInfo Optional module metadata.
 	 * @throws DiscordWebhookException
 	 */
-	/** @param array{name:string,subType:string}|null $moduleInfo */
 	public static function Send(PlayerAPI $playerAPI, int $type, ?array $moduleInfo = null) : void {
 		$sendType = match ($type) {
 			self::BAN => "ban",
@@ -105,7 +134,7 @@ class Discord extends ConfigManager {
 		$webhook = new Webhook(self::nestedString($webhookConfig, "discord.webhook_url"));
 
 		if (!$webhook->isValid()) {
-			throw new DiscordWebhookException("Discord Webhook URL is not valid an url. Please refer to the instruction on the github wiki!");
+			throw new DiscordWebhookException(Lang::get(LangKeys::DEBUG_DISCORD_INVALID_WEBHOOK_URL));
 		}
 		$message = new Message();
 		$moduleName = $moduleInfo["name"] ?? "";
@@ -178,7 +207,7 @@ class Discord extends ConfigManager {
 						if (is_string($fieldTitle) && $fieldTitle !== "" && is_string($fieldValue) && $fieldValue !== "" && is_bool($fieldInline)) {
 							$embed->addField(ReplaceText::replace($playerAPI, $fieldTitle, $moduleName, $moduleSubType), ReplaceText::replace($playerAPI, $fieldValue, $moduleName, $moduleSubType), $fieldInline);
 						} else {
-							throw new DiscordWebhookException("Field \"$field_name\" has an empty required variables. Please fix them on webhook.yml!");
+							throw new DiscordWebhookException(Lang::get(LangKeys::DEBUG_DISCORD_INVALID_FIELD_CONFIG, ["field" => $field_name]));
 						}
 					}
 				}
@@ -190,6 +219,13 @@ class Discord extends ConfigManager {
 		}
 	}
 
+	/**
+	 * Applies lightweight cooldown throttling per message key.
+	 *
+	 * @param string $key Throttle key.
+	 * @param float $cooldownSeconds Cooldown duration in seconds.
+	 * @return bool True when sending is allowed now.
+	 */
 	private static function canSendNow(string $key, float $cooldownSeconds) : bool {
 		$now = microtime(true);
 		$nextAt = self::$sendThrottle[$key] ?? 0.0;
@@ -210,10 +246,18 @@ class Discord extends ConfigManager {
 		return true;
 	}
 
+	/**
+	 * Returns the lazily initialized webhook configuration instance.
+	 */
 	public static function getWebhookConfig() : Config {
 		return self::$config ??= new Config(ZuriAC::getInstance()->getDataFolder() . "webhook.yml", Config::YAML);
 	}
 
+	/**
+	 * Converts hexadecimal color text to decimal color integer.
+	 *
+	 * @param string $hex Hex string with or without leading #.
+	 */
 	public static function textToHex(string $hex) : int|float {
 		// why this??
 		$hex = str_replace("#", "", $hex);

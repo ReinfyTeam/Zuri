@@ -56,14 +56,26 @@ use function implode;
 use function preg_replace;
 use function trim;
 
+/**
+ * Handles `/zuri` and routes players or staff to all bundled Zuri subcommands.
+ */
 class ZuriCommand extends BaseCommand {
 	/** @var list<array{name:string,usage:string,description:string}> */
 	private static array $helpEntries = [];
 
+	/**
+	 * Initializes the root command with aliases used by administrators.
+	 *
+	 * @param ZuriAC $plugin Plugin instance that owns this command.
+	 * @return void
+	 */
 	public function __construct(ZuriAC $plugin) {
 		parent::__construct($plugin, "zuri", "Zuri Anticheat", ["anticheat", "ac"]);
 	}
 
+	/**
+	 * Registers command permissions and wires every available `/zuri` subcommand.
+	 */
 	protected function prepare() : void {
 		$plugin = $this->plugin;
 		if (!$plugin instanceof PluginBase) {
@@ -85,11 +97,23 @@ class ZuriCommand extends BaseCommand {
 		$this->registerAndCollectSubCommand(new HelpSubCommand($plugin));
 	}
 
-	/** @param array<string,mixed> $args */
+	/**
+	 * Shows generated usage help when `/zuri` is executed without a subcommand.
+	 *
+	 * @param CommandSender $sender Sender receiving the help output.
+	 * @param string $aliasUsed Alias used to execute the command.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$sender->sendMessage(self::buildHelpMessage($this->getName()));
 	}
 
+	/**
+	 * Builds the localized multi-line help menu for all registered subcommands.
+	 *
+	 * @param string $namecmd Root command name shown in generated usage lines.
+	 * @return string Rendered help text ready to send as chat output.
+	 */
 	public static function buildHelpMessage(string $namecmd = "zuri") : string {
 		$version = ZuriAC::getInstance()->getDescription()->getVersion();
 		$author = ZuriAC::getInstance()->getDescription()->getAuthors()[0] ?? 'Unknown';
@@ -106,6 +130,11 @@ class ZuriCommand extends BaseCommand {
 		return implode("\n", $lines);
 	}
 
+	/**
+	 * Registers a subcommand and stores its cleaned metadata for help rendering.
+	 *
+	 * @param BaseSubCommand $subCommand Subcommand to expose through `/zuri`.
+	 */
 	private function registerAndCollectSubCommand(BaseSubCommand $subCommand) : void {
 		$this->registerSubCommand($subCommand);
 		$rawDescription = $subCommand->getDescription();

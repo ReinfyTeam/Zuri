@@ -44,6 +44,9 @@ use function array_keys;
 use function is_numeric;
 use function max;
 
+/**
+ * Detects movement through solid blocks.
+ */
 class Phase extends Check {
 	private const BUFFER_KEY = CacheData::PHASE_A_BUFFER;
 	private const BUFFER_LIMIT = 3;
@@ -53,15 +56,26 @@ class Phase extends Check {
 	/** @var list<int>|null */
 	private static ?array $skipIds = null;
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Phase";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Handles movement events for phase detection.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -122,13 +136,22 @@ class Phase extends Check {
 		}
 	}
 
+	/**
+	 * Decreases the local phase buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	private function decreaseBuffer(PlayerAPI $playerAPI) : void {
 		$bufferRaw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
 		$buffer = max(0, (is_numeric($bufferRaw) ? (int) $bufferRaw : 0) - 1);
 		$playerAPI->setExternalData(self::BUFFER_KEY, $buffer);
 	}
 
-	/** @return array<int,int> */
+	/**
+	 * Gets a flipped lookup of block IDs that should be skipped.
+	 *
+	 * @return array<int,int>
+	 */
 	private static function getSkipFlipped() : array {
 		if (self::$skipFlipped !== null) {
 			return self::$skipFlipped;
@@ -208,7 +231,11 @@ class Phase extends Check {
 		return self::$skipFlipped;
 	}
 
-	/** @return list<int> */
+	/**
+	 * Gets the block IDs that should be skipped for phase checks.
+	 *
+	 * @return list<int>
+	 */
 	private static function getSkipIds() : array {
 		if (self::$skipIds !== null) {
 			return self::$skipIds;

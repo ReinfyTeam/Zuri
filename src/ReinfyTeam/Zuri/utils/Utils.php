@@ -39,6 +39,8 @@ use pocketmine\network\mcpe\JwtUtils;
 use pocketmine\network\PacketHandlingException;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use function array_keys;
 use function array_values;
 use function is_array;
@@ -48,7 +50,16 @@ use function mt_getrandmax;
 use function mt_rand;
 use function str_replace;
 
+/**
+ * Hosts generic utility helpers shared across anti-cheat pipelines.
+ */
 class Utils {
+	/**
+	 * Converts placeholder color tokens to formatting codes or reverses the mapping.
+	 *
+	 * @param mixed $text Input text to transform.
+	 * @param bool $reverse When true, converts codes back to tokens.
+	 */
 	public static function ParseColors(mixed $text, bool $reverse = false) : string {
 		if (!is_string($text)) {
 			return "";
@@ -98,6 +109,15 @@ class Utils {
 	}
 
 	// Grabbed from PMMP LOL
+	/**
+	 * Calculates resulting knockback vector using PMMP-compatible physics helpers.
+	 *
+	 * @param Player $player Target player.
+	 * @param float $x Horizontal X force direction.
+	 * @param float $z Horizontal Z force direction.
+	 * @param float $force Knockback force multiplier.
+	 * @param float|null $verticalLimit Optional vertical clamp.
+	 */
 	public static function calculatePossibleKnockback(Player $player, float $x, float $z, float $force = Living::DEFAULT_KNOCKBACK_FORCE, ?float $verticalLimit = Living::DEFAULT_KNOCKBACK_VERTICAL_LIMIT) : ?Vector3 {
 		$f = MathUtil::horizontalLength($x, $z);
 		if ($f <= 0) {
@@ -126,16 +146,22 @@ class Utils {
 		return null;
 	}
 
-	/** @return array<string,mixed> */
+	/**
+	 * Extracts and validates login chain extraData from authInfo JSON.
+	 *
+	 * @param string $authInfoJson Raw authInfo JSON payload.
+	 * @return array<string,mixed>
+	 * @throws PacketHandlingException
+	 */
 	public static function fetchAuthData(string $authInfoJson) : array {
 		$decoded = json_decode($authInfoJson, true);
 		if (!is_array($decoded)) {
-			throw new PacketHandlingException("Invalid authInfoJson payload");
+			throw new PacketHandlingException(Lang::get(LangKeys::DEBUG_AUTH_INVALID_PAYLOAD));
 		}
 
 		$chain = $decoded["chain"] ?? null;
 		if (!is_array($chain)) {
-			throw new PacketHandlingException("'chain' not found in authInfoJson");
+			throw new PacketHandlingException(Lang::get(LangKeys::DEBUG_AUTH_CHAIN_MISSING));
 		}
 
 		$extraData = null;
@@ -151,17 +177,17 @@ class Utils {
 			}
 			if (isset($claims["extraData"])) {
 				if ($extraData !== null) {
-					throw new PacketHandlingException("Found 'extraData' more than once in chainData");
+					throw new PacketHandlingException(Lang::get(LangKeys::DEBUG_AUTH_EXTRA_DUPLICATE));
 				}
 
 				if (!is_array($claims["extraData"])) {
-					throw new PacketHandlingException("'extraData' key should be an array");
+					throw new PacketHandlingException(Lang::get(LangKeys::DEBUG_AUTH_EXTRA_NOT_ARRAY));
 				}
 				$extraData = $claims["extraData"];
 			}
 		}
 		if (!is_array($extraData)) {
-			throw new PacketHandlingException("'extraData' not found in chain data");
+			throw new PacketHandlingException(Lang::get(LangKeys::DEBUG_AUTH_EXTRA_MISSING));
 		}
 		return $extraData;
 	}

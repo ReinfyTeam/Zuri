@@ -45,16 +45,30 @@ use function count;
 use function is_array;
 use function is_numeric;
 
+/**
+ * Detects prolonged airborne movement inconsistent with vanilla physics.
+ */
 class FlyC extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Fly";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "C";
 	}
 
 	/**
+	 * Handles movement events for FlyC detection.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -92,8 +106,12 @@ class FlyC extends Check {
 		}
 	}
 
-	/** @param array<string,mixed> $payload
-	 *  @return array<string,mixed>
+	/**
+	 * Evaluates the async payload for FlyC violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(

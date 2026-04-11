@@ -38,6 +38,9 @@ use function max;
 use function microtime;
 use function round;
 
+/**
+ * Aggregates lightweight runtime timing metrics for hot-path diagnostics.
+ */
 final class HotPathProfiler {
 	/** @var array<string,array{count:int,total:float,max:float}> */
 	private static array $metrics = [];
@@ -45,10 +48,21 @@ final class HotPathProfiler {
 	private static float $flushIntervalSeconds = 30.0;
 	private static bool $enabled = true;
 
+	/**
+	 * Enables or disables runtime metric collection.
+	 *
+	 * @param bool $enabled Whether profiling should run.
+	 */
 	public static function setEnabled(bool $enabled) : void {
 		self::$enabled = $enabled;
 	}
 
+	/**
+	 * Records a metric sample duration in seconds.
+	 *
+	 * @param string $metric Metric key.
+	 * @param float $seconds Sample duration in seconds.
+	 */
 	public static function record(string $metric, float $seconds) : void {
 		if (!self::$enabled) {
 			return;
@@ -69,6 +83,9 @@ final class HotPathProfiler {
 		}
 	}
 
+	/**
+	 * Flushes collected metrics to debug logs and resets the window.
+	 */
 	public static function flush() : void {
 		if (self::$metrics === []) {
 			self::$windowStartedAt = microtime(true);
@@ -101,10 +118,20 @@ final class HotPathProfiler {
 	}
 
 	/** @return array<string,array{count:int,total:float,max:float}> */
+	/**
+	 * Returns current in-memory metric accumulators.
+	 *
+	 * @return array<string,array{count:int,total:float,max:float}>
+	 */
 	public static function getMetrics() : array {
 		return self::$metrics;
 	}
 
+	/**
+	 * Returns average metric duration in milliseconds.
+	 *
+	 * @param string $metric Metric key.
+	 */
 	public static function getAverageMillis(string $metric) : float {
 		$entry = self::$metrics[$metric] ?? null;
 		if ($entry === null || $entry["count"] === 0) {
@@ -113,6 +140,9 @@ final class HotPathProfiler {
 		return ($entry["total"] / $entry["count"]) * 1000.0;
 	}
 
+	/**
+	 * Returns total profiled time across metrics in milliseconds.
+	 */
 	public static function getTotalMillis() : float {
 		if (self::$metrics === []) {
 			return 0.0;
@@ -124,6 +154,9 @@ final class HotPathProfiler {
 		return $total * 1000.0;
 	}
 
+	/**
+	 * Returns count of metric keys currently tracked.
+	 */
 	public static function getMetricCount() : int {
 		return count(self::$metrics);
 	}

@@ -32,6 +32,8 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\snapshots;
 
 use pocketmine\player\Player;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function abs;
 
@@ -92,6 +94,14 @@ class MovementSnapshot extends AsyncSnapshot {
 	/** @var array<string,mixed> */
 	private array $cachedData = [];
 
+	/**
+	 * Captures immutable movement and environment state.
+	 *
+	 * @param string $checkType Check type identifier.
+	 * @param Player $player Player entity for positional/network state.
+	 * @param PlayerAPI $playerAPI Player API wrapper for tracked movement context.
+	 * @return void
+	 */
 	public function __construct(string $checkType, Player $player, PlayerAPI $playerAPI) {
 		parent::__construct($checkType);
 
@@ -134,6 +144,10 @@ class MovementSnapshot extends AsyncSnapshot {
 
 	/**
 	 * Add a cached data field (e.g., last known Y position).
+	 *
+	 * @param string $key Cached data key.
+	 * @param mixed $value Cached data value.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function addCachedData(string $key, mixed $value) : self {
 		$this->cachedData[$key] = $value;
@@ -142,6 +156,11 @@ class MovementSnapshot extends AsyncSnapshot {
 
 	/**
 	 * Set environment state (ground solid, chunk loaded, etc).
+	 *
+	 * @param bool $groundSolid Whether the block below is solid.
+	 * @param bool $chunkLoaded Whether the current chunk is loaded.
+	 * @param bool $recentlyCancelled Whether a recent event cancellation occurred.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function setEnvironmentState(bool $groundSolid, bool $chunkLoaded, bool $recentlyCancelled) : self {
 		$this->groundSolid = $groundSolid;
@@ -150,7 +169,11 @@ class MovementSnapshot extends AsyncSnapshot {
 		return $this;
 	}
 
-	/** @return array<string,mixed> */
+	/**
+	 * Builds the immutable payload for async processing.
+	 *
+	 * @return array<string,mixed> Serialized movement snapshot payload.
+	 */
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
@@ -188,9 +211,14 @@ class MovementSnapshot extends AsyncSnapshot {
 		];
 	}
 
+	/**
+	 * Validates snapshot values before async dispatch.
+	 *
+	 * @throws SnapshotException If snapshot values are invalid.
+	 */
 	public function validate() : void {
 		if ($this->ping < 0) {
-			throw new SnapshotException("Invalid ping in movement snapshot");
+			throw new SnapshotException(Lang::get(LangKeys::DEBUG_SNAPSHOT_INVALID_MOVEMENT_PING));
 		}
 	}
 }

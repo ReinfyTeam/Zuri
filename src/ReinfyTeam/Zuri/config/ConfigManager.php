@@ -48,12 +48,25 @@ use function rename;
 use function stream_get_contents;
 use function yaml_parse;
 
+/**
+ * Centralized helper for reading, writing, and validating plugin configuration.
+ */
 class ConfigManager extends ConfigPaths {
+	/**
+	 * Reads a nested configuration value using dot notation.
+	 *
+	 * @param string $path Nested configuration path.
+	 * @param mixed $defaultValue Value returned when the path is missing.
+	 */
 	public static function getData(string $path, mixed $defaultValue = null) : mixed {
 		return ZuriAC::getInstance()->getConfig()->getNested($path, $defaultValue);
 	}
 
 	/**
+	 * Writes and persists a nested configuration value.
+	 *
+	 * @param string $path Nested configuration path.
+	 * @param mixed $data Value to persist.
 	 * @throws JsonException
 	 */
 	public static function setData(string $path, mixed $data) : void {
@@ -61,6 +74,9 @@ class ConfigManager extends ConfigPaths {
 		ZuriAC::getInstance()->getConfig()->save();
 	}
 
+	/**
+	 * Ensures base configuration resources exist and refreshes outdated configs.
+	 */
 	public static function checkConfig() : void {
 		if (!file_exists(ZuriAC::getInstance()->getDataFolder() . "config.yml")) {
 			ZuriAC::getInstance()->saveResource("config.yml");
@@ -103,6 +119,9 @@ class ConfigManager extends ConfigPaths {
 		self::runStartupDiagnostics();
 	}
 
+	/**
+	 * Runs sanity checks on startup-critical configuration values.
+	 */
 	public static function runStartupDiagnostics() : void {
 		$logger = ZuriAC::getInstance()->getServer()->getLogger();
 		$requiredPaths = [

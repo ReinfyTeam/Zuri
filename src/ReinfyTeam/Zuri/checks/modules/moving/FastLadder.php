@@ -41,16 +41,33 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 use function intval;
 
+/**
+ * Detects vertical ladder movement that exceeds legitimate climbing speed.
+ */
 class FastLadder extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "FastLadder";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Processes move events for fast-ladder detection.
+	 *
+	 * @param Event $event Triggered event.
+	 * @param PlayerAPI $playerAPI Player context.
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

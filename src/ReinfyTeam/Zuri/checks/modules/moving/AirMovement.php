@@ -40,16 +40,33 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_numeric;
 use function is_string;
 
+/**
+ * Detects airborne movement that exceeds expected jump behavior.
+ */
 class AirMovement extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "AirMovement";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Processes packets for excessive airborne movement detection.
+	 *
+	 * @param DataPacket $packet Incoming packet.
+	 * @param PlayerAPI $playerAPI Player context.
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {

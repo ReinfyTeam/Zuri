@@ -42,16 +42,30 @@ use function is_numeric;
 use function microtime;
 use function round;
 
+/**
+ * Detects timing desynchronization via balance accumulation.
+ */
 class TimerB extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Timer";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "B";
 	}
 
 	/**
+	 * Processes input packets and dispatches async TimerB checks.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -69,6 +83,13 @@ class TimerB extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates async payload for TimerB violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$check = new self();
 		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {

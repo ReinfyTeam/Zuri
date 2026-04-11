@@ -37,20 +37,38 @@ use pocketmine\plugin\PluginBase;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\utils\AuditLogger;
+use function str_replace;
 
+/**
+ * Generates an audit snapshot file and returns its path to the command sender.
+ */
 final class ReportSubCommand extends BaseSubCommand {
+	/**
+	 * Registers the `/zuri report` subcommand.
+	 *
+	 * @param PluginBase $plugin Plugin that provides reporting utilities.
+	 * @return void
+	 */
 	public function __construct(PluginBase $plugin) {
 		parent::__construct($plugin, "report", "Generate anti-cheat report file.", []);
 	}
 
+	/**
+	 * Declares arguments for this subcommand.
+	 */
 	protected function prepare() : void {
 	}
 
-	/** @param array<string,mixed> $args */
+	/**
+	 * Triggers report generation and sends the produced file path to the sender.
+	 *
+	 * @param CommandSender $sender Sender requesting an audit export.
+	 * @param string $aliasUsed Alias used to execute this subcommand.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		AuditLogger::command($sender, "zuri report");
 		$file = AuditLogger::createReportFile();
-		$sender->sendMessage(Lang::get(LangKeys::CMD_REPORT_READY, ["file" => $file]));
+		$sender->sendMessage(Lang::get(LangKeys::CMD_REPORT_READY, ["file" => str_replace("\\", "/", $file)]));
 	}
 }
-

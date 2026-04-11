@@ -69,6 +69,9 @@ use function strtolower;
 use function substr;
 use function trim;
 
+/**
+ * Base implementation for all anti-cheat checks and violation escalation flow.
+ */
 abstract class Check extends ConfigManager {
 	/** @var array<string, float> */
 	private static array $asyncThrottle = [];
@@ -84,8 +87,18 @@ abstract class Check extends ConfigManager {
 	/** @var array<string, mixed> */
 	private array $constantCache = [];
 
+	/**
+	 * Returns the check family name.
+	 *
+	 * @return string Check name used for configuration and reporting.
+	 */
 	public abstract function getName() : string;
 
+	/**
+	 * Returns the check subtype identifier.
+	 *
+	 * @return string Check subtype used for thresholds and messaging.
+	 */
 	public abstract function getSubType() : string;
 
 	/**
@@ -98,18 +111,37 @@ abstract class Check extends ConfigManager {
 		return null;
 	}
 
+	/**
+	 * Processes a packet for this check.
+	 *
+	 * @param DataPacket $packet Incoming packet to inspect.
+	 * @param PlayerAPI $playerAPI Player context associated with the packet.
+	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 	}
 
+	/**
+	 * Processes an event with player context for this check.
+	 *
+	 * @param Event $event Event to inspect.
+	 * @param PlayerAPI $playerAPI Player context associated with the event.
+	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 	}
 
+	/**
+	 * Processes an event that does not require a PlayerAPI context.
+	 *
+	 * @param Event $event Event to inspect.
+	 */
 	public function checkJustEvent(Event $event) : void {
 	}
 
 	/**
+	 * Evaluates an async payload result returned by worker execution.
+	 *
 	 * @param array<string,mixed> $payload
-	 * @return array<string,mixed>
+	 * @return array<string,mixed> Normalized decision payload for main-thread application.
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (($payload["_type"] ?? null) === "__decision") {
@@ -123,7 +155,7 @@ abstract class Check extends ConfigManager {
 	 * Fast-path for batched async evaluation.
 	 *
 	 * @param list<array{id:string,payload:array<string,mixed>}> $entries
-	 * @return array<string,array<string,mixed>>
+	 * @return array<string,array<string,mixed>> Results keyed by batch entry ID.
 	 */
 	public static function evaluateAsyncBatch(array $entries) : array {
 		$results = [];
@@ -139,7 +171,12 @@ abstract class Check extends ConfigManager {
 		return $results;
 	}
 
-	/** @param array<string,mixed> $payload */
+	/**
+	 * Dispatches an async evaluation payload for this check.
+	 *
+	 * @param string $playerName Player name used to resolve online player context.
+	 * @param array<string,mixed> $payload Serialized payload sent to async workers.
+	 */
 	protected function dispatchAsyncCheck(string $playerName, array $payload) : void {
 		$player = Server::getInstance()->getPlayerExact($playerName);
 		if ($player === null || !$player->isOnline() || !$player->isConnected()) {
@@ -196,8 +233,14 @@ abstract class Check extends ConfigManager {
 	}
 
 	/**
+	 * Dispatches a lightweight async decision payload back through worker plumbing.
+	 *
+	 * @param PlayerAPI $playerAPI Player context receiving the decision.
+	 * @param bool $failed Whether the decision marks the check as failed.
+	 * @param string $debug Optional debug text for decision processing.
 	 * @param array<string,mixed> $set
 	 * @param list<string> $unset
+	 * @param float $minInterval Minimum dispatch interval in seconds for throttling.
 	 */
 	protected function dispatchAsyncDecision(
 		PlayerAPI $playerAPI,
@@ -233,24 +276,51 @@ abstract class Check extends ConfigManager {
 		$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), $payload);
 	}
 
+	/**
+	 * Applies placeholder replacement for check-related player messages.
+	 *
+	 * @param PlayerAPI $player Player context used for replacement tokens.
+	 * @param string $text Source text with replacement placeholders.
+	 * @param string $reason Optional reason/check name value.
+	 * @param string $subType Optional subtype value.
+	 * @return string Rendered text with placeholders replaced.
+	 */
 	public function replaceText(PlayerAPI $player, string $text, string $reason = "", string $subType = "") : string {
 		return ReplaceText::replace($player, $text, $reason, $subType);
 	}
 
+	/**
+	 * Returns the configured punishment mode for this check.
+	 *
+	 * @return string Lowercase punishment mode identifier.
+	 */
 	public function getPunishment() : string {
 		$raw = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".punishment", "FLAG");
 		return $this->punishmentCache ??= strtolower(self::toString($raw, "FLAG"));
 	}
 
+	/**
+	 * Sets a runtime enable override for this check instance.
+	 *
+	 * @param bool|null $enabled Override value, or null to use configured value.
+	 */
 	public function setEnabledOverride(?bool $enabled) : void {
 		$this->enabledOverride = $enabled;
 		$this->enabledCache = null;
 	}
 
+	/**
+	 * Returns the runtime enable override, if present.
+	 *
+	 * @return bool|null Override value or null when no override is set.
+	 */
 	public function getEnabledOverride() : ?bool {
 		return $this->enabledOverride;
 	}
 
+	/**
+	 * Resets cached configuration-derived values for this check instance.
+	 */
 	public function resetCaches() : void {
 		$this->enabledCache = null;
 		$this->punishmentCache = null;
@@ -258,6 +328,11 @@ abstract class Check extends ConfigManager {
 		$this->constantCache = [];
 	}
 
+	/**
+	 * Determines whether this check is currently enabled.
+	 *
+	 * @return bool True when enabled by override or configuration.
+	 */
 	public function enable() : bool {
 		if ($this->enabledOverride !== null) {
 			return $this->enabledOverride;
@@ -266,11 +341,22 @@ abstract class Check extends ConfigManager {
 		return $this->enabledCache ??= ($raw === true);
 	}
 
+	/**
+	 * Returns the configured pre-violation threshold for this subtype.
+	 *
+	 * @return int Maximum pre-violations before real violations begin counting.
+	 */
 	public function maxViolations() : int {
 		$raw = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".pre-vl." . strtolower($this->getSubType()), 0);
 		return $this->maxViolationsCache ??= self::toInt($raw, 0);
 	}
 
+	/**
+	 * Retrieves a check constant value from configuration with per-instance caching.
+	 *
+	 * @param string $name Constant key under the check constants node.
+	 * @return mixed Constant value as stored in configuration.
+	 */
 	public function getConstant(string $name) : mixed {
 		if (isset($this->constantCache[$name])) {
 			return $this->constantCache[$name];
@@ -278,6 +364,11 @@ abstract class Check extends ConfigManager {
 		return $this->constantCache[$name] = self::getData(self::CHECK . "." . strtolower($this->getName()) . ".constants." . $name);
 	}
 
+	/**
+	 * Collects all registered subtypes for this check name.
+	 *
+	 * @return string Comma-separated list of unique subtype names.
+	 */
 	public function getAllSubTypes() : string {
 		$list = [];
 		foreach (ZuriAC::Checks() as $check) {
@@ -291,6 +382,8 @@ abstract class Check extends ConfigManager {
 	/**
 	 * When multiple attempts of violations is within limit of < 0.5s.
 	 *
+	 * @param PlayerAPI $playerAPI Player context whose violation counters are being updated.
+	 * @return bool True when the violation resulted in a flag/punishment action.
 	 * @throws DiscordWebhookException
 	 * @internal
 	 */
@@ -652,6 +745,8 @@ abstract class Check extends ConfigManager {
 	/**
 	 * For Login purposes warning system only!
 	 * @internal
+	 *
+	 * @param string $username Player name associated with the warning.
 	 */
 	public function warn(string $username) : void {
 		if (!self::getData(self::WARNING_ENABLE)) {
@@ -669,6 +764,9 @@ abstract class Check extends ConfigManager {
 	/**
 	 * Developers: Debugger for Anticheat
 	 * @internal
+	 *
+	 * @param PlayerAPI $playerAPI Player context for debug delivery.
+	 * @param string $text Raw debug text to localize and emit.
 	 */
 	public function debug(PlayerAPI $playerAPI, string $text) : void {
 		$player = $playerAPI->getPlayer();
@@ -710,6 +808,12 @@ abstract class Check extends ConfigManager {
 		}
 	}
 
+	/**
+	 * Localizes formatted debug key/value output while preserving free text.
+	 *
+	 * @param string $text Raw debug detail text.
+	 * @return string Localized debug detail text.
+	 */
 	private function localizeDebugText(string $text) : string {
 		$trimmed = trim($text);
 		if ($trimmed === "") {
@@ -744,18 +848,46 @@ abstract class Check extends ConfigManager {
 		return implode(Lang::get("messages.debug.separator", [], ", "), $pairs);
 	}
 
+	/**
+	 * Converts a mixed value to integer with fallback.
+	 *
+	 * @param mixed $value Value to convert.
+	 * @param int $default Fallback when value is not numeric.
+	 * @return int Converted integer value.
+	 */
 	private static function toInt(mixed $value, int $default) : int {
 		return is_numeric($value) ? (int) $value : $default;
 	}
 
+	/**
+	 * Converts a mixed value to float with fallback.
+	 *
+	 * @param mixed $value Value to convert.
+	 * @param float $default Fallback when value is not numeric.
+	 * @return float Converted float value.
+	 */
 	private static function toFloat(mixed $value, float $default) : float {
 		return is_numeric($value) ? (float) $value : $default;
 	}
 
+	/**
+	 * Converts a mixed value to string with fallback.
+	 *
+	 * @param mixed $value Value to convert.
+	 * @param string $default Fallback when value is not a string.
+	 * @return string Converted string value.
+	 */
 	private static function toString(mixed $value, string $default) : string {
 		return is_string($value) ? $value : $default;
 	}
 
+	/**
+	 * Determines whether a message key can be emitted based on throttle interval.
+	 *
+	 * @param string $key Throttle bucket key.
+	 * @param float $minIntervalSeconds Minimum emission interval in seconds.
+	 * @return bool True when emission is allowed.
+	 */
 	private static function canEmitThrottled(string $key, float $minIntervalSeconds) : bool {
 		$now = microtime(true);
 		$nextAllowedAt = self::$messageThrottle[$key] ?? 0.0;
@@ -778,7 +910,12 @@ abstract class Check extends ConfigManager {
 		return true;
 	}
 
-	/** @return list<string> */
+	/**
+	 * Converts a mixed value to a list of strings.
+	 *
+	 * @param mixed $value Value to normalize into a list.
+	 * @return list<string> String-only list extracted from input.
+	 */
 	private static function toStringList(mixed $value) : array {
 		if (!is_array($value)) {
 			return [];

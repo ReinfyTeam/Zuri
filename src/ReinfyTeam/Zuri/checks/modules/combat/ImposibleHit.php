@@ -41,13 +41,22 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
+/**
+ * Detects hits performed while in impossible interaction states.
+ */
 class ImposibleHit extends Check {
 	private const TYPE = "ImposibleHitA";
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "InventoryMove";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
@@ -56,6 +65,11 @@ class ImposibleHit extends Check {
 	private array $eating = [];
 
 	/**
+	 * Handles combat events for impossible-hit detection.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -70,6 +84,13 @@ class ImposibleHit extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates async payload for ImposibleHit violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (($payload["type"] ?? null) !== self::TYPE) {
 			return [];
@@ -89,6 +110,12 @@ class ImposibleHit extends Check {
 		return $result;
 	}
 
+	/**
+	 * Processes actor event packets to track eating state.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof ActorEventPacket) {
 			if ($packet->eventId === ActorEvent::EATING_ITEM) {

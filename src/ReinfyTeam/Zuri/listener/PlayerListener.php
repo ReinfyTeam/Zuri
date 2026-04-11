@@ -91,6 +91,9 @@ use function array_filter;
 use function count;
 use function microtime;
 
+/**
+ * Primary event and packet listener that routes player data into check pipelines.
+ */
 class PlayerListener implements Listener {
 	/** @var array<string, Block> */
 	private array $blockInteracted = [];
@@ -101,6 +104,11 @@ class PlayerListener implements Listener {
 
 	private const DELTAL_TIME_CLICK = 1;
 
+	/**
+	 * Handles inbound packets, updates CPS counters, and dispatches packet checks.
+	 *
+	 * @param DataPacketReceiveEvent $event Packet receive event.
+	 */
 	public function onDataPacketReceive(DataPacketReceiveEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$profileStartedAt = microtime(true);
@@ -137,6 +145,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onDataPacketReceive");
 	}
 
+	/**
+	 * Tracks movement context and dispatches movement-related checks.
+	 *
+	 * @param PlayerMoveEvent $event Player move event.
+	 */
 	public function onPlayerMove(PlayerMoveEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -185,6 +198,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onPlayerMove");
 	}
 
+	/**
+	 * Tracks interacted blocks and dispatches interaction checks.
+	 *
+	 * @param PlayerInteractEvent $event Player interact event.
+	 */
 	public function onPlayerInteract(PlayerInteractEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -209,6 +227,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onPlayerInteract");
 	}
 
+	/**
+	 * Updates aggregated motion state from entity motion events.
+	 *
+	 * @param EntityMotionEvent $event Entity motion event.
+	 */
 	public function onMotion(EntityMotionEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$entity = $event->getEntity();
@@ -225,6 +248,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onMotion");
 	}
 
+	/**
+	 * Handles block break context and special-break heuristics.
+	 *
+	 * @param BlockBreakEvent $event Block break event.
+	 */
 	public function onPlayerBreak(BlockBreakEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$block = $event->getBlock();
@@ -261,6 +289,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onPlayerBreak");
 	}
 
+	/**
+	 * Handles block place context and special-place heuristics.
+	 *
+	 * @param BlockPlaceEvent $event Block place event.
+	 */
 	public function onPlayerPlace(BlockPlaceEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$block = $event->getBlockAgainst();
@@ -298,6 +331,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onPlayerPlace");
 	}
 
+	/**
+	 * Processes item-use events and records cancellation state.
+	 *
+	 * @param PlayerItemUseEvent $event Item use event.
+	 */
 	public function onPlayerItemUse(PlayerItemUseEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -311,6 +349,11 @@ class PlayerListener implements Listener {
 	}
 
 
+	/**
+	 * Processes inventory transactions and armor transaction flags.
+	 *
+	 * @param InventoryTransactionEvent $event Inventory transaction event.
+	 */
 	public function onInventoryTransaction(InventoryTransactionEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getTransaction()->getSource();
@@ -328,6 +371,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onInventoryTransaction");
 	}
 
+	/**
+	 * Marks inventory open state and dispatches related checks.
+	 *
+	 * @param InventoryOpenEvent $event Inventory open event.
+	 */
 	public function onInventoryOpen(InventoryOpenEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -338,6 +386,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onInventoryOpen");
 	}
 
+	/**
+	 * Marks inventory closed state and dispatches related checks.
+	 *
+	 * @param InventoryCloseEvent $event Inventory close event.
+	 */
 	public function onInventoryClose(InventoryCloseEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -348,6 +401,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onInventoryClose");
 	}
 
+	/**
+	 * Tracks teleport ticks and world-transfer cooldown markers.
+	 *
+	 * @param EntityTeleportEvent $event Entity teleport event.
+	 */
 	public function onEntityTeleport(EntityTeleportEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$entity = $event->getEntity();
@@ -376,6 +434,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onEntityTeleport");
 	}
 
+	/**
+	 * Records jump timing for movement checks.
+	 *
+	 * @param PlayerJumpEvent $event Player jump event.
+	 */
 	public function onPlayerJump(PlayerJumpEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -387,6 +450,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onPlayerJump");
 	}
 
+	/**
+	 * Clears per-player listener state on disconnect.
+	 *
+	 * @param PlayerQuitEvent $event Player quit event.
+	 */
 	public function onPlayerQuit(PlayerQuitEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			unset($this->packetRateState[$this->getPlayerKey($event->getPlayer())]);
@@ -394,6 +462,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onPlayerQuit");
 	}
 
+	/**
+	 * Initializes per-player timing state on join.
+	 *
+	 * @param PlayerJoinEvent $event Player join event.
+	 */
 	public function onPlayerJoin(PlayerJoinEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -406,12 +479,22 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onPlayerJoin");
 	}
 
+	/**
+	 * Dispatches pre-login checks that do not require PlayerAPI context.
+	 *
+	 * @param PlayerPreLoginEvent $event Pre-login event.
+	 */
 	public function onPlayerPreLogin(PlayerPreLoginEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$this->checkJustEvent($event);
 		}, "PlayerListener::onPlayerPreLogin");
 	}
 
+	/**
+	 * Handles generic damage events and updates hurt timers.
+	 *
+	 * @param EntityDamageEvent $event Damage event.
+	 */
 	public function onEntityDamage(EntityDamageEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$this->checkJustEvent($event);
@@ -433,6 +516,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onEntityDamage");
 	}
 
+	/**
+	 * Handles combat damage events and updates attack timings.
+	 *
+	 * @param EntityDamageByEntityEvent $event Damage-by-entity event.
+	 */
 	public function onEntityDamageByEntity(EntityDamageByEntityEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$cause = $event->getCause();
@@ -466,6 +554,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onEntityDamageByEntity");
 	}
 
+	/**
+	 * Tracks projectile-hit timing for shooter-related checks.
+	 *
+	 * @param ProjectileHitEvent $event Projectile hit event.
+	 */
 	public function onProjectileHit(ProjectileHitEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$projectile = $event->getEntity();
@@ -481,6 +574,11 @@ class PlayerListener implements Listener {
 	}
 
 
+	/**
+	 * Records death timing markers used by cooldown logic.
+	 *
+	 * @param PlayerDeathEvent $event Player death event.
+	 */
 	public function onPlayerDeath(PlayerDeathEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -493,6 +591,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onPlayerDeath");
 	}
 
+	/**
+	 * Dispatches chat checks when captcha flow is inactive.
+	 *
+	 * @param PlayerChatEvent $event Player chat event.
+	 */
 	public function onPlayerChat(PlayerChatEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -508,6 +611,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onPlayerChat");
 	}
 
+	/**
+	 * Dispatches held-item change checks.
+	 *
+	 * @param PlayerItemHeldEvent $event Item-held event.
+	 */
 	public function onPlayerItemHeld(PlayerItemHeldEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -520,6 +628,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onPlayerItemHeld");
 	}
 
+	/**
+	 * Dispatches health-regain related checks.
+	 *
+	 * @param EntityRegainHealthEvent $event Health regain event.
+	 */
 	public function onPlayerRegen(EntityRegainHealthEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getEntity();
@@ -535,6 +648,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onPlayerRegen");
 	}
 
+	/**
+	 * Dispatches command-based behavioral checks for players.
+	 *
+	 * @param CommandEvent $event Command event.
+	 */
 	public function onCommandEvent(CommandEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$sender = $event->getSender();
@@ -550,6 +668,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onCommandEvent");
 	}
 
+	/**
+	 * Tracks bow-shot timing and dispatches bow-related checks.
+	 *
+	 * @param EntityShootBowEvent $event Shoot bow event.
+	 */
 	public function onEntityShootBowEvent(EntityShootBowEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getEntity();
@@ -566,6 +689,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onEntityShootBowEvent");
 	}
 
+	/**
+	 * Dispatches item-consume related checks.
+	 *
+	 * @param PlayerItemConsumeEvent $event Item consume event.
+	 */
 	public function onPlayerItemConsume(PlayerItemConsumeEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -578,6 +706,11 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onPlayerItemConsume");
 	}
 
+	/**
+	 * Dispatches item-drop related checks.
+	 *
+	 * @param PlayerDropItemEvent $event Drop item event.
+	 */
 	public function onDropItem(PlayerDropItemEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -591,11 +724,21 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onDropItem");
 	}
 
+	/**
+	 * Appends one click timestamp for CPS estimation.
+	 *
+	 * @param PlayerAPI $player Player context.
+	 */
 	private function addCPS(PlayerAPI $player) : void {
 		$time = microtime(true);
 		$this->clicksData[$player->getPlayer()->getName()][] = $time;
 	}
 
+	/**
+	 * Returns clicks-per-second from recent click timestamps.
+	 *
+	 * @param PlayerAPI $player Player context.
+	 */
 	private function getCPS(PlayerAPI $player) : int {
 		$newTime = microtime(true);
 		return count(array_filter($this->clicksData[$player->getPlayer()->getName()] ?? [], static function(float $lastTime) use ($newTime) : bool {
@@ -603,6 +746,12 @@ class PlayerListener implements Listener {
 		}));
 	}
 
+	/**
+	 * Dispatches event-aware checks for a player.
+	 *
+	 * @param Event $event Event instance.
+	 * @param PlayerAPI $player Player context.
+	 */
 	private function checkEvent(Event $event, PlayerAPI $player) : void {
 		$p = $player->getPlayer();
 		if (!$p->isOnline() || !$p->isConnected()) {
@@ -621,6 +770,12 @@ class PlayerListener implements Listener {
 		}
 	}
 
+	/**
+	 * Dispatches packet checks for a player.
+	 *
+	 * @param ServerboundPacket $packet Packet instance.
+	 * @param PlayerAPI $player Player context.
+	 */
 	private function check(ServerboundPacket $packet, PlayerAPI $player) : void {
 		$p = $player->getPlayer();
 		if (!$p->isOnline() || !$p->isConnected()) {
@@ -645,6 +800,11 @@ class PlayerListener implements Listener {
 		}
 	}
 
+	/**
+	 * Dispatches checks that only consume global event context.
+	 *
+	 * @param Event $event Event instance.
+	 */
 	private function checkJustEvent(Event $event) : void {
 		foreach (ZuriAC::JustEventChecks() as $class) {
 			ExceptionHandler::wrapVoid(
@@ -658,6 +818,11 @@ class PlayerListener implements Listener {
 		}
 	}
 
+	/**
+	 * Dispatches projectile launch checks.
+	 *
+	 * @param ProjectileLaunchEvent $event Projectile launch event.
+	 */
 	public function onProjectileLaunch(ProjectileLaunchEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$projectile = $event->getEntity();
@@ -669,10 +834,20 @@ class PlayerListener implements Listener {
 		}, "PlayerListener::onProjectileLaunch");
 	}
 
+	/**
+	 * Validates that a player is online and fully connected.
+	 *
+	 * @param Player $player Player entity.
+	 */
 	private function isPlayerReady(Player $player) : bool {
 		return $player->isConnected() && $player->isOnline();
 	}
 
+	/**
+	 * Determines whether a player should be treated as recently active.
+	 *
+	 * @param PlayerAPI $playerAPI Player context.
+	 */
 	private function isPlayerActive(PlayerAPI $playerAPI) : bool {
 		return $playerAPI->getLastMoveTick() <= 40
 			|| $playerAPI->getAttackTicks() <= 40
@@ -683,6 +858,11 @@ class PlayerListener implements Listener {
 			|| $playerAPI->getBlocksBrokeASec() > 0;
 	}
 
+	/**
+	 * Identifies packets still relevant for idle players.
+	 *
+	 * @param ServerboundPacket $packet Packet instance.
+	 */
 	private function isPacketRelevantForIdlePlayer(ServerboundPacket $packet) : bool {
 		return $packet instanceof PlayerAuthInputPacket
 			|| $packet instanceof MovePlayerPacket
@@ -696,16 +876,33 @@ class PlayerListener implements Listener {
 			|| $packet instanceof UpdateAdventureSettingsPacket;
 	}
 
+	/**
+	 * Builds a stable key used for per-player state arrays.
+	 *
+	 * @param Player $player Player entity.
+	 */
 	private function getPlayerKey(Player $player) : string {
 		return $player->getXuid() === "" ? $player->getUniqueId()->__toString() : $player->getXuid();
 	}
 
+	/**
+	 * Marks a player when a cancellable event was blocked.
+	 *
+	 * @param Event $event Event instance.
+	 * @param PlayerAPI $playerAPI Player context.
+	 */
 	private function markRecentlyCancelled(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof Cancellable && $event->isCancelled()) {
 			$playerAPI->setRecentlyCancelledEvent(microtime(true));
 		}
 	}
 
+	/**
+	 * Applies packet-rate flood guard and temporary block windows.
+	 *
+	 * @param Player $player Player entity.
+	 * @return bool True when packet processing should be skipped.
+	 */
 	private function isFloodingPackets(Player $player) : bool {
 		$key = $this->getPlayerKey($player);
 		$now = microtime(true);

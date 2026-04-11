@@ -43,16 +43,33 @@ use function abs;
 use function is_numeric;
 use function round;
 
+/**
+ * Detects repeated upward movement while airborne without valid causes.
+ */
 class AirJump extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "AirJump";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Processes move events for air-jump detection.
+	 *
+	 * @param Event $event Triggered event.
+	 * @param PlayerAPI $playerAPI Player context.
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

@@ -45,19 +45,32 @@ use function max;
 use function min;
 use function strtolower;
 
+/**
+ * Detects attacks that target outside a victim's effective hitbox.
+ */
 class Hitbox extends Check {
 	private const TYPE = "HitboxA";
 	private const BUFFER_KEY = CacheData::HITBOX_A_BUFFER;
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Hitbox";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Handles combat events and dispatches Hitbox checks.
+	 *
+	 * @param Event $event Triggered event instance.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkJustEvent(Event $event) : void {
@@ -130,6 +143,13 @@ class Hitbox extends Check {
 		]);
 	}
 
+	/**
+	 * Evaluates async payload for Hitbox violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (($payload["type"] ?? null) !== self::TYPE) {
 			return [];
@@ -171,6 +191,13 @@ class Hitbox extends Check {
 		return $result;
 	}
 
+	/**
+	 * Determines whether current context should skip Hitbox checks.
+	 *
+	 * @param Player $damager Attacking player.
+	 * @param Player $victim Damaged player.
+	 * @param PlayerAPI $damagerAPI Attacker API wrapper.
+	 */
 	private function shouldSkip(Player $damager, Player $victim, PlayerAPI $damagerAPI) : bool {
 		return
 			!$damager->isSurvival() ||
@@ -180,15 +207,31 @@ class Hitbox extends Check {
 			(int) $damagerAPI->getPing() > $this->profileIntConstant("max-ping", 0);
 	}
 
+	/**
+	 * Gets the current hitbox buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	private function getBuffer(PlayerAPI $playerAPI) : int {
 		$raw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
 		return is_numeric($raw) ? (int) $raw : 0;
 	}
 
+	/**
+	 * Stores the hitbox buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 * @param int $buffer Buffer value to persist.
+	 */
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {
 		$playerAPI->setExternalData(self::BUFFER_KEY, $buffer);
 	}
 
+	/**
+	 * Reads a profiling constant with prefixed key support.
+	 *
+	 * @param string $name Constant key suffix.
+	 */
 	private function profileConstant(string $name) : mixed {
 		$default = $this->getConstant($name);
 		$profileRaw = self::getData("zuri.check.hitbox.tuning-presets.active", "default");
@@ -203,11 +246,23 @@ class Hitbox extends Check {
 		return self::getData("zuri.check.hitbox.tuning-presets." . $profile . "." . $name, $default);
 	}
 
+	/**
+	 * Reads a profiling constant as float with fallback.
+	 *
+	 * @param string $name Constant key suffix.
+	 * @param float $default Default value.
+	 */
 	private function profileFloatConstant(string $name, float $default) : float {
 		$raw = $this->profileConstant($name);
 		return is_numeric($raw) ? (float) $raw : $default;
 	}
 
+	/**
+	 * Reads a profiling constant as integer with fallback.
+	 *
+	 * @param string $name Constant key suffix.
+	 * @param int $default Default value.
+	 */
 	private function profileIntConstant(string $name, int $default) : int {
 		$raw = $this->profileConstant($name);
 		return is_numeric($raw) ? (int) $raw : $default;

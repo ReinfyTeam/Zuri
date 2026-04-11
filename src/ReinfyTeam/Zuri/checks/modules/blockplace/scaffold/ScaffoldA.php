@@ -40,16 +40,30 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 
+/**
+ * Detects scaffold behavior from suspicious block placement angles.
+ */
 class ScaffoldA extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Scaffold";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Handles placement-related events for ScaffoldA checks.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

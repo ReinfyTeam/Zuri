@@ -40,16 +40,33 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_numeric;
 
+/**
+ * Detects step-height increases that exceed legitimate movement.
+ */
 class Step extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "Step";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Processes move events for step detection.
+	 *
+	 * @param Event $event Triggered event.
+	 * @param PlayerAPI $playerAPI Player context.
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

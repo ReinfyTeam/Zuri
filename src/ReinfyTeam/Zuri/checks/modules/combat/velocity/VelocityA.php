@@ -47,20 +47,33 @@ use function is_numeric;
 use function max;
 use function microtime;
 
+/**
+ * Detects missing or reduced knockback response after combat hits.
+ */
 class VelocityA extends Check {
 	private const TYPE = "VelocityA";
 	private const HIT_AT_KEY = CacheData::VELOCITY_A_HIT_AT;
 	private const BUFFER_KEY = CacheData::VELOCITY_A_BUFFER;
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Velocity";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Handles damage events and initializes velocity tracking state.
+	 *
+	 * @param Event $event Triggered event instance.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkJustEvent(Event $event) : void {
@@ -79,6 +92,11 @@ class VelocityA extends Check {
 	}
 
 	/**
+	 * Handles move events while evaluating knockback response.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -146,6 +164,13 @@ class VelocityA extends Check {
 		]);
 	}
 
+	/**
+	 * Evaluates async payload for VelocityA violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (($payload["type"] ?? null) !== self::TYPE) {
 			return [];
@@ -181,6 +206,11 @@ class VelocityA extends Check {
 		return $result;
 	}
 
+	/**
+	 * Resets persisted velocity tracking state.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	private function resetState(PlayerAPI $playerAPI) : void {
 		$playerAPI->unsetExternalData(self::HIT_AT_KEY);
 		$playerAPI->setExternalData(self::BUFFER_KEY, 0);

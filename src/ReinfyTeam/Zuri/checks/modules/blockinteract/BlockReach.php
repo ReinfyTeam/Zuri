@@ -39,16 +39,30 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_numeric;
 
+/**
+ * Checks whether a player interacts with blocks beyond valid reach distance.
+ */
 class BlockReach extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "BlockReach";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Handles interaction events for block reach validation.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

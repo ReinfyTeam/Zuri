@@ -44,11 +44,20 @@ use function strlen;
 use function strtolower;
 use function strtoupper;
 
+/**
+ * Validates login device metadata consistency across editions.
+ */
 class EditionFakerA extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "EditionFaker";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
@@ -72,6 +81,11 @@ class EditionFakerA extends Check {
 		DeviceOS::XBOX
 	];
 
+	/**
+	 * Handles pre-login events for edition faker validation.
+	 *
+	 * @param Event $event Triggered event instance.
+	 */
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof PlayerPreLoginEvent) {
 			$playerInfo = $event->getPlayerInfo();
@@ -124,8 +138,12 @@ class EditionFakerA extends Check {
 		}
 	}
 
-	/** @param array<string,mixed> $payload
-	 *  @return array<string,mixed>
+	/**
+	 * Evaluates async payload for EditionFakerA checks.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];

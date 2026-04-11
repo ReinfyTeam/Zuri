@@ -36,30 +36,49 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\Discord;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
+/**
+ * Fired when a player reaches kick criteria.
+ */
 class KickEvent extends Event {
 	private PlayerAPI $player;
 	private string $moduleName;
 	private string $subType;
 
+	/**
+	 * Creates a kick event payload.
+	 *
+	 * @return void
+	 */
 	public function __construct(PlayerAPI $player, string $moduleName, string $subType) {
 		$this->player = $player;
 		$this->moduleName = $moduleName;
 		$this->subType = $subType;
 	}
 
+	/**
+	 * Gets the player being kicked.
+	 */
 	public function getPlayer() : PlayerAPI {
 		return $this->player;
 	}
 
+	/**
+	 * Gets the triggering check name.
+	 */
 	public function getModuleName() : string {
 		return $this->moduleName;
 	}
 
+	/**
+	 * Gets the triggering check subtype.
+	 */
 	public function getSubType() : string {
 		return $this->subType;
 	}
 
 	/**
+	 * Dispatches Discord logging and then the event.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function call() : void {

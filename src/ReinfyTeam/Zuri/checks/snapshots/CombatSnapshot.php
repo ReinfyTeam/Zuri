@@ -32,6 +32,8 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\snapshots;
 
 use pocketmine\player\Player;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
 /**
@@ -75,6 +77,16 @@ class CombatSnapshot extends AsyncSnapshot {
 	/** @var array<string,mixed> */
 	private array $cachedData = [];
 
+	/**
+	 * Captures immutable combat context between damager and victim.
+	 *
+	 * @param string $checkType Check type identifier.
+	 * @param Player $damager Player entity dealing the hit.
+	 * @param PlayerAPI $damagerAPI Damager API state wrapper.
+	 * @param Player $victim Player entity receiving the hit.
+	 * @param PlayerAPI $victimAPI Victim API state wrapper.
+	 * @return void
+	 */
 	public function __construct(
 		string $checkType,
 		Player $damager,
@@ -114,13 +126,21 @@ class CombatSnapshot extends AsyncSnapshot {
 
 	/**
 	 * Add cached combat data (e.g., last hit distance, rotation deltas).
+	 *
+	 * @param string $key Cached data key.
+	 * @param mixed $value Cached data value.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function addCachedData(string $key, mixed $value) : self {
 		$this->cachedData[$key] = $value;
 		return $this;
 	}
 
-	/** @return array<string,mixed> */
+	/**
+	 * Builds the immutable payload for async processing.
+	 *
+	 * @return array<string,mixed> Serialized combat snapshot payload.
+	 */
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
@@ -150,9 +170,14 @@ class CombatSnapshot extends AsyncSnapshot {
 		];
 	}
 
+	/**
+	 * Validates snapshot values before async dispatch.
+	 *
+	 * @throws SnapshotException If snapshot values are invalid.
+	 */
 	public function validate() : void {
 		if ($this->damagerPing < 0 || $this->victimPing < 0) {
-			throw new SnapshotException("Invalid ping value in combat snapshot");
+			throw new SnapshotException(Lang::get(LangKeys::DEBUG_SNAPSHOT_INVALID_COMBAT_PING));
 		}
 	}
 }

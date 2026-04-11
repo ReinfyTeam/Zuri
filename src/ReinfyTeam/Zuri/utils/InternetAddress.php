@@ -31,15 +31,30 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
+/**
+ * Immutable-like value object for UDP/TCP endpoint addressing.
+ */
 class InternetAddress {
 	public string $ip;
 	public int $port;
 
+	/**
+	 * Creates a new internet address container.
+	 *
+	 * @param string $ip IPv4/IPv6 textual address.
+	 * @param int $port Endpoint port number.
+	 * @return void
+	 */
 	public function __construct(string $ip, int $port) {
 		$this->ip = $ip;
 		$this->port = $port;
 	}
 
+	/**
+	 * Compares this address against another endpoint.
+	 *
+	 * @param InternetAddress $address Address to compare with.
+	 */
 	public function equals(InternetAddress $address) : bool {
 		return $this->ip === $address->ip && $this->port === $address->port;
 	}

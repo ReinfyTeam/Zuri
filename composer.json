@@ -15,7 +15,8 @@
         "pocketmine/pocketmine-mp": "^5.42.1",
         "phpstan/phpstan": "^1.2",
         "sof3/pharynx": "^0.3.8",
-        "friendsofphp/php-cs-fixer": "^3.94.2"
+        "friendsofphp/php-cs-fixer": "^3.94.2",
+        "phpunit/phpunit": "^11.5"
     },
     "autoload": {
         "classmap": [
@@ -30,9 +31,10 @@
     "scripts": {
         "format": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes",
         "format:check": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --dry-run --diff",
-        "analyze": "vendor/bin/phpstan",
+        "analyze": "vendor/bin/phpstan --no-progress",
         "build": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -p=./build/Zuri.phar",
-        "build-source": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -o=./build/"
+        "build-source": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -o=./build/",
+		"test": "php vendor/bin/phpunit --verbose --stop-on-failure"
     },
     "minimum-stability": "stable",
     "prefer-stable": true

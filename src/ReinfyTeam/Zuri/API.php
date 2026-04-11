@@ -42,13 +42,22 @@ use ReinfyTeam\Zuri\utils\discord\Discord;
 use function array_filter;
 use function array_values;
 
+/**
+ * Provides the public API for interacting with Zuri.
+ */
 final class API {
 	private static ConfigManager $config;
 
+	/**
+	 * Gets the installed Zuri plugin version.
+	 */
 	public static function getVersion() : string {
 		return self::getPluginInstance()->getDescription()->getVersion();
 	}
 
+	/**
+	 * Resolves a player name or instance to a PlayerAPI wrapper.
+	 */
 	public static function getPlayer(string|Player $player) : ?PlayerAPI {
 		if ($player instanceof Player) {
 			return PlayerAPI::getAPIPlayer($player);
@@ -60,7 +69,11 @@ final class API {
 		return PlayerAPI::getAPIPlayer($found);
 	}
 
-	/** @return list<Check> */
+	/**
+	 * Gets all checks with optional subtype deduplication.
+	 *
+	 * @return list<Check>
+	 */
 	public static function getAllChecks(bool $includeSubChecks = true) : array {
 		if (!$includeSubChecks) {
 			$unique = [];
@@ -72,7 +85,11 @@ final class API {
 		return ZuriAC::Checks();
 	}
 
-	/** @return list<Check> */
+	/**
+	 * Gets all disabled checks.
+	 *
+	 * @return list<Check>
+	 */
 	public static function getAllDisabledChecks(bool $includeSubChecks = true) : array {
 		return array_filter(
 			self::getAllChecks($includeSubChecks),
@@ -80,7 +97,11 @@ final class API {
 		);
 	}
 
-	/** @return list<Check> */
+	/**
+	 * Gets all enabled checks.
+	 *
+	 * @return list<Check>
+	 */
 	public static function getAllEnabledChecks(bool $includeSubChecks = true) : array {
 		return array_filter(
 			self::getAllChecks($includeSubChecks),
@@ -88,11 +109,18 @@ final class API {
 		);
 	}
 
-	/** @return list<Check> */
+	/**
+	 * Gets all check module instances.
+	 *
+	 * @return list<Check>
+	 */
 	public static function getAllModules() : array {
 		return ZuriAC::Checks();
 	}
 
+	/**
+	 * Gets a check by name and optional subtype.
+	 */
 	public static function getCheck(string $name, ?string $subType = null) : ?Check {
 		if ($subType !== null) {
 			return self::getModule($name, $subType);
@@ -102,7 +130,11 @@ final class API {
 		return $checks[0] ?? null;
 	}
 
-	/** @return list<Check> */
+	/**
+	 * Gets all checks matching a name.
+	 *
+	 * @return list<Check>
+	 */
 	public static function getChecksByName(string $name) : array {
 		return array_values(array_filter(
 			ZuriAC::Checks(),
@@ -110,6 +142,9 @@ final class API {
 		));
 	}
 
+	/**
+	 * Enables or disables a check after dispatching a state change event.
+	 */
 	public static function setCheckEnabled(string $name, bool $enabled, ?string $subType = null) : bool {
 		$plugin = self::getPluginInstance();
 		$event = new CheckStateChangeEvent($name, $subType, $enabled);
@@ -121,19 +156,30 @@ final class API {
 		return $plugin->setCheckEnabled($event->getCheckName(), $event->getSubType(), $event->isEnabled());
 	}
 
+	/**
+	 * Reloads the check registry from configuration.
+	 */
 	public static function reloadChecks() : void {
 		self::getPluginInstance()->reloadChecks();
 	}
 
+	/**
+	 * Rebuilds internal check lookup buckets.
+	 */
 	public static function rebuildCheckBuckets() : void {
 		self::getPluginInstance()->rebuildCheckBuckets();
 	}
 
+	/**
+	 * Gets the shared API configuration manager instance.
+	 */
 	public static function getConfig() : ConfigManager {
 		return self::$config ??= new ConfigManager();
 	}
 
 	/**
+	 * Gets a normalized info payload for a specific module.
+	 *
 	 * @return array{name:string, subType:string, punishment:string, maxViolations:int}|null
 	 */
 	public static function allModuleInfo(string $name, string $subType) : ?array {
@@ -150,6 +196,9 @@ final class API {
 		];
 	}
 
+	/**
+	 * Gets a check by module name and subtype.
+	 */
 	public static function getModule(string $name, string $subType) : ?Check {
 		$matches = array_values(array_filter(
 			ZuriAC::Checks(),
@@ -159,19 +208,30 @@ final class API {
 		return $matches[0] ?? null;
 	}
 
-
+	/**
+	 * Gets the subtype of the first check matching the module name.
+	 */
 	public static function getSubTypeByModule(string $name) : ?string {
 		return self::getCheck($name)?->getSubType();
 	}
 
+	/**
+	 * Gets the max violation threshold of the first matching module.
+	 */
 	public static function getMaxViolationByModule(string $name) : ?int {
 		return self::getCheck($name)?->maxViolations();
 	}
 
+	/**
+	 * Gets the punishment mode of the first matching module.
+	 */
 	public static function getPunishmentByModule(string $name) : ?string {
 		return self::getCheck($name)?->getPunishment();
 	}
 
+	/**
+	 * Sets the flagged state for a player.
+	 */
 	public static function setPlayerFlagged(string|Player $player, bool $flagged = true) : bool {
 		$apiPlayer = self::getPlayer($player);
 		if ($apiPlayer === null) {
@@ -182,6 +242,9 @@ final class API {
 		return true;
 	}
 
+	/**
+	 * Sets debug mode for a player.
+	 */
 	public static function setPlayerDebug(string|Player $player, bool $debug = true) : bool {
 		$apiPlayer = self::getPlayer($player);
 		if ($apiPlayer === null) {
@@ -192,6 +255,9 @@ final class API {
 		return true;
 	}
 
+	/**
+	 * Sets captcha mode for a player.
+	 */
 	public static function setPlayerCaptcha(string|Player $player, bool $captcha = true) : bool {
 		$apiPlayer = self::getPlayer($player);
 		if ($apiPlayer === null) {
@@ -202,10 +268,16 @@ final class API {
 		return true;
 	}
 
+	/**
+	 * Gets the singleton plugin instance.
+	 */
 	public static function getPluginInstance() : ZuriAC {
 		return ZuriAC::getInstance();
 	}
 
+	/**
+	 * Gets the Discord webhook configuration file.
+	 */
 	public static function getDiscordWebhookConfig() : Config {
 		return Discord::getWebhookConfig();
 	}

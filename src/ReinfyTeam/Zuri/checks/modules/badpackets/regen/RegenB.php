@@ -43,20 +43,37 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function in_array;
 use function is_numeric;
 
+/**
+ * Detects excessive regeneration packet cadence.
+ */
 class RegenB extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Regen";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "B";
 	}
 
+	/**
+	 * Gets the maximum violations before action is taken.
+	 */
 	public function maxViolations() : int {
 		return 3;
 	}
 
 	/**
+	 * Handles regeneration-related events for RegenB detection.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

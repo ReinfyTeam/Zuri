@@ -41,16 +41,33 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 use function is_numeric;
 
+/**
+ * Detects pitch values outside normal player rotation limits.
+ */
 class WrongPitch extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "WrongPitch";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Processes movement packets for wrong-pitch detection.
+	 *
+	 * @param DataPacket $packet Incoming packet.
+	 * @param PlayerAPI $playerAPI Player context.
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -74,8 +91,11 @@ class WrongPitch extends Check {
 		}
 	}
 
-	/** @param array<string,mixed> $payload
-	 *  @return array<string,mixed>
+	/**
+	 * Evaluates an async payload for wrong-pitch violations.
+	 *
+	 * @param array<string,mixed> $payload Snapshot payload.
+	 * @return array<string,mixed> Async decision data.
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(

@@ -44,15 +44,30 @@ use function floor;
 use function max;
 use function microtime;
 
+/**
+ * Detects players attempting to break blocks faster than expected.
+ */
 class InstaBreak extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "InstaBreak";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Processes interact and break events for instant-break detection.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		$breakTimes = $playerAPI->getExternalData(CacheData::INSTABREAK_BREAK_TIMES);
 		if ($event instanceof PlayerInteractEvent) {

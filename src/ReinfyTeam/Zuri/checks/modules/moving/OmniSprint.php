@@ -48,20 +48,34 @@ use ReinfyTeam\Zuri\utils\MathUtil;
 use function is_numeric;
 use function max;
 
+/**
+ * Detects sprinting behavior while moving in invalid directions.
+ */
 class OmniSprint extends Check {
 	private const BUFFER_KEY = CacheData::OMNISPRINT_A_BUFFER;
 	private const LAST_MOVE_XZ_KEY = CacheData::OMNISPRINT_A_LAST_MOVE_XZ;
 	private const LAST_MOVE_TICK_KEY = CacheData::OMNISPRINT_A_LAST_MOVE_TICK;
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "OmniSprint";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Processes input packets for omnisprint detection.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -129,6 +143,12 @@ class OmniSprint extends Check {
 		}
 	}
 
+	/**
+	 * Handles move events used by the omnisprint state tracker.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if (!$event instanceof PlayerMoveEvent) {
 			return;
@@ -145,6 +165,11 @@ class OmniSprint extends Check {
 		$this->debug($playerAPI, "moveXZ={$moveXZ}, isSprinting=" . ($playerAPI->getPlayer()->isSprinting() ? "1" : "0"));
 	}
 
+	/**
+	 * Determines whether a player should be exempt from this check.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	private function isExempt(PlayerAPI $playerAPI) : bool {
 		$player = $playerAPI->getPlayer();
 		return
@@ -169,6 +194,11 @@ class OmniSprint extends Check {
 			$playerAPI->isRecentlyCancelledEvent();
 	}
 
+	/**
+	 * Resets persisted omni-sprint tracking state.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	private function resetState(PlayerAPI $playerAPI) : void {
 		$playerAPI->setExternalData(self::BUFFER_KEY, 0);
 		$playerAPI->unsetExternalData(self::LAST_MOVE_XZ_KEY);

@@ -45,19 +45,36 @@ use function is_numeric;
 use function max;
 use function microtime;
 
+/**
+ * Detects packet timer manipulation through tick balance drift.
+ */
 class TimerA extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Timer";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
+	/**
+	 * Gets the cross-check correlation group identifier.
+	 */
 	public function getCorrelationGroup() : ?string {
 		return CrossCheckCorrelation::GROUP_PACKET_TIMING;
 	}
 
 	/**
+	 * Processes input packets and dispatches async TimerA checks.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -79,6 +96,13 @@ class TimerA extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates async payload for TimerA violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$check = new self();
 		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {

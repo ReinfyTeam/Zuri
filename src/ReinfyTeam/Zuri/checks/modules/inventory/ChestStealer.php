@@ -41,16 +41,30 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_numeric;
 use function microtime;
 
+/**
+ * Detects accelerated looting patterns from opened inventories.
+ */
 class ChestStealer extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "ChestStealer";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Processes inventory transaction packets for chest stealer behavior.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {

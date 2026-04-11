@@ -47,19 +47,43 @@ use function abs;
 use function is_array;
 use function is_numeric;
 
+/**
+ * Detects anomalous horizontal acceleration from auth input movement.
+ */
 class SpeedA extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "Speed";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Returns the correlation group used for multi-check escalation.
+	 *
+	 * @return string|null Correlation group identifier.
+	 */
 	public function getCorrelationGroup() : ?string {
 		return \ReinfyTeam\Zuri\checks\CrossCheckCorrelation::GROUP_MOVEMENT;
 	}
 
+	/**
+	 * Processes auth input packets for Speed A evaluation.
+	 *
+	 * @param DataPacket $packet Incoming packet.
+	 * @param PlayerAPI $playerAPI Player context.
+	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		if ($packet instanceof PlayerAuthInputPacket) {
@@ -139,8 +163,11 @@ class SpeedA extends Check {
 		}
 	}
 
-	/** @param array<string,mixed> $payload
-	 *  @return array<string,mixed>
+	/**
+	 * Evaluates an async payload for Speed A violations.
+	 *
+	 * @param array<string,mixed> $payload Snapshot payload.
+	 * @return array<string,mixed> Async decision data.
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(

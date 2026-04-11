@@ -46,19 +46,37 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_numeric;
 use function microtime;
 
+/**
+ * Detects unnaturally fast food consumption behavior.
+ */
 class FastEat extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "FastEat";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Gets the maximum violations before action is taken.
+	 */
 	public function maxViolations() : int {
 		return 5;
 	}
 
+	/**
+	 * Processes packets associated with food usage timing.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof ActorEventPacket) {
 			if ($packet->eventId === ActorEvent::EATING_ITEM) {
@@ -73,6 +91,11 @@ class FastEat extends Check {
 	}
 
 	/**
+	 * Handles consume events for FastEat detection.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

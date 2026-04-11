@@ -34,9 +34,17 @@ namespace ReinfyTeam\Zuri\events\api;
 use pocketmine\event\CancellableTrait;
 use pocketmine\event\Event;
 
+/**
+ * Fired before toggling check enabled state.
+ */
 class CheckStateChangeEvent extends Event {
 	use CancellableTrait;
 
+	/**
+	 * Creates a check state change event payload.
+	 *
+	 * @return void
+	 */
 	public function __construct(
 		private string $checkName,
 		private ?string $subType,
@@ -44,18 +52,30 @@ class CheckStateChangeEvent extends Event {
 	) {
 	}
 
+	/**
+	 * Gets the target check name.
+	 */
 	public function getCheckName() : string {
 		return $this->checkName;
 	}
 
+	/**
+	 * Gets the target check subtype.
+	 */
 	public function getSubType() : ?string {
 		return $this->subType;
 	}
 
+	/**
+	 * Gets the requested enabled state.
+	 */
 	public function isEnabled() : bool {
 		return $this->enabled;
 	}
 
+	/**
+	 * Updates the requested enabled state.
+	 */
 	public function setEnabled(bool $enabled) : void {
 		$this->enabled = $enabled;
 	}

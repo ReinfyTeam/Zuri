@@ -42,20 +42,36 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function microtime;
 
+/**
+ * Detects projectile throws that occur too quickly.
+ */
 class FastThrow extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "FastThrow";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Gets the maximum violations before action is taken.
+	 */
 	public function maxViolations() : int {
 		return 5;
 	}
 
 	/**
+	 * Handles throw-related events for FastThrow detection.
+	 *
+	 * @param Event $event Triggered event instance.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkJustEvent(Event $event) : void {

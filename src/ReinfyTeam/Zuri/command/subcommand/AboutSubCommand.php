@@ -40,15 +40,33 @@ use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\ZuriAC;
 use function count;
 
+/**
+ * Displays plugin build information and quick check-count totals for admins.
+ */
 class AboutSubCommand extends BaseSubCommand {
+	/**
+	 * Registers the `/zuri about` subcommand.
+	 *
+	 * @param PluginBase $plugin Plugin that exposes this subcommand.
+	 * @return void
+	 */
 	public function __construct(PluginBase $plugin) {
 		parent::__construct($plugin, "about", "Show information the plugin.", ["info"]);
 	}
 
+	/**
+	 * Declares arguments for this subcommand.
+	 */
 	protected function prepare() : void {
 	}
 
-	/** @param array<string,mixed> $args */
+	/**
+	 * Sends version, author, and enabled/disabled check totals to the caller.
+	 *
+	 * @param CommandSender $sender Sender requesting plugin status details.
+	 * @param string $aliasUsed Alias used to run the subcommand.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$version = ZuriAC::getInstance()->getDescription()->getVersion();
 		$author = ZuriAC::getInstance()->getDescription()->getAuthors()[0];

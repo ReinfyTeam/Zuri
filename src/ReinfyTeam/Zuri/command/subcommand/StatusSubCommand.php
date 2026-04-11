@@ -48,15 +48,33 @@ use function implode;
 use function max;
 use function round;
 
+/**
+ * Summarizes async pipeline health, resource usage, and server performance metrics.
+ */
 class StatusSubCommand extends BaseSubCommand {
+	/**
+	 * Registers the `/zuri status` subcommand.
+	 *
+	 * @param PluginBase $plugin Plugin exposing status and telemetry features.
+	 * @return void
+	 */
 	public function __construct(PluginBase $plugin) {
 		parent::__construct($plugin, "status", "Show async pipeline status.", ["async"]);
 	}
 
+	/**
+	 * Declares arguments for this subcommand.
+	 */
 	protected function prepare() : void {
 	}
 
-	/** @param array<string,mixed> $args */
+	/**
+	 * Sends a detailed runtime telemetry report to the command sender.
+	 *
+	 * @param CommandSender $sender Sender requesting server and async health data.
+	 * @param string $aliasUsed Alias used to execute this subcommand.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		AuditLogger::command($sender, "zuri status");
 		$metrics = CheckAsyncTask::getMetrics();

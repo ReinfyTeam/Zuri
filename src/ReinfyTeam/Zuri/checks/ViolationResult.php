@@ -66,6 +66,15 @@ class ViolationResult {
 	/** @var array<string, float> */
 	private array $factors = [];
 
+	/**
+	 * Creates a new violation result with an initial confidence score.
+	 *
+	 * @param string $checkName Name of the check that generated the violation.
+	 * @param string $subType Subtype/variant identifier of the check.
+	 * @param float $baseConfidence Initial confidence from raw detection logic.
+	 * @param string $debugInfo Optional debug context associated with the violation.
+	 * @return void
+	 */
 	public function __construct(
 		string $checkName,
 		string $subType,
@@ -83,6 +92,9 @@ class ViolationResult {
 	/**
 	 * Apply ping-based confidence adjustment.
 	 * Higher ping = lower confidence (more likely false positive).
+	 *
+	 * @param int $ping Player ping in milliseconds.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function applyPingFactor(int $ping) : self {
 		$factor = match (true) {
@@ -101,6 +113,9 @@ class ViolationResult {
 	/**
 	 * Apply online time factor.
 	 * New players get benefit of doubt (lower confidence).
+	 *
+	 * @param int $onlineTimeTicks Player online time in server ticks.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function applyOnlineTimeFactor(int $onlineTimeTicks) : self {
 		$factor = match (true) {
@@ -118,6 +133,9 @@ class ViolationResult {
 	/**
 	 * Apply repeated violations factor.
 	 * Multiple violations in short time = higher confidence.
+	 *
+	 * @param int $recentViolations Number of recent matching violations.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function applyRepeatFactor(int $recentViolations) : self {
 		$factor = match ($recentViolations) {
@@ -134,6 +152,12 @@ class ViolationResult {
 	/**
 	 * Apply environmental stability factor.
 	 * Unstable conditions = lower confidence.
+	 *
+	 * @param bool $chunkLoaded Whether the relevant chunk was loaded.
+	 * @param bool $recentTeleport Whether the player recently teleported.
+	 * @param bool $recentDamage Whether the player recently took damage.
+	 * @param bool $serverLagging Whether the server is currently lagging.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function applyEnvironmentFactor(
 		bool $chunkLoaded,
@@ -161,6 +185,10 @@ class ViolationResult {
 
 	/**
 	 * Apply a custom factor.
+	 *
+	 * @param string $name Custom factor key.
+	 * @param float $factor Multiplicative factor value.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function applyCustomFactor(string $name, float $factor) : self {
 		$this->factors[$name] = $factor;
@@ -168,6 +196,9 @@ class ViolationResult {
 		return $this;
 	}
 
+	/**
+	 * Recomputes adjusted confidence after factor changes.
+	 */
 	private function recalculate() : void {
 		$multiplier = 1.0;
 		foreach ($this->factors as $factor) {
@@ -176,39 +207,82 @@ class ViolationResult {
 		$this->adjustedConfidence = self::clamp($this->baseConfidence * $multiplier);
 	}
 
+	/**
+	 * Clamps confidence values into the valid range.
+	 *
+	 * @param float $value Confidence value to clamp.
+	 * @return float Clamped confidence between 0.0 and 1.0.
+	 */
 	private static function clamp(float $value) : float {
 		return max(0.0, min(1.0, $value));
 	}
 
+	/**
+	 * Returns the unadjusted confidence score.
+	 *
+	 * @return float Base confidence value.
+	 */
 	public function getBaseConfidence() : float {
 		return $this->baseConfidence;
 	}
 
+	/**
+	 * Returns the adjusted confidence score.
+	 *
+	 * @return float Confidence after all factors are applied.
+	 */
 	public function getConfidence() : float {
 		return $this->adjustedConfidence;
 	}
 
+	/**
+	 * Returns the adjusted confidence as a percentage.
+	 *
+	 * @return int Confidence percentage rounded to the nearest whole number.
+	 */
 	public function getConfidencePercent() : int {
 		return (int) round($this->adjustedConfidence * 100);
 	}
 
+	/**
+	 * Returns the check name associated with this result.
+	 *
+	 * @return string Check name.
+	 */
 	public function getCheckName() : string {
 		return $this->checkName;
 	}
 
+	/**
+	 * Returns the check subtype associated with this result.
+	 *
+	 * @return string Check subtype.
+	 */
 	public function getSubType() : string {
 		return $this->subType;
 	}
 
+	/**
+	 * Returns debug information attached to this result.
+	 *
+	 * @return string Debug information string.
+	 */
 	public function getDebugInfo() : string {
 		return $this->debugInfo;
 	}
 
+	/**
+	 * Returns the creation timestamp for this result.
+	 *
+	 * @return float Unix timestamp with microseconds.
+	 */
 	public function getTimestamp() : float {
 		return $this->timestamp;
 	}
 
 	/**
+	 * Returns all applied confidence factors.
+	 *
 	 * @return array<string, float>
 	 */
 	public function getFactors() : array {
@@ -217,6 +291,9 @@ class ViolationResult {
 
 	/**
 	 * Check if confidence meets threshold for action.
+	 *
+	 * @param float $threshold Required confidence threshold.
+	 * @return bool True when adjusted confidence is at least the threshold.
 	 */
 	public function meetsThreshold(float $threshold) : bool {
 		return $this->adjustedConfidence >= $threshold;
@@ -224,6 +301,8 @@ class ViolationResult {
 
 	/**
 	 * Check if this is high-confidence (likely real cheat).
+	 *
+	 * @return bool True when confidence is at least CONFIDENCE_HIGH.
 	 */
 	public function isHighConfidence() : bool {
 		return $this->meetsThreshold(self::CONFIDENCE_HIGH);
@@ -231,6 +310,8 @@ class ViolationResult {
 
 	/**
 	 * Check if this is low-confidence (likely false positive).
+	 *
+	 * @return bool True when confidence is below CONFIDENCE_MEDIUM.
 	 */
 	public function isLowConfidence() : bool {
 		return $this->adjustedConfidence < self::CONFIDENCE_MEDIUM;
@@ -238,7 +319,8 @@ class ViolationResult {
 
 	/**
 	 * Serialize for logging/storage.
-	 * @return array{check:string, subType:string, baseConfidence:float, confidence:float, factors:array<string,float>, debug:string, timestamp:float}
+	 *
+	 * @return array{check:string, subType:string, baseConfidence:float, confidence:float, factors:array<string,float>, debug:string, timestamp:float} Serialized violation payload.
 	 */
 	public function toArray() : array {
 		return [

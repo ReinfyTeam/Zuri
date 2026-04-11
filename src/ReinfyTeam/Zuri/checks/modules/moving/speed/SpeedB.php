@@ -49,19 +49,43 @@ use function is_numeric;
 use function max;
 use function round;
 
+/**
+ * Detects excessive horizontal speed using tick-based movement snapshots.
+ */
 class SpeedB extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "Speed";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "B";
 	}
 
+	/**
+	 * Returns the pre-violation cap for this check.
+	 *
+	 * @return int Maximum pre-violations.
+	 */
 	public function maxViolations() : int {
 		return 4;
 	}
 
+	/**
+	 * Captures move events for Speed B async evaluation.
+	 *
+	 * @param Event $event Triggered event.
+	 * @param PlayerAPI $playerAPI Player context.
+	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		if ($event instanceof PlayerMoveEvent) {
@@ -157,8 +181,11 @@ class SpeedB extends Check {
 		}
 	}
 
-	/** @param array<string,mixed> $payload
-	 *  @return array<string,mixed>
+	/**
+	 * Evaluates an async payload for Speed B violations.
+	 *
+	 * @param array<string,mixed> $payload Snapshot payload.
+	 * @return array<string,mixed> Async decision data.
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!MovementSnapshot::validatePayload(

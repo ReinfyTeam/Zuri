@@ -39,11 +39,20 @@ use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
+/**
+ * Limits concurrent connections originating from the same IP address.
+ */
 class NetworkLimit extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "NetworkLimit";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
@@ -51,6 +60,11 @@ class NetworkLimit extends Check {
 	/** @var array<string,int> */
 	private array $ipList = [];
 
+	/**
+	 * Handles pre-login events and tracks per-IP connection counts.
+	 *
+	 * @param Event $event Triggered event instance.
+	 */
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof PlayerPreLoginEvent) {
 			$ip = $event->getIp();
@@ -68,6 +82,12 @@ class NetworkLimit extends Check {
 		}
 	}
 
+	/**
+	 * Handles quit events to decrement tracked IP counts.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerQuitEvent) {
 			$ip = $event->getPlayer()->getNetworkSession()->getIp();
@@ -78,8 +98,12 @@ class NetworkLimit extends Check {
 		}
 	}
 
-	/** @param array<string,mixed> $payload
-	 *  @return array<string,mixed>
+	/**
+	 * Evaluates async payload for NetworkLimit checks.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];

@@ -40,22 +40,26 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use function microtime;
 
 /**
- * Bruh??! Why this event? #BlamePocketMine
+ * Fired when a player teleport is triggered by a command.
  *
- * Well, PocketMine-MP doesn't support checks for teleport by command.
- * Unlike bukkit, there's something called "TeleportCause" which specifies what
- * is the cause of the teleportation. Which is not implemented in PocketMine-MP.
- * This will fix some probably issues when Speed (A/B) detects as malicious behaivor.
- *
- * Also, i created this event so it can easily cancel by plugins.
+ * This event provides a cancellable hook for plugins and updates Zuri timing state
+ * so movement checks can distinguish command teleports from suspicious movement.
  */
 class PlayerTeleportByCommandEvent extends PlayerEvent implements Cancellable {
 	use CancellableTrait;
 
+	/**
+	 * Creates a teleport-by-command event payload.
+	 *
+	 * @return void
+	 */
 	public function __construct(Player $player) {
 		$this->player = $player;
 	}
 
+	/**
+	 * Updates teleport-command timing state for the player.
+	 */
 	public function call() : void {
 		$playerAPI = PlayerAPI::getAPIPlayer($this->player);
 

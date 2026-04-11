@@ -33,6 +33,9 @@ namespace ReinfyTeam\Zuri\utils\discord;
 
 use Exception;
 
+/**
+ * Signals invalid webhook configuration or malformed Discord field definitions.
+ */
 class DiscordWebhookException extends Exception {
 	// NO-OP
 }

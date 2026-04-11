@@ -47,6 +47,9 @@ use function strlen;
 use function strtolower;
 use function trim;
 
+/**
+ * Detects spoofed or invalid device identifier values on login.
+ */
 class DeviceSpoofID extends Check {
 	private const INVALID_DEVICE_IDS = [
 		"",
@@ -62,14 +65,25 @@ class DeviceSpoofID extends Check {
 		"ffffffff-ffff-ffff-ffff-ffffffffffff",
 	];
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "DeviceSpoofID";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Handles pre-login events for device ID validation.
+	 *
+	 * @param Event $event Triggered event instance.
+	 */
 	public function checkJustEvent(Event $event) : void {
 		if (!$event instanceof PlayerPreLoginEvent) {
 			return;
@@ -113,13 +127,22 @@ class DeviceSpoofID extends Check {
 		}
 	}
 
+	/**
+	 * Kicks a player with the configured spoofing message.
+	 *
+	 * @param PlayerPreLoginEvent $event Pre-login event instance.
+	 */
 	private function kick(PlayerPreLoginEvent $event) : void {
 		$this->warn($event->getPlayerInfo()->getUsername());
 		$event->setKickFlag(0, Lang::get(LangKeys::EDITIONFAKER_MESSAGE));
 	}
 
-	/** @param array<string,mixed> $payload
-	 *  @return array<string,mixed>
+	/**
+	 * Evaluates async payload for DeviceSpoofID checks.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];

@@ -45,16 +45,30 @@ use function is_numeric;
 use function max;
 use function microtime;
 
+/**
+ * Detects automated chest interaction and transaction bursts.
+ */
 class ChestAura extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "ChestAura";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Handles inventory events and evaluates chest aura behavior.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

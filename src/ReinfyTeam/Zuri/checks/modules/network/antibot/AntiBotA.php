@@ -42,15 +42,29 @@ use function preg_match;
 use function strlen;
 use function trim;
 
+/**
+ * Detects malformed Android client metadata on login.
+ */
 class AntiBotA extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "AntiBot";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Handles pre-login events for AntiBotA validation.
+	 *
+	 * @param Event $event Triggered event instance.
+	 */
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof PlayerPreLoginEvent) {
 			$extraData = $event->getPlayerInfo()->getExtraData();
@@ -67,8 +81,12 @@ class AntiBotA extends Check {
 		}
 	}
 
-	/** @param array<string,mixed> $payload
-	 *  @return array<string,mixed>
+	/**
+	 * Evaluates async payload for AntiBotA checks.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];

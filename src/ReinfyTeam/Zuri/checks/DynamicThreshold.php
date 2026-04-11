@@ -90,6 +90,10 @@ class DynamicThreshold {
 	/**
 	 * Get multiplier based on player ping.
 	 * Higher ping = higher threshold (more lenient).
+	 *
+	 * @param int $ping Player ping in milliseconds.
+	 * @param string $checkType Check category used to tune sensitivity.
+	 * @return float Ping-based threshold multiplier.
 	 */
 	private static function getPingMultiplier(int $ping, string $checkType) : float {
 		// Movement checks are more sensitive to ping
@@ -114,6 +118,10 @@ class DynamicThreshold {
 	/**
 	 * Get multiplier based on server TPS.
 	 * Lower TPS = higher threshold (more lenient).
+	 *
+	 * @param float $tps Current server TPS value.
+	 * @param string $checkType Check category used to tune sensitivity.
+	 * @return float TPS-based threshold multiplier.
 	 */
 	private static function getTpsMultiplier(float $tps, string $checkType) : float {
 		// Timer checks are most sensitive to TPS fluctuation
@@ -137,6 +145,10 @@ class DynamicThreshold {
 	/**
 	 * Get multiplier based on server load.
 	 * Higher load = slightly higher threshold.
+	 *
+	 * @param float $loadFactor Cached normalized server load factor.
+	 * @param string $checkType Check category used for load tuning.
+	 * @return float Load-based threshold multiplier.
 	 */
 	private static function getLoadMultiplier(float $loadFactor, string $checkType) : float {
 		// Load affects all checks roughly equally
@@ -175,6 +187,8 @@ class DynamicThreshold {
 
 	/**
 	 * Get current server TPS.
+	 *
+	 * @return float Cached server TPS.
 	 */
 	public static function getTps() : float {
 		self::refreshMetrics();
@@ -183,6 +197,8 @@ class DynamicThreshold {
 
 	/**
 	 * Get current load factor (0.0 = idle, 1.0 = heavily loaded).
+	 *
+	 * @return float Cached normalized load factor.
 	 */
 	public static function getLoadFactor() : float {
 		self::refreshMetrics();
@@ -191,6 +207,8 @@ class DynamicThreshold {
 
 	/**
 	 * Check if server is currently under stress.
+	 *
+	 * @return bool True when TPS or load indicates stressed conditions.
 	 */
 	public static function isServerStressed() : bool {
 		self::refreshMetrics();
@@ -199,6 +217,8 @@ class DynamicThreshold {
 
 	/**
 	 * Check if server is severely lagging.
+	 *
+	 * @return bool True when severe lag conditions are detected.
 	 */
 	public static function isServerLagging() : bool {
 		self::refreshMetrics();
@@ -207,8 +227,9 @@ class DynamicThreshold {
 
 	/**
 	 * Get diagnostic info for debugging.
+	 *
+	 * @return array{tps:float, playerCount:int, loadFactor:float, isStressed:bool, isLagging:bool} Diagnostic server metric snapshot.
 	 */
-	/** @return array{tps:float, playerCount:int, loadFactor:float, isStressed:bool, isLagging:bool} */
 	public static function getDiagnostics() : array {
 		self::refreshMetrics();
 		return [
@@ -223,6 +244,9 @@ class DynamicThreshold {
 	/**
 	 * Calculate player-specific adjustment factor.
 	 * Combines ping and recent behavior for per-player tuning.
+	 *
+	 * @param PlayerAPI $playerAPI Player context used for deriving factors.
+	 * @return float Player-specific multiplier combining onboarding and latency factors.
 	 */
 	public static function getPlayerFactor(PlayerAPI $playerAPI) : float {
 		$ping = $playerAPI->getPlayer()->getNetworkSession()->getPing() ?? 0;

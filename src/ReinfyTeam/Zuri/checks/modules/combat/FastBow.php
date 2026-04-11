@@ -42,18 +42,32 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function array_key_exists;
 use function is_numeric;
 
+/**
+ * Detects bow usage rates faster than legitimate draw timing.
+ */
 class FastBow extends Check {
 	private const TYPE = "FastBowA";
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "FastBow";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Handles bow shoot events for FastBow detection.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -89,6 +103,13 @@ class FastBow extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates async payload for FastBow violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (($payload["type"] ?? null) !== self::TYPE) {
 			return [];

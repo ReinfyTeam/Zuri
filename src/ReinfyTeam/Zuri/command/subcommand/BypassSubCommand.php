@@ -42,17 +42,33 @@ use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\utils\AuditLogger;
 
+/**
+ * Toggles permission-based anti-cheat bypass behavior for trusted roles.
+ */
 class BypassSubCommand extends BaseSubCommand {
+	/**
+	 * Registers the `/zuri bypass` subcommand.
+	 *
+	 * @param PluginBase $plugin Plugin providing this subcommand.
+	 * @return void
+	 */
 	public function __construct(PluginBase $plugin) {
 		parent::__construct($plugin, "bypass", "Use to on/off for bypass mode.");
 	}
 
+	/**
+	 * Declares arguments for this subcommand.
+	 */
 	protected function prepare() : void {
 	}
 
 	/**
-	 * @param array<string,mixed> $args
-	 * @throws JsonException
+	 * Flips the bypass configuration flag and shows the resulting state.
+	 *
+	 * @param CommandSender $sender Sender requesting the bypass toggle.
+	 * @param string $aliasUsed Alias used to invoke this subcommand.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 * @throws JsonException When config persistence fails while writing.
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$current = ConfigManager::getData(ConfigPaths::PERMISSION_BYPASS_ENABLE) === true;

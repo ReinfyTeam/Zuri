@@ -37,6 +37,7 @@ use pocketmine\Server;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPaths;
 use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\task\CheckAsyncTask;
 use ReinfyTeam\Zuri\ZuriAC;
 use Throwable;
@@ -84,18 +85,37 @@ use const LOCK_EX;
 use const PATHINFO_DIRNAME;
 use const PHP_VERSION;
 
+/**
+ * Writes tamper-evident operational, detection, punishment, and crash audit logs.
+ */
 final class AuditLogger {
 	private static string $lastHash = "genesis";
 	private static bool $booted = false;
 	private static float $lastCleanupAt = 0.0;
 
 	/** @param array<string,string|int|float|bool> $details */
+	/**
+	 * Records an administrative command action in the audit stream.
+	 *
+	 * @param CommandSender $sender Command actor.
+	 * @param string $command Executed command string.
+	 * @param array<string,string|int|float|bool> $details Additional metadata.
+	 */
 	public static function command(CommandSender $sender, string $command, array $details = []) : void {
 		$actor = $sender instanceof Player ? $sender->getName() : $sender->getName();
 		self::log("command", $command, $actor, $details);
 	}
 
 	/** @param array<string,string|int|float|bool> $details */
+	/**
+	 * Records a punishment action in the audit stream.
+	 *
+	 * @param string $action Action label.
+	 * @param string $target Target player or entity.
+	 * @param string $check Triggering check name.
+	 * @param string $subType Triggering check subtype.
+	 * @param array<string,string|int|float|bool> $details Additional metadata.
+	 */
 	public static function punishment(string $action, string $target, string $check, string $subType, array $details = []) : void {
 		$details["check"] = $check;
 		$details["subType"] = $subType;
@@ -103,12 +123,26 @@ final class AuditLogger {
 	}
 
 	/** @param array<string,string|int|float|bool> $details */
+	/**
+	 * Records a detection action in the audit stream.
+	 *
+	 * @param string $action Action label.
+	 * @param string $target Target player or entity.
+	 * @param string $check Triggering check name.
+	 * @param string $subType Triggering check subtype.
+	 * @param array<string,string|int|float|bool> $details Additional metadata.
+	 */
 	public static function detection(string $action, string $target, string $check, string $subType, array $details = []) : void {
 		$details["check"] = $check;
 		$details["subType"] = $subType;
 		self::log("detection", $action, $target, $details);
 	}
 
+	/**
+	 * Writes a plain anti-cheat log line when channel is enabled.
+	 *
+	 * @param string $message Log message.
+	 */
 	public static function anticheat(string $message) : void {
 		self::bootIfNeeded();
 		if (!self::isEnabled("anticheat")) {
@@ -117,6 +151,11 @@ final class AuditLogger {
 		self::appendLine(self::logsPath(self::fileName("anticheat", "anticheat.log")), self::timestamp() . " " . $message);
 	}
 
+	/**
+	 * Writes thread/runtime diagnostics to thread log channel.
+	 *
+	 * @param string $message Log message.
+	 */
 	public static function thread(string $message) : void {
 		self::bootIfNeeded();
 		if (!self::isEnabled("thread")) {
@@ -125,6 +164,11 @@ final class AuditLogger {
 		self::appendLine(self::logsPath(self::fileName("thread", "thread.log")), self::timestamp() . " " . $message);
 	}
 
+	/**
+	 * Writes crash-oriented messages to crash log channel.
+	 *
+	 * @param string $message Log message.
+	 */
 	public static function crash(string $message) : void {
 		self::bootIfNeeded();
 		if (!self::isEnabled("crash")) {
@@ -133,19 +177,35 @@ final class AuditLogger {
 		self::appendLine(self::crashesPath(self::fileName("crash", "crash.log")), self::timestamp() . " " . $message);
 	}
 
+	/**
+	 * Logs a throwable summary and stack trace into crash logs.
+	 *
+	 * @param string $context Crash context label.
+	 * @param Throwable $throwable Throwable to serialize.
+	 */
 	public static function crashThrowable(string $context, Throwable $throwable) : void {
-		$summary = $context
-			. ": type=" . $throwable::class
-			. ", message=" . $throwable->getMessage()
-			. ", file=" . $throwable->getFile()
-			. ", line=" . $throwable->getLine();
+		$summary = self::tr(LangKeys::DEBUG_AUDIT_THROWABLE_SUMMARY, [
+			"context" => $context,
+			"type" => $throwable::class,
+			"message" => $throwable->getMessage(),
+			"file" => $throwable->getFile(),
+			"line" => $throwable->getLine(),
+		], "{context}: type={type}, message={message}, file={file}, line={line}");
 		self::crash($summary);
 		$trace = trim($throwable->getTraceAsString());
 		if ($trace !== "") {
-			self::crash("Stack trace (" . $context . "): " . str_replace(["\r", "\n"], ["", " | "], $trace));
+			self::crash(self::tr(LangKeys::DEBUG_AUDIT_STACK_TRACE, [
+				"context" => $context,
+				"trace" => str_replace(["\r", "\n"], ["", " | "], $trace),
+			], "Stack trace ({context}): {trace}"));
 		}
 	}
 
+	/**
+	 * Generates and stores a human-readable runtime diagnostics report.
+	 *
+	 * @return string Absolute report file path.
+	 */
 	public static function createReportFile() : string {
 		self::bootIfNeeded();
 		$server = Server::getInstance();
@@ -229,6 +289,9 @@ final class AuditLogger {
 		return $file;
 	}
 
+	/**
+	 * Initializes logging folders and crash shutdown handlers lazily.
+	 */
 	public static function bootIfNeeded() : void {
 		if (self::$booted) {
 			if ((microtime(true) - self::$lastCleanupAt) > 3600.0) {
@@ -252,11 +315,23 @@ final class AuditLogger {
 			$message = (string) $error["message"];
 			$file = (string) $error["file"];
 			$line = (int) $error["line"];
-			self::crash("Hard-crash captured: {$message} at {$file}:{$line}");
+			self::crash(self::tr(LangKeys::DEBUG_AUDIT_HARD_CRASH, [
+				"message" => $message,
+				"file" => $file,
+				"line" => $line,
+			], "Hard-crash captured: {message} at {file}:{line}"));
 		});
 	}
 
 	/** @param array<string,string|int|float|bool> $details */
+	/**
+	 * Writes one chained audit line and mirrors it to the enabled channel.
+	 *
+	 * @param string $category Audit category.
+	 * @param string $action Action label.
+	 * @param string $actor Actor identifier.
+	 * @param array<string,string|int|float|bool> $details Structured details.
+	 */
 	private static function log(string $category, string $action, string $actor, array $details) : void {
 		self::bootIfNeeded();
 		ksort($details);
@@ -269,8 +344,20 @@ final class AuditLogger {
 		$payload = $timestamp . "|" . $category . "|" . $action . "|" . $actor . "|" . implode("|", $detailPairs) . "|" . self::$lastHash;
 		$currentHash = hash("sha256", $payload);
 		self::$lastHash = $currentHash;
-		Server::getInstance()->getLogger()->debug("[DEBUG] AUDIT (" . $category . ") actor=" . $actor . ", action=" . $action . $detailText . " [chain=" . $currentHash . "]");
-		$line = self::timestamp() . " category={$category}, actor={$actor}, action={$action}{$detailText}, chain={$currentHash}";
+		Server::getInstance()->getLogger()->debug(self::tr(LangKeys::DEBUG_AUDIT_LINE, [
+			"category" => $category,
+			"actor" => $actor,
+			"action" => $action,
+			"details" => $detailText,
+			"chain" => $currentHash,
+		], "[DEBUG] AUDIT ({category}) actor={actor}, action={action}{details} [chain={chain}]"));
+		$line = self::timestamp() . " " . self::tr(LangKeys::DEBUG_AUDIT_FILE_LINE, [
+			"category" => $category,
+			"actor" => $actor,
+			"action" => $action,
+			"details" => $detailText,
+			"chain" => $currentHash,
+		], "category={category}, actor={actor}, action={action}{details}, chain={chain}");
 		if ($category === "punishment" || $category === "detection") {
 			if (self::isEnabled("punishment")) {
 				self::appendLine(self::logsPath(self::fileName("punishment", "punishment.log")), $line);
@@ -282,22 +369,40 @@ final class AuditLogger {
 		}
 	}
 
+	/**
+	 * Returns a bracketed wall-clock timestamp prefix.
+	 */
 	private static function timestamp() : string {
 		return "[" . date("Y-m-d H:i:s") . "]";
 	}
 
+	/**
+	 * Resolves an absolute path inside configured logs folder.
+	 *
+	 * @param string $file File name.
+	 */
 	private static function logsPath(string $file) : string {
 		$folderRaw = ConfigManager::getData("zuri.logging.folders.logs", "logs");
 		$folder = is_string($folderRaw) && $folderRaw !== "" ? $folderRaw : "logs";
 		return ZuriAC::getInstance()->getDataFolder() . $folder . DIRECTORY_SEPARATOR . $file;
 	}
 
+	/**
+	 * Resolves an absolute path inside configured crashes folder.
+	 *
+	 * @param string $file File name.
+	 */
 	private static function crashesPath(string $file) : string {
 		$folderRaw = ConfigManager::getData("zuri.logging.folders.crashes", "crashes");
 		$folder = is_string($folderRaw) && $folderRaw !== "" ? $folderRaw : "crashes";
 		return ZuriAC::getInstance()->getDataFolder() . $folder . DIRECTORY_SEPARATOR . $file;
 	}
 
+	/**
+	 * Creates directory path recursively when it does not exist.
+	 *
+	 * @param string $path Directory path.
+	 */
 	private static function ensureDirectory(string $path) : void {
 		if ($path === "") {
 			return;
@@ -308,6 +413,12 @@ final class AuditLogger {
 		@mkdir($path, 0777, true);
 	}
 
+	/**
+	 * Appends one sanitized log line to a file with locking.
+	 *
+	 * @param string $file Destination file path.
+	 * @param string $line Raw line text.
+	 */
 	private static function appendLine(string $file, string $line) : void {
 		$dir = pathinfo($file, PATHINFO_DIRNAME);
 		if (is_string($dir) && $dir !== "") {
@@ -317,6 +428,11 @@ final class AuditLogger {
 		@file_put_contents($file, $sanitized . PHP_EOL, FILE_APPEND | LOCK_EX);
 	}
 
+	/**
+	 * Removes Minecraft formatting codes from log text.
+	 *
+	 * @param string $text Raw formatted text.
+	 */
 	private static function stripFormattingCodes(string $text) : string {
 		// Strip Bedrock color/style codes like §a, &c, and hex forms.
 		$text = (string) preg_replace('/(?:§|&)x(?:(?:§|&)[0-9A-Fa-f]){6}/', '', $text);
@@ -325,6 +441,13 @@ final class AuditLogger {
 	}
 
 	/** @param array<string,int|float|bool> $metrics */
+	/**
+	 * Reads integer-like metric values from mixed metrics map.
+	 *
+	 * @param array<string,int|float|bool> $metrics Metrics map.
+	 * @param string $key Metric key.
+	 * @param int $default Default value.
+	 */
 	private static function metricInt(array $metrics, string $key, int $default = 0) : int {
 		$value = $metrics[$key] ?? $default;
 		if (is_int($value)) {
@@ -337,6 +460,13 @@ final class AuditLogger {
 	}
 
 	/** @param array<string,int|float|bool> $metrics */
+	/**
+	 * Reads float-like metric values from mixed metrics map.
+	 *
+	 * @param array<string,int|float|bool> $metrics Metrics map.
+	 * @param string $key Metric key.
+	 * @param float $default Default value.
+	 */
 	private static function metricFloat(array $metrics, string $key, float $default = 0.0) : float {
 		$value = $metrics[$key] ?? $default;
 		if (is_float($value)) {
@@ -348,6 +478,11 @@ final class AuditLogger {
 		return $default;
 	}
 
+	/**
+	 * Formats boolean values using localized true/false labels.
+	 *
+	 * @param mixed $value Value to format.
+	 */
 	private static function formatBool(mixed $value) : string {
 		if (is_bool($value)) {
 			return self::tr(
@@ -359,15 +494,32 @@ final class AuditLogger {
 		return self::tr("commands.report.content.bool-false", [], "false");
 	}
 
+	/**
+	 * Formats a decimal ratio as percentage text.
+	 *
+	 * @param float $value Ratio value from 0..1.
+	 */
 	private static function formatPercent(float $value) : string {
 		return round($value * 100.0, 2) . "%";
 	}
 
+	/**
+	 * Reads config value as string.
+	 *
+	 * @param string $path Config path.
+	 * @param string $default Default value.
+	 */
 	private static function cfgString(string $path, string $default) : string {
 		$value = ConfigManager::getData($path, $default);
 		return is_string($value) ? $value : $default;
 	}
 
+	/**
+	 * Reads config value as integer with numeric coercion.
+	 *
+	 * @param string $path Config path.
+	 * @param int $default Default value.
+	 */
 	private static function cfgInt(string $path, int $default) : int {
 		$value = ConfigManager::getData($path, $default);
 		if (is_int($value)) {
@@ -376,6 +528,12 @@ final class AuditLogger {
 		return is_numeric($value) ? (int) $value : $default;
 	}
 
+	/**
+	 * Reads config value as float with numeric coercion.
+	 *
+	 * @param string $path Config path.
+	 * @param float $default Default value.
+	 */
 	private static function cfgFloat(string $path, float $default) : float {
 		$value = ConfigManager::getData($path, $default);
 		if (is_float($value)) {
@@ -388,10 +546,22 @@ final class AuditLogger {
 	}
 
 	/** @param array<string,string|int|float> $replacements */
+	/**
+	 * Localized translation shorthand for report and audit strings.
+	 *
+	 * @param string $key Translation key.
+	 * @param array<string,string|int|float> $replacements Placeholder replacements.
+	 * @param string $default Default message.
+	 */
 	private static function tr(string $key, array $replacements = [], string $default = "") : string {
 		return Lang::get($key, $replacements, $default);
 	}
 
+	/**
+	 * Resolves whether a logging bucket is enabled globally and per-channel.
+	 *
+	 * @param string $bucket Channel bucket name.
+	 */
 	private static function isEnabled(string $bucket) : bool {
 		$globalRaw = ConfigManager::getData("zuri.logging.enable", true);
 		$global = !is_bool($globalRaw) || $globalRaw;
@@ -402,11 +572,20 @@ final class AuditLogger {
 		return !is_bool($bucketRaw) || $bucketRaw;
 	}
 
+	/**
+	 * Resolves configured file name for a logging bucket.
+	 *
+	 * @param string $bucket Channel bucket name.
+	 * @param string $fallback Default file name.
+	 */
 	private static function fileName(string $bucket, string $fallback) : string {
 		$fileRaw = ConfigManager::getData("zuri.logging.channels.{$bucket}.file", $fallback);
 		return is_string($fileRaw) && $fileRaw !== "" ? $fileRaw : $fallback;
 	}
 
+	/**
+	 * Deletes aged log files based on cleanup retention settings.
+	 */
 	private static function cleanupOldFiles() : void {
 		self::$lastCleanupAt = microtime(true);
 		$maxAgeRaw = ConfigManager::getData("zuri.logging.cleanup.max-age-days", 30);
@@ -441,6 +620,13 @@ final class AuditLogger {
 	}
 
 	/** @return list<string> */
+	/**
+	 * Returns recent non-empty lines from a log file tail.
+	 *
+	 * @param string $filePath File path to read.
+	 * @param int $maxLines Maximum tail lines to inspect.
+	 * @return list<string>
+	 */
 	private static function readRecentLines(string $filePath, int $maxLines) : array {
 		if ($maxLines <= 0 || !file_exists($filePath) || !is_readable($filePath)) {
 			return [];

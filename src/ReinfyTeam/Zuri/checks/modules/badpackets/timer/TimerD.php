@@ -44,16 +44,30 @@ use function is_numeric;
 use function max;
 use function microtime;
 
+/**
+ * Detects timer drift by comparing auth tick cadence to wall-clock time.
+ */
 class TimerD extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Timer";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "D";
 	}
 
 	/**
+	 * Processes auth input packets and dispatches async TimerD checks.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -81,6 +95,13 @@ class TimerD extends Check {
 		]);
 	}
 
+	/**
+	 * Evaluates async payload for TimerD violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$check = new self();
 		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {

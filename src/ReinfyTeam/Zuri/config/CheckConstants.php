@@ -31,7 +31,18 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\config;
 
+/**
+ * Maps per-check configuration option names to reusable constants.
+ *
+ * Reference these keys when reading module tuning values from config to keep
+ * check logic and config path usage consistent.
+ */
 final class CheckConstants {
+	/**
+	 * Prevents static-only utility instantiation.
+	 *
+	 * @return void
+	 */
 	private function __construct() {
 	}
 	public const AIMASSISTC_MAX_PITCH = "max-pitch";

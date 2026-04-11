@@ -41,16 +41,30 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_numeric;
 use function is_string;
 
+/**
+ * Detects delay anomalies between auth input and movement packets.
+ */
 class TimerC extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Timer";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "C";
 	}
 
 	/**
+	 * Processes packets and dispatches async TimerC checks.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -62,6 +76,13 @@ class TimerC extends Check {
 		]);
 	}
 
+	/**
+	 * Evaluates async payload for TimerC violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$typeRaw = $payload["type"] ?? "other";
 		$type = is_string($typeRaw) ? $typeRaw : "other";

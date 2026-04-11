@@ -44,7 +44,18 @@ use function strtolower;
 use function time;
 use function zlib_encode;
 
+/**
+ * Expands runtime placeholders used by chat, alerts, and webhook templates.
+ */
 class ReplaceText extends ConfigManager {
+	/**
+	 * Replaces all known placeholders for a player and optional module context.
+	 *
+	 * @param string|PlayerAPI $player Player name or PlayerAPI context.
+	 * @param string $text Template containing placeholders.
+	 * @param string $module Check/module name used for contextual tokens.
+	 * @param string $subType Module subtype used for contextual tokens.
+	 */
 	public static function replace(string|PlayerAPI $player, string $text, string $module = "", string $subType = "") : string {
 		$onlinePlayer = is_string($player) ? Server::getInstance()->getPlayerExact($player) : $player->getPlayer();
 		$playerAPI = is_string($player)

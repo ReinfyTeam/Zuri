@@ -50,14 +50,114 @@ use function microtime;
 use function min;
 use function spl_object_id;
 
+/**
+ * Mutable per-player anti-cheat state container and runtime timing accessor.
+ *
+ * @method bool isCaptcha()
+ * @method void setCaptcha(bool $data)
+ * @method bool isFlagged()
+ * @method void setFlagged(bool $data)
+ * @method bool actionBreakingSpecial()
+ * @method void setActionBreakingSpecial(bool $data)
+ * @method bool actionPlacingSpecial()
+ * @method void setActionPlacingSpecial(bool $data)
+ * @method bool isInventoryOpen()
+ * @method void setInventoryOpen(bool $data)
+ * @method bool isTransactionArmorInventory()
+ * @method void setTransactionArmorInventory(bool $data)
+ * @method bool isUnderBlock()
+ * @method void setUnderBlock(bool $data)
+ * @method bool isOnAdhesion()
+ * @method void setOnAdhesion(bool $data)
+ * @method bool isOnPlant()
+ * @method void setOnPlant(bool $data)
+ * @method bool isOnDoor()
+ * @method void setOnDoor(bool $data)
+ * @method bool isOnCarpet()
+ * @method void setOnCarpet(bool $data)
+ * @method bool isOnPlate()
+ * @method void setOnPlate(bool $data)
+ * @method bool isOnSnow()
+ * @method void setOnSnow(bool $data)
+ * @method bool isSprinting()
+ * @method void setSprinting(bool $data)
+ * @method bool isOnGround()
+ * @method void setOnGround(bool $data)
+ * @method bool isSniffing()
+ * @method void setSniffing(bool $data)
+ * @method bool isInLiquid()
+ * @method void setInLiquid(bool $data)
+ * @method bool isOnStairs()
+ * @method void setOnStairs(bool $data)
+ * @method bool isOnIce()
+ * @method void setOnIce(bool $data)
+ * @method bool isDigging()
+ * @method bool isInWeb()
+ * @method bool isInBoxBlock()
+ * @method float getLastGroundY()
+ * @method void setLastGroundY(float $data)
+ * @method float getLastNoGroundY()
+ * @method void setLastNoGroundY(float $data)
+ * @method float getLastDelayedMovePacket()
+ * @method void setLastDelayedMovePacket(float $data)
+ * @method float getPing()
+ * @method int getCPS()
+ * @method void setCPS(int $data)
+ * @method int getBlocksBrokeASec()
+ * @method void setBlocksBrokeASec(int $data)
+ * @method int getBlocksPlacedASec()
+ * @method void setBlocksPlacedASec(int $data)
+ * @method int getNumberBlocksAllowBreak()
+ * @method void setNumberBlocksAllowBreak(int $data)
+ * @method int getNumberBlocksAllowPlace()
+ * @method void setNumberBlocksAllowPlace(int $data)
+ * @method float getJoinedAtTheTime()
+ * @method void setJoinedAtTheTime(float $data)
+ * @method int getOnlineTime()
+ * @method int getTeleportTicks()
+ * @method void setTeleportTicks(float $data)
+ * @method int getJumpTicks()
+ * @method void setJumpTicks(float $data)
+ * @method int getAttackTicks()
+ * @method void setAttackTicks(float $data)
+ * @method int getSlimeBlockTicks()
+ * @method void setSlimeBlockTicks(float $data)
+ * @method int getDeathTicks()
+ * @method void setDeathTicks(float $data)
+ * @method int getPlacingTicks()
+ * @method void setPlacingTicks(float $data)
+ * @method int getViolation(string $supplier)
+ * @method void addViolation(string $supplier, int|float $amount = 1)
+ * @method int getRealViolation(string $supplier)
+ * @method void addRealViolation(string $supplier, int|float $amount = 1)
+ * @method array<string, Location> getNLocation()
+ * @method void setNLocation(Location $from, Location $to)
+ * @method mixed getExternalData(string $dataName, mixed $default = null)
+ * @method void setExternalData(string $dataName, mixed $amount)
+ * @method void unsetExternalData(string $dataName)
+ * @method string getCaptchaCode()
+ * @method void setCaptchaCode(string $data)
+ * @method void setDebug(bool $value = false)
+ * @method bool isDebug()
+ */
 class PlayerAPI implements IPlayerAPI {
 	/** @var PlayerAPI[] */
 	public static array $players = [];
 
+	/**
+	 * Returns or creates the API wrapper associated with a live Player instance.
+	 *
+	 * @param Player $player Target player.
+	 */
 	public static function getAPIPlayer(Player $player) : PlayerAPI {
 		return self::$players[spl_object_id($player)] ??= new PlayerAPI($player);
 	}
 
+	/**
+	 * Removes cached API wrapper for a player leaving memory scope.
+	 *
+	 * @param Player $player Target player.
+	 */
 	public static function removeAPIPlayer(Player $player) : void {
 		unset(self::$players[spl_object_id($player)]);
 	}
@@ -120,36 +220,65 @@ class PlayerAPI implements IPlayerAPI {
 	/** @var array<string, list<array{score: float, timestamp: float}>> */
 	private array $confidenceScores = [];
 
+	/**
+	 * Creates a player API wrapper for the supplied player.
+	 *
+	 * @param Player $player Underlying player instance.
+	 * @return void
+	 */
 	public function __construct(private readonly Player $player) {
 		$this->onGround = $player->isOnGround();
 	}
 
+	/**
+	 * Returns the underlying PocketMine player instance.
+	 */
 	public function getPlayer() : Player {
 		return $this->player;
 	}
 
-	//Captcha
+	/**
+	 * Returns whether captcha mode is currently enabled for the player.
+	 */
 	public function isCaptcha() : bool {
 		return $this->isCaptcha;
 	}
 
+	/**
+	 * Sets captcha mode state for the player.
+	 *
+	 * @param bool $data Captcha mode state.
+	 */
 	public function setCaptcha(bool $data) : void {
 		$this->isCaptcha = $data;
 	}
 
-	//Flagged
+	/**
+	 * Returns whether the player is flagged for event cancellation.
+	 */
 	public function isFlagged() : bool {
 		return $this->flagged;
 	}
 
+	/**
+	 * Sets the flagged state for the player.
+	 *
+	 * @param bool $data Flagged state.
+	 */
 	public function setFlagged(bool $data) : void {
 		$this->flagged = $data;
 	}
 
+	/**
+	 * Checks whether the player's current chunk is loaded.
+	 */
 	public function isCurrentChunkIsLoaded() : bool {
 		return $this->getPlayer()->getWorld()->isInLoadedTerrain($this->getPlayer()->getLocation());
 	}
 
+	/**
+	 * Checks whether the player is gliding based on state and motion heuristics.
+	 */
 	public function isGliding() : bool {
 		$motion = $this->getPlayer()->getMotion();
 		$isGliding = $this->getPlayer()->isGliding();
@@ -163,63 +292,114 @@ class PlayerAPI implements IPlayerAPI {
 		return false;
 	}
 
+	/**
+	 * Returns the tracked aggregated motion vector.
+	 */
 	public function getMotion() : Vector3 {
 		return $this->motion ??= Vector3::zero();
 	}
 
+	/**
+	 * Updates the tracked aggregated motion vector.
+	 *
+	 * @param Vector3 $motion Motion vector.
+	 */
 	public function setMotion(Vector3 $motion) : void {
 		$this->motion = $motion;
 	}
 
-	//Break many blocks just one time break (This can check NUKER PLAYER)
+	/**
+	 * Returns whether the player is marked for special block-break behavior.
+	 */
 	public function actionBreakingSpecial() : bool {
 		return $this->actionBreakingSpecial;
 	}
 
+	/**
+	 * Sets the special block-break behavior marker.
+	 *
+	 * @param bool $data Marker state.
+	 */
 	public function setActionBreakingSpecial(bool $data) : void {
 		$this->actionBreakingSpecial = $data;
 	}
 
-	//Place many blocks just one time place (This can check FILLBLOCK PLAYER)
+	/**
+	 * Returns whether the player is marked for special block-place behavior.
+	 */
 	public function actionPlacingSpecial() : bool {
 		return $this->actionPlacingSpecial;
 	}
 
+	/**
+	 * Sets the special block-place behavior marker.
+	 *
+	 * @param bool $data Marker state.
+	 */
 	public function setActionPlacingSpecial(bool $data) : void {
 		$this->actionPlacingSpecial = $data;
 	}
 
-	//Inventory
+	/**
+	 * Returns whether the player's inventory is currently open.
+	 */
 	public function isInventoryOpen() : bool {
 		return $this->inventoryOpen;
 	}
 
+	/**
+	 * Sets whether the player's inventory is currently open.
+	 *
+	 * @param bool $data Inventory-open state.
+	 */
 	public function setInventoryOpen(bool $data) : void {
 		$this->inventoryOpen = $data;
 	}
 
-	//Transaction armor inventory
+	/**
+	 * Returns whether an armor inventory transaction was detected.
+	 */
 	public function isTransactionArmorInventory() : bool {
 		return $this->transactionArmorInventory;
 	}
 
+	/**
+	 * Sets armor inventory transaction tracking state.
+	 *
+	 * @param bool $data Transaction state.
+	 */
 	public function setTransactionArmorInventory(bool $data) : void {
 		$this->transactionArmorInventory = $data;
 	}
 
-	//Under block
+	/**
+	 * Returns whether the player is currently under a blocking structure.
+	 */
 	public function isUnderBlock() : bool {
 		return $this->underBlock;
 	}
 
+	/**
+	 * Sets whether the player is currently under a blocking structure.
+	 *
+	 * @param bool $data Under-block state.
+	 */
 	public function setUnderBlock(bool $data) : void {
 		$this->underBlock = $data;
 	}
 
+	/**
+	 * Stores the timestamp of a recently cancelled event.
+	 *
+	 * @param float $tick Event timestamp.
+	 */
 	public function setRecentlyCancelledEvent(float $tick) : void {
 		$this->eventCancelled = $tick;
 	}
 
+	/**
+	 * Checks whether a recently cancelled event marker is still active.
+	 */
 	public function isRecentlyCancelledEvent() : bool {
 		if ($this->eventCancelled === 0.0) {
 			return false;
@@ -231,24 +411,41 @@ class PlayerAPI implements IPlayerAPI {
 		return true;
 	}
 
-	//Top block
+	/**
+	 * Returns whether a block exists directly above the player.
+	 */
 	public function isTopBlock() : bool {
 		return $this->topBlock;
 	}
 
+	/**
+	 * Sets whether a block exists directly above the player.
+	 *
+	 * @param bool $data Top-block state.
+	 */
 	public function setTopBlock(bool $data) : void {
 		$this->topBlock = $data;
 	}
 
-	//On adhesion
+	/**
+	 * Returns whether the player is on an adhesion-type block.
+	 */
 	public function isOnAdhesion() : bool {
 		return $this->onAdhesion;
 	}
 
+	/**
+	 * Sets whether the player is on an adhesion-type block.
+	 *
+	 * @param bool $data Adhesion state.
+	 */
 	public function setOnAdhesion(bool $data) : void {
 		$this->onAdhesion = $data;
 	}
 
+	/**
+	 * Returns the detected device OS identifier from login metadata.
+	 */
 	public function getDeviceOS() : int {
 		$deviceOS = $this->getPlayer()->getPlayerInfo()->getExtraData()["DeviceOS"] ?? 0;
 		if (is_int($deviceOS)) {
@@ -260,142 +457,259 @@ class PlayerAPI implements IPlayerAPI {
 		return 0;
 	}
 
-	//On plant
+	/**
+	 * Returns whether the player is on a plant block.
+	 */
 	public function isOnPlant() : bool {
 		return $this->onPlant;
 	}
 
+	/**
+	 * Sets whether the player is on a plant block.
+	 *
+	 * @param bool $data Plant-contact state.
+	 */
 	public function setOnPlant(bool $data) : void {
 		$this->onPlant = $data;
 	}
 
+	/**
+	 * Stores the timestamp of the last movement update.
+	 *
+	 * @param float $data Movement timestamp.
+	 */
 	public function setLastMoveTick(float $data) : void {
 		$this->lastMoveTick = $data;
 	}
 
+	/**
+	 * Returns ticks elapsed since the last movement update.
+	 */
 	public function getLastMoveTick() : int {
 		return MathUtil::ticksSince($this->lastMoveTick);
 	}
 
+	/**
+	 * Stores the timestamp of the last projectile attack.
+	 *
+	 * @param float $data Projectile attack timestamp.
+	 */
 	public function setProjectileAttackTicks(float $data) : void {
 		$this->projectileAttackTicks = $data;
 	}
 
+	/**
+	 * Returns ticks elapsed since the last projectile attack.
+	 */
 	public function getProjectileAttackTicks() : int {
 		return MathUtil::ticksSince($this->projectileAttackTicks);
 	}
 
 
+	/**
+	 * Stores the timestamp of the last bow shot.
+	 *
+	 * @param float $data Bow shot timestamp.
+	 */
 	public function setBowShotTicks(float $data) : void {
 		$this->bowShotTicks = $data;
 	}
 
+	/**
+	 * Returns ticks elapsed since the last bow shot.
+	 */
 	public function getBowShotTicks() : int {
 		return MathUtil::ticksSince($this->bowShotTicks);
 	}
 
+	/**
+	 * Stores the timestamp of the last hurt event.
+	 *
+	 * @param float $data Hurt timestamp.
+	 */
 	public function setHurtTicks(float $data) : void {
 		$this->hurtTicks = $data;
 	}
 
+	/**
+	 * Returns ticks elapsed since the last teleport command marker.
+	 */
 	public function getTeleportCommandTicks() : int {
 		return MathUtil::ticksSince($this->teleportCommandTicks);
 	}
 
+	/**
+	 * Stores the timestamp of the last teleport command marker.
+	 *
+	 * @param float $data Teleport command timestamp.
+	 */
 	public function setTeleportCommandTicks(float $data) : void {
 		$this->teleportCommandTicks = $data;
 	}
 
+	/**
+	 * Returns ticks elapsed since the last hurt event.
+	 */
 	public function getHurtTicks() : int {
 		return MathUtil::ticksSince($this->hurtTicks);
 	}
 
-	//On door
+	/**
+	 * Returns whether the player is on a door block.
+	 */
 	public function isOnDoor() : bool {
 		return $this->onDoor;
 	}
 
+	/**
+	 * Sets whether the player is on a door block.
+	 *
+	 * @param bool $data Door-contact state.
+	 */
 	public function setOnDoor(bool $data) : void {
 		$this->onDoor = $data;
 	}
 
-	//On carpet
+	/**
+	 * Returns whether the player is on carpet.
+	 */
 	public function isOnCarpet() : bool {
 		return $this->onCarpet;
 	}
 
+	/**
+	 * Sets whether the player is on carpet.
+	 *
+	 * @param bool $data Carpet-contact state.
+	 */
 	public function setOnCarpet(bool $data) : void {
 		$this->onCarpet = $data;
 	}
 
-	//On plate
+	/**
+	 * Returns whether the player is on a pressure plate.
+	 */
 	public function isOnPlate() : bool {
 		return $this->onPlate;
 	}
 
+	/**
+	 * Sets whether the player is on a pressure plate.
+	 *
+	 * @param bool $data Plate-contact state.
+	 */
 	public function setOnPlate(bool $data) : void {
 		$this->onPlate = $data;
 	}
 
-	//On snow
+	/**
+	 * Returns whether the player is on snow.
+	 */
 	public function isOnSnow() : bool {
 		return $this->onSnow;
 	}
 
+	/**
+	 * Sets whether the player is on snow.
+	 *
+	 * @param bool $data Snow-contact state.
+	 */
 	public function setOnSnow(bool $data) : void {
 		$this->onSnow = $data;
 	}
 
-	//Sprinting
+	/**
+	 * Returns whether the player is sprinting.
+	 */
 	public function isSprinting() : bool {
 		return $this->getPlayer()->isSprinting();
 	}
 
+	/**
+	 * Sets player sprinting state.
+	 *
+	 * @param bool $data Sprinting state.
+	 */
 	public function setSprinting(bool $data) : void {
 		$this->getPlayer()->setSprinting($data);
 	}
 
-	//On ground
+	/**
+	 * Returns cached on-ground state for the player.
+	 */
 	public function isOnGround() : bool {
 		return $this->onGround;
 	}
 
+	/**
+	 * Sets cached on-ground state for the player.
+	 *
+	 * @param bool $data On-ground state.
+	 */
 	public function setOnGround(bool $data) : void {
 		$this->onGround = $data;
 	}
 
-	//Sniffing
+	/**
+	 * Returns whether sniffing state is active.
+	 */
 	public function isSniffing() : bool {
 		return $this->sniffing;
 	}
 
+	/**
+	 * Sets sniffing state.
+	 *
+	 * @param bool $data Sniffing state.
+	 */
 	public function setSniffing(bool $data) : void {
 		$this->sniffing = $data;
 	}
 
-	//In Liquid
+	/**
+	 * Returns whether the player is currently in liquid.
+	 */
 	public function isInLiquid() : bool {
 		return $this->inLiquid;
 	}
 
+	/**
+	 * Sets whether the player is currently in liquid.
+	 *
+	 * @param bool $data Liquid state.
+	 */
 	public function setInLiquid(bool $data) : void {
 		$this->inLiquid = $data;
 	}
 
-	//On stairs
+	/**
+	 * Returns whether the player is currently on stairs.
+	 */
 	public function isOnStairs() : bool {
 		return $this->onStairs;
 	}
 
+	/**
+	 * Sets whether the player is currently on stairs.
+	 *
+	 * @param bool $data Stairs state.
+	 */
 	public function setOnStairs(bool $data) : void {
 		$this->onStairs = $data;
 	}
 
-	//On Ice
+	/**
+	 * Returns whether the player is currently on ice.
+	 */
 	public function isOnIce() : bool {
 		return $this->onIce;
 	}
 
+	/**
+	 * Sets whether the player is currently on ice.
+	 *
+	 * @param bool $data Ice state.
+	 */
 	public function setOnIce(bool $data) : void {
 		$this->onIce = $data;
 	}
@@ -403,6 +717,8 @@ class PlayerAPI implements IPlayerAPI {
 	//Digging
 
 	/**
+	 * Returns whether the player is currently digging.
+	 *
 	 * @throws ReflectionException
 	 */
 	public function isDigging() : bool {
@@ -413,6 +729,8 @@ class PlayerAPI implements IPlayerAPI {
 	}
 
 	/**
+	 * Resolves the internal block-break handler from player state.
+	 *
 	 * @throws ReflectionException
 	 */
 	private function getBlockBreakHandler() : ?SurvivalBlockBreakHandler {
@@ -423,7 +741,9 @@ class PlayerAPI implements IPlayerAPI {
 		return $ref->getValue($this->getPlayer());
 	}
 
-	//In Web
+	/**
+	 * Checks whether the player is inside cobweb blocks.
+	 */
 	public function isInWeb() : bool {
 		$world = $this->getPlayer()->getWorld();
 		$location = $this->getPlayer()->getLocation();
@@ -442,7 +762,9 @@ class PlayerAPI implements IPlayerAPI {
 		return false;
 	}
 
-	//In Box Block
+	/**
+	 * Checks whether the player is boxed by nearby non-air blocks.
+	 */
 	public function isInBoxBlock() : bool {
 		$world = $this->getPlayer()->getWorld();
 		$location = $this->getPlayer()->getLocation();
@@ -459,7 +781,9 @@ class PlayerAPI implements IPlayerAPI {
 		return false;
 	}
 
-	// is in bounding box
+	/**
+	 * Checks whether solid blocks are intersecting the player's surrounding box.
+	 */
 	public function isInBoundingBox() : bool {
 		$player = $this->getPlayer();
 		$pos = $player->getPosition();
@@ -478,34 +802,57 @@ class PlayerAPI implements IPlayerAPI {
 		return false;
 	}
 
-	//Last ground Y
+	/**
+	 * Returns the last known ground Y position.
+	 */
 	public function getLastGroundY() : float {
 		return $this->lastGroundY;
 	}
 
+	/**
+	 * Sets the last known ground Y position.
+	 *
+	 * @param float $data Ground Y position.
+	 */
 	public function setLastGroundY(float $data) : void {
 		$this->lastGroundY = $data;
 	}
 
-	//Last no ground Y
+	/**
+	 * Returns the last known non-ground Y position.
+	 */
 	public function getLastNoGroundY() : float {
 		return $this->lastNoGroundY;
 	}
 
+	/**
+	 * Sets the last known non-ground Y position.
+	 *
+	 * @param float $data Non-ground Y position.
+	 */
 	public function setlastNoGroundY(float $data) : void {
 		$this->lastNoGroundY = $data;
 	}
 
-	//Last delayed move packet
+	/**
+	 * Returns the last delayed move packet timestamp.
+	 */
 	public function getLastDelayedMovePacket() : float {
 		return $this->lastDelayedMovePacket;
 	}
 
+	/**
+	 * Sets the last delayed move packet timestamp.
+	 *
+	 * @param float $data Move packet timestamp.
+	 */
 	public function setLastDelayedMovePacket(float $data) : void {
 		$this->lastDelayedMovePacket = $data;
 	}
 
-	//Ping
+	/**
+	 * Returns the player's current ping, or zero when unavailable.
+	 */
 	public function getPing() : float {
 		if (!$this->getPlayer()->isConnected() || !$this->getPlayer()->isOnline()) {
 			return 0.0;
@@ -514,60 +861,105 @@ class PlayerAPI implements IPlayerAPI {
 		return $this->getPlayer()->getNetworkSession()->getPing() === null ? 0.0 : $this->getPlayer()->getNetworkSession()->getPing(); // TODO: 0.0 frrr ping?
 	}
 
-	//CPS
+	/**
+	 * Returns the tracked clicks-per-second value.
+	 */
 	public function getCPS() : int {
 		return $this->cps;
 	}
 
+	/**
+	 * Sets the tracked clicks-per-second value.
+	 *
+	 * @param int $data CPS value.
+	 */
 	public function setCPS(int $data) : void {
 		$this->cps = $data;
 	}
 
-	//Number blocks broke one second
+	/**
+	 * Returns blocks broken in the current one-second tracking window.
+	 */
 	public function getBlocksBrokeASec() : int {
 		return $this->blocksBrokeASec;
 	}
 
+	/**
+	 * Sets blocks broken in the current one-second tracking window.
+	 *
+	 * @param int $data Block break count.
+	 */
 	public function setBlocksBrokeASec(int $data) : void {
 		$this->blocksBrokeASec = $data;
 	}
 
-	//Number blocks place one second
+	/**
+	 * Returns blocks placed in the current one-second tracking window.
+	 */
 	public function getBlocksPlacedASec() : int {
 		return $this->blocksPlacedASec;
 	}
 
+	/**
+	 * Sets blocks placed in the current one-second tracking window.
+	 *
+	 * @param int $data Block place count.
+	 */
 	public function setBlocksPlacedASec(int $data) : void {
 		$this->blocksPlacedASec = $data;
 	}
 
-	//Number blocks allow break per sec
+	/**
+	 * Returns the per-second allowed block-break baseline.
+	 */
 	public function getNumberBlocksAllowBreak() : int {
 		return $this->numberBlocksAllowBreak;
 	}
 
+	/**
+	 * Sets the per-second allowed block-break baseline.
+	 *
+	 * @param int $data Allowed block-break count.
+	 */
 	public function setNumberBlocksAllowBreak(int $data) : void {
 		$this->numberBlocksAllowBreak = $data;
 	}
 
-	//Number blocks allow break per sec
+	/**
+	 * Returns the per-second allowed block-place baseline.
+	 */
 	public function getNumberBlocksAllowPlace() : int {
 		return $this->numberBlocksAllowPlace;
 	}
 
+	/**
+	 * Sets the per-second allowed block-place baseline.
+	 *
+	 * @param int $data Allowed block-place count.
+	 */
 	public function setNumberBlocksAllowPlace(int $data) : void {
 		$this->numberBlocksAllowPlace = $data;
 	}
 
-	//Time when player join
+	/**
+	 * Returns the join timestamp used for uptime calculations.
+	 */
 	public function getJoinedAtTheTime() : float {
 		return $this->joinedAtTime;
 	}
 
+	/**
+	 * Sets the join timestamp used for uptime calculations.
+	 *
+	 * @param float $data Join timestamp.
+	 */
 	public function setJoinedAtTheTime(float $data) : void {
 		$this->joinedAtTime = $data;
 	}
 
+	/**
+	 * Returns player online duration in seconds.
+	 */
 	public function getOnlineTime() : int {
 		if ($this->joinedAtTime < 1) {
 			return 0;
@@ -575,61 +967,107 @@ class PlayerAPI implements IPlayerAPI {
 		return (int) (microtime(true) - $this->joinedAtTime);
 	}
 
-	//Teleport ticks
+	/**
+	 * Returns ticks elapsed since last teleport marker.
+	 */
 	public function getTeleportTicks() : int {
 		return MathUtil::ticksSince($this->teleportTicks);
 	}
 
+	/**
+	 * Sets the teleport marker timestamp.
+	 *
+	 * @param float $data Teleport timestamp.
+	 */
 	public function setTeleportTicks(float $data) : void {
 		$this->teleportTicks = $data;
 	}
 
-	//Jump ticks
+	/**
+	 * Returns ticks elapsed since last jump marker.
+	 */
 	public function getJumpTicks() : int {
 		return MathUtil::ticksSince($this->jumpTicks);
 	}
 
+	/**
+	 * Sets the jump marker timestamp.
+	 *
+	 * @param float $data Jump timestamp.
+	 */
 	public function setJumpTicks(float $data) : void {
 		$this->jumpTicks = $data;
 	}
 
-	//Attack ticks
+	/**
+	 * Returns ticks elapsed since last attack marker.
+	 */
 	public function getAttackTicks() : int {
 		return MathUtil::ticksSince($this->attackTicks);
 	}
 
+	/**
+	 * Sets the attack marker timestamp.
+	 *
+	 * @param float $data Attack timestamp.
+	 */
 	public function setAttackTicks(float $data) : void {
 		$this->attackTicks = $data;
 	}
 
-	//On slime block ticks
+	/**
+	 * Returns ticks elapsed since last slime-block contact marker.
+	 */
 	public function getSlimeBlockTicks() : int {
 		return MathUtil::ticksSince($this->slimeBlockTicks);
 	}
 
+	/**
+	 * Sets the slime-block contact marker timestamp.
+	 *
+	 * @param float $data Slime-block timestamp.
+	 */
 	public function setSlimeBlockTicks(float $data) : void {
 		$this->slimeBlockTicks = $data;
 	}
 
-	//Death ticks
+	/**
+	 * Returns ticks elapsed since last death marker.
+	 */
 	public function getDeathTicks() : int {
 		return MathUtil::ticksSince($this->deathTicks);
 	}
 
+	/**
+	 * Sets the death marker timestamp.
+	 *
+	 * @param float $data Death timestamp.
+	 */
 	public function setDeathTicks(float $data) : void {
 		$this->deathTicks = $data;
 	}
 
-	//Placing ticks
+	/**
+	 * Returns ticks elapsed since last block-place marker.
+	 */
 	public function getPlacingTicks() : int {
 		return MathUtil::ticksSince($this->placingTicks);
 	}
 
+	/**
+	 * Sets the block-place marker timestamp.
+	 *
+	 * @param float $data Block-place timestamp.
+	 */
 	public function setPlacingTicks(float $data) : void {
 		$this->placingTicks = $data;
 	}
 
-	//Violation
+	/**
+	 * Returns the active violation count for a supplier.
+	 *
+	 * @param string $supplier Check supplier key.
+	 */
 	public function getViolation(string $supplier) : int {
 		if (isset($this->violations[$supplier])) {
 			return count($this->violations[$supplier]);
@@ -637,12 +1075,23 @@ class PlayerAPI implements IPlayerAPI {
 		return 0;
 	}
 
+	/**
+	 * Resets active violations for a supplier.
+	 *
+	 * @param string $supplier Check supplier key.
+	 */
 	public function resetViolation(string $supplier) : void {
 		if (isset($this->violations[$supplier])) {
 			unset($this->violations[$supplier]);
 		}
 	}
 
+	/**
+	 * Adds active violation entries for a supplier.
+	 *
+	 * @param string $supplier Check supplier key.
+	 * @param int|float $amount Violation amount hint.
+	 */
 	public function addViolation(string $supplier, int|float $amount = 1) : void {
 		if (isset($this->violations[$supplier])) {
 			foreach ($this->violations[$supplier] as $index => $time) {
@@ -655,7 +1104,11 @@ class PlayerAPI implements IPlayerAPI {
 		$this->violations[$supplier][] = microtime(true);
 	}
 
-	//Real violation
+	/**
+	 * Returns the real-violation count for a supplier.
+	 *
+	 * @param string $supplier Check supplier key.
+	 */
 	public function getRealViolation(string $supplier) : int {
 		if (isset($this->realViolations[$supplier])) {
 			return count($this->realViolations[$supplier]);
@@ -663,12 +1116,23 @@ class PlayerAPI implements IPlayerAPI {
 		return 0;
 	}
 
+	/**
+	 * Resets real violations for a supplier.
+	 *
+	 * @param string $supplier Check supplier key.
+	 */
 	public function resetRealViolation(string $supplier) : void {
 		if (isset($this->realViolations[$supplier])) {
 			unset($this->realViolations[$supplier]);
 		}
 	}
 
+	/**
+	 * Adds a real-violation entry for a supplier.
+	 *
+	 * @param string $supplier Check supplier key.
+	 * @param int|float $amount Violation amount hint.
+	 */
 	public function addRealViolation(string $supplier, int|float $amount = 1) : void {
 		if (isset($this->realViolations[$supplier])) {
 			foreach ($this->realViolations[$supplier] as $index => $time) {
@@ -685,6 +1149,8 @@ class PlayerAPI implements IPlayerAPI {
 	/**
 	 * Get the accumulated confidence score for a check.
 	 * Uses exponential decay: older scores contribute less.
+	 *
+	 * @param string $supplier Check supplier key.
 	 */
 	public function getConfidenceScore(string $supplier) : float {
 		if (!isset($this->confidenceScores[$supplier]) || $this->confidenceScores[$supplier] === []) {
@@ -710,6 +1176,9 @@ class PlayerAPI implements IPlayerAPI {
 
 	/**
 	 * Add a confidence score for a check.
+	 *
+	 * @param string $supplier Check supplier key.
+	 * @param float $score Confidence score to add.
 	 */
 	public function addConfidenceScore(string $supplier, float $score) : void {
 		if (!isset($this->confidenceScores[$supplier])) {
@@ -732,6 +1201,8 @@ class PlayerAPI implements IPlayerAPI {
 
 	/**
 	 * Reset confidence scores for a check.
+	 *
+	 * @param string $supplier Check supplier key.
 	 */
 	public function resetConfidenceScore(string $supplier) : void {
 		if (isset($this->confidenceScores[$supplier])) {
@@ -741,6 +1212,7 @@ class PlayerAPI implements IPlayerAPI {
 
 	/**
 	 * Get all confidence scores (for debugging/telemetry).
+	 *
 	 * @return array<string, float>
 	 */
 	public function getAllConfidenceScores() : array {
@@ -751,40 +1223,77 @@ class PlayerAPI implements IPlayerAPI {
 		return $scores;
 	}
 
-	//Async sequence
+	/**
+	 * Returns the current async sequence number for a supplier.
+	 *
+	 * @param string $supplier Check supplier key.
+	 */
 	public function getAsyncSequence(string $supplier) : int {
 		return $this->asyncSequences[$supplier] ?? 0;
 	}
 
+	/**
+	 * Increments and returns async sequence number for a supplier.
+	 *
+	 * @param string $supplier Check supplier key.
+	 */
 	public function nextAsyncSequence(string $supplier) : int {
 		return $this->asyncSequences[$supplier] = $this->getAsyncSequence($supplier) + 1;
 	}
 
+	/**
+	 * Checks whether a sequence matches the current supplier sequence.
+	 *
+	 * @param string $supplier Check supplier key.
+	 * @param int $sequence Sequence number to verify.
+	 */
 	public function isAsyncSequenceCurrent(string $supplier, int $sequence) : bool {
 		return $this->getAsyncSequence($supplier) === $sequence;
 	}
 
+	/**
+	 * Resets async sequence for a single supplier.
+	 *
+	 * @param string $supplier Check supplier key.
+	 */
 	public function resetAsyncSequence(string $supplier) : void {
 		if (isset($this->asyncSequences[$supplier])) {
 			unset($this->asyncSequences[$supplier]);
 		}
 	}
 
+	/**
+	 * Resets async sequences for all suppliers.
+	 */
 	public function resetAsyncSequences() : void {
 		$this->asyncSequences = [];
 	}
 
-	//Location
-	/** @return array<string, Location> */
+	/**
+	 * Returns the last tracked movement location pair.
+	 *
+	 * @return array<string, Location>
+	 */
 	public function getNLocation() : array {
 		return $this->nLocation;
 	}
 
+	/**
+	 * Updates the tracked movement location pair.
+	 *
+	 * @param Location $from From location.
+	 * @param Location $to To location.
+	 */
 	public function setNLocation(Location $from, Location $to) : void {
 		$this->nLocation = ["from" => $from, "to" => $to];
 	}
 
-	//External Data
+	/**
+	 * Returns externally stored player data by key.
+	 *
+	 * @param string $dataName Data key.
+	 * @param mixed $default Default value when key is missing.
+	 */
 	public function getExternalData(string $dataName, mixed $default = null) : mixed {
 		if (isset($this->externalData[$dataName])) {
 			return $this->externalData[$dataName];
@@ -792,50 +1301,94 @@ class PlayerAPI implements IPlayerAPI {
 		return $default;
 	}
 
+	/**
+	 * Stores externally managed player data.
+	 *
+	 * @param string $dataName Data key.
+	 * @param mixed $value Value to store.
+	 */
 	public function setExternalData(string $dataName, mixed $value) : void {
 		$this->externalData[$dataName] = $value;
 	}
 
+	/**
+	 * Removes externally managed player data by key.
+	 *
+	 * @param string $dataName Data key.
+	 */
 	public function unsetExternalData(string $dataName) : void {
 		if (isset($this->externalData[$dataName])) {
 			unset($this->externalData[$dataName]);
 		}
 	}
 
-	//Captcha code
+	/**
+	 * Returns the player's current captcha code.
+	 */
 	public function getCaptchaCode() : string {
 		return $this->captchaCode;
 	}
 
+	/**
+	 * Sets the player's current captcha code.
+	 *
+	 * @param string $data Captcha code.
+	 */
 	public function setCaptchaCode(string $data) : void {
 		$this->captchaCode = $data;
 	}
 
+	/**
+	 * Returns the player's inventory instance.
+	 */
 	public function getInventory() : PlayerInventory {
 		return $this->getPlayer()->getInventory();
 	}
 
+	/**
+	 * Returns the player's current location.
+	 */
 	public function getLocation() : Location {
 		return $this->getPlayer()->getLocation();
 	}
 
+	/**
+	 * Enables or disables per-player debug mode.
+	 *
+	 * @param bool $value Debug mode state.
+	 */
 	public function setDebug(bool $value = true) : void {
 		$this->debug = $value;
 	}
 
+	/**
+	 * Returns whether per-player debug mode is enabled.
+	 */
 	public function isDebug() : bool {
 		return $this->debug;
 	}
 
-	// FP Cooldown System - Lag spikes
+	/**
+	 * Stores timestamp of the last lag spike marker.
+	 *
+	 * @param float $time Lag spike timestamp.
+	 */
 	public function setLastLagSpike(float $time) : void {
 		$this->lastLagSpike = $time;
 	}
 
+	/**
+	 * Returns timestamp of the last lag spike marker.
+	 */
 	public function getLastLagSpike() : float {
 		return $this->lastLagSpike;
 	}
 
+	/**
+	 * Returns whether lag cooldown is currently active.
+	 *
+	 * @param float $cooldownSeconds Cooldown duration in seconds.
+	 */
 	public function isInLagCooldown(float $cooldownSeconds = 3.0) : bool {
 		if ($this->lastLagSpike < 1.0) {
 			return false;
@@ -843,15 +1396,27 @@ class PlayerAPI implements IPlayerAPI {
 		return (microtime(true) - $this->lastLagSpike) < $cooldownSeconds;
 	}
 
-	// FP Cooldown System - World transfers
+	/**
+	 * Stores timestamp of the last world-transfer marker.
+	 *
+	 * @param float $time World-transfer timestamp.
+	 */
 	public function setLastWorldTransfer(float $time) : void {
 		$this->lastWorldTransfer = $time;
 	}
 
+	/**
+	 * Returns timestamp of the last world-transfer marker.
+	 */
 	public function getLastWorldTransfer() : float {
 		return $this->lastWorldTransfer;
 	}
 
+	/**
+	 * Returns whether world-transfer cooldown is currently active.
+	 *
+	 * @param float $cooldownSeconds Cooldown duration in seconds.
+	 */
 	public function isInWorldTransferCooldown(float $cooldownSeconds = 5.0) : bool {
 		if ($this->lastWorldTransfer < 1.0) {
 			return false;

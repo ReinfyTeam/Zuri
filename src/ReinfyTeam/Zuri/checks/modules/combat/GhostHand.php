@@ -51,19 +51,32 @@ use function min;
 use function str_contains;
 use function strtolower;
 
+/**
+ * Detects combat hits blocked by solid blocks between attacker and target.
+ */
 class GhostHand extends Check {
 	private const TYPE = "GhostHandA";
 	private const BUFFER_KEY = CacheData::GHOSTHAND_A_BUFFER;
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "GhostHand";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Handles combat events and dispatches GhostHand checks.
+	 *
+	 * @param Event $event Triggered event instance.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkJustEvent(Event $event) : void {
@@ -115,6 +128,13 @@ class GhostHand extends Check {
 		]);
 	}
 
+	/**
+	 * Evaluates async payload for GhostHand violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (($payload["type"] ?? null) !== self::TYPE) {
 			return [];
@@ -147,7 +167,15 @@ class GhostHand extends Check {
 		return $result;
 	}
 
-	/** @param list<string> $ignoredCategories */
+	/**
+	 * Casts a ray and checks for blocking solid blocks.
+	 *
+	 * @param World $world Combat world.
+	 * @param Vector3 $from Ray start.
+	 * @param Vector3 $to Ray end.
+	 * @param float $step Ray march step size.
+	 * @param list<string> $ignoredCategories Block categories to ignore.
+	 */
 	private function hasSolidBetween(World $world, Vector3 $from, Vector3 $to, float $step, array $ignoredCategories) : bool {
 		$dx = $to->x - $from->x;
 		$dy = $to->y - $from->y;
@@ -175,6 +203,13 @@ class GhostHand extends Check {
 		return false;
 	}
 
+	/**
+	 * Determines whether current context should skip GhostHand checks.
+	 *
+	 * @param Player $damager Attacking player.
+	 * @param Player $victim Damaged player.
+	 * @param PlayerAPI $damagerAPI Attacker API wrapper.
+	 */
 	private function shouldSkip(Player $damager, Player $victim, PlayerAPI $damagerAPI) : bool {
 		return
 			!$damager->isSurvival() ||
@@ -185,15 +220,31 @@ class GhostHand extends Check {
 			(int) $damagerAPI->getPing() > $this->profileIntConstant("max-ping", 0);
 	}
 
+	/**
+	 * Gets the current ghost-hand buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	private function getBuffer(PlayerAPI $playerAPI) : int {
 		$raw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
 		return is_numeric($raw) ? (int) $raw : 0;
 	}
 
+	/**
+	 * Stores the ghost-hand buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 * @param int $buffer Buffer value to persist.
+	 */
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {
 		$playerAPI->setExternalData(self::BUFFER_KEY, $buffer);
 	}
 
+	/**
+	 * Reads a profiling constant with prefixed key support.
+	 *
+	 * @param string $name Constant key suffix.
+	 */
 	private function profileConstant(string $name) : mixed {
 		$default = $this->getConstant($name);
 		$profileRaw = self::getData("zuri.check.ghosthand.tuning-presets.active", "default");
@@ -208,17 +259,33 @@ class GhostHand extends Check {
 		return self::getData("zuri.check.ghosthand.tuning-presets." . $profile . "." . $name, $default);
 	}
 
+	/**
+	 * Reads a profiling constant as float with fallback.
+	 *
+	 * @param string $name Constant key suffix.
+	 * @param float $default Default value.
+	 */
 	private function profileFloatConstant(string $name, float $default) : float {
 		$raw = $this->profileConstant($name);
 		return is_numeric($raw) ? (float) $raw : $default;
 	}
 
+	/**
+	 * Reads a profiling constant as integer with fallback.
+	 *
+	 * @param string $name Constant key suffix.
+	 * @param int $default Default value.
+	 */
 	private function profileIntConstant(string $name, int $default) : int {
 		$raw = $this->profileConstant($name);
 		return is_numeric($raw) ? (int) $raw : $default;
 	}
 
-	/** @return list<string> */
+	/**
+	 * Gets block categories ignored by the ghost-hand raycast.
+	 *
+	 * @return list<string>
+	 */
 	private function getIgnoredBlockCategories() : array {
 		$categories = $this->profileConstant("ignore-block-categories");
 		if (!is_array($categories)) {
@@ -233,7 +300,12 @@ class GhostHand extends Check {
 		return $normalized;
 	}
 
-	/** @param list<string> $ignoredCategories */
+	/**
+	 * Determines whether a solid block should be ignored by category.
+	 *
+	 * @param string $blockName Block type name.
+	 * @param list<string> $ignoredCategories Block categories to ignore.
+	 */
 	private function isIgnoredSolid(string $blockName, array $ignoredCategories) : bool {
 		foreach ($ignoredCategories as $category) {
 			switch ($category) {

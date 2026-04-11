@@ -48,17 +48,36 @@ use function is_array;
 use function is_numeric;
 use function sqrt;
 
+/**
+ * Detects aura-like attacks against entities outside line-of-sight context.
+ */
 class KillAuraC extends Check {
 	private bool $interact = false;
 
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "KillAura";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "C";
 	}
 
+	/**
+	 * Tracks interaction events used as an exclusion signal.
+	 *
+	 * @param Event $event Triggered event.
+	 * @param PlayerAPI $playerAPI Player context.
+	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerInteractEvent) {
 			$this->interact = true;
@@ -66,6 +85,10 @@ class KillAuraC extends Check {
 	}
 
 	/**
+	 * Processes inventory transaction packets for KillAura C evaluation.
+	 *
+	 * @param DataPacket $packet Incoming packet.
+	 * @param PlayerAPI $playerAPI Player context.
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -120,6 +143,12 @@ class KillAuraC extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates an async payload for KillAura C violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check payload.
+	 * @return array<string,mixed> Async decision data.
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$check = new self();
 		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {

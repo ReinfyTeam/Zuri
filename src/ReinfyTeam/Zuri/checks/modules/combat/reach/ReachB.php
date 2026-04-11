@@ -42,16 +42,32 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_array;
 use function is_numeric;
 
+/**
+ * Detects horizontal reach distance beyond allowed combat limits.
+ */
 class ReachB extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "Reach";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "B";
 	}
 
 	/**
+	 * Processes entity damage events for reach evaluation.
+	 *
+	 * @param Event $event Triggered event.
 	 * @throws DiscordWebhookException
 	 */
 	public function checkJustEvent(Event $event) : void {
@@ -88,6 +104,12 @@ class ReachB extends Check {
 		$this->dispatchAsyncCheck($damager->getName(), $snapshot->build());
 	}
 
+	/**
+	 * Evaluates an async payload for Reach B violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check payload.
+	 * @return array<string,mixed> Async decision data.
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!CombatSnapshot::validatePayload(
 			$payload,

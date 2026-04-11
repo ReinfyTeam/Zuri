@@ -31,6 +31,12 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\config;
 
+/**
+ * Canonical list of root configuration paths used throughout the plugin.
+ *
+ * Use these constants with ConfigManager reads/writes to avoid hardcoded path
+ * typos and keep feature settings discoverable.
+ */
 abstract class ConfigPaths {
 	public const PREFIX = "zuri.prefix";
 	public const LANGUAGE_LOCALE = "zuri.language.locale";

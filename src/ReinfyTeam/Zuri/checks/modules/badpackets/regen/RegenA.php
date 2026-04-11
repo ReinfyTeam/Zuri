@@ -39,20 +39,37 @@ use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 
+/**
+ * Detects abnormal regeneration timing behavior.
+ */
 class RegenA extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Regen";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Gets the maximum violations before action is taken.
+	 */
 	public function maxViolations() : int {
 		return 3;
 	}
 
 	/**
+	 * Handles regeneration-related events for RegenA detection.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

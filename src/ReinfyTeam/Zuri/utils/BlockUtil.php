@@ -43,15 +43,28 @@ use function array_flip;
 use function fmod;
 use function implode;
 
+/**
+ * Provides block neighborhood and terrain-state helpers used by movement checks.
+ */
 class BlockUtil {
 	/** @var array<string,array<int,int>> */
 	private static array $idLookupCache = [];
 
+	/**
+	 * Gets the block directly above the player's current position.
+	 *
+	 * @param Player $player Target player.
+	 */
 	public static function getBlockAbove(Player $player) : ?Block {
 		$position = $player->getPosition()->add(0, 1.0, 0);
 		return $player->getWorld()->getBlock($position->getSide(Facing::UP));
 	}
 
+	/**
+	 * Determines whether nearby blocks beneath the player are all solid.
+	 *
+	 * @param Player $player Target player.
+	 */
 	public static function isGroundSolid(Player $player) : bool {
 		$world = $player->getWorld();
 		$pos = $player->getPosition();
@@ -71,7 +84,12 @@ class BlockUtil {
 		return true;
 	}
 
-	/** @return list<int> */
+	/**
+	 * Returns type IDs around the player's block position.
+	 *
+	 * @param Player $player Target player.
+	 * @return list<int>
+	 */
 	public static function getSurroundingBlocks(Player $player) : array {
 		$world = $player->getWorld();
 
@@ -102,6 +120,12 @@ class BlockUtil {
 		return  [$bpos1, $bpos2, $bpos3, $bpos4, $bpos5, $bpos6, $bpos7, $bpos8, $bpos9];
 	}
 
+	/**
+	 * Checks if there is any non-air block under player coordinates.
+	 *
+	 * @param Location $location Sample location.
+	 * @param int $down Vertical offset under location.
+	 */
 	public static function isOnGround(Location $location, int $down) : bool {
 		$posX = $location->getX();
 		$posZ = $location->getZ();
@@ -174,7 +198,13 @@ class BlockUtil {
 		return false;
 	}
 
-	/** @param list<int> $id */
+	/**
+	 * Checks whether one of the target block IDs exists beneath a location.
+	 *
+	 * @param Location $location Sample location.
+	 * @param list<int> $id Allowed block type IDs.
+	 * @param int $down Vertical offset under location.
+	 */
 	public static function isUnderBlock(Location $location, array $id, int $down) : bool {
 		$posX = $location->getX();
 		$posZ = $location->getZ();
@@ -234,6 +264,12 @@ class BlockUtil {
 	}
 
 
+	/**
+	 * Checks if the player stands on any stair block.
+	 *
+	 * @param Location $location Sample location.
+	 * @param int $down Vertical offset under location.
+	 */
 	public static function isOnStairs(Location $location, int $down) : bool {
 		static $stairs = [
 			BlockTypeIds::STONE_STAIRS,
@@ -271,6 +307,12 @@ class BlockUtil {
 		return self::isUnderBlock($location, $stairs, $down);
 	}
 
+	/**
+	 * Checks if the player stands on ice-type blocks.
+	 *
+	 * @param Location $location Sample location.
+	 * @param int $down Vertical offset under location.
+	 */
 	public static function isOnIce(Location $location, int $down) : bool {
 		static $ice = [
 			BlockTypeIds::ICE,
@@ -281,6 +323,12 @@ class BlockUtil {
 		return self::isUnderBlock($location, $ice, $down);
 	}
 
+	/**
+	 * Checks if the player stands on liquid blocks.
+	 *
+	 * @param Location $location Sample location.
+	 * @param int $down Vertical offset under location.
+	 */
 	public static function isOnLiquid(Location $location, int $down) : bool {
 		static $liquid = [
 			BlockTypeIds::WATER,
@@ -289,6 +337,12 @@ class BlockUtil {
 		return self::isUnderBlock($location, $liquid, $down);
 	}
 
+	/**
+	 * Checks if the player stands on climbable adhesion blocks.
+	 *
+	 * @param Location $location Sample location.
+	 * @param int $down Vertical offset under location.
+	 */
 	public static function isOnAdhesion(Location $location, int $down) : bool {
 		static $adhesion = [
 			BlockTypeIds::LADDER,
@@ -297,6 +351,12 @@ class BlockUtil {
 		return self::isUnderBlock($location, $adhesion, $down);
 	}
 
+	/**
+	 * Checks if the player stands on plant-like blocks.
+	 *
+	 * @param Location $location Sample location.
+	 * @param int $down Vertical offset under location.
+	 */
 	public static function isOnPlant(Location $location, int $down) : bool {
 		static $plants = [
 			BlockTypeIds::GRASS_PATH,
@@ -319,6 +379,12 @@ class BlockUtil {
 		return self::isUnderBlock($location, $plants, $down);
 	}
 
+	/**
+	 * Checks if the player stands on door or trapdoor blocks.
+	 *
+	 * @param Location $location Sample location.
+	 * @param int $down Vertical offset under location.
+	 */
 	public static function isOnDoor(Location $location, int $down) : bool {
 		static $doors = [
 			BlockTypeIds::OAK_DOOR,
@@ -340,6 +406,12 @@ class BlockUtil {
 		return self::isUnderBlock($location, $doors, $down);
 	}
 
+	/**
+	 * Checks if the player stands on carpet.
+	 *
+	 * @param Location $location Sample location.
+	 * @param int $down Vertical offset under location.
+	 */
 	public static function isOnCarpet(Location $location, int $down) : bool {
 		static $carpets = [
 			BlockTypeIds::CARPET
@@ -347,6 +419,12 @@ class BlockUtil {
 		return self::isUnderBlock($location, $carpets, $down);
 	}
 
+	/**
+	 * Checks if the player stands on pressure-plate-like blocks.
+	 *
+	 * @param Location $location Sample location.
+	 * @param int $down Vertical offset under location.
+	 */
 	public static function isOnPlate(Location $location, int $down) : bool {
 		static $plates = [
 			BlockTypeIds::CARPET,
@@ -363,6 +441,12 @@ class BlockUtil {
 		return self::isUnderBlock($location, $plates, $down);
 	}
 
+	/**
+	 * Checks if the player stands on snow blocks.
+	 *
+	 * @param Location $location Sample location.
+	 * @param int $down Vertical offset under location.
+	 */
 	public static function isOnSnow(Location $location, int $down) : bool {
 		static $snow = [
 			BlockTypeIds::SNOW,
@@ -371,14 +455,32 @@ class BlockUtil {
 		return self::isUnderBlock($location, $snow, $down);
 	}
 
+	/**
+	 * Checks if the player stands on a slime block.
+	 *
+	 * @param Location $location Sample location.
+	 * @param int $down Vertical offset under location.
+	 */
 	public static function onSlimeBlock(Location $location, int $down) : bool {
 		return self::isUnderBlock($location, [BlockTypeIds::SLIME], $down);
 	}
 
+	/**
+	 * Gets the block under a location at a given depth.
+	 *
+	 * @param Location $location Sample location.
+	 * @param int $deep Block depth offset.
+	 */
 	public static function getUnderBlock(Location $location, int $deep = 1) : Block {
 		return $location->getWorld()->getBlockAt(abs((int) $location->getX()), abs((int) $location->getY()) - $deep, abs((int) $location->getZ()));
 	}
 
+	/**
+	 * Returns the distance between two vectors or positions.
+	 *
+	 * @param Vector3|Position $a First point.
+	 * @param Vector3|Position $b Second point.
+	 */
 	public static function distance(Vector3|Position $a, Vector3|Position $b) : float {
 		$from = $a instanceof Position ? $a->asVector3() : $a;
 		$to = $b instanceof Position ? $b->asVector3() : $b;

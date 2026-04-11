@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri\utils;
 
 use pocketmine\Server;
 use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use Throwable;
 use function get_class;
 use function microtime;
@@ -86,6 +87,9 @@ final class ExceptionHandler {
 
 	/**
 	 * Handles an exception by logging it and tracking error rates.
+	 *
+	 * @param Throwable $e Exception to process.
+	 * @param string $context Context label for the exception source.
 	 */
 	private static function handleException(Throwable $e, string $context) : void {
 		$now = microtime(true);
@@ -106,7 +110,11 @@ final class ExceptionHandler {
 		// Rate limit logging to prevent log spam
 		if (self::$errorCount <= self::MAX_ERRORS_PER_MINUTE) {
 			$logger = Server::getInstance()->getLogger();
-			AuditLogger::anticheat("Safe-crash boundary: context={$context}, type=" . get_class($e) . ", message=" . $e->getMessage());
+			AuditLogger::anticheat(Lang::get(LangKeys::DEBUG_SAFE_CRASH_BOUNDARY_AUDIT, [
+				"context" => $context,
+				"type" => get_class($e),
+				"message" => $e->getMessage(),
+			]));
 			$logger->error(Lang::get("messages.debug.system.exception-error", [
 				"context" => $context,
 				"type" => get_class($e),
@@ -135,6 +143,7 @@ final class ExceptionHandler {
 
 	/**
 	 * Returns error counts grouped by exception type and context.
+	 *
 	 * @return array<string, int>
 	 */
 	public static function getErrorBreakdown() : array {

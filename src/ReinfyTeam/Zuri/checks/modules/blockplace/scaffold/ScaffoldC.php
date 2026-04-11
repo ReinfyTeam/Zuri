@@ -41,19 +41,39 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
 
+/**
+ * Detects scaffold behavior through packet and movement timing.
+ */
 class ScaffoldC extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Scaffold";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "C";
 	}
 
+	/**
+	 * Processes packets needed for ScaffoldC analysis.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 	}
 
 	/**
+	 * Handles placement-related events for ScaffoldC checks.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

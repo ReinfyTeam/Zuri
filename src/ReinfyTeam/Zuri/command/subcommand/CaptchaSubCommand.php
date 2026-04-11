@@ -48,19 +48,35 @@ use function is_string;
 use function strtolower;
 use function ucfirst;
 
+/**
+ * Manages runtime captcha options such as mode, delivery channel, and code length.
+ */
 class CaptchaSubCommand extends BaseSubCommand {
+	/**
+	 * Registers the `/zuri captcha` subcommand.
+	 *
+	 * @param PluginBase $plugin Plugin instance exposing this command.
+	 * @return void
+	 */
 	public function __construct(PluginBase $plugin) {
 		parent::__construct($plugin, "captcha", "Use to on/off mode for captcha.", ["verification", "verify"]);
 	}
 
+	/**
+	 * Declares captcha option and optional length arguments.
+	 */
 	protected function prepare() : void {
 		$this->registerArgument(0, new RawStringArgument("option"));
 		$this->registerArgument(1, new IntegerArgument("length", true));
 	}
 
 	/**
-	 * @param array<string,mixed> $args
-	 * @throws JsonException
+	 * Applies captcha setting changes and returns immediate feedback to the sender.
+	 *
+	 * @param CommandSender $sender Sender managing captcha behavior.
+	 * @param string $aliasUsed Alias used to execute this subcommand.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 * @throws JsonException When config persistence fails while writing.
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$optionRaw = $args["option"] ?? "";

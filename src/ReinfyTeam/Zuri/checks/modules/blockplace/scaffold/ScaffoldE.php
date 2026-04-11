@@ -45,20 +45,34 @@ use function is_numeric;
 use function max;
 use function microtime;
 
+/**
+ * Detects scaffold placement through directional and timing constraints.
+ */
 class ScaffoldE extends Check {
 	private const BUFFER_KEY = CacheData::SCAFFOLD_E_BUFFER;
 	private const LAST_BLOCK_KEY = CacheData::SCAFFOLD_E_LAST_BLOCK;
 	private const LAST_PLACE_AT_KEY = CacheData::SCAFFOLD_E_LAST_PLACE_AT;
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Scaffold";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "E";
 	}
 
 	/**
+	 * Handles placement-related events for ScaffoldE checks.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -137,11 +151,22 @@ class ScaffoldE extends Check {
 		}
 	}
 
+	/**
+	 * Gets the current scaffold buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	private function getBuffer(PlayerAPI $playerAPI) : int {
 		$raw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
 		return is_numeric($raw) ? (int) $raw : 0;
 	}
 
+	/**
+	 * Stores the scaffold buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 * @param int $buffer Buffer value to persist.
+	 */
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {
 		$playerAPI->setExternalData(self::BUFFER_KEY, $buffer);
 	}

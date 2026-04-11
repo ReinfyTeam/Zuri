@@ -45,16 +45,32 @@ use function is_array;
 use function is_numeric;
 use function sqrt;
 
+/**
+ * Detects suspicious attack traces that intersect multiple nearby entities.
+ */
 class KillAuraE extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "KillAura";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "E";
 	}
 
 	/**
+	 * Processes entity damage events for KillAura E evaluation.
+	 *
+	 * @param Event $event Triggered event.
 	 * @throws DiscordWebhookException
 	 */
 	public function checkJustEvent(Event $event) : void {
@@ -104,6 +120,12 @@ class KillAuraE extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates an async payload for KillAura E violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check payload.
+	 * @return array<string,mixed> Async decision data.
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$check = new self();
 		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {

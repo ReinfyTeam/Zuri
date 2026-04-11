@@ -34,22 +34,36 @@ namespace ReinfyTeam\Zuri\events\api;
 use pocketmine\event\CancellableTrait;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
+/**
+ * Fired when a specific check fails for a player.
+ */
 class CheckFailedEvent extends APIEvent {
 	use CancellableTrait;
 
 	private string $supplier;
 	private string $subType;
 
+	/**
+	 * Creates a check-failed event payload.
+	 *
+	 * @return void
+	 */
 	public function __construct(PlayerAPI $playerAPI, string $supplier, string $subType) {
 		$this->supplier = $supplier;
 		$this->subType = $subType;
 		parent::__construct($playerAPI);
 	}
 
+	/**
+	 * Gets the check supplier name.
+	 */
 	public function getSupplier() : string {
 		return $this->supplier;
 	}
 
+	/**
+	 * Gets the check subtype.
+	 */
 	public function getSubType() : string {
 		return $this->subType;
 	}

@@ -48,12 +48,20 @@ use function socket_set_option;
 use function socket_strerror;
 use function strlen;
 
+/**
+ * Lightweight non-blocking UDP wrapper used for proxy signal ingestion.
+ */
 class ProxyUDPSocket {
 	protected ?Socket $socket = null;
 	protected ?InternetAddress $bindAddress = null;
 	private bool $ready = false;
 	private bool $closed = false;
 
+	/**
+	 * Creates and configures the internal UDP socket instance.
+	 *
+	 * @return void
+	 */
 	public function __construct() {
 		$socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 		if ($socket === false) {
@@ -71,11 +79,14 @@ class ProxyUDPSocket {
 	}
 
 	/**
+	 * Binds the socket to the configured local endpoint.
+	 *
+	 * @param InternetAddress $address Target bind address.
 	 * @throws Exception
 	 */
 	public function bind(InternetAddress $address) : void {
 		if (!$this->ready || $this->socket === null) {
-			throw new Exception("Could not initialize ProxyUDP socket");
+			throw new Exception(Lang::get(LangKeys::PROXY_SOCKET_INIT_EXCEPTION));
 		}
 
 		$this->bindAddress = $address;
@@ -95,10 +106,17 @@ class ProxyUDPSocket {
 		} else {
 			$error = socket_last_error($this->socket);
 			ZuriAC::getInstance()->getServer()->getLogger()->info(Lang::get(LangKeys::PROXY_BIND_FAILED, ["address" => $address->ip . ":" . $address->port, "error" => socket_strerror($error)]));
-			throw new Exception("Could not bind to $address->ip:$address->port");
+			throw new Exception(Lang::get(LangKeys::PROXY_SOCKET_BIND_EXCEPTION, ["address" => $address->ip . ":" . $address->port]));
 		}
 	}
 
+	/**
+	 * Reads one datagram from the socket when available.
+	 *
+	 * @param string|null $buffer Receives packet payload.
+	 * @param string|null $ip Receives sender IP.
+	 * @param int|null $port Receives sender port.
+	 */
 	public function receive(?string &$buffer, ?string &$ip, ?int &$port) : void {
 		if (!$this->ready || $this->socket === null || $this->closed) {
 			$buffer = null;
@@ -115,6 +133,13 @@ class ProxyUDPSocket {
 		}
 	}
 
+	/**
+	 * Sends a UDP datagram to the given remote endpoint.
+	 *
+	 * @param string $buffer Payload to transmit.
+	 * @param string $ip Destination IP.
+	 * @param int $port Destination port.
+	 */
 	public function send(string $buffer, string $ip, int $port) : void {
 		if (!$this->ready || $this->socket === null || $this->closed || $buffer === "") {
 			return;
@@ -123,6 +148,9 @@ class ProxyUDPSocket {
 		@socket_sendto($this->socket, $buffer, strlen($buffer), 0, $ip, $port);
 	}
 
+	/**
+	 * Closes the internal socket and marks this wrapper as inactive.
+	 */
 	public function close() : void {
 		if ($this->socket !== null && !$this->closed) {
 			socket_close($this->socket);

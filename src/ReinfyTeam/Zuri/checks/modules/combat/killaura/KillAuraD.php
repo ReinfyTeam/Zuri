@@ -43,16 +43,35 @@ use function is_float;
 use function is_int;
 use function is_string;
 
+/**
+ * Detects invalid arm-swing packet patterns associated with aura clients.
+ */
 class KillAuraD extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "KillAura";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "D";
 	}
 
-	/** @throws DiscordWebhookException */
+	/**
+	 * Processes animation packets for KillAura D evaluation.
+	 *
+	 * @param DataPacket $packet Incoming packet.
+	 * @param PlayerAPI $playerAPI Player context.
+	 * @throws DiscordWebhookException
+	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		if ($packet instanceof AnimatePacket) {
@@ -69,6 +88,12 @@ class KillAuraD extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates an async payload for KillAura D violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check payload.
+	 * @return array<string,mixed> Async decision data.
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$check = new self();
 		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {

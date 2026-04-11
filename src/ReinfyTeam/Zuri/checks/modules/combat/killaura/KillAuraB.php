@@ -40,16 +40,33 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function cos;
 use function is_numeric;
 
+/**
+ * Detects impossible yaw and pitch relationships in combat packets.
+ */
 class KillAuraB extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "KillAura";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "B";
 	}
 
 	/**
+	 * Processes auth input packets for KillAura B evaluation.
+	 *
+	 * @param DataPacket $packet Incoming packet.
+	 * @param PlayerAPI $playerAPI Player context.
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -74,6 +91,12 @@ class KillAuraB extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates an async payload for KillAura B violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check payload.
+	 * @return array<string,mixed> Async decision data.
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$check = new self();
 		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {

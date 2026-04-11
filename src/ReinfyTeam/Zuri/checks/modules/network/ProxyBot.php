@@ -42,15 +42,29 @@ use function is_string;
 use function json_decode;
 use function strtolower;
 
+/**
+ * Detects proxy or VPN connections during player login.
+ */
 class ProxyBot extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "ProxyBot";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Handles pre-login events for proxy checks.
+	 *
+	 * @param Event $event Triggered event instance.
+	 */
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof PlayerPreLoginEvent) {
 			$ip = $event->getIp();
@@ -77,8 +91,12 @@ class ProxyBot extends Check {
 		}
 	}
 
-	/** @param array<string,mixed> $payload
-	 *  @return array<string,mixed>
+	/**
+	 * Evaluates async payload for ProxyBot checks.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];

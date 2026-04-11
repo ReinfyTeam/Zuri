@@ -40,15 +40,33 @@ use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\utils\AuditLogger;
 use ReinfyTeam\Zuri\utils\forms\FormSender;
 
+/**
+ * Opens the Zuri admin management UI for in-game staff members.
+ */
 class UiSubCommand extends BaseSubCommand {
+	/**
+	 * Registers the `/zuri ui` subcommand and its aliases.
+	 *
+	 * @param PluginBase $plugin Plugin that owns this command tree.
+	 * @return void
+	 */
 	public function __construct(PluginBase $plugin) {
 		parent::__construct($plugin, "ui", "Sends the Admin Management UI", ["forms", "form", "gui"]);
 	}
 
+	/**
+	 * Declares arguments for this subcommand.
+	 */
 	protected function prepare() : void {
 	}
 
-	/** @param array<string,mixed> $args */
+	/**
+	 * Sends the management form to the invoking player when executed in-game.
+	 *
+	 * @param CommandSender $sender Sender attempting to open the UI.
+	 * @param string $aliasUsed Alias used to invoke this subcommand.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		if (!$sender instanceof Player) {
 			$sender->sendMessage(Lang::get(LangKeys::CMD_UI_IN_GAME_ONLY));

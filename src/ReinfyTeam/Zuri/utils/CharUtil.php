@@ -37,8 +37,14 @@ use function random_int;
 use function str_split;
 use function strtoupper;
 
+/**
+ * Generates random alphanumeric captcha strings.
+ */
 class CharUtil {
 	/**
+	 * Builds a randomized mixed-case captcha code of fixed length.
+	 *
+	 * @param int $count Requested character length.
 	 * @throws RandomException
 	 */
 	public static function generatorCode(int $count) : string {

@@ -32,6 +32,8 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\snapshots;
 
 use pocketmine\player\Player;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
 /**
@@ -64,6 +66,14 @@ class InventorySnapshot extends AsyncSnapshot {
 	/** @var array<string,mixed> Cached inventory data. */
 	private array $cachedData = [];
 
+	/**
+	 * Captures immutable inventory state for async checks.
+	 *
+	 * @param string $checkType Check type identifier.
+	 * @param Player $player Player entity providing inventory state.
+	 * @param PlayerAPI $playerAPI Player API wrapper for tracked ticks.
+	 * @return void
+	 */
 	public function __construct(string $checkType, Player $player, PlayerAPI $playerAPI) {
 		parent::__construct($checkType);
 
@@ -105,13 +115,21 @@ class InventorySnapshot extends AsyncSnapshot {
 
 	/**
 	 * Add cached inventory data.
+	 *
+	 * @param string $key Cached data key.
+	 * @param mixed $value Cached data value.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function addCachedData(string $key, mixed $value) : self {
 		$this->cachedData[$key] = $value;
 		return $this;
 	}
 
-	/** @return array<string,mixed> */
+	/**
+	 * Builds the immutable payload for async processing.
+	 *
+	 * @return array<string,mixed> Serialized inventory snapshot payload.
+	 */
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
@@ -129,9 +147,14 @@ class InventorySnapshot extends AsyncSnapshot {
 		];
 	}
 
+	/**
+	 * Validates snapshot values before async dispatch.
+	 *
+	 * @throws SnapshotException If snapshot values are invalid.
+	 */
 	public function validate() : void {
 		if ($this->selectedSlot < 0 || $this->selectedSlot >= 9) {
-			throw new SnapshotException("Invalid selected slot in inventory snapshot");
+			throw new SnapshotException(Lang::get(LangKeys::DEBUG_SNAPSHOT_INVALID_SELECTED_SLOT));
 		}
 	}
 }

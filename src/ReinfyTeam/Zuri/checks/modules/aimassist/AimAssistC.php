@@ -40,17 +40,31 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
 
+/**
+ * Detects suspicious yaw and pitch coupling patterns.
+ */
 class AimAssistC extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "AimAssist";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "C";
 	}
 
 
 	/**
+	 * Processes input packets for AimAssistC detection.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {

@@ -45,6 +45,9 @@ use function is_int;
 use function is_numeric;
 use function max;
 
+/**
+ * Detects repetitive rotation deltas characteristic of aim assistance.
+ */
 class RotationA extends Check {
 	private const TYPE = "RotationA";
 	private const LAST_YAW = CacheData::ROTATION_A_LAST_YAW;
@@ -53,15 +56,26 @@ class RotationA extends Check {
 	private const LAST_DELTA_PITCH = CacheData::ROTATION_A_LAST_DELTA_PITCH;
 	private const BUFFER = CacheData::ROTATION_A_BUFFER;
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Rotation";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Processes input packets for RotationA detection.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -135,6 +149,13 @@ class RotationA extends Check {
 		]);
 	}
 
+	/**
+	 * Evaluates async payload for RotationA violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (($payload["type"] ?? null) !== self::TYPE) {
 			return [];
@@ -172,19 +193,45 @@ class RotationA extends Check {
 		return $result;
 	}
 
+	/**
+	 * Calculates normalized angular difference.
+	 *
+	 * @param float $from Source angle.
+	 * @param float $to Target angle.
+	 */
 	private function angleDelta(float $from, float $to) : float {
 		return abs(fmod(($to - $from + 540.0), 360.0) - 180.0);
 	}
 
+	/**
+	 * Gets the current rotation buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	private function getBuffer(PlayerAPI $playerAPI) : int {
 		$bufferRaw = $playerAPI->getExternalData(self::BUFFER, 0);
 		return is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 	}
 
+	/**
+	 * Stores the rotation buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 * @param int $value Buffer value to persist.
+	 */
 	private function setBuffer(PlayerAPI $playerAPI, int $value) : void {
 		$playerAPI->setExternalData(self::BUFFER, $value);
 	}
 
+	/**
+	 * Persists previous angle values used by the check.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 * @param float $yaw Current yaw.
+	 * @param float $pitch Current pitch.
+	 * @param float $deltaYaw Delta yaw.
+	 * @param float $deltaPitch Delta pitch.
+	 */
 	private function storeAngles(PlayerAPI $playerAPI, float $yaw, float $pitch, float $deltaYaw, float $deltaPitch) : void {
 		$playerAPI->setExternalData(self::LAST_YAW, $yaw);
 		$playerAPI->setExternalData(self::LAST_PITCH, $pitch);

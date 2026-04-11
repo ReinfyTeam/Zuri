@@ -52,13 +52,24 @@ use function strtotime;
 use function trim;
 use function version_compare;
 
+/**
+ * Async task that fetches GitHub release metadata to detect plugin updates.
+ */
 class UpdateCheckerAsyncTask extends AsyncTask {
 	private string $currentVersion;
 
+	/**
+	 * Creates an update checker task.
+	 *
+	 * @return void
+	 */
 	public function __construct(string $currentVersion) {
 		$this->currentVersion = $currentVersion;
 	}
 
+	/**
+	 * Fetches release metadata from GitHub.
+	 */
 	public function onRun() : void {
 		$result = Internet::getURL(
 			"https://api.github.com/repos/ReinfyTeam/Zuri/releases/latest",
@@ -69,6 +80,9 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 		$this->setResult([$result ?? null, $err]);
 	}
 
+	/**
+	 * Parses fetched release data and logs update availability details.
+	 */
 	public function onCompletion() : void {
 		$server = Server::getInstance();
 
@@ -143,6 +157,12 @@ class UpdateCheckerAsyncTask extends AsyncTask {
 		$server->getLogger()->warning(Lang::get(LangKeys::UPDATE_DOWNLOAD_URL, ["downloadUrl" => $downloadUrl, "fileSizeKB" => $fileSizeKB]));
 	}
 
+	/**
+	 * Normalizes a version string into a comparable semantic version value.
+	 *
+	 * @param string $version Raw version text, with or without a leading "v".
+	 * @return string Version string suitable for version_compare().
+	 */
 	private static function normalizeVersion(string $version) : string {
 		$normalized = ltrim(trim($version), "vV");
 		return $normalized;

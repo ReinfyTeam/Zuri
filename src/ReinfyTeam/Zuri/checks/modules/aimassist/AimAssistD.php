@@ -39,16 +39,31 @@ use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
 
+/**
+ * Detects constrained aim-step patterns indicative of assist tools.
+ */
 class AimAssistD extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "AimAssist";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "D";
 	}
 
 
+	/**
+	 * Processes input packets for AimAssistD detection.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerAuthInputPacket) {
 			$player = $playerAPI->getPlayer();

@@ -35,21 +35,38 @@ use pocketmine\event\Event;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\ZuriAC;
 
+/**
+ * Base API event carrying a PlayerAPI payload.
+ */
 class APIEvent extends Event {
 	private PlayerAPI $player;
 
+	/**
+	 * Creates an API event payload.
+	 *
+	 * @return void
+	 */
 	public function __construct(PlayerAPI $playerAPI) {
 		$this->player = $playerAPI;
 	}
 
+	/**
+	 * Replaces the associated player context.
+	 */
 	public function setPlayer(PlayerAPI $playerAPI) : void {
 		$this->player = $playerAPI;
 	}
 
+	/**
+	 * Gets the associated player context.
+	 */
 	public function getPlayer() : PlayerAPI {
 		return $this->player;
 	}
 
+	/**
+	 * Gets the plugin API instance.
+	 */
 	public function getAPI() : ?ZuriAC {
 		return ZuriAC::getInstance();
 	}

@@ -35,15 +35,30 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
+/**
+ * Detects invalid or inconsistent block mining packet data.
+ */
 class WrongMining extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "WrongMining";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Validates mining-related network packets.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		$isCreative = $player->isCreative() ? 10 : 0;

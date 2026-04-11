@@ -44,15 +44,30 @@ use function is_string;
 use function str_split;
 use function strtolower;
 
+/**
+ * Detects repetitive or duplicated chat messages.
+ */
 class SpamB extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Spam";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "B";
 	}
 
+	/**
+	 * Handles chat events and evaluates repeat-message spam.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
 		if ($event instanceof PlayerChatEvent) {
 			if (!$event->isCancelled()) {

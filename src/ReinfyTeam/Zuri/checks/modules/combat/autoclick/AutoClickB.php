@@ -42,16 +42,30 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_numeric;
 use function microtime;
 
+/**
+ * Detects auto-click patterns through CPS and variance heuristics.
+ */
 class AutoClickB extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "AutoClick";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "B";
 	}
 
 	/**
+	 * Processes input packets for AutoClickB detection.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -76,6 +90,13 @@ class AutoClickB extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates async payload for AutoClickB violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$check = new self();
 		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {

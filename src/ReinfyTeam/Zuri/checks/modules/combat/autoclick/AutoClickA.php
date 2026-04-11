@@ -42,16 +42,32 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function abs;
 use function is_numeric;
 
+/**
+ * Detects auto-click patterns based on click interval consistency.
+ */
 class AutoClickA extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "AutoClick";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
-	/** @throws DiscordWebhookException */
+	/**
+	 * Processes input packets for AutoClickA detection.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
+	 * @throws DiscordWebhookException
+	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof LevelSoundEventPacket) {
 			if ($packet->sound === LevelSoundEvent::ATTACK_NODAMAGE) {
@@ -71,6 +87,13 @@ class AutoClickA extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates async payload for AutoClickA violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$check = new self();
 		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {

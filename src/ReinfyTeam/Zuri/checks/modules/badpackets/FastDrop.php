@@ -41,20 +41,37 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_numeric;
 use function microtime;
 
+/**
+ * Detects item drops occurring at impossible rates.
+ */
 class FastDrop extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "FastDrop";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Gets the maximum violations before action is taken.
+	 */
 	public function maxViolations() : int {
 		return 5;
 	}
 
 	/**
+	 * Handles item drop events for FastDrop detection.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

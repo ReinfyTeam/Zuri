@@ -41,28 +41,51 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_numeric;
 use function microtime;
 
+/**
+ * Detects abnormally fast inventory transaction bursts.
+ */
 class InventoryCleaner extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "InventoryCleaner";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Indicates whether this check can trigger bans.
+	 */
 	public function ban() : bool {
 		return false;
 	}
 
+	/**
+	 * Indicates whether this check can trigger kicks.
+	 */
 	public function kick() : bool {
 		return true;
 	}
 
+	/**
+	 * Indicates whether this check should create flags.
+	 */
 	public function flag() : bool {
 		return false;
 	}
 
 	/**
+	 * Processes inventory transaction packets for cleaner detection.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {

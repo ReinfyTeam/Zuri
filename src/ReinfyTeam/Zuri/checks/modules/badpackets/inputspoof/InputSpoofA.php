@@ -41,16 +41,30 @@ use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
 use function is_numeric;
 
+/**
+ * Detects spoofed movement input state in packets.
+ */
 class InputSpoofA extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "InputSpoof";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Processes packets for input spoof validation.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {

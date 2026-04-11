@@ -43,18 +43,34 @@ use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\utils\AuditLogger;
 
+/**
+ * Lets staff quickly toggle global ban-mode punishment handling.
+ */
 class BanModeSubCommand extends BaseSubCommand {
+	/**
+	 * Registers the `/zuri banmode` subcommand.
+	 *
+	 * @param PluginBase $plugin Plugin that owns this command tree.
+	 * @return void
+	 */
 	public function __construct(PluginBase $plugin) {
 		parent::__construct($plugin, "banmode", "Use to on/off ban mode.", ["ban"]);
 	}
 
+	/**
+	 * Registers accepted arguments for this toggle command.
+	 */
 	protected function prepare() : void {
 		$this->registerArgument(0, new RawStringArgument("mode"));
 	}
 
 	/**
-	 * @param array<string,mixed> $args
-	 * @throws JsonException
+	 * Flips the configured ban-mode flag and reports the new state.
+	 *
+	 * @param CommandSender $sender Sender requesting the toggle.
+	 * @param string $aliasUsed Alias used to invoke this subcommand.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 * @throws JsonException When config persistence fails while writing.
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$mode = $args["mode"] ?? "";

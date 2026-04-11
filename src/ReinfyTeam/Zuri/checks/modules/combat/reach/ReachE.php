@@ -45,18 +45,34 @@ use function is_numeric;
 use function max;
 use function min;
 
+/**
+ * Detects edge-hit reach abuse using victim bounding box proximity checks.
+ */
 class ReachE extends Check {
 	private const BUFFER_KEY = CacheData::REACH_E_BUFFER;
 
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "Reach";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "E";
 	}
 
 	/**
+	 * Processes entity damage events for edge reach evaluation.
+	 *
+	 * @param Event $event Triggered event.
 	 * @throws DiscordWebhookException
 	 */
 	public function checkJustEvent(Event $event) : void {
@@ -100,6 +116,12 @@ class ReachE extends Check {
 		$this->dispatchAsyncCheck($damager->getName(), $snapshot->build());
 	}
 
+	/**
+	 * Evaluates an async payload for Reach E violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check payload.
+	 * @return array<string,mixed> Async decision data.
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!CombatSnapshot::validatePayload(
 			$payload,
@@ -185,6 +207,15 @@ class ReachE extends Check {
 		return $result;
 	}
 
+	/**
+	 * Determines whether edge-reach processing should be skipped.
+	 *
+	 * @param Player $damager Attacking player.
+	 * @param Player $victim Victim player.
+	 * @param PlayerAPI $damagerAPI Damager context.
+	 * @param PlayerAPI $victimAPI Victim context.
+	 * @return bool True when the check should be skipped.
+	 */
 	private function shouldSkip(Player $damager, Player $victim, PlayerAPI $damagerAPI, PlayerAPI $victimAPI) : bool {
 		$maxPingRaw = $this->getConstant(CheckConstants::REACHE_EDGE_MAX_PING);
 		$minTeleportTicksRaw = $this->getConstant(CheckConstants::REACHE_EDGE_MIN_TELEPORT_TICKS);
@@ -206,11 +237,23 @@ class ReachE extends Check {
 			$damagerAPI->getBowShotTicks() < $minStabilityTicks;
 	}
 
+	/**
+	 * Returns the current edge-reach buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player context.
+	 * @return int Current buffer.
+	 */
 	private function getBuffer(PlayerAPI $playerAPI) : int {
 		$bufferRaw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
 		return is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 	}
 
+	/**
+	 * Stores the edge-reach buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player context.
+	 * @param int $buffer Buffer value to store.
+	 */
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {
 		$playerAPI->setExternalData(self::BUFFER_KEY, $buffer);
 	}

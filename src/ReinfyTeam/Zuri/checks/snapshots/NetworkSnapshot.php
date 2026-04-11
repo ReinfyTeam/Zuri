@@ -33,6 +33,8 @@ namespace ReinfyTeam\Zuri\checks\snapshots;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\player\Player;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function microtime;
 
@@ -64,6 +66,15 @@ class NetworkSnapshot extends AsyncSnapshot {
 	/** @var array<string,mixed> */
 	private array $cachedData = [];
 
+	/**
+	 * Captures immutable packet and player network context.
+	 *
+	 * @param string $checkType Check type identifier.
+	 * @param Player $player Player entity sending the packet.
+	 * @param PlayerAPI $playerAPI Player API wrapper for tracked state.
+	 * @param DataPacket $packet Packet instance being evaluated.
+	 * @return void
+	 */
 	public function __construct(string $checkType, Player $player, PlayerAPI $playerAPI, DataPacket $packet) {
 		parent::__construct($checkType);
 
@@ -81,6 +92,10 @@ class NetworkSnapshot extends AsyncSnapshot {
 
 	/**
 	 * Add packet-specific data that is JSON-serializable.
+	 *
+	 * @param string $key Packet data key.
+	 * @param mixed $value Packet data value.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function addPacketData(string $key, mixed $value) : self {
 		$this->packetData[$key] = $value;
@@ -89,13 +104,21 @@ class NetworkSnapshot extends AsyncSnapshot {
 
 	/**
 	 * Add cached network interaction data.
+	 *
+	 * @param string $key Cached data key.
+	 * @param mixed $value Cached data value.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function addCachedData(string $key, mixed $value) : self {
 		$this->cachedData[$key] = $value;
 		return $this;
 	}
 
-	/** @return array<string,mixed> */
+	/**
+	 * Builds the immutable payload for async processing.
+	 *
+	 * @return array<string,mixed> Serialized network snapshot payload.
+	 */
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
@@ -113,9 +136,14 @@ class NetworkSnapshot extends AsyncSnapshot {
 		];
 	}
 
+	/**
+	 * Validates snapshot values before async dispatch.
+	 *
+	 * @throws SnapshotException If snapshot values are invalid.
+	 */
 	public function validate() : void {
 		if ($this->packetName === "") {
-			throw new SnapshotException("Invalid packet name in network snapshot");
+			throw new SnapshotException(Lang::get(LangKeys::DEBUG_SNAPSHOT_INVALID_PACKET_NAME));
 		}
 	}
 }

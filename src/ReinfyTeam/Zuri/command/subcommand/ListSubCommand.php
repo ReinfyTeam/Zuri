@@ -43,15 +43,33 @@ use ReinfyTeam\Zuri\ZuriAC;
 use function is_scalar;
 use function strtolower;
 
+/**
+ * Displays loaded check modules with status, subtypes, and configured max violations.
+ */
 class ListSubCommand extends BaseSubCommand {
+	/**
+	 * Registers the `/zuri list` subcommand.
+	 *
+	 * @param PluginBase $plugin Plugin that provides this command tree.
+	 * @return void
+	 */
 	public function __construct(PluginBase $plugin) {
 		parent::__construct($plugin, "list", "List of modules in Zuri.", ["modules", "checks"]);
 	}
 
+	/**
+	 * Declares arguments for this subcommand.
+	 */
 	protected function prepare() : void {
 	}
 
-	/** @param array<string,mixed> $args */
+	/**
+	 * Sends a formatted list of anti-cheat checks and their current configuration.
+	 *
+	 * @param CommandSender $sender Sender requesting the module listing.
+	 * @param string $aliasUsed Alias used to execute this subcommand.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$sender->sendMessage(Lang::get(LangKeys::CMD_LIST_HEADER));
 		$sender->sendMessage(Lang::get(LangKeys::CMD_LIST_TITLE));

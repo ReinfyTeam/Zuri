@@ -41,20 +41,33 @@ use ReinfyTeam\Zuri\utils\discord\Discord;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 
+/**
+ * Fired when lag handling detects severe server slowdown.
+ */
 class ServerLagEvent extends Event {
 	use CancellableTrait;
 
 	private PlayerAPI $player;
 
+	/**
+	 * Creates a server lag event payload.
+	 *
+	 * @return void
+	 */
 	public function __construct(PlayerAPI $player) {
 		$this->player = $player;
 	}
 
+	/**
+	 * Gets the associated player context.
+	 */
 	public function getPlayer() : PlayerAPI {
 		return $this->player;
 	}
 
 	/**
+	 * Sends lag notifications and dispatches the event.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function call() : void {

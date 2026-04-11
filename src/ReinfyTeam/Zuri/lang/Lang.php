@@ -52,6 +52,9 @@ use function str_replace;
 use function strpos;
 use function substr;
 
+/**
+ * Loads, validates, and resolves localized message strings with fallback support.
+ */
 final class Lang {
 	private const DEFAULT_LOCALE = 'en_US';
 
@@ -65,6 +68,9 @@ final class Lang {
 	private static array $availableLocales = [];
 	private static string $activeLocale = self::DEFAULT_LOCALE;
 
+	/**
+	 * Loads locale files and prepares active/fallback message maps.
+	 */
 	public static function boot() : void {
 		$localeRaw = ConfigManager::getData(ConfigPaths::LANGUAGE_LOCALE, self::DEFAULT_LOCALE);
 		$fallbackLocaleRaw = ConfigManager::getData(ConfigPaths::LANGUAGE_FALLBACK_LOCALE, self::DEFAULT_LOCALE);
@@ -88,15 +94,29 @@ final class Lang {
 		self::validateAllLocales();
 	}
 
-	/** @return string[] */
+	/**
+	 * Returns all discovered locale identifiers.
+	 *
+	 * @return string[]
+	 */
 	public static function getAvailableLocales() : array {
 		return self::$availableLocales;
 	}
 
+	/**
+	 * Returns the currently active locale code.
+	 */
 	public static function getActiveLocale() : string {
 		return self::$activeLocale;
 	}
 
+	/**
+	 * Switches the active locale and optionally persists it in config.
+	 *
+	 * @param string $locale Locale code to activate.
+	 * @param bool $persist Whether to save the selected locale.
+	 * @return bool True when the locale exists and was applied.
+	 */
 	public static function setLocale(string $locale, bool $persist = true) : bool {
 		if (!isset(self::$allLocales[$locale])) {
 			return false;
@@ -112,6 +132,9 @@ final class Lang {
 		return true;
 	}
 
+	/**
+	 * Ensures the default language file exists in the data folder.
+	 */
 	private static function ensureBaseLanguageExists() : void {
 		$path = ZuriAC::getInstance()->getDataFolder() . 'lang/' . self::DEFAULT_LOCALE . '.yml';
 		if (!file_exists($path)) {
@@ -119,6 +142,9 @@ final class Lang {
 		}
 	}
 
+	/**
+	 * Loads every available locale file into in-memory maps.
+	 */
 	private static function loadAllLocales() : void {
 		self::$allLocales = [];
 		self::$availableLocales = [];
@@ -158,6 +184,12 @@ final class Lang {
 	}
 
 	/** @return array<int|string,mixed> */
+	/**
+	 * Loads a single locale file from known language folders.
+	 *
+	 * @param string $locale Locale code to load.
+	 * @return array<int|string,mixed>
+	 */
 	private static function loadLocale(string $locale) : array {
 		$path = ZuriAC::getInstance()->getDataFolder() . "lang/{$locale}.yml";
 		if (!file_exists($path)) {
@@ -172,11 +204,19 @@ final class Lang {
 			$data = (new Config($path, Config::YAML))->getAll();
 			return $data;
 		} catch (\Throwable $e) {
-			ZuriAC::getInstance()->getLogger()->warning("Failed to load language file '{$path}': " . $e->getMessage());
+			ZuriAC::getInstance()->getLogger()->warning(Lang::get(LangKeys::DEBUG_LANG_LOAD_FAILED, [
+				"path" => $path,
+				"error" => $e->getMessage(),
+			], "Failed to load language file '{path}': {error}"));
 			return [];
 		}
 	}
 
+	/**
+	 * Extracts a locale code from a language file path.
+	 *
+	 * @param string $path Absolute language file path.
+	 */
 	private static function localeFromPath(string $path) : ?string {
 		$path = str_replace("\\", "/", $path);
 		$pos = strpos($path, '/lang/');
@@ -197,6 +237,13 @@ final class Lang {
 
 	/** @param array<int|string,mixed> $source
 	 *  @return string[] */
+	/**
+	 * Flattens nested language arrays into dot-notation keys.
+	 *
+	 * @param array<int|string,mixed> $source Source language tree.
+	 * @param string $prefix Current key prefix.
+	 * @return string[]
+	 */
 	private static function flattenKeys(array $source, string $prefix = '') : array {
 		$result = [];
 		foreach ($source as $k => $v) {
@@ -217,6 +264,13 @@ final class Lang {
 	 *  @param array<int|string,mixed> $fallback
 	 *  @return array<int|string,mixed>
 	 */
+	/**
+	 * Merges locale values over fallback values, preserving missing fallback entries.
+	 *
+	 * @param array<int|string,mixed> $locale Active locale values.
+	 * @param array<int|string,mixed> $fallback Fallback locale values.
+	 * @return array<int|string,mixed>
+	 */
 	private static function mergeMissingWithFallback(array $locale, array $fallback) : array {
 		$merged = $fallback;
 		foreach ($locale as $k => $v) {
@@ -229,6 +283,9 @@ final class Lang {
 		return $merged;
 	}
 
+	/**
+	 * Validates each loaded locale against fallback key coverage.
+	 */
 	private static function validateAllLocales() : void {
 		$logger = ZuriAC::getInstance()->getLogger();
 		$fallbackKeys = self::flattenKeys(self::$fallbackMessages);
@@ -245,6 +302,12 @@ final class Lang {
 		}
 	}
 
+	/**
+	 * Resolves a localized string without placeholder replacement.
+	 *
+	 * @param string $key Dot-notation language key.
+	 * @param string $default Default text when key is missing.
+	 */
 	public static function raw(string $key, string $default = '') : string {
 		$value = self::resolve(self::$messages, $key);
 		if ($value === null) {
@@ -266,6 +329,13 @@ final class Lang {
 	}
 
 	/** @param array<string,string|int|float> $replacements */
+	/**
+	 * Resolves a localized string and injects token replacements.
+	 *
+	 * @param string $key Dot-notation language key.
+	 * @param array<string,string|int|float> $replacements Placeholder values.
+	 * @param string $default Default text when key is missing.
+	 */
 	public static function get(string $key, array $replacements = [], string $default = '') : string {
 		$text = self::raw($key, $default);
 		if (!array_key_exists('prefix', $replacements)) {
@@ -279,6 +349,12 @@ final class Lang {
 	}
 
 	/** @param array<int|string,mixed> $source */
+	/**
+	 * Resolves a nested value from an array using dot-notation path segments.
+	 *
+	 * @param array<int|string,mixed> $source Source array tree.
+	 * @param string $path Dot-notation path.
+	 */
 	private static function resolve(array $source, string $path) : mixed {
 		$segments = explode('.', $path);
 		$cursor = $source;

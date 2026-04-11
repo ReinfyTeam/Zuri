@@ -45,21 +45,35 @@ use function is_numeric;
 use function max;
 use function microtime;
 
+/**
+ * Detects ghost scaffold placement through sequential block analysis.
+ */
 class ScaffoldF extends Check {
 	private const BUFFER_KEY = CacheData::SCAFFOLD_F_BUFFER;
 	private const LAST_PLACE_AT_KEY = CacheData::SCAFFOLD_F_LAST_PLACE_AT;
 	private const LAST_BLOCK_KEY = CacheData::SCAFFOLD_F_LAST_BLOCK;
 	private const LAST_PLAYER_KEY = CacheData::SCAFFOLD_F_LAST_PLAYER;
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Scaffold";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "F";
 	}
 
 	/**
+	 * Handles placement events for ScaffoldF detection.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -158,6 +172,11 @@ class ScaffoldF extends Check {
 		}
 	}
 
+	/**
+	 * Resets stored state for ScaffoldF tracking.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	private function resetState(PlayerAPI $playerAPI) : void {
 		$playerAPI->setExternalData(self::BUFFER_KEY, 0);
 		$playerAPI->unsetExternalData(self::LAST_PLACE_AT_KEY);
@@ -165,11 +184,22 @@ class ScaffoldF extends Check {
 		$playerAPI->unsetExternalData(self::LAST_PLAYER_KEY);
 	}
 
+	/**
+	 * Gets the current scaffold buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	private function getBuffer(PlayerAPI $playerAPI) : int {
 		$raw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
 		return is_numeric($raw) ? (int) $raw : 0;
 	}
 
+	/**
+	 * Stores the scaffold buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 * @param int $buffer Buffer value to persist.
+	 */
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {
 		$playerAPI->setExternalData(self::BUFFER_KEY, $buffer);
 	}

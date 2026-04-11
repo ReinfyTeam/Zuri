@@ -42,6 +42,9 @@ use pocketmine\utils\NotSerializable;
 use pocketmine\utils\SingletonTrait;
 use ReinfyTeam\Zuri\ZuriAC;
 
+/**
+ * Wraps PMMP permission registration and runtime attachment utilities.
+ */
 #[AllowDynamicProperties] class PermissionManager {
 	use NotSerializable;
 	use NotCloneable;
@@ -57,6 +60,13 @@ use ReinfyTeam\Zuri\ZuriAC;
 	public const NONE = -1;
 
 	/** @param array<string,bool> $childPermission */
+	/**
+	 * Registers a permission node and attaches it to the selected root scope.
+	 *
+	 * @param string $permission Permission node to create.
+	 * @param int $permAccess Root access level constant.
+	 * @param array<string,bool> $childPermission Child permission map.
+	 */
 	public function register(string $permission, int $permAccess, array $childPermission = []) : void {
 		$this->perm[] = $permission;
 
@@ -82,6 +92,12 @@ use ReinfyTeam\Zuri\ZuriAC;
 
 
 	/** @param array<string,bool> $permissions */
+	/**
+	 * Applies a full permission map to a player attachment.
+	 *
+	 * @param Player $player Target player.
+	 * @param array<string,bool> $permissions Permission map to apply.
+	 */
 	public function addPlayerPermissions(Player $player, array $permissions) : void {
 		if ($this->attachment === null) {
 			$this->attachment = $player->addAttachment(ZuriAC::getInstance());
@@ -90,6 +106,9 @@ use ReinfyTeam\Zuri\ZuriAC;
 		$player->getNetworkSession()->syncAvailableCommands();
 	}
 
+	/**
+	 * Clears all dynamically attached permissions from the current attachment.
+	 */
 	public function resetPlayerPermissions() : void {
 		if ($this->attachment === null) {
 			return;
@@ -98,6 +117,11 @@ use ReinfyTeam\Zuri\ZuriAC;
 	}
 
 	/** @return list<string> */
+	/**
+	 * Returns all permission nodes registered through this manager.
+	 *
+	 * @return list<string>
+	 */
 	public function getAllPermissions() : array {
 		return $this->perm;
 	}

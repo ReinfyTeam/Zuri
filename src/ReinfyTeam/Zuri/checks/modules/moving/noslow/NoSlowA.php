@@ -43,18 +43,32 @@ use ReinfyTeam\Zuri\utils\MathUtil;
 use function is_numeric;
 use function max;
 
+/**
+ * Detects players moving too quickly while using items.
+ */
 class NoSlowA extends Check {
 	private const BUFFER_KEY = CacheData::NOSLOW_A_BUFFER;
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "NoSlow";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
 	/**
+	 * Handles movement events for no-slow detection.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {
@@ -112,11 +126,22 @@ class NoSlowA extends Check {
 		}
 	}
 
+	/**
+	 * Gets the current no-slow buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 */
 	private function getBuffer(PlayerAPI $playerAPI) : int {
 		$bufferRaw = $playerAPI->getExternalData(self::BUFFER_KEY, 0);
 		return is_numeric($bufferRaw) ? (int) $bufferRaw : 0;
 	}
 
+	/**
+	 * Stores the no-slow buffer value.
+	 *
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 * @param int $buffer Buffer value to persist.
+	 */
 	private function setBuffer(PlayerAPI $playerAPI, int $buffer) : void {
 		$playerAPI->setExternalData(self::BUFFER_KEY, $buffer);
 	}

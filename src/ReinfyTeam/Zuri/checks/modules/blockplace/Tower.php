@@ -43,20 +43,37 @@ use function cos;
 use function deg2rad;
 use function sin;
 
+/**
+ * Detects vertical tower-building movement anomalies.
+ */
 class Tower extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "Tower";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
 
+	/**
+	 * Gets the maximum violation threshold for this check.
+	 */
 	public function maxViolations() : int {
 		return 5;
 	}
 
 	/**
+	 * Handles block place and movement events for tower checks.
+	 *
+	 * @param Event $event Triggered event instance.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function checkEvent(Event $event, PlayerAPI $playerAPI) : void {

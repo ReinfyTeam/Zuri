@@ -34,19 +34,31 @@ namespace ReinfyTeam\Zuri\task;
 use pocketmine\scheduler\Task;
 use Random\RandomException;
 use ReinfyTeam\Zuri\events\CaptchaEvent;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\ExceptionHandler;
 use ReinfyTeam\Zuri\ZuriAC;
 
+/**
+ * Repeating scheduler task that triggers captcha delivery for online players.
+ */
 class CaptchaTask extends Task {
 	private static ?CaptchaTask $instance = null;
 	protected ZuriAC $plugin;
 
+	/**
+	 * Creates the captcha scheduler task.
+	 *
+	 * @return void
+	 */
 	public function __construct(ZuriAC $plugin) {
 		$this->plugin = $plugin;
 	}
 
 	/**
+	 * Ticks captcha prompting for online players.
+	 *
 	 * @throws RandomException
 	 */
 	public function onRun() : void {
@@ -62,7 +74,12 @@ class CaptchaTask extends Task {
 		}, "CaptchaTask::onRun");
 	}
 
+	/**
+	 * Gets the active captcha task instance.
+	 *
+	 * @return self Initialized captcha task singleton.
+	 */
 	public static function getInstance() : self {
-		return self::$instance ?? throw new \LogicException("CaptchaTask instance is not initialized yet.");
+		return self::$instance ?? throw new \LogicException(Lang::get(LangKeys::DEBUG_CAPTCHA_TASK_UNINITIALIZED));
 	}
 }

@@ -32,6 +32,8 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\snapshots;
 
 use pocketmine\player\Player;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 
 /**
@@ -74,6 +76,14 @@ class BlockSnapshot extends AsyncSnapshot {
 	/** @var array<string,mixed> */
 	private array $cachedData = [];
 
+	/**
+	 * Captures player baseline block-interaction state.
+	 *
+	 * @param string $checkType Check type identifier.
+	 * @param Player $player Player entity for positional and network state.
+	 * @param PlayerAPI $playerAPI Player API wrapper for tracked ticks/flags.
+	 * @return void
+	 */
 	public function __construct(string $checkType, Player $player, PlayerAPI $playerAPI) {
 		parent::__construct($checkType);
 
@@ -97,6 +107,14 @@ class BlockSnapshot extends AsyncSnapshot {
 
 	/**
 	 * Set block position and state.
+	 *
+	 * @param float $x Target block X coordinate.
+	 * @param float $y Target block Y coordinate.
+	 * @param float $z Target block Z coordinate.
+	 * @param int $id Target block runtime type ID.
+	 * @param int $meta Target block state/meta ID.
+	 * @param float $hardness Target block hardness value.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function setBlockState(float $x, float $y, float $z, int $id, int $meta, float $hardness) : self {
 		$this->blockX = $x;
@@ -110,13 +128,21 @@ class BlockSnapshot extends AsyncSnapshot {
 
 	/**
 	 * Add cached block interaction data.
+	 *
+	 * @param string $key Cached data key.
+	 * @param mixed $value Cached data value.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function addCachedData(string $key, mixed $value) : self {
 		$this->cachedData[$key] = $value;
 		return $this;
 	}
 
-	/** @return array<string,mixed> */
+	/**
+	 * Builds the immutable payload for async processing.
+	 *
+	 * @return array<string,mixed> Serialized block snapshot payload.
+	 */
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
@@ -143,9 +169,14 @@ class BlockSnapshot extends AsyncSnapshot {
 		];
 	}
 
+	/**
+	 * Validates snapshot values before async dispatch.
+	 *
+	 * @throws SnapshotException If snapshot values are invalid.
+	 */
 	public function validate() : void {
 		if ($this->blockHardness < 0.0) {
-			throw new SnapshotException("Invalid block hardness in snapshot");
+			throw new SnapshotException(Lang::get(LangKeys::DEBUG_SNAPSHOT_INVALID_BLOCK_HARDNESS));
 		}
 	}
 }

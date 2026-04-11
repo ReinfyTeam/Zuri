@@ -41,15 +41,33 @@ use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\AuditLogger;
 
+/**
+ * Lets players toggle their personal anti-cheat debug stream.
+ */
 class DebugSubCommand extends BaseSubCommand {
+	/**
+	 * Registers the `/zuri debug` subcommand.
+	 *
+	 * @param PluginBase $plugin Plugin exposing this subcommand.
+	 * @return void
+	 */
 	public function __construct(PluginBase $plugin) {
 		parent::__construct($plugin, "debug", "Use to on/off for debug mode.", ["analyze"]);
 	}
 
+	/**
+	 * Declares arguments for this subcommand.
+	 */
 	protected function prepare() : void {
 	}
 
-	/** @param array<string,mixed> $args */
+	/**
+	 * Toggles debug mode for the executing in-game player.
+	 *
+	 * @param CommandSender $sender Sender attempting to toggle debug mode.
+	 * @param string $aliasUsed Alias used to run this subcommand.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		if (!$sender instanceof Player) {
 			$sender->sendMessage(Lang::get(LangKeys::CMD_UI_IN_GAME_ONLY));

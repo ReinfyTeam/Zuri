@@ -73,6 +73,9 @@ use function strtoupper;
 use function substr;
 use function trim;
 
+/**
+ * Builds and dispatches administrative in-game forms for Zuri configuration.
+ */
 final class FormSender extends ConfigManager {
 	use NotCloneable;
 	use NotSerializable;
@@ -82,6 +85,12 @@ final class FormSender extends ConfigManager {
 	/** @var array<string,int> */
 	private static array $lastConfigEditorType = [];
 
+	/**
+	 * Reads a config node as boolean with permissive conversions.
+	 *
+	 * @param string $path Config path.
+	 * @param bool $default Fallback value.
+	 */
 	private static function boolData(string $path, bool $default = false) : bool {
 		$value = self::getData($path, $default);
 		if (is_bool($value)) {
@@ -96,6 +105,12 @@ final class FormSender extends ConfigManager {
 		return $default;
 	}
 
+	/**
+	 * Reads a config node as integer with numeric coercion.
+	 *
+	 * @param string $path Config path.
+	 * @param int $default Fallback value.
+	 */
 	private static function intData(string $path, int $default = 0) : int {
 		$value = self::getData($path, $default);
 		if (is_int($value)) {
@@ -107,12 +122,24 @@ final class FormSender extends ConfigManager {
 		return $default;
 	}
 
+	/**
+	 * Reads a config node as string.
+	 *
+	 * @param string $path Config path.
+	 * @param string $default Fallback value.
+	 */
 	private static function stringData(string $path, string $default = "") : string {
 		$value = self::getData($path, $default);
 		return is_string($value) ? $value : $default;
 	}
 
 	/** @return array<string,mixed> */
+	/**
+	 * Reads a config node as array.
+	 *
+	 * @param string $path Config path.
+	 * @return array<string,mixed>
+	 */
 	private static function arrayData(string $path) : array {
 		$value = self::getData($path, []);
 		return is_array($value) ? $value : [];
@@ -122,12 +149,20 @@ final class FormSender extends ConfigManager {
 	 * If libpmform preserves the leading label row as null, we need to skip it.
 	 * If it is omitted, keep the data as-is.
 	 *
-	 * @param array<int,mixed> $data
+	 * @param array<int,mixed> $data Response payload values.
+	 * @return int Offset for value indices.
 	 */
 	private static function leadingLabelOffset(array $data) : int {
 		return array_key_exists(0, $data) && $data[0] === null ? 1 : 0;
 	}
 
+	/**
+	 * Persists a config value and reports save failures to player and logs.
+	 *
+	 * @param Player $player Player receiving feedback.
+	 * @param string $path Config path.
+	 * @param mixed $value Value to save.
+	 */
 	private static function safeSetData(Player $player, string $path, mixed $value) : bool {
 		try {
 			self::setData($path, $value);
@@ -144,6 +179,11 @@ final class FormSender extends ConfigManager {
 		}
 	}
 
+	/**
+	 * Reloads check registry while preserving UX-safe error handling.
+	 *
+	 * @param Player $player Player receiving feedback.
+	 */
 	private static function safeReloadChecks(Player $player) : bool {
 		try {
 			ZuriAC::getInstance()->loadChecks();
@@ -157,10 +197,20 @@ final class FormSender extends ConfigManager {
 		}
 	}
 
+	/**
+	 * Builds a stable per-player key for editor state caches.
+	 *
+	 * @param Player $player Player context.
+	 */
 	private static function configEditorPlayerKey(Player $player) : string {
 		return strtolower($player->getName());
 	}
 
+	/**
+	 * Converts arbitrary config values into editable text.
+	 *
+	 * @param mixed $value Value to stringify.
+	 */
 	private static function stringifyConfigEditorValue(mixed $value) : string {
 		if (is_bool($value)) {
 			return $value ? "true" : "false";
@@ -175,6 +225,13 @@ final class FormSender extends ConfigManager {
 		return is_string($encoded) ? $encoded : "";
 	}
 
+	/**
+	 * Parses typed config editor input into normalized values.
+	 *
+	 * @param int $typeIndex Selected type option index.
+	 * @param string $raw Raw input text.
+	 * @param string $error Populated parse error text.
+	 */
 	private static function parseConfigEditorValue(int $typeIndex, string $raw, string &$error) : mixed {
 		$trimmed = trim($raw);
 		$lower = strtolower($trimmed);
@@ -241,6 +298,11 @@ final class FormSender extends ConfigManager {
 	}
 
 	/** @return list<string> */
+	/**
+	 * Returns localized type dropdown options for config editor.
+	 *
+	 * @return list<string>
+	 */
 	private static function configEditorTypeOptions() : array {
 		return [
 			Lang::get(LangKeys::UI_CONFIG_EDITOR_TYPE_AUTO),
@@ -253,6 +315,11 @@ final class FormSender extends ConfigManager {
 		];
 	}
 
+	/**
+	 * Chooses default editor type index from a runtime value.
+	 *
+	 * @param mixed $value Runtime value.
+	 */
 	private static function guessConfigEditorTypeIndex(mixed $value) : int {
 		if ($value === null) {
 			return 6;
@@ -275,6 +342,11 @@ final class FormSender extends ConfigManager {
 		return 0;
 	}
 
+	/**
+	 * Resolves parent node path of a dot-notation config key.
+	 *
+	 * @param string $path Child config path.
+	 */
 	private static function parentConfigPath(string $path) : string {
 		$parts = explode(".", $path);
 		if (count($parts) <= 1) {
@@ -285,6 +357,12 @@ final class FormSender extends ConfigManager {
 		return $parent !== "" ? $parent : "zuri";
 	}
 
+	/**
+	 * Truncates long config previews for compact button display.
+	 *
+	 * @param string $value Input preview.
+	 * @param int $max Max display length.
+	 */
 	private static function shortenValue(string $value, int $max = 48) : string {
 		if (strlen($value) <= $max) {
 			return $value;
@@ -292,6 +370,12 @@ final class FormSender extends ConfigManager {
 		return substr($value, 0, $max - 1) . "...";
 	}
 
+	/**
+	 * Opens category browser for nested config groups and leaf keys.
+	 *
+	 * @param Player $player Player opening the editor.
+	 * @param string $basePath Root config path to browse.
+	 */
 	public static function ConfigCategoryEditor(Player $player, string $basePath = "zuri") : void {
 		$node = self::getData($basePath, null);
 		if (!is_array($node)) {
@@ -360,6 +444,14 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
+	/**
+	 * Opens direct config value editor with typed parsing support.
+	 *
+	 * @param Player $player Player opening the editor.
+	 * @param string|null $preferredPath Preferred config path.
+	 * @param bool $saved Whether the previous update succeeded.
+	 * @param string $statusMessage Optional status line override.
+	 */
 	public static function ConfigEditor(Player $player, ?string $preferredPath = null, bool $saved = false, string $statusMessage = "") : void {
 		$playerKey = self::configEditorPlayerKey($player);
 		$path = trim($preferredPath ?? (self::$lastConfigEditorPath[$playerKey] ?? "zuri.alerts.enable"));
@@ -430,6 +522,11 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
+	/**
+	 * Opens the root Zuri administration menu.
+	 *
+	 * @param Player $player Player opening the menu.
+	 */
 	public static function MainUI(Player $player) : void {
 		$form = new SimpleForm(Lang::get(LangKeys::UI_MAIN_TITLE), Lang::get(LangKeys::UI_MAIN_CHOOSE));
 		$form->setCallback(function(Player $player, FormResponse $response) {
@@ -469,6 +566,12 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
+	/**
+	 * Opens module management entry menu.
+	 *
+	 * @param Player $player Player opening the menu.
+	 * @param bool $reloaded Whether a reload action just occurred.
+	 */
 	public static function ManageModules(Player $player, bool $reloaded = false) : void {
 		$form = new SimpleForm(
 			Lang::get(LangKeys::UI_MANAGE_MODULES_TITLE),
@@ -501,6 +604,12 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
+	/**
+	 * Opens captcha settings form and persists chosen options.
+	 *
+	 * @param Player $player Player opening the menu.
+	 * @param bool $updated Whether settings were just applied.
+	 */
 	public static function CaptchaSettings(Player $player, bool $updated = false) : void {
 		$form = new CustomForm(Lang::get(LangKeys::UI_CAPTCHA_TITLE));
 		$form->setCallback(function(Player $player, FormResponse $response) {
@@ -564,6 +673,12 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
+	/**
+	 * Opens admin behavior settings form.
+	 *
+	 * @param Player $player Player opening the menu.
+	 * @param bool $updated Whether settings were just applied.
+	 */
 	public static function AdminSettings(Player $player, bool $updated = false) : void {
 		$form = new CustomForm(Lang::get(LangKeys::UI_ADMIN_TITLE));
 		$form->setCallback(function(Player $player, FormResponse $response) {
@@ -620,6 +735,12 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
+	/**
+	 * Opens advanced tools form for locale/debug/proxy/discord toggles.
+	 *
+	 * @param Player $player Player opening the menu.
+	 * @param bool $updated Whether settings were just applied.
+	 */
 	public static function AdvanceTools(Player $player, bool $updated = false) : void {
 		$availableLocales = Lang::getAvailableLocales();
 		$activeLocaleIndex = array_search(Lang::getActiveLocale(), $availableLocales, true);
@@ -666,6 +787,12 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
+	/**
+	 * Opens bulk module toggle form.
+	 *
+	 * @param Player $player Player opening the menu.
+	 * @param bool $toggled Whether toggles were just saved.
+	 */
 	public static function ToggleModules(Player $player, bool $toggled = false) : void {
 		$form = new CustomForm(Lang::get(LangKeys::UI_TOGGLE_MODULES_TITLE));
 		$form->setCallback(function(Player $player, FormResponse $response) {
@@ -706,6 +833,11 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
+	/**
+	 * Opens module picker for detailed module actions.
+	 *
+	 * @param Player $player Player opening the menu.
+	 */
 	public static function PickAModule(Player $player) : void {
 		/** @var list<string> $modules */
 		$modules = [];
@@ -753,6 +885,12 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
+	/**
+	 * Shows details and actions for a selected check module.
+	 *
+	 * @param Player $player Player viewing module details.
+	 * @param Check $check Selected module instance.
+	 */
 	public static function ModuleInformation(Player $player, Check $check) : void {
 		$checkPunishment = strtolower($check->getPunishment());
 		$statusValue = $check->enable() ? Lang::get(LangKeys::UI_COMMON_ENABLED) : Lang::get(LangKeys::UI_COMMON_DISABLED);
@@ -810,6 +948,12 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
+	/**
+	 * Toggles a module enabled state and reloads checks.
+	 *
+	 * @param Player $player Player performing action.
+	 * @param Check $check Selected module instance.
+	 */
 	private static function ToggleModuleStatus(Player $player, Check $check) : void {
 		$path = self::CHECK . "." . strtolower($check->getName()) . ".enable";
 		$newState = !self::boolData($path, $check->enable());
@@ -822,6 +966,13 @@ final class FormSender extends ConfigManager {
 		self::ModuleInformation($player, $check);
 	}
 
+	/**
+	 * Opens max-violation editor for a module.
+	 *
+	 * @param Player $player Player performing action.
+	 * @param Check $check Selected module instance.
+	 * @param bool $saved Whether the value was just saved.
+	 */
 	public static function ChangeMaxVL(Player $player, Check $check, bool $saved = false) : void {
 		$form = new CustomForm(Lang::get(LangKeys::UI_CHANGE_MAXVL_TITLE, ["module" => $check->getName()]));
 		$form->setCallback(function(Player $player, FormResponse $response) use ($check) {
@@ -849,6 +1000,13 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
+	/**
+	 * Opens pre-violation thresholds editor for module subtypes.
+	 *
+	 * @param Player $player Player performing action.
+	 * @param Check $check Selected module instance.
+	 * @param bool $saved Whether values were just saved.
+	 */
 	public static function ChangePreVL(Player $player, Check $check, bool $saved = false) : void {
 		/** @var list<string> $subTypes */
 		$subTypes = [];
@@ -890,6 +1048,13 @@ final class FormSender extends ConfigManager {
 		$player->sendForm($form);
 	}
 
+	/**
+	 * Opens punishment-mode toggle menu for a module.
+	 *
+	 * @param Player $player Player performing action.
+	 * @param Check $check Selected module instance.
+	 * @param bool $saved Whether a mode was just saved.
+	 */
 	public static function TogglePunishment(Player $player, Check $check, bool $saved = false) : void {
 		$form = new SimpleForm(
 			Lang::get(LangKeys::UI_TOGGLE_PUNISHMENT_TITLE, ["module" => $check->getName()]),

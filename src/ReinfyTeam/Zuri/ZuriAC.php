@@ -141,6 +141,9 @@ use function is_numeric;
 use function is_string;
 use function version_compare;
 
+/**
+ * Boots Zuri and manages the lifecycle of all registered anti-cheat checks.
+ */
 class ZuriAC extends PluginBase {
 	private static ZuriAC $instance;
 
@@ -155,6 +158,9 @@ class ZuriAC extends PluginBase {
 
 	private const MINIMUM_PHP_VERSION = "8.2.0";
 
+	/**
+	 * Performs early startup validation and static bootstrapping.
+	 */
 	protected function onLoad() : void {
 		self::$instance = $this;
 		ConfigManager::checkConfig();
@@ -174,23 +180,35 @@ class ZuriAC extends PluginBase {
 		}
 	}
 
+	/**
+	 * Gets the singleton plugin instance.
+	 */
 	public static function getInstance() : ZuriAC {
 		return self::$instance;
 	}
 
+	/**
+	 * Reloads all checks from the current configuration.
+	 */
 	public function reloadChecks() : void {
 		$this->loadChecks();
 	}
 
+	/**
+	 * Rebuilds internal categorized check collections.
+	 */
 	public function rebuildCheckBuckets() : void {
 		$this->buildCheckBuckets();
 	}
 
+	/**
+	 * Enables integrations, tasks, listeners, and check registrations.
+	 */
 	protected function onEnable() : void {
 		AuditLogger::bootIfNeeded();
 		if (!class_exists(VapmPMMP::class)) {
 			$this->getLogger()->error(Lang::get(LangKeys::STARTUP_VAPM_MISSING));
-			AuditLogger::crash("Startup failure: missing LibVapmPMMP");
+			AuditLogger::crash(Lang::get(LangKeys::STARTUP_VAPM_MISSING_AUDIT));
 			$this->getServer()->getPluginManager()->disablePlugin($this);
 			return;
 		}
@@ -211,7 +229,10 @@ class ZuriAC extends PluginBase {
 		$this->getServer()->getCommandMap()->register("zuri", new ZuriCommand($this));
 		$localeRaw = ConfigManager::getData("zuri.language.locale", "en_US");
 		$locale = is_string($localeRaw) ? $localeRaw : "en_US";
-		AuditLogger::anticheat("Plugin enabled. checks=" . count($this->checks) . ", locale=" . $locale);
+		AuditLogger::anticheat(Lang::get(LangKeys::STARTUP_PLUGIN_ENABLED_AUDIT, [
+			"checks" => count($this->checks),
+			"locale" => $locale,
+		]));
 		$proxyUDPSocket = new ProxyUDPSocket();
 		if (ConfigManager::getData(ConfigPaths::PROXY_ENABLE)) {
 			$ipRaw = ConfigManager::getData(ConfigPaths::PROXY_IP);
@@ -229,7 +250,11 @@ class ZuriAC extends PluginBase {
 	}
 
 	/**
-	 * Do not call internally, or do not call it double.
+	 * Recreates the full check list from configuration and rebuilds runtime buckets.
+	 *
+	 * Call this when check configuration changes and you need the new state to apply
+	 * immediately without restarting the server.
+	 *
 	 * @internal
 	 */
 	public function loadChecks() : void {
@@ -395,6 +420,9 @@ class ZuriAC extends PluginBase {
 		$this->buildCheckBuckets();
 	}
 
+	/**
+	 * Splits checks into packet/event execution buckets.
+	 */
 	private function buildCheckBuckets() : void {
 		$this->packetChecks = [];
 		$this->eventChecks = [];
@@ -419,30 +447,52 @@ class ZuriAC extends PluginBase {
 		}
 	}
 
+	/**
+	 * Determines whether a check overrides a specific hook method.
+	 */
 	private function isMethodOverridden(Check $check, string $method) : bool {
 		return (new ReflectionMethod($check, $method))->getDeclaringClass()->getName() !== Check::class;
 	}
 
-	/** @return list<Check> */
+	/**
+	 * Gets all currently loaded checks.
+	 *
+	 * @return list<Check>
+	 */
 	public static function Checks() : array {
 		return ZuriAC::getInstance()->checks;
 	}
 
-	/** @return list<Check> */
+	/**
+	 * Gets checks that implement packet handling.
+	 *
+	 * @return list<Check>
+	 */
 	public static function PacketChecks() : array {
 		return ZuriAC::getInstance()->packetChecks;
 	}
 
-	/** @return list<Check> */
+	/**
+	 * Gets checks that implement event handling.
+	 *
+	 * @return list<Check>
+	 */
 	public static function EventChecks() : array {
 		return ZuriAC::getInstance()->eventChecks;
 	}
 
-	/** @return list<Check> */
+	/**
+	 * Gets checks that implement non-player event handling.
+	 *
+	 * @return list<Check>
+	 */
 	public static function JustEventChecks() : array {
 		return ZuriAC::getInstance()->justEventChecks;
 	}
 
+	/**
+	 * Enables or disables matching checks and refreshes lookup buckets.
+	 */
 	public function setCheckEnabled(string $name, ?string $subType, bool $enabled) : bool {
 		$changed = false;
 		foreach ($this->checks as $check) {

@@ -32,6 +32,8 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\snapshots;
 
 use JsonSerializable;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use function array_key_exists;
 use function gettype;
 use function implode;
@@ -68,6 +70,12 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	/** Timestamp when snapshot was captured. */
 	protected float $captureTime;
 
+	/**
+	 * Creates a new async snapshot with the given check type.
+	 *
+	 * @param string $checkType Check type identifier for downstream validation.
+	 * @return void
+	 */
 	public function __construct(string $checkType) {
 		$this->checkType = $checkType;
 		$this->captureTime = microtime(true);
@@ -75,6 +83,8 @@ abstract class AsyncSnapshot implements JsonSerializable {
 
 	/**
 	 * Get the check type identifier.
+	 *
+	 * @return string Snapshot check type identifier.
 	 */
 	public function getCheckType() : string {
 		return $this->checkType;
@@ -82,6 +92,8 @@ abstract class AsyncSnapshot implements JsonSerializable {
 
 	/**
 	 * Get the capture timestamp.
+	 *
+	 * @return float Snapshot capture time as a Unix timestamp with microseconds.
 	 */
 	public function getCaptureTime() : float {
 		return $this->captureTime;
@@ -90,6 +102,7 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	/**
 	 * Build the complete payload array for async dispatch.
 	 * Must return only JSON-serializable values.
+	 *
 	 * @return array<string,mixed>
 	 */
 	abstract public function build() : array;
@@ -97,11 +110,15 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	/**
 	 * Validate that required snapshot fields are present.
 	 * Should throw if validation fails.
+	 *
+	 * @throws SnapshotException If snapshot data is invalid.
 	 */
 	abstract public function validate() : void;
 
 	/**
 	 * JsonSerializable interface implementation.
+	 *
+	 * @return mixed JSON-serializable snapshot payload.
 	 */
 	public function jsonSerialize() : mixed {
 		return $this->build();
@@ -133,8 +150,10 @@ abstract class AsyncSnapshot implements JsonSerializable {
 		if ($version !== $expectedVersion) {
 			$versionString = is_numeric($version) ? (string) $version : gettype($version);
 			throw new SnapshotException(
-				"Schema version mismatch: expected {$expectedVersion}, got {$versionString}. " .
-				"This may indicate stale async tasks during a plugin update."
+				Lang::get(LangKeys::DEBUG_SNAPSHOT_SCHEMA_MISMATCH, [
+					"expected" => $expectedVersion,
+					"actual" => $versionString,
+				])
 			);
 		}
 	}
@@ -155,7 +174,9 @@ abstract class AsyncSnapshot implements JsonSerializable {
 		}
 		if ($missing !== []) {
 			throw new SnapshotException(
-				"Missing required fields in snapshot: " . implode(', ', $missing)
+				Lang::get(LangKeys::DEBUG_SNAPSHOT_MISSING_FIELDS, [
+					"fields" => implode(", ", $missing),
+				])
 			);
 		}
 	}
@@ -171,11 +192,19 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	 */
 	public static function assertBounds(mixed $value, float $min, float $max, string $fieldName) : void {
 		if (!is_numeric($value)) {
-			throw new SnapshotException("Field '{$fieldName}' must be numeric, got " . gettype($value));
+			throw new SnapshotException(Lang::get(LangKeys::DEBUG_SNAPSHOT_NON_NUMERIC_FIELD, [
+				"field" => $fieldName,
+				"type" => gettype($value),
+			]));
 		}
 		if ($value < $min || $value > $max) {
 			throw new SnapshotException(
-				"Field '{$fieldName}' value {$value} out of bounds [{$min}, {$max}]"
+				Lang::get(LangKeys::DEBUG_SNAPSHOT_BOUNDS_FIELD, [
+					"field" => $fieldName,
+					"value" => $value,
+					"min" => $min,
+					"max" => $max,
+				])
 			);
 		}
 	}
@@ -200,7 +229,10 @@ abstract class AsyncSnapshot implements JsonSerializable {
 		if (($payload['type'] ?? null) !== $expectedType) {
 			$actualTypeValue = $payload['type'] ?? 'unknown';
 			$actualType = is_string($actualTypeValue) ? $actualTypeValue : gettype($actualTypeValue);
-			throw new SnapshotException("Snapshot type mismatch: expected {$expectedType}, got {$actualType}");
+			throw new SnapshotException(Lang::get(LangKeys::DEBUG_SNAPSHOT_TYPE_MISMATCH, [
+				"expected" => $expectedType,
+				"actual" => $actualType,
+			]));
 		}
 
 		self::assertSchemaVersion($payload, $expectedVersion);
@@ -220,6 +252,7 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	 * @param int $expectedVersion Expected schema version
 	 * @param string[] $requiredFields Required field names
 	 * @param array<string,array{0:float,1:float}> $boundedFields Field bounds map (field => [min,max])
+	 * @return bool True when payload validation succeeds.
 	 */
 	public static function validatePayload(
 		array $payload,

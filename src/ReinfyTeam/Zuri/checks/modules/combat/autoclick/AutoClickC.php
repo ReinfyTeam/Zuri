@@ -43,24 +43,45 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function is_numeric;
 use function microtime;
 
+/**
+ * Detects autoclick activity using event and packet timing signals.
+ */
 class AutoClickC extends Check {
 	private bool $canDamagable = false;
 
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "AutoClick";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "C";
 	}
 
+	/**
+	 * Handles events used to seed AutoClickC state.
+	 *
+	 * @param Event $event Triggered event instance.
+	 */
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageEvent) {
 			$this->canDamagable = $event->isCancelled();
 		}
 	}
 
-	/** @throws DiscordWebhookException */
+	/**
+	 * Processes packets for AutoClickC detection.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
+	 * @throws DiscordWebhookException
+	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof AnimatePacket) {
 			if ($packet->action === AnimatePacket::ACTION_SWING_ARM) {
@@ -84,6 +105,13 @@ class AutoClickC extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates async payload for AutoClickC violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$check = new self();
 		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {

@@ -31,7 +31,18 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\config;
 
+/**
+ * Central registry of cache key strings used by checks and player runtime state.
+ *
+ * Use these constants instead of inline strings when reading or writing per-player
+ * cache values to avoid mismatched keys across checks.
+ */
 final class CacheData {
+	/**
+	 * Prevents static-only utility instantiation.
+	 *
+	 * @return void
+	 */
 	private function __construct() {
 	}
 

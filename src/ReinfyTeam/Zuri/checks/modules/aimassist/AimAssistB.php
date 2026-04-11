@@ -41,16 +41,30 @@ use function abs;
 use function is_numeric;
 use function round;
 
+/**
+ * Detects quantized aim movement patterns processed asynchronously.
+ */
 class AimAssistB extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "AimAssist";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "B";
 	}
 
 	/**
+	 * Processes input packets and dispatches async AimAssistB checks.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -81,6 +95,13 @@ class AimAssistB extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates async payload data for AimAssistB violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$check = new self();
 		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
@@ -112,10 +133,21 @@ class AimAssistB extends Check {
 		return [];
 	}
 
+	/**
+	 * Checks whether a value is approximately a multiple of a step.
+	 *
+	 * @param float $value Value to evaluate.
+	 * @param float $step Step size.
+	 */
 	private static function isApproxMultiple(float $value, float $step) : bool {
 		return abs($value - (round($value / $step) * $step)) <= 0.0001;
 	}
 
+	/**
+	 * Checks whether a value follows the expected quantized step size.
+	 *
+	 * @param float $value Value to evaluate.
+	 */
 	private static function isQuantizedStep(float $value) : bool {
 		return self::isApproxMultiple($value, 0.1);
 	}

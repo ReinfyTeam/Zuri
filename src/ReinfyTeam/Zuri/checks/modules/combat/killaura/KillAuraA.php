@@ -41,19 +41,42 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function in_array;
 use function is_numeric;
 
+/**
+ * Detects invalid block interaction faces linked to aura behavior.
+ */
 class KillAuraA extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "KillAura";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "A";
 	}
+
+	/**
+	 * Returns the correlation group used for multi-check escalation.
+	 *
+	 * @return string|null Correlation group identifier.
+	 */
 	public function getCorrelationGroup() : ?string {
 		return \ReinfyTeam\Zuri\checks\CrossCheckCorrelation::GROUP_COMBAT;
 	}
 
 	/**
+	 * Processes player action packets for KillAura A evaluation.
+	 *
+	 * @param DataPacket $packet Incoming packet.
+	 * @param PlayerAPI $playerAPI Player context.
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -67,6 +90,12 @@ class KillAuraA extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates an async payload for KillAura A violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check payload.
+	 * @return array<string,mixed> Async decision data.
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		$check = new self();
 		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {

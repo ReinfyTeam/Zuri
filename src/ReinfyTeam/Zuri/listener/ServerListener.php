@@ -57,6 +57,9 @@ use function str_contains;
 use function strtolower;
 use function trim;
 
+/**
+ * Handles non-check packetless server events such as captcha gating and join/quit hooks.
+ */
 class ServerListener implements Listener {
 	/** @var array<string,int> */
 	private array $ip = [];
@@ -65,6 +68,8 @@ class ServerListener implements Listener {
 	 * HACKK!! This is checking the teleport command if it is run by administrator / console.
 	 * This will prevent any malicious teleportation from player. This is BC breaking until solution is polished. Because somehow pocketmine does not have any implementation for checking of teleportation cause.
 	 * @See PlayerTeleportByCommandEvent::class for more details.
+	 *
+	 * @param CommandEvent $event Fired server command event.
 	 */
 	public function onCommandEvent(CommandEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
@@ -89,6 +94,11 @@ class ServerListener implements Listener {
 		}, "ServerListener::onCommandEvent");
 	}
 
+	/**
+	 * Sends join webhook events for online players.
+	 *
+	 * @param PlayerJoinEvent $event Player join event.
+	 */
 	public function onPlayerJoin(PlayerJoinEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -98,6 +108,9 @@ class ServerListener implements Listener {
 	}
 
 	/**
+	 * Sends leave webhook events and updates per-IP join counters.
+	 *
+	 * @param PlayerQuitEvent $event Player quit event.
 	 * @throws DiscordWebhookException
 	 */
 	public function onPlayerQuit(PlayerQuitEvent $event) : void {
@@ -112,6 +125,11 @@ class ServerListener implements Listener {
 		}, "ServerListener::onPlayerQuit");
 	}
 
+	/**
+	 * Handles captcha answer validation from chat messages.
+	 *
+	 * @param PlayerChatEvent $event Player chat event.
+	 */
 	public function onPlayerChat(PlayerChatEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -130,6 +148,11 @@ class ServerListener implements Listener {
 		}, "ServerListener::onPlayerChat");
 	}
 
+	/**
+	 * Blocks combat actions while a player is in captcha verification.
+	 *
+	 * @param EntityDamageByEntityEvent $event Damage-by-entity event.
+	 */
 	public function onEntityDamageByEntity(EntityDamageByEntityEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$damager = $event->getDamager();
@@ -144,6 +167,11 @@ class ServerListener implements Listener {
 		}, "ServerListener::onEntityDamageByEntity");
 	}
 
+	/**
+	 * Cancels interaction while captcha verification is active.
+	 *
+	 * @param PlayerInteractEvent $event Player interaction event.
+	 */
 	public function onPlayerInteract(PlayerInteractEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -155,6 +183,11 @@ class ServerListener implements Listener {
 		}, "ServerListener::onPlayerInteract");
 	}
 
+	/**
+	 * Cancels movement while captcha verification is active.
+	 *
+	 * @param PlayerMoveEvent $event Player movement event.
+	 */
 	public function onPlayerMove(PlayerMoveEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();
@@ -166,6 +199,11 @@ class ServerListener implements Listener {
 		}, "ServerListener::onPlayerMove");
 	}
 
+	/**
+	 * Cancels block breaking while captcha verification is active.
+	 *
+	 * @param BlockBreakEvent $event Block break event.
+	 */
 	public function onBlockBreak(BlockBreakEvent $event) : void {
 		ExceptionHandler::wrapVoid(function() use ($event) : void {
 			$player = $event->getPlayer();

@@ -38,8 +38,7 @@ use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\AuditLogger;
 use Throwable;
-use vennv\vapm\ClosureThread;
-use vennv\vapm\Thread;
+use vennv\vapm\thread\ClosureThread;
 use function array_keys;
 use function array_slice;
 use function base64_decode;
@@ -75,6 +74,9 @@ use function substr;
 use function sys_getloadavg;
 use function trim;
 
+/**
+ * Coordinates async check execution, batching, and fallback behavior.
+ */
 class CheckAsyncTask {
 	/** @var list<array{0:string,1:string,2:array<string,mixed>,3:int,4:float,5:float,6:int,7:string}> */
 	private static array $queue = [];
@@ -133,7 +135,11 @@ class CheckAsyncTask {
 	private static float $lastOverloadAlertAt = 0.0;
 	private static float $overloadAlertCooldownSeconds = 10.0;
 
-	/** @return array<string,int|float|bool> */
+	/**
+	 * Returns current dispatcher and runtime metrics.
+	 *
+	 * @return array<string,int|float|bool>
+	 */
 	public static function getMetrics() : array {
 		$now = microtime(true);
 		self::runHealthCheck($now);
@@ -200,6 +206,9 @@ class CheckAsyncTask {
 		];
 	}
 
+	/**
+	 * Configures the async dispatcher capacity and performance thresholds.
+	 */
 	public static function configure(int $maxConcurrentWorkers, int $maxQueueSize, float $workerTimeoutSeconds = 3.0, float $degradedCooldownSeconds = 6.0, int $batchSize = 16, float $workerTargetMilliseconds = 20.0) : void {
 		self::$configuredMaxConcurrentWorkers = max(1, min(16, $maxConcurrentWorkers));
 		self::$maxConcurrentWorkers = self::$configuredMaxConcurrentWorkers;
@@ -212,7 +221,11 @@ class CheckAsyncTask {
 		self::$workerTargetMilliseconds = $workerTargetMilliseconds > 1.0 ? min(250.0, $workerTargetMilliseconds) : 20.0;
 	}
 
-	/** @param array<string,mixed> $payload */
+	/**
+	 * Enqueues a check payload for async processing.
+	 *
+	 * @param array<string,mixed> $payload
+	 */
 	public static function dispatch(string $checkClass, string $playerName, array $payload, int $sequence) : void {
 		$now = microtime(true);
 		self::runHealthCheck($now);
@@ -266,6 +279,9 @@ class CheckAsyncTask {
 		self::drain();
 	}
 
+	/**
+	 * Drains queued tasks into runnable batches while worker capacity is available.
+	 */
 	private static function drain() : void {
 		self::runHealthCheck(microtime(true));
 
@@ -302,7 +318,9 @@ class CheckAsyncTask {
 	}
 
 	/**
-	 * @param list<array{0:string,1:string,2:array<string,mixed>,3:int,4:float,5:float,6:int,7:string}> $batch
+	 * Converts queued task entries into one worker batch and starts the async thread.
+	 *
+	 * @param list<array{0:string,1:string,2:array<string,mixed>,3:int,4:float,5:float,6:int,7:string}> $batch Batched queue entries selected by drain().
 	 */
 	private static function startBatch(array $batch) : void {
 		$startedAt = microtime(true);
@@ -363,6 +381,13 @@ class CheckAsyncTask {
 			});
 	}
 
+	/**
+	 * Handles thread batch completion, retry/fallback logic, and result merge.
+	 *
+	 * @param string $batchId Internal batch identifier created in startBatch().
+	 * @param mixed $output Raw completion payload received from the worker thread.
+	 * @param mixed $reason Rejection reason when the thread promise fails.
+	 */
 	private static function handleBatchCompletion(string $batchId, mixed $output, mixed $reason = null) : void {
 		$batchMeta = self::$activeBatches[$batchId] ?? null;
 		if (!is_array($batchMeta)) {
@@ -431,15 +456,7 @@ class CheckAsyncTask {
 			return;
 		}
 
-		$orderedFallback = [];
 		$rawResultsList = is_array($decoded) && is_array($decoded["results"] ?? null) ? $decoded["results"] : [];
-		if (is_array($decoded) && is_array($decoded["results"] ?? null)) {
-			foreach ($decoded["results"] as $entry) {
-				if (is_array($entry) && is_array($entry["result"] ?? null)) {
-					$orderedFallback[] = $entry["result"];
-				}
-			}
-		}
 		$orderedIndex = 0;
 
 		foreach ($batchMeta["taskIds"] as $id) {
@@ -455,21 +472,7 @@ class CheckAsyncTask {
 			$normalizedId = trim($id, " \t\n\r\0\x0B\"'");
 			$result = $results[$normalizedId] ?? null;
 			if (!is_array($result)) {
-				foreach ($results as $candidateId => $candidateResult) {
-					if (!is_array($candidateResult)) {
-						continue;
-					}
-					if (trim((string) $candidateId, " \t\n\r\0\x0B\"'") === $normalizedId) {
-						$result = $candidateResult;
-						break;
-					}
-				}
-			}
-			if (!is_array($result) && isset($orderedFallback[$orderedIndex])) {
-				$result = $orderedFallback[$orderedIndex];
-			}
-			if (!is_array($result) && isset($rawResultsList[$orderedIndex]) && is_array($rawResultsList[$orderedIndex])) {
-				$result = $rawResultsList[$orderedIndex];
+				$result = self::extractIndexedFallbackResult($rawResultsList, $orderedIndex);
 			}
 			$orderedIndex++;
 			if (!is_array($result)) {
@@ -517,7 +520,12 @@ class CheckAsyncTask {
 		self::drain();
 	}
 
-	/** @return array<string,mixed>|null */
+	/**
+	 * Attempts to decode worker output into the normalized thread payload shape.
+	 *
+	 * @param mixed $output Raw output returned by the ClosureThread promise chain.
+	 * @return array<string,mixed>|null Decoded payload, or null when output cannot be parsed.
+	 */
 	private static function decodeThreadOutput(mixed $output) : ?array {
 		if (is_array($output)) {
 			return $output;
@@ -572,9 +580,15 @@ class CheckAsyncTask {
 		return null;
 	}
 
+	/**
+	 * Executes a grouped batch in the worker thread and returns a JSON payload.
+	 *
+	 * @param string $batchPayloadKey Shared-storage key used to retrieve the encoded task list.
+	 * @return string JSON-encoded batch result payload.
+	 */
 	private static function runThreadBatch(string $batchPayloadKey) : string {
 		$results = [];
-		$sharedData = Thread::getSharedData();
+		$sharedData = ClosureThread::getSharedData();
 		$payloadMap = is_array($sharedData[self::THREAD_SHARED_BATCH_KEY] ?? null) ? $sharedData[self::THREAD_SHARED_BATCH_KEY] : [];
 		$encodedTasks = is_string($payloadMap[$batchPayloadKey] ?? null) ? $payloadMap[$batchPayloadKey] : "";
 		$decodedPayload = base64_decode($encodedTasks, true);
@@ -648,7 +662,12 @@ class CheckAsyncTask {
 		return is_string($encoded) ? $encoded : "{\"results\":{}}";
 	}
 
-	/** @return array<string,mixed>|null */
+	/**
+	 * Tries multiple decoding strategies for a single candidate thread output string.
+	 *
+	 * @param string $value Candidate string that may contain JSON payload data.
+	 * @return array<string,mixed>|null Parsed payload or null when no strategy succeeds.
+	 */
 	private static function decodeThreadOutputCandidate(string $value) : ?array {
 		$decoded = json_decode($value, true);
 		if (is_array($decoded)) {
@@ -694,7 +713,12 @@ class CheckAsyncTask {
 		return null;
 	}
 
-	/** @return list<string> */
+	/**
+	 * Extracts balanced JSON object fragments from noisy text output.
+	 *
+	 * @param string $value Text that may embed one or more JSON object strings.
+	 * @return list<string> Candidate JSON fragments ready for decode attempts.
+	 */
 	private static function extractJsonCandidates(string $value) : array {
 		$candidates = [];
 		$inString = false;
@@ -747,8 +771,10 @@ class CheckAsyncTask {
 	}
 
 	/**
+	 * Normalizes decoded thread results into an ID-keyed map consumed by merge logic.
+	 *
 	 * @param array<string,mixed> $decoded
-	 * @return array<string,array<string,mixed>>
+	 * @return array<string,array<string,mixed>> Map of task IDs to result payload arrays.
 	 */
 	private static function normalizeThreadResults(array $decoded) : array {
 		$source = is_array($decoded["results"] ?? null) ? $decoded["results"] : $decoded;
@@ -774,7 +800,10 @@ class CheckAsyncTask {
 	}
 
 	/**
+	 * Requeues a failed task once before forcing synchronous fallback handling.
+	 *
 	 * @param array{startedAt:float,queuedAt:float,capturedAt:float,checkClass:string,playerName:string,payload:array<string,mixed>,sequence:int,attempt:int,batchId:string,dedupeKey:string} $taskMeta
+	 * @return bool True when the task was requeued; false when retries are exhausted.
 	 */
 	private static function retryTask(array $taskMeta) : bool {
 		if ($taskMeta["attempt"] >= 1) {
@@ -797,7 +826,14 @@ class CheckAsyncTask {
 		return true;
 	}
 
-	/** @param array<string,mixed> $payload */
+	/**
+	 * Runs check evaluation synchronously when thread execution is unavailable or failed.
+	 *
+	 * @param string $checkClass Check class to execute.
+	 * @param string $playerName Player name used to resolve the online target.
+	 * @param array<string,mixed> $payload Captured check input payload.
+	 * @param int $sequence Async sequence number used for stale-result protection.
+	 */
 	private static function executeSyncFallback(string $checkClass, string $playerName, array $payload, int $sequence) : void {
 		self::$totalSyncFallback++;
 		$context = "check={$checkClass}, player={$playerName}, sequence={$sequence}";
@@ -805,22 +841,34 @@ class CheckAsyncTask {
 		try {
 			if (!method_exists($checkClass, "evaluateAsync")) {
 				self::$totalFallbackErrors++;
-				self::logWarning("Async fallback failed ({$context}): Missing evaluateAsync()");
+				$reason = Lang::get(LangKeys::DEBUG_ASYNC_REASON_MISSING_EVALUATE, [], "Missing evaluateAsync()");
+				self::logWarning(Lang::get(LangKeys::DEBUG_ASYNC_FALLBACK_FAILED, [
+					"context" => $context,
+					"reason" => $reason,
+				], "Async fallback failed ({context}): {reason}"));
 				return;
 			}
 
 			$result = $checkClass::evaluateAsync($payload);
 			if (!is_array($result)) {
 				self::$totalFallbackErrors++;
-				$reason = "Invalid fallback result payload";
-				self::logWarning("Async fallback failed ({$context}): {$reason}");
+				$reason = Lang::get(LangKeys::DEBUG_ASYNC_REASON_INVALID_FALLBACK_PAYLOAD, [], "Invalid fallback result payload");
+				self::logWarning(Lang::get(LangKeys::DEBUG_ASYNC_FALLBACK_FAILED, [
+					"context" => $context,
+					"reason" => $reason,
+				], "Async fallback failed ({context}): {reason}"));
 				return;
 			}
 
 			if (isset($result["error"])) {
 				self::$totalFallbackErrors++;
-				$reason = is_string($result["error"]) ? $result["error"] : "Invalid fallback result payload";
-				self::logWarning("Async fallback failed ({$context}): {$reason}");
+				$reason = is_string($result["error"])
+					? $result["error"]
+					: Lang::get(LangKeys::DEBUG_ASYNC_REASON_INVALID_FALLBACK_PAYLOAD, [], "Invalid fallback result payload");
+				self::logWarning(Lang::get(LangKeys::DEBUG_ASYNC_FALLBACK_FAILED, [
+					"context" => $context,
+					"reason" => $reason,
+				], "Async fallback failed ({context}): {reason}"));
 				return;
 			}
 
@@ -843,30 +891,49 @@ class CheckAsyncTask {
 			self::$totalMergeTime += max(0.0, microtime(true) - $mergeStartedAt);
 		} catch (Throwable $throwable) {
 			self::$totalFallbackErrors++;
-			self::logWarning("Async fallback exception ({$context}): " . $throwable->getMessage());
+			self::logWarning(Lang::get(LangKeys::DEBUG_ASYNC_FALLBACK_EXCEPTION, [
+				"context" => $context,
+				"error" => $throwable->getMessage(),
+			], "Async fallback exception ({context}): {error}"));
 		}
 	}
 
 	/**
+	 * Emits a structured async-task failure record into the debug logging pipeline.
+	 *
+	 * @param string $kind Failure category identifier.
+	 * @param string $batchId Batch identifier where the failure happened.
 	 * @param array{startedAt:float,queuedAt:float,capturedAt:float,checkClass:string,playerName:string,payload:array<string,mixed>,sequence:int,attempt:int,batchId:string,dedupeKey:string} $taskMeta
+	 * @param string $reason Human-readable failure reason.
 	 */
 	private static function logTaskFailure(string $kind, string $batchId, array $taskMeta, string $reason) : void {
-		self::logWarning(
-			"Async {$kind}: "
-			. "check=" . $taskMeta["checkClass"]
-			. ", player=" . $taskMeta["playerName"]
-			. ", sequence=" . $taskMeta["sequence"]
-			. ", attempt=" . $taskMeta["attempt"]
-			. ", batch=" . $batchId
-			. ", reason=" . $reason
-		);
+		self::logWarning(Lang::get(LangKeys::DEBUG_ASYNC_TASK_FAILURE, [
+			"kind" => $kind,
+			"check" => $taskMeta["checkClass"],
+			"player" => $taskMeta["playerName"],
+			"sequence" => $taskMeta["sequence"],
+			"attempt" => $taskMeta["attempt"],
+			"batch" => $batchId,
+			"reason" => $reason,
+		], "Async {kind}: check={check}, player={player}, sequence={sequence}, attempt={attempt}, batch={batch}, reason={reason}"));
 	}
 
+	/**
+	 * Emits warning logs to both server logger and thread audit logger.
+	 *
+	 * @param string $message Log message content.
+	 */
 	private static function logWarning(string $message) : void {
 		Server::getInstance()->getLogger()->warning($message);
 		AuditLogger::thread($message);
 	}
 
+	/**
+	 * Converts mixed thread rejection reasons into a stable loggable string.
+	 *
+	 * @param mixed $reason Promise rejection reason from worker completion.
+	 * @return string Stable reason string for diagnostics.
+	 */
 	private static function normalizeErrorReason(mixed $reason) : string {
 		if ($reason instanceof Throwable) {
 			$text = $reason::class
@@ -893,8 +960,30 @@ class CheckAsyncTask {
 	}
 
 	/**
+	 * Extracts a compatible fallback result payload from positional worker output.
+	 *
+	 * @param array<int|string,mixed> $rawResultsList
+	 * @return array<string,mixed>|null
+	 */
+	private static function extractIndexedFallbackResult(array $rawResultsList, int $index) : ?array {
+		$entry = $rawResultsList[$index] ?? null;
+		if (!is_array($entry)) {
+			return null;
+		}
+		if (is_array($entry["result"] ?? null)) {
+			return $entry["result"];
+		}
+		if (is_array($entry["payload"] ?? null)) {
+			return $entry["payload"];
+		}
+		return $entry;
+	}
+
+	/**
 	 * Dynamically optimize worker count based on queue load and performance metrics.
 	 * Scales up workers when queue is filling, scales down when underutilized.
+	 *
+	 * @param float $now Current timestamp used for throttling optimization passes.
 	 */
 	private static function optimizeQueueIfNeeded(float $now) : void {
 		if (($now - self::$lastQueueOptimizationAt) < self::$queueOptimizationIntervalSeconds) {
@@ -931,6 +1020,12 @@ class CheckAsyncTask {
 		}
 	}
 
+	/**
+	 * Computes adaptive batch size from queue pressure and worker timings.
+	 *
+	 * @param int $pendingQueue Current pending queue depth.
+	 * @return int Target batch size for the next drain cycle.
+	 */
 	private static function computeTargetBatchSize(int $pendingQueue) : int {
 		$base = max(1, self::$batchSize);
 		$completed = self::$totalCompleted;
@@ -954,6 +1049,8 @@ class CheckAsyncTask {
 
 	/**
 	 * Health check for stuck workers. Reclaims slots and requeues one retry attempt.
+	 *
+	 * @param float|null $now Optional timestamp override for deterministic tests.
 	 * @return array{reclaimed:int,restarted:int,degraded:bool}
 	 */
 	public static function runHealthCheck(?float $now = null) : array {
@@ -1010,11 +1107,21 @@ class CheckAsyncTask {
 		];
 	}
 
+	/**
+	 * Returns current number of pending queued tasks.
+	 *
+	 * @return int Number of queued tasks that have not yet been started.
+	 */
 	private static function pendingQueueSize() : int {
 		$pending = count(self::$queue) - self::$queueHead;
 		return $pending > 0 ? $pending : 0;
 	}
 
+	/**
+	 * Counts unique check-class groups currently present in the pending queue.
+	 *
+	 * @return int Number of distinct check classes waiting in queue.
+	 */
 	private static function pendingClassGroupCount() : int {
 		$groups = [];
 		$count = count(self::$queue);
@@ -1028,6 +1135,12 @@ class CheckAsyncTask {
 		return count($groups);
 	}
 
+	/**
+	 * Estimates pending batch units for the given queue depth.
+	 *
+	 * @param int $pendingQueue Current pending queue depth.
+	 * @return int Estimated number of batches required to drain queue.
+	 */
 	private static function pendingBatchUnitCount(int $pendingQueue) : int {
 		if ($pendingQueue <= 0) {
 			return 0;
@@ -1036,6 +1149,9 @@ class CheckAsyncTask {
 		return (int) ceil($pendingQueue / $size);
 	}
 
+	/**
+	 * Compacts queue storage and rebuilds key indexes after head advancement.
+	 */
 	private static function compactQueueIfNeeded() : void {
 		if (self::$queueHead <= 0) {
 			return;
@@ -1058,6 +1174,11 @@ class CheckAsyncTask {
 		}
 	}
 
+	/**
+	 * Parses PHP memory_limit into bytes. Returns 0 for unlimited/unknown.
+	 *
+	 * @return int Parsed memory limit in bytes, or 0 when unlimited/unknown.
+	 */
 	private static function parseMemoryLimitBytes() : int {
 		$raw = ini_get("memory_limit");
 		if (!is_string($raw) || $raw === "") {
@@ -1077,6 +1198,11 @@ class CheckAsyncTask {
 		};
 	}
 
+	/**
+	 * Tracks overload signals and emits throttled overload diagnostics.
+	 *
+	 * @param float $now Current timestamp used for cooldown throttling.
+	 */
 	private static function monitorResourcePressure(float $now) : void {
 		$queueUtilization = self::$maxQueueSize > 0 ? (self::pendingQueueSize() / self::$maxQueueSize) : 0.0;
 		$workerUtilization = self::$maxConcurrentWorkers > 0 ? (self::$inFlight / self::$maxConcurrentWorkers) : 0.0;
@@ -1112,18 +1238,47 @@ class CheckAsyncTask {
 		]));
 	}
 
+	/**
+	 * Activates temporary degraded mode to force synchronous fallback.
+	 *
+	 * @param float $now Current timestamp used to compute degraded-mode expiry.
+	 */
 	private static function activateDegradedMode(float $now) : void {
 		self::$degradedUntil = max(self::$degradedUntil, $now + self::$degradedCooldownSeconds);
 	}
 
+	/**
+	 * Returns whether synchronous fallback mode is currently active.
+	 *
+	 * @param float $now Current timestamp used to compare degraded expiry.
+	 * @return bool True when synchronous fallback should be used.
+	 */
 	private static function isSyncFallbackActive(float $now) : bool {
 		return self::$degradedUntil > $now;
 	}
 
+	/**
+	 * Builds a deterministic task identifier for queue/active maps.
+	 *
+	 * @param string $checkClass Check class name.
+	 * @param string $playerName Player name associated with the check.
+	 * @param int $sequence Async sequence index.
+	 * @param int $attempt Retry attempt number.
+	 * @return string Deterministic task identifier.
+	 */
 	private static function taskId(string $checkClass, string $playerName, int $sequence, int $attempt) : string {
 		return $checkClass . ":" . $playerName . ":" . $sequence . ":" . $attempt;
 	}
 
+	/**
+	 * Validates whether an async result is still eligible to be merged.
+	 *
+	 * @param PlayerAPI $playerAPI Runtime player API wrapper.
+	 * @param string $checkClass Check class associated with the result.
+	 * @param int $sequence Sequence number captured at dispatch time.
+	 * @param float $queuedAt Queue timestamp used for result age calculations.
+	 * @return bool True when the result should be merged into player state.
+	 */
 	private static function canMergeResult(PlayerAPI $playerAPI, string $checkClass, int $sequence, float $queuedAt) : bool {
 		if ($playerAPI->isAsyncSequenceCurrent($checkClass, $sequence)) {
 			return true;
@@ -1139,6 +1294,7 @@ class CheckAsyncTask {
 
 	/**
 	 * Test helper: reset static async pipeline state.
+	 *
 	 * @internal
 	 */
 	public static function resetForTesting() : void {
@@ -1193,6 +1349,14 @@ class CheckAsyncTask {
 
 	/**
 	 * Test helper: inject an active task to simulate stuck-worker recovery.
+	 *
+	 * @param string $checkClass Check class for the synthetic active task.
+	 * @param string $playerName Player name for the synthetic active task.
+	 * @param int $sequence Sequence number for the synthetic task.
+	 * @param float $startedAt Simulated worker start timestamp.
+	 * @param float $queuedAt Simulated queue timestamp.
+	 * @param float $capturedAt Simulated snapshot capture timestamp.
+	 * @param int $attempt Simulated retry attempt count.
 	 * @internal
 	 */
 	public static function injectActiveTaskForTesting(
@@ -1225,12 +1389,23 @@ class CheckAsyncTask {
 		self::$inFlight++;
 	}
 
+	/**
+	 * Stores encoded batch payload for worker-thread retrieval.
+	 *
+	 * @param string $batchPayloadKey Shared-data key used by the worker.
+	 * @param string $encodedPayload Base64-encoded JSON payload.
+	 */
 	private static function storeBatchPayload(string $batchPayloadKey, string $encodedPayload) : void {
 		self::$threadBatchPayloads[$batchPayloadKey] = $encodedPayload;
 		self::pruneSharedBatchPayloads();
 		self::syncSharedBatchPayloads();
 	}
 
+	/**
+	 * Releases a stored batch payload after batch completion.
+	 *
+	 * @param string $batchPayloadKey Shared-data key to remove.
+	 */
 	private static function releaseBatchPayload(string $batchPayloadKey) : void {
 		if (!isset(self::$threadBatchPayloads[$batchPayloadKey])) {
 			return;
@@ -1240,10 +1415,16 @@ class CheckAsyncTask {
 		self::syncSharedBatchPayloads();
 	}
 
+	/**
+	 * Synchronizes payload map into LibVapm thread shared storage.
+	 */
 	private static function syncSharedBatchPayloads() : void {
-		Thread::addShared(self::THREAD_SHARED_BATCH_KEY, self::$threadBatchPayloads);
+		ClosureThread::addShared(self::THREAD_SHARED_BATCH_KEY, self::$threadBatchPayloads);
 	}
 
+	/**
+	 * Prunes payload cache entries that are no longer referenced by active batches.
+	 */
 	private static function pruneSharedBatchPayloads() : void {
 		foreach (array_keys(self::$threadBatchPayloads) as $batchPayloadKey) {
 			if (!isset(self::$activeBatches[$batchPayloadKey])) {
@@ -1255,7 +1436,13 @@ class CheckAsyncTask {
 		}
 	}
 
-	/** @param array<string,mixed> $result */
+	/**
+	 * Applies async check output fields onto the live player/check state.
+	 *
+	 * @param Check $check Check instance receiving debug/fail callbacks.
+	 * @param PlayerAPI $playerAPI Player API instance updated by merge operations.
+	 * @param array<string,mixed> $result Normalized async result payload.
+	 */
 	private static function applyResult(Check $check, PlayerAPI $playerAPI, array $result) : void {
 		$setValues = $result['set'] ?? [];
 		if (is_array($setValues)) {

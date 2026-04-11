@@ -42,15 +42,33 @@ use ReinfyTeam\Zuri\utils\MathUtil;
 use function is_array;
 use function is_numeric;
 
+/**
+ * Detects reach anomalies after ping and sprint compensation adjustments.
+ */
 class ReachD extends Check {
+	/**
+	 * Returns the check name.
+	 *
+	 * @return string Check identifier.
+	 */
 	public function getName() : string {
 		return "Reach";
 	}
 
+	/**
+	 * Returns the check subtype.
+	 *
+	 * @return string Check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "D";
 	}
 
+	/**
+	 * Processes entity damage events for reach evaluation.
+	 *
+	 * @param Event $event Triggered event.
+	 */
 	public function checkJustEvent(Event $event) : void {
 		if ($event instanceof EntityDamageByEntityEvent) {
 			$damager = $event->getDamager();
@@ -84,6 +102,12 @@ class ReachD extends Check {
 		}
 	}
 
+	/**
+	 * Evaluates an async payload for Reach D violations.
+	 *
+	 * @param array<string,mixed> $payload Serialized check payload.
+	 * @return array<string,mixed> Async decision data.
+	 */
 	public static function evaluateAsync(array $payload) : array {
 		if (!CombatSnapshot::validatePayload(
 			$payload,
@@ -183,6 +207,15 @@ class ReachD extends Check {
 		return ["debug" => $debug];
 	}
 
+	/**
+	 * Determines whether reach processing should be skipped for current combat state.
+	 *
+	 * @param Player $damager Attacking player.
+	 * @param Player $victim Victim player.
+	 * @param PlayerAPI $damagerAPI Damager context.
+	 * @param PlayerAPI $victimAPI Victim context.
+	 * @return bool True when the check should be skipped.
+	 */
 	private function shouldSkip(Player $damager, Player $victim, PlayerAPI $damagerAPI, PlayerAPI $victimAPI) : bool {
 		return !$damager->isSurvival() ||
 			!$victim->isSurvival() ||

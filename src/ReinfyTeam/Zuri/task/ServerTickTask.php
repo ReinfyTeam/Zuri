@@ -36,15 +36,26 @@ use ReinfyTeam\Zuri\utils\ExceptionHandler;
 use ReinfyTeam\Zuri\ZuriAC;
 use function microtime;
 
+/**
+ * Tracks the latest server tick timestamp for lag-aware check decisions.
+ */
 class ServerTickTask extends Task {
 	private float $tick;
 	private static ?ServerTickTask $instance = null;
 	protected ZuriAC $plugin;
 
+	/**
+	 * Creates the server tick tracker task.
+	 *
+	 * @return void
+	 */
 	public function __construct(ZuriAC $plugin) {
 		$this->plugin = $plugin;
 	}
 
+	/**
+	 * Updates the current tick timestamp.
+	 */
 	public function onRun() : void {
 		ExceptionHandler::wrapVoid(function() : void {
 			self::$instance = $this;
@@ -52,14 +63,26 @@ class ServerTickTask extends Task {
 		}, "ServerTickTask::onRun");
 	}
 
+	/**
+	 * Gets the current task instance when initialized.
+	 */
 	public static function getInstance() : ?self {
 		return self::$instance;
 	}
 
+	/**
+	 * Gets the stored tick timestamp.
+	 */
 	public function getTick() : float {
 		return $this->tick;
 	}
 
+	/**
+	 * Determines whether the server is lagging using the last recorded tick time.
+	 *
+	 * @param float $l Current timestamp (typically microtime(true)).
+	 * @return bool True when the elapsed time since the last tick exceeds threshold.
+	 */
 	public function isLagging(float $l) : bool {
 		$lsat = $l - $this->tick;
 		return $lsat >= 5;

@@ -32,6 +32,8 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\snapshots;
 
 use pocketmine\player\Player;
+use ReinfyTeam\Zuri\lang\Lang;
+use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use function is_array;
 use function microtime;
@@ -64,6 +66,15 @@ class ChatSnapshot extends AsyncSnapshot {
 	/** @var array<string,mixed> */
 	private array $cachedData = [];
 
+	/**
+	 * Captures immutable chat message context for async evaluation.
+	 *
+	 * @param string $checkType Check type identifier.
+	 * @param Player $player Player entity that sent the message.
+	 * @param PlayerAPI $playerAPI Player API wrapper for tracked state.
+	 * @param string $message Chat message content.
+	 * @return void
+	 */
 	public function __construct(string $checkType, Player $player, PlayerAPI $playerAPI, string $message) {
 		parent::__construct($checkType);
 
@@ -81,13 +92,21 @@ class ChatSnapshot extends AsyncSnapshot {
 
 	/**
 	 * Add cached chat data.
+	 *
+	 * @param string $key Cached data key.
+	 * @param mixed $value Cached data value.
+	 * @return self Current instance for fluent chaining.
 	 */
 	public function addCachedData(string $key, mixed $value) : self {
 		$this->cachedData[$key] = $value;
 		return $this;
 	}
 
-	/** @return array<string,mixed> */
+	/**
+	 * Builds the immutable payload for async processing.
+	 *
+	 * @return array<string,mixed> Serialized chat snapshot payload.
+	 */
 	public function build() : array {
 		return [
 			"type" => $this->checkType,
@@ -104,9 +123,14 @@ class ChatSnapshot extends AsyncSnapshot {
 		];
 	}
 
+	/**
+	 * Validates snapshot values before async dispatch.
+	 *
+	 * @throws SnapshotException If snapshot values are invalid.
+	 */
 	public function validate() : void {
 		if ($this->messageLength < 0) {
-			throw new SnapshotException("Invalid message length in chat snapshot");
+			throw new SnapshotException(Lang::get(LangKeys::DEBUG_SNAPSHOT_INVALID_MESSAGE_LENGTH));
 		}
 	}
 }

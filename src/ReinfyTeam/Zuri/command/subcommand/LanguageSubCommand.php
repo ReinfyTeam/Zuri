@@ -42,16 +42,34 @@ use function implode;
 use function is_string;
 use function strtolower;
 
+/**
+ * Lists available locales or switches the active plugin language at runtime.
+ */
 class LanguageSubCommand extends BaseSubCommand {
+	/**
+	 * Registers the `/zuri language` subcommand and aliases.
+	 *
+	 * @param PluginBase $plugin Plugin exposing this localization command.
+	 * @return void
+	 */
 	public function __construct(PluginBase $plugin) {
 		parent::__construct($plugin, "language", "Switch plugin language at runtime", ["lang", "locale"]);
 	}
 
+	/**
+	 * Declares the optional locale argument used for listing or switching.
+	 */
 	protected function prepare() : void {
 		$this->registerArgument(0, new RawStringArgument("locale", true));
 	}
 
-	/** @param array<string,mixed> $args */
+	/**
+	 * Shows locale information or applies a locale change request.
+	 *
+	 * @param CommandSender $sender Sender requesting locale info or updates.
+	 * @param string $aliasUsed Alias used to invoke this subcommand.
+	 * @param array<string,mixed> $args Parsed arguments from Commando.
+	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
 		$requestedRaw = $args["locale"] ?? "";
 		$requested = is_string($requestedRaw) ? $requestedRaw : "";

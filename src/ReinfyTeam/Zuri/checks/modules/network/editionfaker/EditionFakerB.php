@@ -41,15 +41,27 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\Utils;
 use function is_string;
 
+/**
+ * Validates title ID and reported device OS consistency.
+ */
 class EditionFakerB extends Check {
+	/**
+	 * Gets the check name.
+	 */
 	public function getName() : string {
 		return "EditionFaker";
 	}
 
+	/**
+	 * Gets the check subtype identifier.
+	 */
 	public function getSubType() : string {
 		return "B";
 	}
 
+	/**
+	 * Gets the maximum violations before action is taken.
+	 */
 	public function maxViolations() : int {
 		return 0; // Instant fail
 	}
@@ -57,6 +69,11 @@ class EditionFakerB extends Check {
 	// From Esoteric Code
 
 	/**
+	 * Processes login packets for edition spoofing checks.
+	 *
+	 * @param DataPacket $packet Incoming network packet.
+	 * @param PlayerAPI $playerAPI Player state wrapper.
+	 *
 	 * @throws DiscordWebhookException
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
@@ -82,8 +99,12 @@ class EditionFakerB extends Check {
 		}
 	}
 
-	/** @param array<string,mixed> $payload
-	 *  @return array<string,mixed>
+	/**
+	 * Evaluates async payload for EditionFakerB checks.
+	 *
+	 * @param array<string,mixed> $payload Serialized check context.
+	 *
+	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
 		return [];
