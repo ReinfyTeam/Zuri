@@ -72,6 +72,7 @@ use function round;
 use function sprintf;
 use function str_repeat;
 use function str_replace;
+use function stripos;
 use function strtotime;
 use function trim;
 use function unlink;
@@ -282,6 +283,26 @@ final class AuditLogger {
 		} else {
 			foreach ($recentCrashes as $crashLine) {
 				$lines[] = self::tr("commands.report.content.recent-crashes-entry", ["line" => $crashLine], "- {line}");
+			}
+		}
+		$recentAsyncThreadFailures = self::readRecentMatchingLines(
+			self::logsPath(self::fileName("thread", "thread.log")),
+			15,
+			[
+				"thread-error",
+				"result-error",
+				"fatal error",
+				"uncaught error",
+				"stack trace",
+			]
+		);
+		$lines[] = "";
+		$lines[] = self::tr("commands.report.content.recent-async-header", ["count" => 15], "Recent async thread failures (latest {count} lines):");
+		if ($recentAsyncThreadFailures === []) {
+			$lines[] = self::tr("commands.report.content.recent-async-none", [], "- none");
+		} else {
+			foreach ($recentAsyncThreadFailures as $threadLine) {
+				$lines[] = self::tr("commands.report.content.recent-async-entry", ["line" => $threadLine], "- {line}");
 			}
 		}
 		$file = self::logsPath(self::fileName("report", "report.txt"));
@@ -643,5 +664,40 @@ final class AuditLogger {
 			}
 		}
 		return $result;
+	}
+
+	/**
+	 * Returns recent lines from a log file that match any of the given case-insensitive tokens.
+	 *
+	 * @param string $filePath File path to read.
+	 * @param int $maxLines Maximum matched lines to return.
+	 * @param list<string> $needles Match tokens.
+	 * @return list<string>
+	 */
+	private static function readRecentMatchingLines(string $filePath, int $maxLines, array $needles) : array {
+		if ($maxLines <= 0 || !file_exists($filePath) || !is_readable($filePath) || $needles === []) {
+			return [];
+		}
+		$rawLines = file($filePath, FILE_IGNORE_NEW_LINES);
+		if (!is_array($rawLines) || $rawLines === []) {
+			return [];
+		}
+		$result = [];
+		foreach ($rawLines as $line) {
+			if (!is_string($line)) {
+				continue;
+			}
+			$trimmed = trim($line);
+			if ($trimmed === "") {
+				continue;
+			}
+			foreach ($needles as $needle) {
+				if ($needle !== "" && stripos($trimmed, $needle) !== false) {
+					$result[] = $trimmed;
+					break;
+				}
+			}
+		}
+		return array_slice($result, -$maxLines);
 	}
 }

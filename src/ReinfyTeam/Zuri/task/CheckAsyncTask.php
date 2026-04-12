@@ -47,6 +47,7 @@ use function ceil;
 use function count;
 use function floor;
 use function function_exists;
+use function implode;
 use function ini_get;
 use function is_array;
 use function is_bool;
@@ -432,7 +433,7 @@ class CheckAsyncTask {
 		if (($topLevelError !== null && $results === []) || !is_array($decoded)) {
 			$reasonText = $topLevelError !== null ? "Thread output error: " . $topLevelError : "Invalid thread output payload";
 			if ($topLevelError === null && is_string($output) && $output !== "") {
-				$reasonText .= " (rawPreview=" . substr(trim($output), 0, 200) . ")";
+				$reasonText .= " (rawPreview=" . self::summarizeThreadOutput($output) . ")";
 			}
 			foreach ($batchMeta["taskIds"] as $id) {
 				$taskMeta = self::$activeTasks[$id] ?? null;
@@ -586,7 +587,7 @@ class CheckAsyncTask {
 	 * @param string $batchPayloadKey Shared-storage key used to retrieve the encoded task list.
 	 * @return string JSON-encoded batch result payload.
 	 */
-	private static function runThreadBatch(string $batchPayloadKey) : string {
+	public static function runThreadBatch(string $batchPayloadKey) : string {
 		$results = [];
 		$sharedData = ClosureThread::getSharedData();
 		$payloadMap = is_array($sharedData[self::THREAD_SHARED_BATCH_KEY] ?? null) ? $sharedData[self::THREAD_SHARED_BATCH_KEY] : [];
@@ -622,8 +623,8 @@ class CheckAsyncTask {
 		}
 
 		foreach ($grouped as $checkClass => $entries) {
-			if (method_exists($checkClass, "evaluateAsyncBatch")) {
-				try {
+			try {
+				if (method_exists($checkClass, "evaluateAsyncBatch")) {
 					$batchResults = $checkClass::evaluateAsyncBatch($entries);
 					foreach ($entries as $entry) {
 						$id = $entry["id"];
@@ -631,25 +632,20 @@ class CheckAsyncTask {
 						$results[$id] = is_array($result) ? $result : ["error" => "Invalid batch result"];
 					}
 					continue;
-				} catch (Throwable $throwable) {
+				}
+
+				if (!method_exists($checkClass, "evaluateAsync")) {
 					foreach ($entries as $entry) {
-						$results[$entry["id"]] = ["error" => $throwable->getMessage()];
+						$results[$entry["id"]] = ["error" => "Missing evaluateAsync()"];
 					}
 					continue;
 				}
-			}
 
-			if (!method_exists($checkClass, "evaluateAsync")) {
 				foreach ($entries as $entry) {
-					$results[$entry["id"]] = ["error" => "Missing evaluateAsync()"];
-				}
-				continue;
-			}
-
-			foreach ($entries as $entry) {
-				try {
 					$results[$entry["id"]] = $checkClass::evaluateAsync($entry["payload"]);
-				} catch (Throwable $throwable) {
+				}
+			} catch (Throwable $throwable) {
+				foreach ($entries as $entry) {
 					$results[$entry["id"]] = ["error" => $throwable->getMessage()];
 				}
 			}
@@ -957,6 +953,51 @@ class CheckAsyncTask {
 			return is_string($encoded) ? $encoded : "array";
 		}
 		return "unknown async error reason";
+	}
+
+	/**
+	 * Summarizes raw worker output while keeping fatal messages and stack traces readable.
+	 *
+	 * @param string $output Raw worker output text.
+	 * @return string Compact summary containing the error headline and relevant stack lines.
+	 */
+	private static function summarizeThreadOutput(string $output) : string {
+		$lines = preg_split('/\R+/', trim(str_replace("\r", "\n", $output)));
+		if (!is_array($lines) || $lines === []) {
+			$fallback = trim($output);
+			return strlen($fallback) > 1200 ? substr($fallback, 0, 1200) : $fallback;
+		}
+
+		$headline = "";
+		$stackLines = [];
+		foreach ($lines as $rawLine) {
+			if (!is_string($rawLine)) {
+				continue;
+			}
+			$line = trim($rawLine);
+			if ($line === "") {
+				continue;
+			}
+			if ($headline === "") {
+				$headline = $line;
+				continue;
+			}
+			if (strpos($line, "Stack trace:") !== false || strpos($line, "#") === 0 || strpos($line, "thrown in") !== false || strpos($line, "Next ") === 0) {
+				$stackLines[] = $line;
+				if (count($stackLines) >= 8) {
+					break;
+				}
+			}
+		}
+
+		if ($headline === "") {
+			$headline = "Unknown worker output";
+		}
+		$summary = $headline;
+		if ($stackLines !== []) {
+			$summary .= " || " . implode(" || ", $stackLines);
+		}
+		return strlen($summary) > 1200 ? substr($summary, 0, 1200) : $summary;
 	}
 
 	/**

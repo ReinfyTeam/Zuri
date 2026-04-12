@@ -1,3 +1,13 @@
+# English Translations (Default Language)
+# This is the default language messages used in Zuri.
+# Just copy this file to modify your own translations, it can be changed using /zuri ui or /zuri lang <locale:name>
+
+information:
+  name: "English Translation"
+  code: "en_US"
+  version: 1.0.0
+  author: "ReinfyTeam"
+
 messages:
   # Placeholder docs:
   # - Zuri placeholders: {prefix}, {player_name}, {module}, {subtype}, {realViolation}, {violation}, {code}, {tps}
@@ -134,22 +144,22 @@ messages:
       safe-crash-boundary-audit: "Safe-crash boundary: context={context}, type={type}, message={message}"
       async-overload: "{prefix} Async overload detected: queue={queue}/{maxQueue}, inFlight={inFlight}/{maxWorkers}, tps={tps}, memory={memory}"
       async-task-failure: "Async {kind}: check={check}, player={player}, sequence={sequence}, attempt={attempt}, batch={batch}, reason={reason}"
-      async-fallback-failed: "Async fallback failed ({context}): {reason}"
+      async-fallback-failed: "{prefix} Async fallback failed ({context}): {reason}"
       async-fallback-exception: "Async fallback exception ({context}): {error}"
-      async-backend-disabled-declarations: "Async thread backend disabled: missing LibVapm thread declarations"
-      async-backend-disabled-shared: "Async thread backend disabled: missing LibVapm thread shared-data methods"
+      async-backend-disabled-declarations: "{prefix} Async thread backend disabled: missing LibVapm thread declarations"
+      async-backend-disabled-shared: "{prefix} Async thread backend disabled: missing LibVapm thread shared-data methods"
       async-reason-missing-evaluate: "Missing evaluateAsync()"
       async-reason-invalid-fallback-payload: "Invalid fallback result payload"
       ui-config-save-failed: "{prefix} UI config save failed for {path}: {error}"
       ui-reload-failed: "{prefix} UI reload checks failed: {error}"
       packet-flood-guard: "{prefix} Packet flood guard activated for {key} (>{limit} packets/s)"
-      audit-line: "[DEBUG] AUDIT ({category}) actor={actor}, action={action}{details} [chain={chain}]"
+      audit-line: "{prefix} &7[DEBUG] &fAUDIT &7(&f{category}&7) &factor={actor}, action={action}{details} [chain={chain}]"
       audit-file-line: "category={category}, actor={actor}, action={action}{details}, chain={chain}"
       audit-throwable-summary: "{context}: type={type}, message={message}, file={file}, line={line}"
       audit-stack-trace: "Stack trace ({context}): {trace}"
       audit-hard-crash: "Hard-crash captured: {message} at {file}:{line}"
       lang-load-failed: "{prefix} Failed to load language file '{path}': {error}"
-      snapshot-schema-mismatch: "Schema version mismatch: expected {expected}, got {actual}. This may indicate stale async tasks during a plugin update."
+      snapshot-schema-mismatch: "{prefix} Schema version mismatch: expected {expected}, got {actual}. This may indicate stale async tasks during a plugin update."
       snapshot-missing-fields: "Missing required fields in snapshot: {fields}"
       snapshot-non-numeric-field: "Field '{field}' must be numeric, got {type}"
       snapshot-bounds-field: "Field '{field}' value {value} out of bounds [{min}, {max}]"
