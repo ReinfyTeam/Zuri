@@ -1,9 +1,0 @@
----
-build-by-default: true
-branches:
-- main
-projects:
-  LibVapmPMMP:
-    model: virion
-    type: library
-...

@@ -34,7 +34,6 @@ namespace ReinfyTeam\Zuri\checks\modules\combat\killaura;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerInteractEvent;
-use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
@@ -150,8 +149,7 @@ class KillAuraC extends Check {
 	 * @return array<string,mixed> Async decision data.
 	 */
 	public static function evaluateAsync(array $payload) : array {
-		$check = new self();
-		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
+		if (($payload["checkName"] ?? null) !== "KillAura" || ($payload["checkSubType"] ?? null) !== "C") {
 			return [];
 		}
 
@@ -177,18 +175,31 @@ class KillAuraC extends Check {
 		$deltaX = is_numeric($deltaXRaw) ? (float) $deltaXRaw : 0.0;
 		$deltaY = is_numeric($deltaYRaw) ? (float) $deltaYRaw : 0.0;
 		$deltaZ = is_numeric($deltaZRaw) ? (float) $deltaZRaw : 0.0;
-		$from = new Vector3($locX, $locY + $eyeHeight, $locZ);
-		$delta = new Vector3($deltaX, $deltaY + $eyeHeight, $deltaZ);
-		$to = $from->add($delta->getX(), $delta->getY(), $delta->getZ());
-		$distance = MathUtil::distance($from, $to);
-		$vector = $to->subtract($from->x, $from->y, $from->z)->normalize()->multiply(1);
+		$fromX = $locX;
+		$fromY = $locY + $eyeHeight;
+		$fromZ = $locZ;
+		$stepX = $deltaX;
+		$stepY = $deltaY + $eyeHeight;
+		$stepZ = $deltaZ;
+		$distance = sqrt(($stepX ** 2) + ($stepY ** 2) + ($stepZ ** 2));
+		if ($distance > 0.0) {
+			$stepX /= $distance;
+			$stepY /= $distance;
+			$stepZ /= $distance;
+		} else {
+			$stepX = 0.0;
+			$stepY = 0.0;
+			$stepZ = 0.0;
+		}
 		$maxDistanceRaw = $payload["maxDistance"] ?? 0;
 		$maxDistance = is_numeric($maxDistanceRaw) ? (float) $maxDistanceRaw : 0.0;
 		$entitiesPayload = $payload["entities"] ?? [];
 		$entitiesList = is_array($entitiesPayload) ? $entitiesPayload : [];
 		$entities = [];
 		for ($i = 0; $i <= $distance; ++$i) {
-			$from = $from->add($vector->x, $vector->y, $vector->z);
+			$fromX += $stepX;
+			$fromY += $stepY;
+			$fromZ += $stepZ;
 			foreach ($entitiesList as $target) {
 				if (!is_array($target)) {
 					continue;
@@ -204,8 +215,7 @@ class KillAuraC extends Check {
 				$targetY = (float) $targetYRaw;
 				$targetZ = (float) $targetZRaw;
 				$targetId = (int) $targetIdRaw;
-				$distanceA = new Vector3($from->x, $from->y, $from->z);
-				if (sqrt((($targetX - $distanceA->getX()) ** 2) + (($targetY - $distanceA->getY()) ** 2) + (($targetZ - $distanceA->getZ()) ** 2)) <= $maxDistance) {
+				if (sqrt((($targetX - $fromX) ** 2) + (($targetY - $fromY) ** 2) + (($targetZ - $fromZ) ** 2)) <= $maxDistance) {
 					$entities[$targetId] = true;
 				}
 			}

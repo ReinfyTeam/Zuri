@@ -6,6 +6,7 @@ version: 1.4.0-ALPHA
 website: "https://github.com/ReinfyTeam/Zuri/"
 main: ReinfyTeam\Zuri\ZuriAC
 api: 5.36.0
+softdepend: [LibVapmPMMP]
 permissions:
      zuri.command:
           default: op

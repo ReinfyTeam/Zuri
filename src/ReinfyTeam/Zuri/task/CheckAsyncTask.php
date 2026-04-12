@@ -38,13 +38,14 @@ use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\AuditLogger;
 use Throwable;
-use vennv\vapm\thread\ClosureThread;
+use vennv\vapm\ClosureThread;
 use function array_keys;
 use function array_slice;
 use function base64_decode;
 use function base64_encode;
 use function ceil;
 use function count;
+use function dirname;
 use function floor;
 use function function_exists;
 use function implode;
@@ -133,8 +134,10 @@ class CheckAsyncTask {
 	private static int $maxAllowedSequenceLag = 4;
 	private static float $maxAllowedResultAgeSeconds = 0.75;
 	private static bool $overloadActive = false;
+	private static bool $shuttingDown = false;
 	private static float $lastOverloadAlertAt = 0.0;
 	private static float $overloadAlertCooldownSeconds = 10.0;
+	private const ASYNC_REASON_PREFIX = "__zuri_async:";
 
 	/**
 	 * Returns current dispatcher and runtime metrics.
@@ -211,12 +214,14 @@ class CheckAsyncTask {
 	 * Configures the async dispatcher capacity and performance thresholds.
 	 */
 	public static function configure(int $maxConcurrentWorkers, int $maxQueueSize, float $workerTimeoutSeconds = 3.0, float $degradedCooldownSeconds = 6.0, int $batchSize = 16, float $workerTargetMilliseconds = 20.0) : void {
+		self::$shuttingDown = false;
 		self::$configuredMaxConcurrentWorkers = max(1, min(16, $maxConcurrentWorkers));
 		self::$maxConcurrentWorkers = self::$configuredMaxConcurrentWorkers;
 		self::$minConcurrentWorkers = 1;
 		self::$configuredBatchSize = max(1, min(128, $batchSize));
 		self::$batchSize = self::$configuredBatchSize;
-		self::$maxQueueSize = $maxQueueSize > 0 ? $maxQueueSize : 1;
+		$queueUnits = $maxQueueSize > 0 ? $maxQueueSize : 1;
+		self::$maxQueueSize = max(1, $queueUnits * self::$configuredBatchSize);
 		self::$workerTimeoutSeconds = $workerTimeoutSeconds > 0.1 ? $workerTimeoutSeconds : 0.1;
 		self::$degradedCooldownSeconds = $degradedCooldownSeconds > 0.1 ? $degradedCooldownSeconds : 0.1;
 		self::$workerTargetMilliseconds = $workerTargetMilliseconds > 1.0 ? min(250.0, $workerTargetMilliseconds) : 20.0;
@@ -228,31 +233,26 @@ class CheckAsyncTask {
 	 * @param array<string,mixed> $payload
 	 */
 	public static function dispatch(string $checkClass, string $playerName, array $payload, int $sequence) : void {
+		if (self::$shuttingDown) {
+			return;
+		}
 		$now = microtime(true);
 		self::runHealthCheck($now);
 		self::optimizeQueueIfNeeded($now);
 		self::monitorResourcePressure($now);
 
 		if (self::isSyncFallbackActive($now)) {
+			self::logThreadEvent("sync-fallback-dispatch", [
+				"check" => $checkClass,
+				"player" => $playerName,
+				"sequence" => $sequence,
+				"reason" => "degraded-mode",
+			]);
 			self::executeSyncFallback($checkClass, $playerName, $payload, $sequence);
 			return;
 		}
 
-		$dedupeKey = $checkClass . ":" . $playerName;
-		$replaceIndex = self::$pendingTaskIndexesByKey[$dedupeKey] ?? -1;
-		if ($replaceIndex >= self::$queueHead) {
-			$existing = self::$queue[$replaceIndex] ?? null;
-			if (is_array($existing)) {
-				$queuedAt = $now;
-				$capturedAtValue = $payload["captureTime"] ?? $queuedAt;
-				$capturedAt = is_numeric($capturedAtValue) ? (float) $capturedAtValue : $queuedAt;
-				self::$queue[$replaceIndex] = [$checkClass, $playerName, $payload, $sequence, $queuedAt, $capturedAt, 0, $dedupeKey];
-				self::$totalCoalesced++;
-				self::$lastDispatchAt = $queuedAt;
-				self::drain();
-				return;
-			}
-		}
+		$dedupeKey = $checkClass . ":" . $playerName . ":" . $sequence . ":" . $now;
 
 		if (self::pendingQueueSize() >= self::$maxQueueSize) {
 			// Drop oldest pending task to keep newest snapshots flowing and avoid sync fallback lag.
@@ -268,6 +268,13 @@ class CheckAsyncTask {
 			}
 			self::$totalDropped++;
 			self::compactQueueIfNeeded();
+			self::logThreadEvent("queue-drop-oldest", [
+				"check" => $checkClass,
+				"player" => $playerName,
+				"sequence" => $sequence,
+				"pendingAfterDrop" => self::pendingQueueSize(),
+				"maxQueueSize" => self::$maxQueueSize,
+			]);
 		}
 
 		$queuedAt = $now;
@@ -277,6 +284,14 @@ class CheckAsyncTask {
 		self::$queue[] = [$checkClass, $playerName, $payload, $sequence, $queuedAt, $capturedAt, 0, $dedupeKey];
 		self::$pendingTaskIndexesByKey[$dedupeKey] = $queueIndex;
 		self::$lastDispatchAt = $queuedAt;
+		self::logThreadEvent("queue-enqueued", [
+			"check" => $checkClass,
+			"player" => $playerName,
+			"sequence" => $sequence,
+			"pendingQueue" => self::pendingQueueSize(),
+			"inFlight" => self::$inFlight,
+			"payload" => self::summarizePayloadForLog($payload),
+		]);
 		self::drain();
 	}
 
@@ -333,7 +348,6 @@ class CheckAsyncTask {
 			$taskIds[] = $id;
 			$batchPayload[] = [
 				"id" => $id,
-				"checkClass" => $checkClass,
 				"payload" => $payload,
 			];
 			self::$activeTasks[$id] = [
@@ -358,25 +372,151 @@ class CheckAsyncTask {
 		];
 		self::$inFlight++;
 		self::$totalDispatched += count($taskIds);
+		self::logThreadEvent("batch-dispatch-start", [
+			"batch" => $batchId,
+			"taskCount" => count($taskIds),
+			"inFlight" => self::$inFlight,
+			"pendingQueue" => self::pendingQueueSize(),
+			"payloadPreview" => self::summarizePayloadForLog($batchPayload[0]["payload"] ?? []),
+		]);
 		$encodedBatchPayloadRaw = json_encode(
 			$batchPayload,
 			JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
 		);
 		$encodedBatchPayload = is_string($encodedBatchPayloadRaw) ? base64_encode($encodedBatchPayloadRaw) : "";
 		self::storeBatchPayload($batchId, $encodedBatchPayload);
-
+		$projectAutoloadPath = dirname(__DIR__, 4) . "\\vendor\\autoload.php";
+		$sourceRootPath = dirname(__DIR__, 3);
+		$asyncReasonPrefix = self::ASYNC_REASON_PREFIX;
 		$thread = new ClosureThread(
-			static function (string $batchPayloadKey) : string {
-				return CheckAsyncTask::runThreadBatch($batchPayloadKey);
+			static function (string $batchPayloadKey, string $projectAutoloadPath, string $sourceRootPath, string $asyncReasonPrefix) : string {
+				if ($projectAutoloadPath !== "" && is_file($projectAutoloadPath)) {
+					require_once $projectAutoloadPath;
+				}
+				if ($sourceRootPath !== "") {
+					spl_autoload_register(static function(string $class) use ($sourceRootPath) : void {
+						if (strpos($class, "ReinfyTeam\\Zuri\\") !== 0) {
+							return;
+						}
+						$classPath = $sourceRootPath . "/" . str_replace("\\", "/", $class) . ".php";
+						if (is_file($classPath)) {
+							require_once $classPath;
+						}
+					}, true, true);
+				}
+				$sharedData = \vennv\vapm\ClosureThread::getSharedData();
+				$payloadMap = is_array($sharedData["__zuri_async_batches"] ?? null) ? $sharedData["__zuri_async_batches"] : [];
+				$encodedTasks = is_string($payloadMap[$batchPayloadKey] ?? null) ? $payloadMap[$batchPayloadKey] : "";
+				if ($encodedTasks === "" && is_string($sharedData[$batchPayloadKey] ?? null)) {
+					$encodedTasks = $sharedData[$batchPayloadKey];
+				}
+				if ($encodedTasks === "" && $batchPayloadKey !== "") {
+					$encodedTasks = $batchPayloadKey;
+				}
+				$decodedPayload = base64_decode($encodedTasks, true);
+				$tasks = is_string($decodedPayload) ? json_decode($decodedPayload, true) : null;
+				if (!is_array($tasks)) {
+					$failed = json_encode(
+						[
+							"error" => $encodedTasks === ""
+								? $asyncReasonPrefix . "missing-batch-payload"
+								: $asyncReasonPrefix . "decode-batch-payload",
+							"results" => [],
+							"encodedLength" => (string) strlen($encodedTasks),
+							"payloadRef" => $batchPayloadKey,
+						],
+						JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
+					);
+					return is_string($failed) ? $failed : "{\"results\":{}}";
+				}
+
+				/** @var array<string,list<array{id:string,payload:array<string,mixed>}>> $grouped */
+				$grouped = [];
+				foreach ($tasks as $task) {
+					$id = is_string($task["id"] ?? null) ? trim($task["id"]) : "";
+					$payload = is_array($task["payload"] ?? null) ? $task["payload"] : [];
+					if ($id === "") {
+						continue;
+					}
+					$checkClassRaw = $payload["_checkClass"] ?? null;
+					$checkClass = is_string($checkClassRaw) ? trim($checkClassRaw) : "";
+					if ($checkClass === "") {
+						$grouped["__unknown__"][] = [
+							"id" => $id,
+							"payload" => $payload,
+						];
+						continue;
+					}
+					$grouped[$checkClass][] = [
+						"id" => $id,
+						"payload" => $payload,
+					];
+				}
+
+				$results = [];
+				foreach ($grouped as $checkClass => $entries) {
+					if ($checkClass === "__unknown__") {
+						foreach ($entries as $entry) {
+							$results[$entry["id"]] = ["error" => $asyncReasonPrefix . "missing-evaluate"];
+						}
+						continue;
+					}
+
+					try {
+						if (!class_exists($checkClass)) {
+							foreach ($entries as $entry) {
+								$results[$entry["id"]] = ["error" => $asyncReasonPrefix . "missing-check-class:" . $checkClass];
+							}
+							continue;
+						}
+						if (method_exists($checkClass, "evaluateAsyncBatch")) {
+							$batchResults = $checkClass::evaluateAsyncBatch($entries);
+							foreach ($entries as $entry) {
+								$id = $entry["id"];
+								$result = $batchResults[$id] ?? ["error" => $asyncReasonPrefix . "missing-batch-result"];
+								$results[$id] = is_array($result) ? $result : ["error" => $asyncReasonPrefix . "invalid-batch-result"];
+							}
+							continue;
+						}
+						if (!method_exists($checkClass, "evaluateAsync")) {
+							foreach ($entries as $entry) {
+								$results[$entry["id"]] = ["error" => $asyncReasonPrefix . "missing-evaluate"];
+							}
+							continue;
+						}
+						foreach ($entries as $entry) {
+							$result = $checkClass::evaluateAsync($entry["payload"]);
+							$results[$entry["id"]] = is_array($result) ? $result : ["error" => $asyncReasonPrefix . "invalid-batch-result"];
+						}
+					} catch (\Throwable $throwable) {
+						foreach ($entries as $entry) {
+							$results[$entry["id"]] = ["error" => $throwable->getMessage()];
+						}
+					}
+				}
+
+				$encoded = json_encode(
+					["results" => $results],
+					JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
+				);
+				return is_string($encoded) ? $encoded : "{\"results\":{}}";
 			},
-			[$batchId]
+			[$batchId, $projectAutoloadPath, $sourceRootPath, $asyncReasonPrefix]
 		);
 		$thread->start()
 			->then(function(mixed $output) use ($batchId) : mixed {
+				self::logThreadEvent("batch-dispatch-complete", [
+					"batch" => $batchId,
+					"outputPreview" => self::summarizeThreadOutput($output),
+				]);
 				self::handleBatchCompletion($batchId, $output);
 				return $output;
 			})
 			->catch(function(mixed $reason) use ($batchId) : mixed {
+				self::logThreadEvent("batch-dispatch-error", [
+					"batch" => $batchId,
+					"reason" => self::normalizeErrorReason($reason),
+				]);
 				self::handleBatchCompletion($batchId, null, $reason);
 				return $reason;
 			});
@@ -431,7 +571,17 @@ class CheckAsyncTask {
 		$results = is_array($decoded) ? self::normalizeThreadResults($decoded) : [];
 		$topLevelError = is_array($decoded) && is_string($decoded["error"] ?? null) ? $decoded["error"] : null;
 		if (($topLevelError !== null && $results === []) || !is_array($decoded)) {
-			$reasonText = $topLevelError !== null ? "Thread output error: " . $topLevelError : "Invalid thread output payload";
+			$reasonText = $topLevelError !== null
+				? Lang::get(
+					LangKeys::DEBUG_ASYNC_REASON_THREAD_OUTPUT_ERROR,
+					["error" => self::localizeAsyncReason($topLevelError)],
+					"Thread output error: {error}"
+				)
+				: Lang::get(
+					LangKeys::DEBUG_ASYNC_REASON_INVALID_THREAD_OUTPUT,
+					[],
+					"Invalid thread output payload"
+				);
 			if ($topLevelError === null && is_string($output) && $output !== "") {
 				$reasonText .= " (rawPreview=" . self::summarizeThreadOutput($output) . ")";
 			}
@@ -478,7 +628,11 @@ class CheckAsyncTask {
 			$orderedIndex++;
 			if (!is_array($result)) {
 				self::$totalThreadResultErrors++;
-				$reasonText = "Invalid or missing thread result payload";
+				$reasonText = Lang::get(
+					LangKeys::DEBUG_ASYNC_REASON_INVALID_THREAD_RESULT,
+					[],
+					"Invalid or missing thread result payload"
+				);
 				self::logTaskFailure("result-error", $batchId, $taskMeta, $reasonText);
 				if (self::retryTask($taskMeta)) {
 					continue;
@@ -490,7 +644,13 @@ class CheckAsyncTask {
 
 			if (isset($result["error"])) {
 				self::$totalThreadResultErrors++;
-				$reasonText = is_string($result["error"]) ? $result["error"] : "Invalid or missing thread result payload";
+				$reasonText = is_string($result["error"])
+					? self::localizeAsyncReason($result["error"])
+					: Lang::get(
+						LangKeys::DEBUG_ASYNC_REASON_INVALID_THREAD_RESULT,
+						[],
+						"Invalid or missing thread result payload"
+					);
 				self::logTaskFailure("result-error", $batchId, $taskMeta, $reasonText);
 				if (self::retryTask($taskMeta)) {
 					continue;
@@ -579,83 +739,6 @@ class CheckAsyncTask {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Executes a grouped batch in the worker thread and returns a JSON payload.
-	 *
-	 * @param string $batchPayloadKey Shared-storage key used to retrieve the encoded task list.
-	 * @return string JSON-encoded batch result payload.
-	 */
-	public static function runThreadBatch(string $batchPayloadKey) : string {
-		$results = [];
-		$sharedData = ClosureThread::getSharedData();
-		$payloadMap = is_array($sharedData[self::THREAD_SHARED_BATCH_KEY] ?? null) ? $sharedData[self::THREAD_SHARED_BATCH_KEY] : [];
-		$encodedTasks = is_string($payloadMap[$batchPayloadKey] ?? null) ? $payloadMap[$batchPayloadKey] : "";
-		$decodedPayload = base64_decode($encodedTasks, true);
-		$tasks = is_string($decodedPayload) ? json_decode($decodedPayload, true) : null;
-		if (!is_array($tasks)) {
-			$failed = json_encode(
-				[
-					"error" => $encodedTasks === "" ? "Missing shared batch payload" : "Unable to decode batch payload",
-					"results" => [],
-					"encodedLength" => (string) strlen($encodedTasks),
-					"payloadKey" => $batchPayloadKey,
-				],
-				JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
-			);
-			return is_string($failed) ? $failed : "{\"results\":{}}";
-		}
-
-		/** @var array<string,list<array{id:string,payload:array<string,mixed>}>> $grouped */
-		$grouped = [];
-		foreach ($tasks as $task) {
-			$checkClass = is_string($task["checkClass"] ?? null) ? trim($task["checkClass"], " \t\n\r\0\x0B\"'") : "";
-			$id = is_string($task["id"] ?? null) ? trim($task["id"], " \t\n\r\0\x0B\"'") : "";
-			$payload = is_array($task["payload"] ?? null) ? $task["payload"] : [];
-			if ($checkClass === "" || $id === "") {
-				continue;
-			}
-			$grouped[$checkClass][] = [
-				"id" => $id,
-				"payload" => $payload,
-			];
-		}
-
-		foreach ($grouped as $checkClass => $entries) {
-			try {
-				if (method_exists($checkClass, "evaluateAsyncBatch")) {
-					$batchResults = $checkClass::evaluateAsyncBatch($entries);
-					foreach ($entries as $entry) {
-						$id = $entry["id"];
-						$result = $batchResults[$id] ?? ["error" => "Missing batch result"];
-						$results[$id] = is_array($result) ? $result : ["error" => "Invalid batch result"];
-					}
-					continue;
-				}
-
-				if (!method_exists($checkClass, "evaluateAsync")) {
-					foreach ($entries as $entry) {
-						$results[$entry["id"]] = ["error" => "Missing evaluateAsync()"];
-					}
-					continue;
-				}
-
-				foreach ($entries as $entry) {
-					$results[$entry["id"]] = $checkClass::evaluateAsync($entry["payload"]);
-				}
-			} catch (Throwable $throwable) {
-				foreach ($entries as $entry) {
-					$results[$entry["id"]] = ["error" => $throwable->getMessage()];
-				}
-			}
-		}
-
-		$encoded = json_encode(
-			["results" => $results],
-			JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR
-		);
-		return is_string($encoded) ? $encoded : "{\"results\":{}}";
 	}
 
 	/**
@@ -818,7 +901,16 @@ class CheckAsyncTask {
 		];
 		self::$pendingTaskIndexesByKey[$taskMeta["dedupeKey"]] = count(self::$queue) - 1;
 		self::$totalThreadRetries++;
-		self::logTaskFailure("retry-scheduled", $taskMeta["batchId"], $taskMeta, "retry attempt=" . ($taskMeta["attempt"] + 1));
+		self::logTaskFailure(
+			"retry-scheduled",
+			$taskMeta["batchId"],
+			$taskMeta,
+			Lang::get(
+				LangKeys::DEBUG_ASYNC_REASON_RETRY_ATTEMPT,
+				["attempt" => (string) ($taskMeta["attempt"] + 1)],
+				"retry attempt={attempt}"
+			)
+		);
 		return true;
 	}
 
@@ -859,7 +951,7 @@ class CheckAsyncTask {
 			if (isset($result["error"])) {
 				self::$totalFallbackErrors++;
 				$reason = is_string($result["error"])
-					? $result["error"]
+					? self::localizeAsyncReason($result["error"])
 					: Lang::get(LangKeys::DEBUG_ASYNC_REASON_INVALID_FALLBACK_PAYLOAD, [], "Invalid fallback result payload");
 				self::logWarning(Lang::get(LangKeys::DEBUG_ASYNC_FALLBACK_FAILED, [
 					"context" => $context,
@@ -956,12 +1048,58 @@ class CheckAsyncTask {
 	}
 
 	/**
+	 * Converts internal async reason codes to translated text.
+	 */
+	private static function localizeAsyncReason(string $reason) : string {
+		$prefix = self::ASYNC_REASON_PREFIX;
+		if (strpos($reason, $prefix) !== 0) {
+			return $reason;
+		}
+
+		$code = substr($reason, strlen($prefix));
+		if ($code === "missing-batch-payload") {
+			return Lang::get(LangKeys::DEBUG_ASYNC_REASON_MISSING_BATCH_PAYLOAD, [], "Missing batch payload");
+		}
+		if ($code === "decode-batch-payload") {
+			return Lang::get(LangKeys::DEBUG_ASYNC_REASON_DECODE_BATCH_PAYLOAD, [], "Unable to decode batch payload");
+		}
+		if ($code === "missing-batch-result") {
+			return Lang::get(LangKeys::DEBUG_ASYNC_REASON_MISSING_BATCH_RESULT, [], "Missing batch result");
+		}
+		if ($code === "invalid-batch-result") {
+			return Lang::get(LangKeys::DEBUG_ASYNC_REASON_INVALID_BATCH_RESULT, [], "Invalid batch result");
+		}
+		if ($code === "missing-evaluate") {
+			return Lang::get(LangKeys::DEBUG_ASYNC_REASON_MISSING_EVALUATE, [], "Missing evaluateAsync()");
+		}
+		if (strpos($code, "missing-check-class:") === 0) {
+			$checkClass = substr($code, strlen("missing-check-class:"));
+			return Lang::get(
+				LangKeys::DEBUG_ASYNC_REASON_MISSING_CHECK_CLASS,
+				["checkClass" => $checkClass],
+				"Missing check class: {checkClass}"
+			);
+		}
+		return $reason;
+	}
+
+	/**
 	 * Summarizes raw worker output while keeping fatal messages and stack traces readable.
 	 *
-	 * @param string $output Raw worker output text.
+	 * @param mixed $output Raw worker output text.
 	 * @return string Compact summary containing the error headline and relevant stack lines.
 	 */
-	private static function summarizeThreadOutput(string $output) : string {
+	private static function summarizeThreadOutput(mixed $output) : string {
+		if (!is_string($output)) {
+			if (is_array($output)) {
+				$encoded = json_encode($output, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR);
+				return is_string($encoded) ? (strlen($encoded) > 1200 ? substr($encoded, 0, 1200) : $encoded) : "non-string thread output";
+			}
+			if (is_bool($output) || is_numeric($output)) {
+				return (string) $output;
+			}
+			return "non-string thread output";
+		}
 		$lines = preg_split('/\R+/', trim(str_replace("\r", "\n", $output)));
 		if (!is_array($lines) || $lines === []) {
 			$fallback = trim($output);
@@ -998,6 +1136,46 @@ class CheckAsyncTask {
 			$summary .= " || " . implode(" || ", $stackLines);
 		}
 		return strlen($summary) > 1200 ? substr($summary, 0, 1200) : $summary;
+	}
+
+	/**
+	 * Builds a compact payload preview for thread diagnostics.
+	 *
+	 * @param array<string,mixed> $payload
+	 * @return string
+	 */
+	private static function summarizePayloadForLog(array $payload) : string {
+		$preview = [
+			"_checkClass" => is_string($payload["_checkClass"] ?? null) ? $payload["_checkClass"] : null,
+			"_sequence" => $payload["_sequence"] ?? null,
+			"_type" => is_string($payload["_type"] ?? null) ? $payload["_type"] : null,
+			"captureTime" => $payload["captureTime"] ?? null,
+			"keys" => array_slice(array_keys($payload), 0, 16),
+		];
+		$encoded = json_encode($preview, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR);
+		if (!is_string($encoded)) {
+			return "payload-preview-unavailable";
+		}
+		return strlen($encoded) > 1200 ? substr($encoded, 0, 1200) : $encoded;
+	}
+
+	/**
+	 * Emits a structured thread pipeline event into thread.log.
+	 *
+	 * @param string $event
+	 * @param array<string,mixed> $context
+	 */
+	private static function logThreadEvent(string $event, array $context = []) : void {
+		$record = [
+			"event" => $event,
+			"time" => microtime(true),
+			"context" => $context,
+		];
+		$encoded = json_encode($record, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR);
+		if (!is_string($encoded)) {
+			return;
+		}
+		AuditLogger::thread($encoded);
 	}
 
 	/**
@@ -1299,6 +1477,31 @@ class CheckAsyncTask {
 	}
 
 	/**
+	 * Stops accepting async work and clears all pending/in-flight payloads.
+	 */
+	public static function shutdown() : void {
+		if (self::$shuttingDown) {
+			return;
+		}
+		self::$shuttingDown = true;
+		$pending = self::pendingQueueSize();
+		$inFlight = self::$inFlight;
+		self::$queue = [];
+		self::$queueHead = 0;
+		self::$pendingTaskIndexesByKey = [];
+		self::$activeTasks = [];
+		self::$activeBatches = [];
+		self::$threadBatchPayloads = [];
+		self::$inFlight = 0;
+		self::$degradedUntil = 0.0;
+		self::syncSharedBatchPayloads();
+		self::logWarning(Lang::get(LangKeys::DEBUG_ASYNC_SHUTDOWN, [
+			"pending" => (string) $pending,
+			"inFlight" => (string) $inFlight,
+		], "{prefix} Async shutdown: dropped pending={pending}, cancelled inFlight={inFlight}"));
+	}
+
+	/**
 	 * Builds a deterministic task identifier for queue/active maps.
 	 *
 	 * @param string $checkClass Check class name.
@@ -1378,6 +1581,7 @@ class CheckAsyncTask {
 		self::$totalThreadRetries = 0;
 		self::$maxAllowedSequenceLag = 4;
 		self::$maxAllowedResultAgeSeconds = 0.75;
+		self::$shuttingDown = false;
 		self::$lastDispatchAt = 0.0;
 		self::$lastCompleteAt = 0.0;
 		self::$lastHealthCheckAt = 0.0;
@@ -1508,12 +1712,15 @@ class CheckAsyncTask {
 				$check->failed($playerAPI);
 			} catch (Throwable $throwable) {
 				self::$totalFallbackErrors++;
-				self::logWarning(
-					"Async failed() merge exception in "
-					. $check->getName() . ":" . $check->getSubType()
-					. " for " . $playerAPI->getPlayer()->getName()
-					. ": " . $throwable->getMessage()
-				);
+				self::logWarning(Lang::get(
+					LangKeys::DEBUG_ASYNC_FAILED_MERGE_EXCEPTION,
+					[
+						"check" => $check->getName() . ":" . $check->getSubType(),
+						"player" => $playerAPI->getPlayer()->getName(),
+						"error" => $throwable->getMessage(),
+					],
+					"Async failed() merge exception in {check} for {player}: {error}"
+				));
 			}
 		}
 	}

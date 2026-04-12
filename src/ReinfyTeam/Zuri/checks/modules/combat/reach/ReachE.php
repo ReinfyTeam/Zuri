@@ -40,10 +40,10 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
-use ReinfyTeam\Zuri\utils\MathUtil;
 use function is_numeric;
 use function max;
 use function min;
+use function sqrt;
 
 /**
  * Detects edge-hit reach abuse using victim bounding box proximity checks.
@@ -182,7 +182,7 @@ class ReachE extends Check {
 		$closestY = max($victimMinY, min($eyeY, $victimMaxY));
 		$closestZ = max($victimMinZ, min($eyeZ, $victimMaxZ));
 
-		$distance = MathUtil::distanceFromComponents(
+		$distance = self::distanceFromComponents(
 			$eyeX,
 			$eyeY,
 			$eyeZ,
@@ -205,6 +205,10 @@ class ReachE extends Check {
 		}
 
 		return $result;
+	}
+
+	private static function distanceFromComponents(float $fromX, float $fromY, float $fromZ, float $toX, float $toY, float $toZ) : float {
+		return sqrt((($toX - $fromX) ** 2) + (($toY - $fromY) ** 2) + (($toZ - $fromZ) ** 2));
 	}
 
 	/**

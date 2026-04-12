@@ -75,6 +75,7 @@ class KillAuraD extends Check {
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		$player = $playerAPI->getPlayer();
 		if ($packet instanceof AnimatePacket) {
+			$action = $packet->action;
 			$this->dispatchAsyncCheck($player->getName(), [
 				"checkName" => $this->getName(),
 				"checkSubType" => $this->getSubType(),
@@ -83,7 +84,7 @@ class KillAuraD extends Check {
 				"attackTicks" => $playerAPI->getAttackTicks(),
 				"survival" => $player->isSurvival(),
 				"recentlyCancelled" => $playerAPI->isRecentlyCancelledEvent(),
-				"action" => $packet->action,
+				"isSwingArm" => $action === AnimatePacket::ACTION_SWING_ARM,
 			]);
 		}
 	}
@@ -95,12 +96,10 @@ class KillAuraD extends Check {
 	 * @return array<string,mixed> Async decision data.
 	 */
 	public static function evaluateAsync(array $payload) : array {
-		$check = new self();
-		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
+		if (($payload["checkName"] ?? null) !== "KillAura" || ($payload["checkSubType"] ?? null) !== "D") {
 			return [];
 		}
 
-		$actionRaw = $payload["action"] ?? -1;
 		$placingTicksRaw = $payload["placingTicks"] ?? 0;
 		$attackTicksRaw = $payload["attackTicks"] ?? 0;
 		$survivalRaw = $payload["survival"];
@@ -115,11 +114,11 @@ class KillAuraD extends Check {
 
 			return $default;
 		};
-		$action = $toInt($actionRaw, -1);
 		$placingTicks = $toInt($placingTicksRaw);
 		$attackTicks = $toInt($attackTicksRaw);
 		$survival = (bool) $survivalRaw;
 		$isDigging = (bool) ($payload["isDigging"] ?? false);
+		$isSwingArm = (bool) ($payload["isSwingArm"] ?? false);
 
 		if (
 			$isDigging ||
@@ -132,7 +131,7 @@ class KillAuraD extends Check {
 		}
 
 		$debug = "isDigging=false, placingTicks={$placingTicks}, attackTicks={$attackTicks}, isSurvival=true";
-		if ($action !== AnimatePacket::ACTION_SWING_ARM && $attackTicks > 40) {
+		if (!$isSwingArm && $attackTicks > 40) {
 			return ["failed" => true, "debug" => $debug];
 		}
 

@@ -41,6 +41,7 @@ use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\task\CheckAsyncTask;
 use ReinfyTeam\Zuri\ZuriAC;
 use Throwable;
+use function array_merge;
 use function array_slice;
 use function count;
 use function date;
@@ -93,6 +94,9 @@ final class AuditLogger {
 	private static string $lastHash = "genesis";
 	private static bool $booted = false;
 	private static float $lastCleanupAt = 0.0;
+	/** @var list<string> */
+	private static array $recentCheckDebugEntries = [];
+	private const MAX_RECENT_CHECK_DEBUG_ENTRIES = 100;
 
 	/** @param array<string,string|int|float|bool> $details */
 	/**
@@ -137,6 +141,28 @@ final class AuditLogger {
 		$details["check"] = $check;
 		$details["subType"] = $subType;
 		self::log("detection", $action, $target, $details);
+	}
+
+	/**
+	 * Stores a translated check debug line for report diagnostics.
+	 *
+	 * @param string $player Player name.
+	 * @param string $check Check name.
+	 * @param string $subType Check subtype.
+	 * @param string $details Localized debug details.
+	 */
+	public static function recordCheckDebug(string $player, string $check, string $subType, string $details) : void {
+		self::bootIfNeeded();
+		$line = self::tr("messages.debug.system.check-debug-entry", [
+			"player" => $player,
+			"check" => $check,
+			"subtype" => $subType,
+			"details" => $details,
+		], "{prefix} check-debug player={player}, check={check}, subtype={subtype}, details={details}");
+		self::$recentCheckDebugEntries[] = self::timestamp() . " " . $line;
+		if (count(self::$recentCheckDebugEntries) > self::MAX_RECENT_CHECK_DEBUG_ENTRIES) {
+			self::$recentCheckDebugEntries = array_slice(self::$recentCheckDebugEntries, -self::MAX_RECENT_CHECK_DEBUG_ENTRIES);
+		}
 	}
 
 	/**
@@ -272,12 +298,20 @@ final class AuditLogger {
 			self::tr("commands.report.content.cfg-logging", ["enable" => self::formatBool(ConfigManager::getData("zuri.logging.enable", true)), "logsFolder" => self::cfgString("zuri.logging.folders.logs", "logs"), "crashesFolder" => self::cfgString("zuri.logging.folders.crashes", "crashes"), "retentionDays" => self::cfgInt("zuri.logging.cleanup.max-age-days", 30), "deleteBeforeDate" => self::cfgString("zuri.logging.cleanup.delete-before-date", "")], "- Logging: enable={enable}, folders={logsFolder}/{crashesFolder}, retentionDays={retentionDays}, deleteBeforeDate={deleteBeforeDate}"),
 			self::tr("commands.report.content.cfg-log-channels", ["anticheat" => self::formatBool(ConfigManager::getData("zuri.logging.channels.anticheat.enable", true)), "punishment" => self::formatBool(ConfigManager::getData("zuri.logging.channels.punishment.enable", true)), "thread" => self::formatBool(ConfigManager::getData("zuri.logging.channels.thread.enable", true)), "crash" => self::formatBool(ConfigManager::getData("zuri.logging.channels.crash.enable", true)), "report" => self::formatBool(ConfigManager::getData("zuri.logging.channels.report.enable", true))], "- Log channels: anticheat={anticheat}, punishment={punishment}, thread={thread}, crash={crash}, report={report}"),
 		];
-		$recentCrashes = self::readRecentLines(
+		$crashErrorLimit = 10;
+		$recentCrashes = self::readRecentMatchingLines(
 			self::crashesPath(self::fileName("crash", "crash.log")),
-			15
+			$crashErrorLimit,
+			[
+				"error",
+				"fatal",
+				"exception",
+				"uncaught",
+				"crash",
+			]
 		);
 		$lines[] = "";
-		$lines[] = self::tr("commands.report.content.recent-crashes-header", ["count" => 15], "Recent crashes (latest {count} lines):");
+		$lines[] = self::tr("commands.report.content.recent-crashes-header", ["count" => $crashErrorLimit], "Recent crash errors (latest {count} entries):");
 		if ($recentCrashes === []) {
 			$lines[] = self::tr("commands.report.content.recent-crashes-none", [], "- none");
 		} else {
@@ -303,6 +337,40 @@ final class AuditLogger {
 		} else {
 			foreach ($recentAsyncThreadFailures as $threadLine) {
 				$lines[] = self::tr("commands.report.content.recent-async-entry", ["line" => $threadLine], "- {line}");
+			}
+		}
+		$recentBacktraces = array_merge(
+			self::readRecentMatchingLines(
+				self::crashesPath(self::fileName("crash", "crash.log")),
+				10,
+				["stack trace", "trace=", "#0", "#1", "#2", "thrown in"]
+			),
+			self::readRecentMatchingLines(
+				self::logsPath(self::fileName("thread", "thread.log")),
+				10,
+				["stack trace", "trace=", "#0", "#1", "#2", "thrown in"]
+			)
+		);
+		$recentBacktraces = array_slice($recentBacktraces, -10);
+		$lines[] = "";
+		$lines[] = self::tr("commands.report.content.section-backtrace", [], "Backtrace diagnostics");
+		$lines[] = self::tr("commands.report.content.backtrace-header", ["count" => 10], "Recent backtrace lines (latest {count} entries):");
+		if ($recentBacktraces === []) {
+			$lines[] = self::tr("commands.report.content.backtrace-none", [], "- none");
+		} else {
+			foreach ($recentBacktraces as $backtraceLine) {
+				$lines[] = self::tr("commands.report.content.backtrace-entry", ["line" => $backtraceLine], "- {line}");
+			}
+		}
+		$recentCheckDebugEntries = array_slice(self::$recentCheckDebugEntries, -10);
+		$lines[] = "";
+		$lines[] = self::tr("commands.report.content.section-debug-history", [], "Debug history");
+		$lines[] = self::tr("commands.report.content.debug-history-header", ["count" => 10], "Last player check debug entries (latest {count}):");
+		if ($recentCheckDebugEntries === []) {
+			$lines[] = self::tr("commands.report.content.debug-history-none", [], "- none");
+		} else {
+			foreach ($recentCheckDebugEntries as $debugEntry) {
+				$lines[] = self::tr("commands.report.content.debug-history-entry", ["line" => $debugEntry], "- {line}");
 			}
 		}
 		$file = self::logsPath(self::fileName("report", "report.txt"));
@@ -638,32 +706,6 @@ final class AuditLogger {
 				}
 			}
 		}
-	}
-
-	/** @return list<string> */
-	/**
-	 * Returns recent non-empty lines from a log file tail.
-	 *
-	 * @param string $filePath File path to read.
-	 * @param int $maxLines Maximum tail lines to inspect.
-	 * @return list<string>
-	 */
-	private static function readRecentLines(string $filePath, int $maxLines) : array {
-		if ($maxLines <= 0 || !file_exists($filePath) || !is_readable($filePath)) {
-			return [];
-		}
-		$rawLines = file($filePath, FILE_IGNORE_NEW_LINES);
-		if (!is_array($rawLines) || $rawLines === []) {
-			return [];
-		}
-		$tail = array_slice($rawLines, -$maxLines);
-		$result = [];
-		foreach ($tail as $line) {
-			if (is_string($line) && trim($line) !== "") {
-				$result[] = $line;
-			}
-		}
-		return $result;
 	}
 
 	/**

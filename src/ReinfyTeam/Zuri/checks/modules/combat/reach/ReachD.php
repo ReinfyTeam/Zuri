@@ -38,9 +38,9 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\checks\snapshots\CombatSnapshot;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
-use ReinfyTeam\Zuri\utils\MathUtil;
 use function is_array;
 use function is_numeric;
+use function sqrt;
 
 /**
  * Detects reach anomalies after ping and sprint compensation adjustments.
@@ -182,7 +182,7 @@ class ReachD extends Check {
 		$damagerNotSprintingDistance = is_numeric($damagerNotSprintingDistanceRaw) ? (float) $damagerNotSprintingDistanceRaw : 0.67;
 		$limit = is_numeric($limitRaw) ? (float) $limitRaw : 3.0;
 
-		$distance = MathUtil::distanceFromComponents(
+		$distance = self::distanceFromComponents(
 			$damagerEyeX,
 			$damagerEyeY,
 			$damagerEyeZ,
@@ -205,6 +205,10 @@ class ReachD extends Check {
 		}
 
 		return ["debug" => $debug];
+	}
+
+	private static function distanceFromComponents(float $fromX, float $fromY, float $fromZ, float $toX, float $toY, float $toZ) : float {
+		return sqrt((($toX - $fromX) ** 2) + (($toY - $fromY) ** 2) + (($toZ - $fromZ) ** 2));
 	}
 
 	/**

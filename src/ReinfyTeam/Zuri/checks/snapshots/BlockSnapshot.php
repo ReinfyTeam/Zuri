@@ -134,7 +134,7 @@ class BlockSnapshot extends AsyncSnapshot {
 	 * @return self Current instance for fluent chaining.
 	 */
 	public function addCachedData(string $key, mixed $value) : self {
-		$this->cachedData[$key] = $value;
+		$this->cachedData[$key] = self::sanitizeSerializableValue($value);
 		return $this;
 	}
 

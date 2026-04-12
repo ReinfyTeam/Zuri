@@ -34,7 +34,6 @@ namespace ReinfyTeam\Zuri\checks\modules\moving\speed;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\event\Event;
 use pocketmine\event\player\PlayerMoveEvent;
-use pocketmine\math\Vector3;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\checks\snapshots\MovementSnapshot;
@@ -48,6 +47,7 @@ use function is_int;
 use function is_numeric;
 use function max;
 use function round;
+use function sqrt;
 
 /**
  * Detects excessive horizontal speed using tick-based movement snapshots.
@@ -266,9 +266,13 @@ class SpeedB extends Check {
 		}
 
 		$timeDiff = $tickDiff / 20;
-		$from = new Vector3((float) ($cachedData["fromX"] ?? 0.0), (float) ($cachedData["fromY"] ?? 0.0), (float) ($cachedData["fromZ"] ?? 0.0));
-		$to = new Vector3((float) ($cachedData["toX"] ?? 0.0), (float) ($cachedData["toY"] ?? 0.0), (float) ($cachedData["toZ"] ?? 0.0));
-		$distance = round(BlockUtil::distance($from, $to), 5);
+		$fromX = (float) ($cachedData["fromX"] ?? 0.0);
+		$fromY = (float) ($cachedData["fromY"] ?? 0.0);
+		$fromZ = (float) ($cachedData["fromZ"] ?? 0.0);
+		$toX = (float) ($cachedData["toX"] ?? 0.0);
+		$toY = (float) ($cachedData["toY"] ?? 0.0);
+		$toZ = (float) ($cachedData["toZ"] ?? 0.0);
+		$distance = round(self::distanceFromComponents($fromX, $fromY, $fromZ, $toX, $toY, $toZ), 5);
 		$speed = round($distance / max($timeDiff, 0.00001), 5);
 
 		$constants = is_array($cachedData["constants"] ?? null) ? $cachedData["constants"] : [];
@@ -301,5 +305,9 @@ class SpeedB extends Check {
 		}
 
 		return ["debug" => $debug];
+	}
+
+	private static function distanceFromComponents(float $fromX, float $fromY, float $fromZ, float $toX, float $toY, float $toZ) : float {
+		return sqrt((($toX - $fromX) ** 2) + (($toY - $fromY) ** 2) + (($toZ - $fromZ) ** 2));
 	}
 }

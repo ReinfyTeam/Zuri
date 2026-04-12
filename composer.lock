@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2582a2f0b7b9abf4b27757d6f94d1df8",
+    "content-hash": "57398a120c6105ed49ac81b3a2a06045",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -1165,63 +1165,6 @@
                 "source": "https://github.com/ReinfyTeam/libpmform/tree/main"
             },
             "time": "2026-04-09T16:17:19+00:00"
-        },
-        {
-            "name": "reinfyteam/libvapm-pmmp",
-            "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ReinfyTeam/LibVapmPMMP.git",
-                "reference": "6165c419e7d30c49177075effed355a86952d28e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ReinfyTeam/LibVapmPMMP/zipball/6165c419e7d30c49177075effed355a86952d28e",
-                "reference": "6165c419e7d30c49177075effed355a86952d28e",
-                "shasum": ""
-            },
-            "require-dev": {
-                "composer-runtime-api": "^2.0",
-                "php": ">=8.2",
-                "php-64bit": "*",
-                "phpstan/phpstan": "*",
-                "pocketmine/pocketmine-mp": "^5.17.0"
-            },
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "virion": {
-                    "spec": "3.1",
-                    "namespace-root": "vennv\\vapm"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "vennv\\vapm\\": "src/vennv/vapm/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPL-2.0-only"
-            ],
-            "authors": [
-                {
-                    "name": "VennDev",
-                    "email": "1050080275@sv.hcmunre.edu.vn"
-                }
-            ],
-            "keywords": [
-                "LibVapmPMMP",
-                "Thread",
-                "asynchronous",
-                "lib-vapm-pmmp",
-                "process",
-                "vapm-pmmp"
-            ],
-            "support": {
-                "source": "https://github.com/ReinfyTeam/LibVapmPMMP/tree/main"
-            },
-            "time": "2026-04-12T01:28:47+00:00"
         },
         {
             "name": "sof3/await-generator",
@@ -3337,6 +3280,57 @@
                 }
             ],
             "time": "2024-06-11T12:45:25+00:00"
+        },
+        {
+            "name": "reinfyteam/libvapm-pmmp",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ReinfyTeam/LibVapmPMMP.git",
+                "reference": "180cfadfff6d467e81099993ac14c0dff4da9089"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ReinfyTeam/LibVapmPMMP/zipball/180cfadfff6d467e81099993ac14c0dff4da9089",
+                "reference": "180cfadfff6d467e81099993ac14c0dff4da9089",
+                "shasum": ""
+            },
+            "require-dev": {
+                "composer-runtime-api": "^2.0",
+                "php": ">=8.2",
+                "php-64bit": "*",
+                "phpstan/phpstan": "*",
+                "pocketmine/pocketmine-mp": "^5.17.0"
+            },
+            "default-branch": true,
+            "type": "project",
+            "autoload": {
+                "psr-4": {
+                    "vennv\\vapm\\": "src/vennv/vapm/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-2.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "VennDev",
+                    "email": "1050080275@sv.hcmunre.edu.vn"
+                }
+            ],
+            "keywords": [
+                "LibVapmPMMP",
+                "Thread",
+                "asynchronous",
+                "lib-vapm-pmmp",
+                "process",
+                "vapm-pmmp"
+            ],
+            "support": {
+                "source": "https://github.com/ReinfyTeam/LibVapmPMMP/tree/main"
+            },
+            "time": "2026-04-12T03:22:27+00:00"
         },
         {
             "name": "sebastian/diff",

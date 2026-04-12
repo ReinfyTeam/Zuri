@@ -87,7 +87,8 @@ class ChatSnapshot extends AsyncSnapshot {
 
 		// Capture recent message history (last 10)
 		$recentMessages = $playerAPI->getExternalData("chat_history") ?? [];
-		$this->recentMessages = is_array($recentMessages) ? $recentMessages : [];
+		$sanitizedRecentMessages = is_array($recentMessages) ? self::sanitizeSerializableValue($recentMessages) : [];
+		$this->recentMessages = is_array($sanitizedRecentMessages) ? $sanitizedRecentMessages : [];
 	}
 
 	/**
@@ -98,7 +99,7 @@ class ChatSnapshot extends AsyncSnapshot {
 	 * @return self Current instance for fluent chaining.
 	 */
 	public function addCachedData(string $key, mixed $value) : self {
-		$this->cachedData[$key] = $value;
+		$this->cachedData[$key] = self::sanitizeSerializableValue($value);
 		return $this;
 	}
 

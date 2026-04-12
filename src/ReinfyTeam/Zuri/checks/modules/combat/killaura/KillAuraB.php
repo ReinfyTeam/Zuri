@@ -98,8 +98,7 @@ class KillAuraB extends Check {
 	 * @return array<string,mixed> Async decision data.
 	 */
 	public static function evaluateAsync(array $payload) : array {
-		$check = new self();
-		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
+		if (($payload["checkName"] ?? null) !== "KillAura" || ($payload["checkSubType"] ?? null) !== "B") {
 			return [];
 		}
 

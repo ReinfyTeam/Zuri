@@ -41,6 +41,7 @@ use ReinfyTeam\Zuri\events\api\CheckFailedEvent;
 use ReinfyTeam\Zuri\events\BanEvent;
 use ReinfyTeam\Zuri\events\KickEvent;
 use ReinfyTeam\Zuri\events\ServerLagEvent;
+use ReinfyTeam\Zuri\checks\snapshots\AsyncSnapshot;
 use ReinfyTeam\Zuri\lang\Lang;
 use ReinfyTeam\Zuri\lang\LangKeys;
 use ReinfyTeam\Zuri\player\PlayerAPI;
@@ -51,6 +52,8 @@ use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use ReinfyTeam\Zuri\utils\HotPathProfiler;
 use ReinfyTeam\Zuri\utils\ReplaceText;
 use ReinfyTeam\Zuri\ZuriAC;
+use function array_keys;
+use function array_slice;
 use function ceil;
 use function count;
 use function explode;
@@ -183,12 +186,14 @@ abstract class Check extends ConfigManager {
 			return;
 		}
 
+		$payload = AsyncSnapshot::sanitizeSerializablePayload($payload);
+
 		CheckAsyncTask::configure(
-			self::toInt(self::getData("zuri.async.max-concurrent-workers", 4), 4),
-			self::toInt(self::getData("zuri.async.max-queue-size", 2048), 2048),
+			self::toInt(self::getData("zuri.async.max-concurrent-workers", 8), 8),
+			self::toInt(self::getData("zuri.async.max-queue-size", 128), 128),
 			self::toFloat(self::getData("zuri.async.worker-timeout-seconds", 3.0), 3.0),
 			self::toFloat(self::getData("zuri.async.degraded-cooldown-seconds", 6.0), 6.0),
-			self::toInt(self::getData("zuri.async.batch-size", 64), 64),
+			self::toInt(self::getData("zuri.async.batch-size", 128), 128),
 			self::toFloat(self::getData("zuri.async.worker-target-ms", 20.0), 20.0)
 		);
 
@@ -227,6 +232,16 @@ abstract class Check extends ConfigManager {
 		$sequence = $playerAPI->nextAsyncSequence(static::class);
 		$payload["_sequence"] = $sequence;
 		$payload["_checkClass"] = static::class;
+		if ($playerAPI->isDebug()) {
+			$this->debug(
+				$playerAPI,
+				Lang::get(LangKeys::DEBUG_ASYNC_DISPATCH_PREVIEW, [
+					"check" => static::class,
+					"sequence" => (string) $sequence,
+					"keys" => implode(",", array_slice(array_keys($payload), 0, 20)),
+				], "Async dispatch snapshot: check={check}, sequence={sequence}, payloadKeys={keys}")
+			);
+		}
 
 		self::$asyncThrottle[$key] = $now + $minInterval;
 		CheckAsyncTask::dispatch(static::class, $playerName, $payload, $sequence);
@@ -774,6 +789,12 @@ abstract class Check extends ConfigManager {
 		if (self::getData(self::DEBUG_ENABLE)) {
 			if ($playerAPI->isDebug()) {
 				$localizedText = $this->localizeDebugText($text);
+				AuditLogger::recordCheckDebug(
+					$playerAPI->getPlayer()->getName(),
+					$this->getName(),
+					$this->getSubType(),
+					$localizedText
+				);
 				$player->sendMessage(Lang::get("messages.debug.output.self", [
 					"check" => $this->getName(),
 					"subtype" => $this->getSubType(),

@@ -6,12 +6,12 @@
         "paroxity/commando": "dev-master",
         "reinfyteam/discordwebhookapi": "dev-master",
         "reinfyteam/libpmform": "dev-main",
-        "reinfyteam/libvapm-pmmp": "dev-main",
         "muqsit/simple-packet-handler": "0.1.5",
         "sof3/infoapi": "^2.0.0-beta.1"
     },
     "require-dev": {
         "php": ">=8.2",
+		"reinfyteam/libvapm-pmmp": "dev-main",
         "pocketmine/pocketmine-mp": "^5.42.1",
         "phpstan/phpstan": "^1.2",
         "sof3/pharynx": "^0.3.8",

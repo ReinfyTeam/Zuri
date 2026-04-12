@@ -36,8 +36,8 @@ use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
-use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
+use function fmod;
 use function is_numeric;
 use function round;
 
@@ -103,8 +103,7 @@ class AimAssistB extends Check {
 	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
-		$check = new self();
-		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
+		if (($payload["checkName"] ?? null) !== "AimAssist" || ($payload["checkSubType"] ?? null) !== "B") {
 			return [];
 		}
 
@@ -112,7 +111,7 @@ class AimAssistB extends Check {
 		$fromYawRaw = $payload["fromYaw"] ?? 0.0;
 		$toYaw = is_numeric($toYawRaw) ? (float) $toYawRaw : 0.0;
 		$fromYaw = is_numeric($fromYawRaw) ? (float) $fromYawRaw : 0.0;
-		$yawDiff = MathUtil::angleDiff($fromYaw, $toYaw);
+		$yawDiff = self::angleDiff($fromYaw, $toYaw);
 		if ($yawDiff >= 1.0 && self::isQuantizedStep($yawDiff)) {
 			if (self::isApproxMultiple($yawDiff, 1.0) || self::isApproxMultiple($yawDiff, 10.0) || self::isApproxMultiple($yawDiff, 30.0)) {
 				return ["failed" => true, "debug" => "toYaw={$toYaw}, fromYaw={$fromYaw}, yawDiff={$yawDiff}"];
@@ -150,5 +149,21 @@ class AimAssistB extends Check {
 	 */
 	private static function isQuantizedStep(float $value) : bool {
 		return self::isApproxMultiple($value, 0.1);
+	}
+
+	private static function angleDiff(float $from, float $to) : float {
+		return abs(self::wrapAngleTo180($to - $from));
+	}
+
+	private static function wrapAngleTo180(float $angle) : float {
+		$wrapped = fmod($angle, 360.0);
+		if ($wrapped >= 180.0) {
+			$wrapped -= 360.0;
+		}
+		if ($wrapped < -180.0) {
+			$wrapped += 360.0;
+		}
+
+		return $wrapped;
 	}
 }

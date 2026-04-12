@@ -37,7 +37,10 @@ use ReinfyTeam\Zuri\lang\LangKeys;
 use function array_key_exists;
 use function gettype;
 use function implode;
+use function is_array;
+use function is_null;
 use function is_numeric;
+use function is_scalar;
 use function is_string;
 use function microtime;
 
@@ -267,5 +270,52 @@ abstract class AsyncSnapshot implements JsonSerializable {
 		} catch (SnapshotException) {
 			return false;
 		}
+	}
+
+	/**
+	 * Sanitizes a value for thread-safe payload transport.
+	 *
+	 * Keeps only scalar/null values and recursively sanitized arrays.
+	 * Any object/resource/unsupported value is replaced with null.
+	 *
+	 * @param mixed $value
+	 * @param int $depth
+	 * @return mixed
+	 */
+	public static function sanitizeSerializableValue(mixed $value, int $depth = 0) : mixed {
+		if ($depth > 16) {
+			return null;
+		}
+
+		if (is_null($value) || is_scalar($value)) {
+			return $value;
+		}
+
+		if (is_array($value)) {
+			$sanitized = [];
+			foreach ($value as $key => $nestedValue) {
+				$sanitized[$key] = self::sanitizeSerializableValue($nestedValue, $depth + 1);
+			}
+			return $sanitized;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Sanitizes a payload array for thread-safe transport.
+	 *
+	 * @param array<string,mixed> $payload
+	 * @return array<string,mixed>
+	 */
+	public static function sanitizeSerializablePayload(array $payload) : array {
+		$sanitized = [];
+		foreach ($payload as $key => $value) {
+			if (!is_string($key)) {
+				continue;
+			}
+			$sanitized[$key] = self::sanitizeSerializableValue($value);
+		}
+		return $sanitized;
 	}
 }

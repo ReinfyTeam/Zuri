@@ -39,7 +39,6 @@ use ReinfyTeam\Zuri\checks\Check;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\discord\DiscordWebhookException;
 use function in_array;
-use function is_numeric;
 
 /**
  * Detects invalid block interaction faces linked to aura behavior.
@@ -81,11 +80,13 @@ class KillAuraA extends Check {
 	 */
 	public function check(DataPacket $packet, PlayerAPI $playerAPI) : void {
 		if ($packet instanceof PlayerActionPacket) {
+			$action = $packet->action;
+			$face = $packet->face;
 			$this->dispatchAsyncCheck($playerAPI->getPlayer()->getName(), [
 				"checkName" => $this->getName(),
 				"checkSubType" => $this->getSubType(),
-				"action" => $packet->action,
-				"face" => $packet->face,
+				"isBlockAction" => in_array($action, [PlayerAction::START_BREAK, PlayerAction::ABORT_BREAK, PlayerAction::CONTINUE_DESTROY_BLOCK, PlayerAction::INTERACT_BLOCK], true),
+				"isInvalidFace" => in_array($face, [Facing::UP, Facing::DOWN, Facing::EAST, Facing::NORTH], true),
 			]);
 		}
 	}
@@ -97,24 +98,14 @@ class KillAuraA extends Check {
 	 * @return array<string,mixed> Async decision data.
 	 */
 	public static function evaluateAsync(array $payload) : array {
-		$check = new self();
-		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
+		if (($payload["checkName"] ?? null) !== "KillAura" || ($payload["checkSubType"] ?? null) !== "A") {
 			return [];
 		}
 
-		$actionRaw = $payload["action"] ?? -1;
-		$faceRaw = $payload["face"] ?? -1;
-		$action = is_numeric($actionRaw) ? (int) $actionRaw : -1;
-		$face = is_numeric($faceRaw) ? (int) $faceRaw : -1;
-
-		if (in_array($action, [PlayerAction::START_BREAK, PlayerAction::ABORT_BREAK, PlayerAction::CONTINUE_DESTROY_BLOCK, PlayerAction::INTERACT_BLOCK], true)) {
-			switch ($face) {
-				case Facing::UP:
-				case Facing::DOWN:
-				case Facing::EAST:
-				case Facing::NORTH:
-					return ["failed" => true];
-			}
+		$isBlockAction = (bool) ($payload["isBlockAction"] ?? false);
+		$isInvalidFace = (bool) ($payload["isInvalidFace"] ?? false);
+		if ($isBlockAction && $isInvalidFace) {
+			return ["failed" => true];
 		}
 
 		return [];

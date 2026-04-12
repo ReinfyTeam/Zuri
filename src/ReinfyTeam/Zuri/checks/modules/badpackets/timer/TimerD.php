@@ -103,8 +103,7 @@ class TimerD extends Check {
 	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
-		$check = new self();
-		if (($payload["checkName"] ?? null) !== $check->getName() || ($payload["checkSubType"] ?? null) !== $check->getSubType()) {
+		if (($payload["checkName"] ?? null) !== "Timer" || ($payload["checkSubType"] ?? null) !== "D") {
 			return [];
 		}
 

@@ -76,14 +76,14 @@ zuri:
         default-min-interval: 0.02
         # Max number of in-flight async workers for check evaluation.
         # Recommended: 4-8 for high player counts.
-        max-concurrent-workers: 4
+        max-concurrent-workers: 8
         # Number of queued checks evaluated together by one worker execution.
         # Recommended: 64-128 when queue spikes above ~1000.
-        batch-size: 64
+        batch-size: 128
         # Soft worker processing budget in milliseconds. Lower values favor responsiveness.
         worker-target-ms: 20.0
         # Max queued async payloads before new payloads are dropped.
-        max-queue-size: 2048
+        max-queue-size: 128
         # If a worker appears stuck longer than this, recover its slot and retry once.
         worker-timeout-seconds: 3.0
         # Duration to stay in sync-safe fallback mode after async degradation.

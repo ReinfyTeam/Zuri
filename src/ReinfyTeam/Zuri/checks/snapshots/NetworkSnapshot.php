@@ -98,7 +98,7 @@ class NetworkSnapshot extends AsyncSnapshot {
 	 * @return self Current instance for fluent chaining.
 	 */
 	public function addPacketData(string $key, mixed $value) : self {
-		$this->packetData[$key] = $value;
+		$this->packetData[$key] = self::sanitizeSerializableValue($value);
 		return $this;
 	}
 
@@ -110,7 +110,7 @@ class NetworkSnapshot extends AsyncSnapshot {
 	 * @return self Current instance for fluent chaining.
 	 */
 	public function addCachedData(string $key, mixed $value) : self {
-		$this->cachedData[$key] = $value;
+		$this->cachedData[$key] = self::sanitizeSerializableValue($value);
 		return $this;
 	}
 

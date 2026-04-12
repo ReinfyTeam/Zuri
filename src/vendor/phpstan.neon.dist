@@ -1,7 +1,0 @@
-parameters:
-   level: 9
-   paths:
-      - src\vennv
-   treatPhpDocTypesAsCertain: false
-   ignoreErrors:
-        - identifier: missingType.generics

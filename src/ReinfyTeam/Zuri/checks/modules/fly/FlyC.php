@@ -97,6 +97,34 @@ class FlyC extends Check {
 			$snapshot->addCachedData("maxAirTicks", is_numeric($maxAirTicksRaw) ? (int) $maxAirTicksRaw : 0);
 			$snapshot->addCachedData("maxY", $player->getWorld()->getHighestBlockAt((int) $newPos->getX(), (int) $newPos->getZ()));
 			$snapshot->addCachedData("surroundingBlocks", BlockUtil::getSurroundingBlocks($player));
+			$snapshot->addCachedData("ignoredCollisionBlockIds", [
+				BlockTypeIds::OAK_FENCE,
+				BlockTypeIds::COBBLESTONE_WALL,
+				BlockTypeIds::ACACIA_FENCE,
+				BlockTypeIds::BIRCH_FENCE,
+				BlockTypeIds::DARK_OAK_FENCE,
+				BlockTypeIds::JUNGLE_FENCE,
+				BlockTypeIds::NETHER_BRICK_FENCE,
+				BlockTypeIds::SPRUCE_FENCE,
+				BlockTypeIds::WARPED_FENCE,
+				BlockTypeIds::MANGROVE_FENCE,
+				BlockTypeIds::CRIMSON_FENCE,
+				BlockTypeIds::CHERRY_FENCE,
+				BlockTypeIds::ACACIA_FENCE_GATE,
+				BlockTypeIds::OAK_FENCE_GATE,
+				BlockTypeIds::BIRCH_FENCE_GATE,
+				BlockTypeIds::DARK_OAK_FENCE_GATE,
+				BlockTypeIds::JUNGLE_FENCE_GATE,
+				BlockTypeIds::SPRUCE_FENCE_GATE,
+				BlockTypeIds::WARPED_FENCE_GATE,
+				BlockTypeIds::MANGROVE_FENCE_GATE,
+				BlockTypeIds::CRIMSON_FENCE_GATE,
+				BlockTypeIds::CHERRY_FENCE_GATE,
+				BlockTypeIds::GLASS_PANE,
+				BlockTypeIds::HARDENED_GLASS_PANE,
+				BlockTypeIds::STAINED_GLASS_PANE,
+				BlockTypeIds::STAINED_HARDENED_GLASS_PANE,
+			]);
 
 			$snapshot->validate();
 
@@ -160,39 +188,13 @@ class FlyC extends Check {
 				$maxAirTicks = is_numeric($maxAirTicksRaw) ? (int) $maxAirTicksRaw : 0;
 				if ($inAirTicks > $maxAirTicks) {
 					$surroundingBlocks = $cachedData["surroundingBlocks"] ?? [];
+					$ignoredCollisionBlockIds = is_array($cachedData["ignoredCollisionBlockIds"] ?? null) ? $cachedData["ignoredCollisionBlockIds"] : [];
 					$maxYRaw = $cachedData["maxY"] ?? 0;
 					$maxY = is_numeric($maxYRaw) ? (int) $maxYRaw : 0;
 					$newYRaw = $cachedData["newY"] ?? 0;
 					$newY = is_numeric($newYRaw) ? (float) $newYRaw : 0.0;
 					if ($newY - 1 > $maxY) {
-						if (!is_array($surroundingBlocks) || count(array_intersect($surroundingBlocks, [
-							BlockTypeIds::OAK_FENCE,
-							BlockTypeIds::COBBLESTONE_WALL,
-							BlockTypeIds::ACACIA_FENCE,
-							BlockTypeIds::BIRCH_FENCE,
-							BlockTypeIds::DARK_OAK_FENCE,
-							BlockTypeIds::JUNGLE_FENCE,
-							BlockTypeIds::NETHER_BRICK_FENCE,
-							BlockTypeIds::SPRUCE_FENCE,
-							BlockTypeIds::WARPED_FENCE,
-							BlockTypeIds::MANGROVE_FENCE,
-							BlockTypeIds::CRIMSON_FENCE,
-							BlockTypeIds::CHERRY_FENCE,
-							BlockTypeIds::ACACIA_FENCE_GATE,
-							BlockTypeIds::OAK_FENCE_GATE,
-							BlockTypeIds::BIRCH_FENCE_GATE,
-							BlockTypeIds::DARK_OAK_FENCE_GATE,
-							BlockTypeIds::JUNGLE_FENCE_GATE,
-							BlockTypeIds::SPRUCE_FENCE_GATE,
-							BlockTypeIds::WARPED_FENCE_GATE,
-							BlockTypeIds::MANGROVE_FENCE_GATE,
-							BlockTypeIds::CRIMSON_FENCE_GATE,
-							BlockTypeIds::CHERRY_FENCE_GATE,
-							BlockTypeIds::GLASS_PANE,
-							BlockTypeIds::HARDENED_GLASS_PANE,
-							BlockTypeIds::STAINED_GLASS_PANE,
-							BlockTypeIds::STAINED_HARDENED_GLASS_PANE
-						])) === 0) {
+						if (!is_array($surroundingBlocks) || count(array_intersect($surroundingBlocks, $ignoredCollisionBlockIds)) === 0) {
 							return ["failed" => true];
 						}
 					}

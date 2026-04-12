@@ -32,7 +32,6 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\checks\modules\moving\speed;
 
 use pocketmine\math\Facing;
-use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
@@ -42,10 +41,12 @@ use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
 use ReinfyTeam\Zuri\utils\BlockUtil;
-use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
 use function is_array;
 use function is_numeric;
+use function max;
+use function min;
+use function sqrt;
 
 /**
  * Detects anomalous horizontal acceleration from auth input movement.
@@ -192,8 +193,6 @@ class SpeedA extends Check {
 		$fromZ = is_numeric($fromZRaw) ? (float) $fromZRaw : 0.0;
 		$toX = is_numeric($toXRaw) ? (float) $toXRaw : 0.0;
 		$toZ = is_numeric($toZRaw) ? (float) $toZRaw : 0.0;
-		$previous = new Vector3($fromX, 0, $fromZ);
-		$next = new Vector3($toX, 0, $toZ);
 		$constants = is_array($cachedData["constants"] ?? null) ? $cachedData["constants"] : [];
 		$speedLevelRaw = $constants["speedLevel"] ?? 0;
 		$speedLevel = is_numeric($speedLevelRaw) ? (int) $speedLevelRaw : 0;
@@ -201,10 +200,10 @@ class SpeedA extends Check {
 		$slownessLevel = is_numeric($slownessLevelRaw) ? (int) $slownessLevelRaw : 0;
 		$friction = (float) ($cachedData["friction"] ?? 0.91);
 		$lastDistance = (float) ($cachedData[CacheData::SPEED_A_LAST_DISTANCE_XZ] ?? ($constants["xz-distance"] ?? 0));
-		$momentum = MathUtil::getMomentum($lastDistance, $friction);
-		$movement = MathUtil::getMovementSnapshot((bool) ($cachedData["sprinting"] ?? false), (bool) ($cachedData["sneaking"] ?? false), (bool) ($cachedData["usingItem"] ?? false), (int) ($cachedData["swiftSneakLevel"] ?? 0));
-		$effects = MathUtil::getEffectsMultiplierSnapshot($speedLevel, $slownessLevel);
-		$acceleration = MathUtil::getAcceleration($movement, $effects, $friction, (bool) ($payload["onGround"] ?? false));
+		$momentum = self::getMomentum($lastDistance, $friction);
+		$movement = self::getMovementSnapshot((bool) ($cachedData["sprinting"] ?? false), (bool) ($cachedData["sneaking"] ?? false), (bool) ($cachedData["usingItem"] ?? false), (int) ($cachedData["swiftSneakLevel"] ?? 0));
+		$effects = self::getEffectsMultiplierSnapshot($speedLevel, $slownessLevel);
+		$acceleration = self::getAcceleration($movement, $effects, $friction, (bool) ($payload["onGround"] ?? false));
 		$expected = $momentum + $acceleration;
 		$expected += ((int) ($cachedData["jumpTicks"] ?? 0) < 5 && (bool) ($cachedData["blockAboveSolid"] ?? false)) ? (float) ($constants["jump-factor"] ?? 0) : 0;
 		$expected += (bool) ($payload["onGround"] ?? false) ? (float) ($constants["ground-factor"] ?? 0) : 0;
@@ -219,7 +218,7 @@ class SpeedA extends Check {
 			$expected += $knockback;
 		}
 		$expected += ((float) ($cachedData["lastMoveTick"] ?? 0) < 5) ? (float) ($constants["lastmove-factor"] ?? 0) : 0;
-		$dist = $previous->distance($next);
+		$dist = self::distanceFromComponents($fromX, 0.0, $fromZ, $toX, 0.0, $toZ);
 		$distDiff = abs($dist - $expected);
 		$result = ["set" => [CacheData::SPEED_A_LAST_DISTANCE_XZ => $dist]];
 		if ($dist > $expected && $distDiff > (float) ($cachedData["threshold"] ?? 0.0)) {
@@ -227,5 +226,38 @@ class SpeedA extends Check {
 			$result["debug"] = "expected={$expected}, distance={$distDiff}";
 		}
 		return $result;
+	}
+
+	private static function getMovementSnapshot(bool $sprinting, bool $sneaking, bool $usingItem, int $swiftSneakLevel) : float {
+		$movement = 1.0;
+		if ($sprinting) {
+			$movement = 1.3;
+		}
+		if ($sneaking) {
+			$movement = max(0.3, min(1.0, 0.3 + (0.15 * $swiftSneakLevel)));
+		}
+		if ($usingItem) {
+			$movement = 0.2;
+		}
+		return $movement;
+	}
+
+	private static function getEffectsMultiplierSnapshot(int $speedLevel, int $slownessLevel) : float {
+		return (1 + 0.2 * $speedLevel) * (1 - 0.15 * $slownessLevel);
+	}
+
+	private static function getMomentum(float $lastDistance, float $friction) : float {
+		return $lastDistance * $friction * 0.91;
+	}
+
+	private static function getAcceleration(float $movement, float $effectMultiplier, float $friction, bool $onGround) : float {
+		if (!$onGround) {
+			return 0.02 * $movement;
+		}
+		return 0.1 * $movement * $effectMultiplier * ((0.6 / $friction) ** 3);
+	}
+
+	private static function distanceFromComponents(float $fromX, float $fromY, float $fromZ, float $toX, float $toY, float $toZ) : float {
+		return sqrt((($toX - $fromX) ** 2) + (($toY - $fromY) ** 2) + (($toZ - $fromZ) ** 2));
 	}
 }
