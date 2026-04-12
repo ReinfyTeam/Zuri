@@ -1,0 +1,44 @@
+{
+    "name": "reinfyteam/libvapm-pmmp",
+    "keywords": ["vapm-pmmp", "asynchronous", "LibVapmPMMP", "lib-vapm-pmmp", "process", "thread"],
+    "license": "LGPL-2.0-only",
+    "type": "library",
+    "version": "2.5.6",
+    "autoload": {
+        "psr-4": {
+            "vennv\\vapm\\": "src/vennv/vapm/"
+        }
+    },
+    "authors": [
+        {
+            "name": "VennDev",
+            "email": "1050080275@sv.hcmunre.edu.vn"
+        }
+    ],
+    "config": {
+    	"allow-plugins": {
+    		"phpstan/extension-installer": true
+    	}
+    },
+    "require-dev": {
+        "php-64bit": "*",
+    	"composer-runtime-api": "^2.0",
+        "pocketmine/pocketmine-mp": "^5.17.0",
+        "php": ">=8.2",
+        "phpstan/phpstan": "*"
+    },
+    "scripts": {
+        "analyse-src": "./vendor/bin/phpstan analyse -c phpstan.neon.dist",
+        "analyse-scheduler": "./vendor/bin/phpstan analyse -c phpstan.scheduler.neon",
+        "compat-api5": "php tests/compat/pmmp_api5_compat.php",
+        "benchmark-queue": "php tests/benchmark/stress_queue.php 5000",
+        "benchmark-mixed": "php tests/benchmark/mixed_scheduler.php 2000 500 500",
+        "benchmark-compare": "@benchmark-queue && @benchmark-mixed"
+    },
+    "extra": {
+        "virion": {
+            "spec": "3.1",
+            "namespace-root": "vennv\\vapm"
+        }
+    }
+}
