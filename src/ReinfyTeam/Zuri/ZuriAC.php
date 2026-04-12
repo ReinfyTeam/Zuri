@@ -261,7 +261,9 @@ class ZuriAC extends PluginBase {
 	 * Stops async pipeline and writes a translated shutdown audit entry.
 	 */
 	protected function onDisable() : void {
-		CheckAsyncTask::shutdown();
+		if (class_exists(VapmPMMP::class)) {
+			CheckAsyncTask::shutdown();
+		}
 		AuditLogger::anticheat(Lang::get(LangKeys::STARTUP_PLUGIN_DISABLED_AUDIT));
 	}
 
