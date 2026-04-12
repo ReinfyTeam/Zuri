@@ -46,22 +46,22 @@ Also, adding :star: a **Star** is also appreciated. ✨
 - 💥 You can manage plugin at the in-game using **Interactive UI** by using command! `/zuri ui`
    - The UI is meant for quick inspection and administrative control without requiring the console.
 
-If you want to create your own module, see [`TUTORIAL.md`](TUTORIAL.md).
+If you want to create your own module or create contributions, we are open always. Please see [`Plugin Wiki`](https://github.com/ReinfyTeam/Zuri/wiki) on how Zuri anticheat works.
 
 # Forks / Dependencies
 Here are the **dependencies** were used in the plugin:
 
-- [FormAPI Fix](https://github.com/DavyCraft648/FormAPI-PM)
-- [Modified DiscordWebhookAPI](https://github.com/CortexPE/DiscordWebhookAPI/)
-- [AntiInstabreak by PMMP](https://github.com/pmmp/AntiInstabreak) (**Instabreak (A)**)
-- [Commando by Paroxity & CortexPE](https://github.com/Paroxity/Commando)
-- [LibVapmPMMP](https://github.com/VennDev/LibVapmPMMP)
+- [Updated libpmform](https://github.com/ReinfyTeam/libpmform) for newest updated PocketMine-MP.
+- [Updated DiscordWebhookAPI](https://github.com/ReinfyTeam/DiscordWebhookAPI/) for sending discord webhooks.
+- [AntiInstabreak by PMMP](https://github.com/pmmp/AntiInstabreak) (for **Instabreak (A)**)
+- [Commando by Paroxity & CortexPE](https://github.com/Paroxity/Commando) for commands and sub commands
+- [LibVapmPMMP Modified for Zuri](https://github.com/ReinfyTeam/LibVapmPMMP) for async thread library.
 - [InfoAPI](https://github.com/SOF3/InfoAPI) for API placeholders used languages for server developers.
 
 Some are for fixes and some are modified for compability.
 These libraries cover the parts that are outside the anticheat core itself, such as forms, webhook delivery, and specific block-break detection support. 
 
-Async handling now also uses [LibVapmPMMP](https://github.com/VennDev/LibVapmPMMP) as the thread/coroutine backend for heavier check evaluation, which keeps more expensive checks away from the normal event path.
+Async handling now also uses [LibVapmPMMP](https://github.com/ReinfyTeam/LibVapmPMMP) as the thread/coroutine backend for heavier check evaluation, which keeps more expensive checks away from the normal event path.
 The async pipeline now also tracks thread-promise failures and malformed thread results with automatic one-time retries before sync fallback.
 
 # Current Modules
@@ -209,7 +209,7 @@ Every module below is grouped by the type of behavior it watches so server owner
 - **AirJump** (BETA)
      - **A:** Compare up distance and last data and calculate delta up distance.
 
-# Feedbacks and Issue's
+# Feedbacks and Issues
 - 😁 Your feedback and reviews are highly appriciated, if you ever find a bug or false-positive in certain modules, you can create an issue in our [github repository](https://github.com/ReinfyTeam/Zuri/issues)!
    - Please include the module name, subtype, server version, and what the player was doing so the issue can be reproduced faster.
 - 👍 You can also view [Frequently asked questions article](https://github.com/ReinfyTeam/Zuri/wiki/Well-Known-Issues) about common encountered issues to our plugin, be sure to read that before creating an issue!
