@@ -129,8 +129,8 @@ use ReinfyTeam\Zuri\listener\PlayerListener;
 use ReinfyTeam\Zuri\listener\ServerListener;
 use ReinfyTeam\Zuri\network\ProxyUDPSocket;
 use ReinfyTeam\Zuri\task\CaptchaTask;
-use ReinfyTeam\Zuri\task\DownloadLibsAsyncTask;
 use ReinfyTeam\Zuri\task\CheckAsyncTask;
+use ReinfyTeam\Zuri\task\DownloadLibsAsyncTask;
 use ReinfyTeam\Zuri\task\ServerTickTask;
 use ReinfyTeam\Zuri\task\UpdateCheckerAsyncTask;
 use ReinfyTeam\Zuri\utils\AuditLogger;
@@ -142,6 +142,7 @@ use function count;
 use function dirname;
 use function is_numeric;
 use function is_string;
+use function method_exists;
 use function version_compare;
 
 /**
@@ -209,7 +210,7 @@ class ZuriAC extends PluginBase {
 	 */
 	protected function onEnable() : void {
 		AuditLogger::bootIfNeeded();
-		
+
 		if (!class_exists(VapmPMMP::class)) {
 			$this->getLogger()->warning(Lang::get(LangKeys::STARTUP_VAPM_MISSING));
 			$pluginsPath = method_exists($this->getServer(), "getPluginPath")

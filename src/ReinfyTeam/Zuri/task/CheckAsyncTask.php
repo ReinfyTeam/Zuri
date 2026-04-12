@@ -44,6 +44,7 @@ use function array_slice;
 use function base64_decode;
 use function base64_encode;
 use function ceil;
+use function class_exists;
 use function count;
 use function dirname;
 use function floor;
@@ -52,6 +53,7 @@ use function implode;
 use function ini_get;
 use function is_array;
 use function is_bool;
+use function is_file;
 use function is_int;
 use function is_numeric;
 use function is_string;
@@ -66,6 +68,7 @@ use function min;
 use function preg_split;
 use function round;
 use function rtrim;
+use function spl_autoload_register;
 use function str_replace;
 use function stripcslashes;
 use function strlen;
@@ -1142,7 +1145,6 @@ class CheckAsyncTask {
 	 * Builds a compact payload preview for thread diagnostics.
 	 *
 	 * @param array<string,mixed> $payload
-	 * @return string
 	 */
 	private static function summarizePayloadForLog(array $payload) : string {
 		$preview = [
@@ -1162,7 +1164,6 @@ class CheckAsyncTask {
 	/**
 	 * Emits a structured thread pipeline event into thread.log.
 	 *
-	 * @param string $event
 	 * @param array<string,mixed> $context
 	 */
 	private static function logThreadEvent(string $event, array $context = []) : void {

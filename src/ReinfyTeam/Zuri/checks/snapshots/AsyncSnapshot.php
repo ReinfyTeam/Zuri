@@ -277,10 +277,6 @@ abstract class AsyncSnapshot implements JsonSerializable {
 	 *
 	 * Keeps only scalar/null values and recursively sanitized arrays.
 	 * Any object/resource/unsupported value is replaced with null.
-	 *
-	 * @param mixed $value
-	 * @param int $depth
-	 * @return mixed
 	 */
 	public static function sanitizeSerializableValue(mixed $value, int $depth = 0) : mixed {
 		if ($depth > 16) {
