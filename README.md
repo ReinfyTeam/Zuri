@@ -1,4 +1,7 @@
 # Zuri Pocketmine-MP Anticheat 🛡️
+
+[![](https://poggit.pmmp.io/shield.state/Zuri)](https://poggit.pmmp.io/p/Zuri) [![](https://poggit.pmmp.io/shield.api/Zuri)](https://poggit.pmmp.io/p/Zuri) [![](https://poggit.pmmp.io/shield.dl.total/Zuri)](https://poggit.pmmp.io/p/Zuri) [![](https://poggit.pmmp.io/shield.dl/Zuri)](https://poggit.pmmp.io/p/Zuri)
+
 **Zuri** is an anticheat made to protect the server from any may unfair advantages from the players. A powerful anticheat made to destroy hackers from your server for PocketMine-MP.
 
 **Zuri** attempts to enforce "vanilla Minecraft" mechanics, as well as preventing players from abusing weaknesses in Minecraft or its protocol, making your server more safe. 
