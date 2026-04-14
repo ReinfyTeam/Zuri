@@ -67,9 +67,7 @@ class KillAuraA extends Check {
 	 *
 	 * @return string|null Correlation group identifier.
 	 */
-	public function getCorrelationGroup() : ?string {
-		return \ReinfyTeam\Zuri\checks\CrossCheckCorrelation::GROUP_COMBAT;
-	}
+
 
 	/**
 	 * Processes player action packets for KillAura A evaluation.
@@ -98,6 +96,10 @@ class KillAuraA extends Check {
 	 * @return array<string,mixed> Async decision data.
 	 */
 	public static function evaluateAsync(array $payload) : array {
+    // Thread-safe: execute in async worker thread only; use only $payload (no Player objects)
+    if (\pocketmine\thread\Thread::getCurrentThreadId() === 0) {
+        throw new \RuntimeException("evaluateAsync must not be called on the main thread");
+    }
 		if (($payload["checkName"] ?? null) !== "KillAura" || ($payload["checkSubType"] ?? null) !== "A") {
 			return [];
 		}
@@ -111,3 +113,4 @@ class KillAuraA extends Check {
 		return [];
 	}
 }
+

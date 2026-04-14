@@ -98,6 +98,10 @@ class WrongPitch extends Check {
 	 * @return array<string,mixed> Async decision data.
 	 */
 	public static function evaluateAsync(array $payload) : array {
+    // Thread-safe: execute in async worker thread only; use only $payload (no Player objects)
+    if (\pocketmine\thread\Thread::getCurrentThreadId() === 0) {
+        throw new \RuntimeException("evaluateAsync must not be called on the main thread");
+    }
 		if (!MovementSnapshot::validatePayload(
 			$payload,
 			"WrongPitch",
@@ -122,3 +126,4 @@ class WrongPitch extends Check {
 		return [];
 	}
 }
+

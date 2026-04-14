@@ -1,4 +1,4 @@
-<?php
+// Removed: CrossCheckCorrelationTest.php (feature deleted)
 
 declare(strict_types=1);
 

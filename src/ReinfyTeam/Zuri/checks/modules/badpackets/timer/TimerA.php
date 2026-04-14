@@ -35,7 +35,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\checks\Check;
-use ReinfyTeam\Zuri\checks\CrossCheckCorrelation;
+
 use ReinfyTeam\Zuri\config\CacheData;
 use ReinfyTeam\Zuri\config\CheckConstants;
 use ReinfyTeam\Zuri\player\PlayerAPI;
@@ -65,9 +65,7 @@ class TimerA extends Check {
 	/**
 	 * Gets the cross-check correlation group identifier.
 	 */
-	public function getCorrelationGroup() : ?string {
-		return CrossCheckCorrelation::GROUP_PACKET_TIMING;
-	}
+
 
 	/**
 	 * Processes input packets and dispatches async TimerA checks.
@@ -104,6 +102,10 @@ class TimerA extends Check {
 	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
+    // Thread-safe: execute in async worker thread only; use only $payload (no Player objects)
+    if (\pocketmine\thread\Thread::getCurrentThreadId() === 0) {
+        throw new \RuntimeException("evaluateAsync must not be called on the main thread");
+    }
 		if (($payload["checkName"] ?? null) !== "Timer" || ($payload["checkSubType"] ?? null) !== "A") {
 			return [];
 		}
@@ -184,3 +186,4 @@ class TimerA extends Check {
 		return $result;
 	}
 }
+

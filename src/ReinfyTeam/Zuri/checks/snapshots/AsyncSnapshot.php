@@ -314,4 +314,18 @@ abstract class AsyncSnapshot implements JsonSerializable {
 		}
 		return $sanitized;
 	}
+
+	/**
+	 * Validate payload or throw SnapshotException if invalid
+	 *
+	 * @param array<string,mixed> $payload
+	 * @throws SnapshotException
+	 */
+	public static function validatePayloadOrThrow(array $payload) : void {
+		$sanitized = self::sanitizeSerializablePayload($payload);
+		$json = json_encode($sanitized);
+		if ($json === false) {
+			throw new SnapshotException('Payload is not JSON serializable');
+		}
+	}
 }

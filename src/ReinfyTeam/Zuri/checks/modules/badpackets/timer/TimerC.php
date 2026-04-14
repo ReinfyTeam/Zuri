@@ -84,6 +84,10 @@ class TimerC extends Check {
 	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
+    // Thread-safe: execute in async worker thread only; use only $payload (no Player objects)
+    if (\pocketmine\thread\Thread::getCurrentThreadId() === 0) {
+        throw new \RuntimeException("evaluateAsync must not be called on the main thread");
+    }
 		$typeRaw = $payload["type"] ?? "other";
 		$type = is_string($typeRaw) ? $typeRaw : "other";
 		$delay = $payload["delay"] ?? null;
@@ -107,3 +111,4 @@ class TimerC extends Check {
 		return [];
 	}
 }
+

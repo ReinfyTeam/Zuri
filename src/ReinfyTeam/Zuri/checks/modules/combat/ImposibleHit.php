@@ -92,6 +92,10 @@ class ImposibleHit extends Check {
 	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
+    // Thread-safe: execute in async worker thread only; use only $payload (no Player objects)
+    if (\pocketmine\thread\Thread::getCurrentThreadId() === 0) {
+        throw new \RuntimeException("evaluateAsync must not be called on the main thread");
+    }
 		if (($payload["type"] ?? null) !== self::TYPE) {
 			return [];
 		}
@@ -127,3 +131,4 @@ class ImposibleHit extends Check {
 		}
 	}
 }
+

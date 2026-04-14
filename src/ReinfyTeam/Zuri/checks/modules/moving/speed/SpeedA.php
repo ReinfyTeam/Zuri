@@ -75,9 +75,7 @@ class SpeedA extends Check {
 	 *
 	 * @return string|null Correlation group identifier.
 	 */
-	public function getCorrelationGroup() : ?string {
-		return \ReinfyTeam\Zuri\checks\CrossCheckCorrelation::GROUP_MOVEMENT;
-	}
+
 
 	/**
 	 * Processes auth input packets for Speed A evaluation.
@@ -171,6 +169,10 @@ class SpeedA extends Check {
 	 * @return array<string,mixed> Async decision data.
 	 */
 	public static function evaluateAsync(array $payload) : array {
+    // Thread-safe: execute in async worker thread only; use only $payload (no Player objects)
+    if (\pocketmine\thread\Thread::getCurrentThreadId() === 0) {
+        throw new \RuntimeException("evaluateAsync must not be called on the main thread");
+    }
 		if (!MovementSnapshot::validatePayload(
 			$payload,
 			"SpeedA",
@@ -261,3 +263,4 @@ class SpeedA extends Check {
 		return sqrt((($toX - $fromX) ** 2) + (($toY - $fromY) ** 2) + (($toZ - $fromZ) ** 2));
 	}
 }
+

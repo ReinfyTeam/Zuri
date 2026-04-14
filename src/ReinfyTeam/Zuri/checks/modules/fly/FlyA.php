@@ -109,6 +109,10 @@ class FlyA extends Check {
 	 * @return array<string,mixed>
 	 */
 	public static function evaluateAsync(array $payload) : array {
+    // Thread-safe: execute in async worker thread only; use only $payload (no Player objects)
+    if (\pocketmine\thread\Thread::getCurrentThreadId() === 0) {
+        throw new \RuntimeException("evaluateAsync must not be called on the main thread");
+    }
 		if (!MovementSnapshot::validatePayload(
 			$payload,
 			"FlyA",
@@ -199,3 +203,4 @@ class FlyA extends Check {
 		return ["set" => [CacheData::FLY_A_LAST_Y_NO_GROUND => $posY, CacheData::FLY_A_LAST_TIME => $now]];
 	}
 }
+

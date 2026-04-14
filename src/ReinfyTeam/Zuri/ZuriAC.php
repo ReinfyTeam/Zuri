@@ -36,7 +36,7 @@ use Phar;
 use pocketmine\plugin\PluginBase;
 use ReflectionMethod;
 use ReinfyTeam\Zuri\checks\Check;
-use ReinfyTeam\Zuri\checks\CrossCheckCorrelation;
+
 use ReinfyTeam\Zuri\checks\modules\aimassist\AimAssistA;
 use ReinfyTeam\Zuri\checks\modules\aimassist\AimAssistB;
 use ReinfyTeam\Zuri\checks\modules\aimassist\AimAssistC;
@@ -276,7 +276,7 @@ class ZuriAC extends PluginBase {
 	 * @internal
 	 */
 	public function loadChecks() : void {
-		CrossCheckCorrelation::clearCache();
+
 
 		if (!empty($this->checks)) {
 			$this->checks = [];
