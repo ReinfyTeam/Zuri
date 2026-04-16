@@ -6,6 +6,7 @@ use pocketmine\utils\SingletonTrait;
 use ReinfyTeam\Zuri\check\CheckWorker;
 use ReinfyTeam\Zuri\check\CheckRegistry;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\config\ConstantValues;
 use ReinfyTeam\Zuri\config\ConfigPath;
 
 class ZuriAC extends Loader {
@@ -14,6 +15,7 @@ class ZuriAC extends Loader {
 	private static CheckWorker $worker;
 	private static CheckRegistry $checkRegistry;
 	private static ConfigManager $config;
+	private static ConstantValues $constants;
 	
 	protected function onLoad() : void {
 		self::$instance = $this;
@@ -21,7 +23,8 @@ class ZuriAC extends Loader {
 		self::checkPHP();
 		self::checkRunningSource();
 		
-		ConfigManager::configure(ZuriAC::getInstance()->getDataFolder() . "config.yml");
+		self::$config = new ConfigManager(ZuriAC::getInstance()->getDataFolder() . "config.yml");
+		self::$constants = new ConstantValues(ZuriAC::getInstance()->getDataFolder() . "constants.yml");
 	}
 
 	protected function onEnable() : void {
@@ -38,7 +41,11 @@ class ZuriAC extends Loader {
 		return self::$checkRegistry;
 	}
 
-	public static function getConfig() : ConfigManager {
+	public static function getConfigManager() : ConfigManager {
 		return self::$config;
+	}
+
+	public static function getConstants() : ConstantValues {
+		return self::$constants;
 	}
 }

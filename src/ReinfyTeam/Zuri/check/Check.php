@@ -14,5 +14,12 @@ abstract class Check {
 
 	abstract public function getType() : int;
 	
-	abstract public static function check(array $data) : bool;
+	abstract public static function check(array $data) : array;
+
+	/**
+	 * Responsible for building array results for module.
+	 */
+	public static function buildResult(bool $failed, array $debug) : array {
+		return ["failed" => $failed, "debug" => $debug];
+	}
 }

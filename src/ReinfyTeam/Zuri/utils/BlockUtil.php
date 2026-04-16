@@ -330,6 +330,12 @@ final class BlockUtil {
 	}
 
     public static function getUnderBlock(Location $location, int $deep = 1) : Block {
-		return $location->getWorld()->getBlockAt(abs((int) $location->getX()), abs((int) $location->getY()) - $deep, abs((int) $location->getZ()));
-	}
+        $world = $location->getWorld();
+
+        $x = (int) $location->getX();
+        $y = (int) $location->getY() - $deep;
+        $z = (int) $location->getZ();
+
+        return $world->getBlockAt($x, $y, $z);
+    }
 }

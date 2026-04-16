@@ -1,4 +1,14 @@
 # Zuri Anticheat: Constant Values
 
 zuri:
-  friction-factor: 0.0
+  # Constant Configuration: For constant updating the suitable performance variables based on development testing.
+  config-version: 1.0.0
+  speed:
+    friction_factor: 1.0
+    jump_factor: 0.8
+    ground_factor: 0.4
+    lastjump_factor: 0.26
+    ice_factor: 0.2
+    knockback_factor: 4.0
+    last_move_factor: 0.9
+    threshold: 0.1

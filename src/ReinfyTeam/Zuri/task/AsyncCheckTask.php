@@ -7,6 +7,7 @@ namespace ReinfyTeam\Zuri\task;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\check\ResultsHandler;
+use ReinfyTeam\Zuri\ZuriAC;
 use Closure;
 
 class AsyncCheckTask extends AsyncTask {
@@ -16,10 +17,11 @@ class AsyncCheckTask extends AsyncTask {
 	public function __construct(array $batchCheck) {
 		$checkBatch = [];
 		foreach ($batchCheck as $checkData) {
-			$player = $checkData["player"]->jsonSerialize();
-			$check = serialize($checkData["check"]);
-
-			$checkBatch[] = serialize(["player" => $player, "check" => $check]);
+			$eventData = (isset($checkData["data"]["eventData"]) ? serialize($checkData["data"]["eventData"]) : null);
+			$player = $checkData["data"]["player"]->jsonSerialize();
+			$check = serialize($checkData["data"]["check"]);
+			$constants = serialize(ZuriAC::getConstants()->export());
+			$checkBatch[] = serialize(["eventData" => $eventData, "player" => $player, "check" => $check, "constants" => $constants]);
 		}
 
 		$this->batchCheck = serialize($checkBatch);
@@ -31,12 +33,14 @@ class AsyncCheckTask extends AsyncTask {
 		foreach (unserialize($this->batchCheck) as $checkData) {
 			$checkData = unserialize($checkData);
 			$check = unserialize($checkData["check"]);
+			$constants = unserialize($checkData["constants"]);
 			
 			$result = [];
 			
-			$playerData = $checkData["player"];
+			$playerData = $checkData["player"] ?? null;
+			$eventData = $checkData["eventData"] ?? null;
 
-			$result["failed"] = $check::check($playerData);
+			$result["result"] = $check::check(["eventData" => $eventData, "playerData" => $playerData, "constantData" => $constants]);
 			$result["check"] = $check::class;
 			$result["player"] = $playerData["name"];
 			

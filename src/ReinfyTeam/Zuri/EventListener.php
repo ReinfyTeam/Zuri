@@ -14,8 +14,18 @@ use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\ZuriAC;
 use ReinfyTeam\Zuri\player\PlayerManager;
 use pocketmine\player\Player;
-use pocketmine\util\BlockUtil;
 use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\event\player\PlayerJumpEvent;
+use pocketmine\event\player\PlayerJoinEvent;
+use pocketmine\event\player\PlayerPreLoginEvent;
+use pocketmine\event\entity\EntityMotionEvent;
+use pocketmine\event\entity\EntityTeleportEvent;
+use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\utils\Utils;
+use ReinfyTeam\Zuri\player\ExternalDataPath;
+use pocketmine\event\inventory\InventoryTransactionEvent;
+use pocketmine\event\inventory\InventoryOpenEvent;
+use pocketmine\event\inventory\InventoryCloseEvent;
 
 class EventListener implements Listener {
 
@@ -64,6 +74,22 @@ class EventListener implements Listener {
             $playerZuri->setTick($packet->getTick());
             $playerZuri->setDelta($packet->getDelta());
             $playerZuri->setRawMove($packet->getRawMove());
+            $playerZuri->setStartedJumping($packet->getInputFlags()->get(PlayerAuthInputFlags::START_JUMPING));
+
+            $frictionBlock = $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN));
+            $playerZuri->setExternalData(ExternalDataPath::FRICTION_FACTOR, $playerZuri->isOnGround() ? $frictionBlock->getFrictionFactor() : ZuriAC::getConstants()->getConstant(ConstantPath::FRICTION_FACTOR));
+            
+            $lastDistanceXZ = $playerZuri->getExternalData(ExternalDataPath::LAST_DISTANCE_XZ);
+            $frictionFactor = $playerZuri->getExternalData(ExternalDataPath::FRICTION_FACTOR);
+            $playerZuri->setExternalData(ExternalDataPath::MOMENTUM, MathUtil::getMomentum($lastDistanceXZ, $frictionFactor));
+
+            $movement = MathUtil::getMovement($player, new Vector3(max(-1, min(1, $packet->getMoveVecZ())), 0, max(-1, min(1, $packet->getMoveVecX()))));
+            $playerZuri->setExternalData(ExternalDataPath::MOVEMENT, $movement);
+
+            $movementMultiplier = Utils::getMovementMultiplier($player);
+			$acceleration = MathUtil::getAcceleration($movement, $movementMultiplier, $frictionFactor, $playerZuri->isOnGround());
+            $playerZuri->setExternalData(ExternalDataPath::MOVEMENT_MULTIPLIER, $movementMultiplier);
+            $playerZuri->setExternalData(ExternalDataPath::ACCELERATION, $acceleration);
         }
 
         ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PACKET);
@@ -106,13 +132,205 @@ class EventListener implements Listener {
 		$playerZuri->setOnPlate(BlockUtil::isOnPlate($event->getTo(), 0));
 		$playerZuri->setOnSnow(BlockUtil::isOnSnow($event->getTo(), 0));
 		$playerZuri->setLastMoveTick((double) Server::getInstance()->getTick());
+		$playerZuri->setBlockAbove(BlockUtil::getBlockAbove($player)->isSolid());
 
-        $frictionBlock = $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN));
+        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PACKET);
+    }
 
-		$playerZuri->setExternalData(ExternalDataPath::FRICTION_FACTOR, $playerZuri->isOnGround() ? $frictionBlock->getFrictionFactor() : ConstantValue::getConstant(ConstantPath::FRICTION_FACTOR));
+    public function onMotion(EntityMotionEvent $event) : void {
+        $player = $event->getEntity();
+
+		if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+		}
+
+        $currentMotion = $playerZuri->getMotion();
+        $newMotion = $event->getVector();
+
+        $playerZuri->setMotion($currentMotion->addVector($newMotion));
+    }
+
+    public function onInventoryTransaction(InventoryTransactionEvent $event) : void {
+        $player = $event->getPlayer();
+
+        if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+		}
+
+        foreach ($event->getTransaction()->getInventories() as $inventory) {
+			$playerZuri->setTransactionArmorInventory(($inventory instanceof ArmorInventory));
+		}
 
         ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PLAYER);
     }
 
+    public function onInventoryOpen(InventoryOpenEvent $event) : void {
+        $player = $event->getPlayer();
 
+        if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+		}
+
+        $playerZuri->setInventoryOpen(true);
+
+        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PLAYER);
+    }
+
+    public function onInventoryClose(InventoryCloseEvent $event) : void {
+		$player = $event->getPlayer();
+
+        if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+		}
+
+        $playerZuri->setInventoryOpen(false);
+
+        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PLAYER);
+	}
+
+    public function onEntityTeleport(EntityTeleportEvent $event) : void {
+        $player = $event->getEntity();
+
+		if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+		}
+
+        $playerZuri->setTeleportTicks(microtime(true));
+
+        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PLAYER);
+    }
+
+    public function onPlayerJump(PlayerJumpEvent $event) : void {
+        $player = $event->getPlayer();
+
+		if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+		}
+
+        $playerZuri->setJumpTicks(microtime(true));
+
+        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PLAYER);
+    }
+
+    public function onPlayerJoin(PlayerJoinEvent $event) : void {
+        $player = $event->getPlayer();
+
+		if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        $playerZuri->setJoinedAtTheTime(microtime(true));
+
+        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PLAYER);
+    }
+
+    public function onPlayerPreLogin(PlayerPreLoginEvent $event) : void {
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "ip" => $event->getIp(),
+            "port" => $event->getPort(),
+            "port" => $event->getPort(),
+            "isAuthRequired" => $event->isAuthRequired(),
+            "getKickFlags" => $event->getKickFlags(),
+            "isKickFlagSet" => $event->isKickFlagSet(),
+            "getUsername" => $event->getPlayerInfo()->getUsername(),
+            "getLocale" => $event->getPlayerInfo()->getLocale(),
+            "getUuid" => $event->getPlayerInfo()->getUuid(),
+            "getExtraData" => $event->getPlayerInfo()->getExtraData()
+        ], Check::TYPE_EVENT);
+    }
+
+    public function onEntityDamage(EntityDamageEvent $event) : void {
+		$player = $event->getEntity();
+
+		if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        if ($event->isCancelled()) {
+			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+		}
+
+		if (
+			$event->getCause() === EntityDamageEvent::CAUSE_ENTITY_ATTACK ||
+			$event->getCause() === EntityDamageEvent::CAUSE_PROJECTILE ||
+			$event->getCause() === EntityDamageEvent::CAUSE_SUFFOCATION ||
+			$event->getCause() === EntityDamageEvent::CAUSE_VOID ||
+			$event->getCause() === EntityDamageEvent::CAUSE_FALLING_BLOCK
+		) {
+			return;
+		}
+
+        $playerZuri = PlayerManager::get($player);
+		
+        $playerZuri->setHurtTicks(microtime(true));
+	}
+
+    public function onEntityDamageByEntity(EntityDamageByEntityEvent $event) : void {
+        $damager = $event->getDamager();
+        $player = $event->getEntity();
+
+		if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        if (!$damager instanceof Player || !$damager->isConnected() || !$damager->spawned) {
+            return;
+        }
+
+        if ($event->isCancelled()) {
+			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+		}
+
+        $cause = $event->getCause();
+        $playerZuri = PlayerManager::get($player);
+        $damagerZuri = PlayerManager::get($player);
+
+        if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK) {
+            $playerZuri->setAttackTicks(microtime(true));
+            $damagerZuri->setAttackTicks(microtime(true));
+        }
+
+        if ($cause === EntityDamageEvent::CAUSE_ENTITY_EXPLOSION || $cause === EntityDamageEvent::CAUSE_BLOCK_EXPLOSION) {
+            $playerZuri->setExplosionTicks(microtime(true));
+            $damagerZuri->setExplosionTicks(microtime(true));
+        }
+    }
 }

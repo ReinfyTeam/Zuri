@@ -10,7 +10,10 @@ class PlayerManager {
     private static array $players = [];
     
     public static function get(Player $player) : PlayerZuri {
-        return self::$players[$player->getName()]->updateData() ??= PlayerZuri::create($player);
+        $playerZuri = self::$players[$player->getName()] ??= PlayerZuri::create($player);
+        $playerZuri->updateData($player);
+
+        return $playerZuri;
     }
     
     public static function add(Player $player) : void {

@@ -4,7 +4,6 @@ namespace ReinfyTeam\Zuri\config;
 
 use pocketmine\utils\Config;
 use ReinfyTeam\Zuri\ZuriAC;
-use ReinfyTeam\Zuri\utils\FileUtil;
 
 class ConfigManager implements ConfigPath {
     private Config $config;
@@ -13,31 +12,39 @@ class ConfigManager implements ConfigPath {
     public function __construct(string $path) {
         $this->path = $path;
 
-        ZuriAC::getInstance()->saveResource($path);
+        ZuriAC::getInstance()->saveResource(basename($path));
         
         $this->config = new Config(
             $path, 
             Config::YAML
         );
 
-        $this->checkVersion();
+        $this->checkVersion(self::CONFIG_VERSION);
     }
 
-    public static function getData(string $key, mixed $default = null) : mixed {
+    public function getData(string $key, mixed $default = null) : mixed {
         return $this->config->getNested($key, $default ?? $key);
     }
 
-    public static function setData(string $key, mixed $value) : void {
+    public function setData(string $key, mixed $value) : void {
         $this->config->setNested($key, $value);
         $this->config->save();
     }
 
-    public function checkVersion() : void {
-        if (version_compare(self::CONFIG_VERSION, $this->getData(self::CONFIG_VERSION), '>=')) {
-            FileUtil::asyncRename(
-                $path,
-                str_replace(pathinfo($path, PATHINFO_FILENAME), pathinfo($path, PATHINFO_FILENAME) . "-old", $path) 
-            );
+    public function checkVersion(string $version) : void {
+        if ($this->getData($version) !== null) {
+            if (version_compare($version, $this->getData(self::CONFIG_VERSION), '>=')) {
+                @copy(
+                    $this->path,
+                    str_replace(pathinfo($this->path, PATHINFO_FILENAME), pathinfo($this->path, PATHINFO_FILENAME) . "-old", $this->path) 
+                );
+                @unlink($this->path);
+                ZuriAC::getInstance()->saveResource(basename($this->path));
+            }
         }
+    }
+
+    public function export() : array {
+        return $this->config->getAll();
     }
 }

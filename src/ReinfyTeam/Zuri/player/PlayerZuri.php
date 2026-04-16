@@ -41,13 +41,15 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $onWeb = false;
 	private bool $inBoxBlock = false;
 	private bool $inBoundingBox = false;
-	private bool $isCurrentChunkLoaded = false;
-	private bool $isSurvival = false;
-	private bool $isCreative = false;
-	private bool $isSpectator = false;
+	private bool $currentChunkLoaded = false;
+	private bool $survival = false;
+	private bool $creative = false;
+	private bool $spectator = false;
 	private bool $flying = false;
 	private bool $allowFlight = false;
+	private bool $blockAbove = false;
 	private bool $noClientPredictions = false;
+	private bool $startedJumping = false;
 	
 	private float $lastGroundY = 0.0;
 	private float $lastNoGroundY = 0.0;
@@ -65,6 +67,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $lastMoveTick = 0.0;
 	private float $teleportCommandTicks = 0.0;
 	private float $eventCancelled = 0.0;
+	private float $projectileTicks = 0.0;
 	
 	private int $blocksBrokeASec = 0;
 	private int $blocksPlacedASec = 0;
@@ -543,7 +546,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->flying = $flying;
 	}
 
-	public function getFlying() : bool {
+	public function isFlying() : bool {
 		return $this->flying;
 	}
 
@@ -551,7 +554,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		return $this->noClientPredictions;
 	}
 
-	public function setNoClientPredictions(bool $noClientPredictions) : bool {
+	public function setNoClientPredictions(bool $noClientPredictions) : void {
 		$this->noClientPredictions = $noClientPredictions;
 	}
 
@@ -559,7 +562,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		return $this->survival;
 	}
 
-	public function setSurvival(bool $survival) : bool {
+	public function setSurvival(bool $survival) : void {
 		$this->survival = $survival;
 	}
 
@@ -599,24 +602,40 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		return $this->externalData;
 	}
 
+	public function isBlockAbove() : bool {
+		return $this->blockAbove;
+	}
+
+	public function setBlockAbove(bool $blockAbove) : void {
+		$this->blockAbove = $blockAbove;
+	}
+
+	public function isStartedJumping() : bool {
+		return $this->startedJumping;
+	}
+
+	public function setStartedJumping(bool $startedJumping) : void {
+		$this->startedJumping = $startedJumping;
+	}
+
 	public function jsonSerialize() : array {
 		return [
 			"name" => $this->getPlayer()->getName(),
-			"inventoryOpen" => $this->isInventoryOpen(),
-			"transactionArmorInventory" => $this->isTransactionArmorInventory(),
-			"underBlock" => $this->isUnderBlock(),
-			"onAdhesion" => $this->isOnAdhesion(),
-			"onPlant" => $this->isOnPlant(),
-			"onDoor" => $this->isOnDoor(),
-			"onCarpet" => $this->isOnCarpet(),
-			"onPlate" => $this->isOnPlate(),
-			"onSnow" => $this->isOnSnow(),
-			"sniffing" => $this->isSniffing(),
-			"inLiquid" => $this->isInLiquid(),
-			"onStairs" => $this->isOnStairs(),
-			"onIce" => $this->isOnIce(),
-			"debug" => $this->isDebug(),
-			"topBlock" => $this->isTopBlock(),
+			"isInventoryOpen" => $this->isInventoryOpen(),
+			"isTransactionArmorInventory" => $this->isTransactionArmorInventory(),
+			"isUnderBlock" => $this->isUnderBlock(),
+			"isOnAdhesion" => $this->isOnAdhesion(),
+			"isOnPlant" => $this->isOnPlant(),
+			"isOnDoor" => $this->isOnDoor(),
+			"isOnCarpet" => $this->isOnCarpet(),
+			"isOnPlate" => $this->isOnPlate(),
+			"isOnSnow" => $this->isOnSnow(),
+			"isSniffing" => $this->isSniffing(),
+			"isInLiquid" => $this->isInLiquid(),
+			"isOnStairs" => $this->isOnStairs(),
+			"isOnIce" => $this->isOnIce(),
+			"isDebug" => $this->isDebug(),
+			"isTopBlock" => $this->isTopBlock(),
 			"lastGroundY" => $this->getLastGroundY(),
 			"lastNoGroundY" => $this->getLastNoGroundY(),
 			"lastDelayedMovePacket" => $this->getLastDelayedMovePacket(),
@@ -643,10 +662,13 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isSurvival" => $this->isSurvival(),
 			"isCreative" => $this->isCreative(),
 			"isSpectator" => $this->isSpectator(),
-			"flying" => $this->isFlying()
+			"isFlying" => $this->isFlying(),
 			"allowFlight" => $this->getAllowFlight(),
-			"noClientPredictions" => $this->hasNoClientPredictions(),
-			"externalData" => $this->getAllExternalData()
+			"hasNoClientPredictions" => $this->hasNoClientPredictions(),
+			"externalData" => $this->getAllExternalData(),
+			"isBlockAbove" => $this->isBlockAbove(),
+			"isRecentlyCancelledEvent" => $this->isRecentlyCancelledEvent(),
+			"isStartedJumping" => $this->isStartedJumping()
 		];
 	}
 }

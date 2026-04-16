@@ -2,11 +2,35 @@
 # Copyright (c) 2024-2026 ReinfyTeam
 
 zuri:
-  config-version: 2.0.0
+  config_version: 2.0.0
   # Asynchronous processing settings
   # Adjust these values based on your server's performance and workload.
   async:
-    # The number of checks to process in each batch. Higher values may improve performance but can increase latency.
-    batch_size: 128
     # The maximum number of worker threads to use for asynchronous processing. More workers can handle more batches simultaneously but may consume more resources.
     max_worker: 4
+  # Punishment thresholds: Responsible for handling considerations of the player conditions.
+  # This involves the ping, server tps, server load that affects modules.
+  thresholds:
+    default-multiplier: 1.0
+    # Adjust ping sensitivity
+    ping:
+      # Default sensitivity
+      default: 1.0
+      # Per module sensitivity (if you want to adjust based on module)
+      # Ex. Movement checks are more sensitive to ping
+      speed: 1.5
+      fly: 1.5
+      reach: 1.3
+      timer: 1.2
+    tps:
+      # Default sensitivity
+      default: 1.0
+      # Per module sensitivity (if you want to adjust based on module)
+      # Ex. Packet and combat checks are more sensitive to tps
+      timer: 2.0
+      speed: 1.5
+      killaura: 1.2
+      reach: 1.2
+    
+    
+    

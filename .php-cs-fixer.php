@@ -2,7 +2,6 @@
 
 use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
-use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
 
 return (function () {
 	$finder = Finder::create();
@@ -15,7 +14,6 @@ return (function () {
 
 
 	return (new Config)
-		->setParallelConfig(ParallelConfigFactory::detect())
 		->setRiskyAllowed(true)
 		->setFinder($finder)
 		->setIndent("\t")
