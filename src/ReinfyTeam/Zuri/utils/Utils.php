@@ -1,194 +1,32 @@
 <?php
 
-/*
- *
- *  ____           _            __           _____
- * |  _ \    ___  (_)  _ __    / _|  _   _  |_   _|   ___    __ _   _ __ ___
- * | |_) |  / _ \ | | | '_ \  | |_  | | | |   | |    / _ \  / _` | | '_ ` _ \
- * |  _ <  |  __/ | | | | | | |  _| | |_| |   | |   |  __/ | (_| | | | | | | |
- * |_| \_\  \___| |_| |_| |_| |_|    \__, |   |_|    \___|  \__,_| |_| |_| |_|
- *                                   |___/
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Zuri attempts to enforce "vanilla Minecraft" mechanics, as well as preventing
- * players from abusing weaknesses in Minecraft or its protocol, making your server
- * more safe. Organized in different sections, various checks are performed to test
- * players doing, covering a wide range including flying and speeding, fighting
- * hacks, fast block breaking and nukers, inventory hacks, chat spam and other types
- * of malicious behaviour.
- *
- * @author ReinfyTeam
- * @link https://github.com/ReinfyTeam/
- *
- *
- */
-
-declare(strict_types=1);
-
 namespace ReinfyTeam\Zuri\utils;
 
-use pocketmine\entity\Attribute;
-use pocketmine\entity\Living;
 use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\JwtException;
-use pocketmine\network\mcpe\JwtUtils;
-use pocketmine\network\PacketHandlingException;
-use pocketmine\player\Player;
-use pocketmine\utils\TextFormat;
-use ReinfyTeam\Zuri\lang\Lang;
-use ReinfyTeam\Zuri\lang\LangKeys;
-use function array_keys;
-use function array_values;
-use function is_array;
-use function is_string;
-use function json_decode;
-use function mt_getrandmax;
-use function mt_rand;
-use function str_replace;
+use pocketmine\math\Vector2;
 
-/**
- * Hosts generic utility helpers shared across anti-cheat pipelines.
- */
-class Utils {
-	/**
-	 * Converts placeholder color tokens to formatting codes or reverses the mapping.
-	 *
-	 * @param mixed $text Input text to transform.
-	 * @param bool $reverse When true, converts codes back to tokens.
-	 */
-	public static function ParseColors(mixed $text, bool $reverse = false) : string {
-		if (!is_string($text)) {
-			return "";
-		}
+final class Utils {
+    
+    public static function vector3ToArray(Vector3 $vector3) : array {
+        return [
+            "x" => $vector3->getX(),
+            "y" => $vector3->getY(),
+            "z" => $vector3->getZ()
+        ];
+    }
 
-		$colors = [
-			"{BLACK}" => TextFormat::BLACK,
-			"{DARK_BLUE}" => TextFormat::DARK_BLUE,
-			"{DARK_GREEN}" => TextFormat::DARK_GREEN,
-			"{DARK_AQUA}" => TextFormat::DARK_AQUA,
-			"{DARK_RED}" => TextFormat::DARK_RED,
-			"{DARK_PURPLE}" => TextFormat::DARK_PURPLE,
-			"{DARK_GRAY}" => TextFormat::DARK_GRAY,
-			"{LIGHT_PURPLE}" => TextFormat::LIGHT_PURPLE,
-			"{GOLD}" => TextFormat::GOLD,
-			"{GRAY}" => TextFormat::GRAY,
-			"{BLUE}" => TextFormat::BLUE,
-			"{GREEN}" => TextFormat::GREEN,
-			"{AQUA}" => TextFormat::AQUA,
-			"{RED}" => TextFormat::RED,
-			"{YELLOW}" => TextFormat::YELLOW,
-			"{WHITE}" => TextFormat::WHITE,
-			"{MINECOIN_GOLD}" => TextFormat::MINECOIN_GOLD,
-			"{RESET}" => TextFormat::RESET,
-		];
+    public static function arrayToVector3(array $array) {
+        return new Vector3($array["x"], $array["y"], $array["z"]);
+    }
 
-		$formats = [
-			"&" => TextFormat::ESCAPE,
-			"§" => TextFormat::ESCAPE,
-			"{ESCAPE}" => TextFormat::ESCAPE,
-			"{OBFUSCATED}" => TextFormat::OBFUSCATED,
-			"{BOLD}" => TextFormat::BOLD,
-			"{STRIKETHROUGH}" => TextFormat::STRIKETHROUGH,
-			"{UNDERLINE}" => TextFormat::UNDERLINE,
-			"{ITALIC}" => TextFormat::ITALIC,
-		];
+    public static function vector2ToArray(Vector2 $vector2) : array {
+        return [
+            "x" => $vector2->getX(),
+            "z" => $vector2->getZ()
+        ];
+    }
 
-		if ($reverse) {
-			$text = str_replace(array_values($colors), array_keys($colors), $text);
-			$text = str_replace(array_values($formats), array_keys($formats), $text);
-		} else {
-			$text = str_replace(array_keys($colors), array_values($colors), $text);
-			$text = str_replace(array_keys($formats), array_values($formats), $text);
-		}
-
-		return $text;
-	}
-
-	// Grabbed from PMMP LOL
-	/**
-	 * Calculates resulting knockback vector using PMMP-compatible physics helpers.
-	 *
-	 * @param Player $player Target player.
-	 * @param float $x Horizontal X force direction.
-	 * @param float $z Horizontal Z force direction.
-	 * @param float $force Knockback force multiplier.
-	 * @param float|null $verticalLimit Optional vertical clamp.
-	 */
-	public static function calculatePossibleKnockback(Player $player, float $x, float $z, float $force = Living::DEFAULT_KNOCKBACK_FORCE, ?float $verticalLimit = Living::DEFAULT_KNOCKBACK_VERTICAL_LIMIT) : ?Vector3 {
-		$f = MathUtil::horizontalLength($x, $z);
-		if ($f <= 0) {
-			return null;
-		}
-		$knockbackResistanceAttr = $player->getAttributeMap()->get(Attribute::KNOCKBACK_RESISTANCE);
-		$knockbackResistance = $knockbackResistanceAttr !== null ? $knockbackResistanceAttr->getValue() : 0.0;
-		if (mt_rand() / mt_getrandmax() > $knockbackResistance) {
-			$f = 1 / $f;
-
-			$motionX = $player->getMotion()->x / 2;
-			$motionY = $player->getMotion()->y / 2;
-			$motionZ = $player->getMotion()->z / 2;
-			$motionX += $x * $f * $force;
-			$motionY += $force;
-			$motionZ += $z * $f * $force;
-
-			$verticalLimit ??= $force;
-			if ($motionY > $verticalLimit) {
-				$motionY = $verticalLimit;
-			}
-
-			return new Vector3($motionX, $motionY, $motionZ);
-		}
-
-		return null;
-	}
-
-	/**
-	 * Extracts and validates login chain extraData from authInfo JSON.
-	 *
-	 * @param string $authInfoJson Raw authInfo JSON payload.
-	 * @return array<string,mixed>
-	 * @throws PacketHandlingException
-	 */
-	public static function fetchAuthData(string $authInfoJson) : array {
-		$decoded = json_decode($authInfoJson, true);
-		if (!is_array($decoded)) {
-			throw new PacketHandlingException(Lang::get(LangKeys::DEBUG_AUTH_INVALID_PAYLOAD));
-		}
-
-		$chain = $decoded["chain"] ?? null;
-		if (!is_array($chain)) {
-			throw new PacketHandlingException(Lang::get(LangKeys::DEBUG_AUTH_CHAIN_MISSING));
-		}
-
-		$extraData = null;
-		foreach ($chain as $jwt) {
-			if (!is_string($jwt)) {
-				continue;
-			}
-			// Validate every chain element
-			try {
-				[, $claims,] = JwtUtils::parse($jwt);
-			} catch(JwtException $e) {
-				throw PacketHandlingException::wrap($e);
-			}
-			if (isset($claims["extraData"])) {
-				if ($extraData !== null) {
-					throw new PacketHandlingException(Lang::get(LangKeys::DEBUG_AUTH_EXTRA_DUPLICATE));
-				}
-
-				if (!is_array($claims["extraData"])) {
-					throw new PacketHandlingException(Lang::get(LangKeys::DEBUG_AUTH_EXTRA_NOT_ARRAY));
-				}
-				$extraData = $claims["extraData"];
-			}
-		}
-		if (!is_array($extraData)) {
-			throw new PacketHandlingException(Lang::get(LangKeys::DEBUG_AUTH_EXTRA_MISSING));
-		}
-		return $extraData;
-	}
+    public static function arrayToVector2(array $array) : Vector2 {
+        return new Vector2($array["x"], $array["z"]);
+    }
 }

@@ -1,0 +1,30 @@
+name: Build phar package.
+run-name: Build Zuri.phar package with build.php
+on:
+  push:
+  workflow_dispatch:
+jobs:
+ build-phar:
+   runs-on: ubuntu-latest
+   steps:
+     - name: Checkout the repository.
+       uses: actions/checkout@v6
+     - name: Setup PHP
+       uses: pmmp/setup-php-action@3.2.0
+       with:
+         php-version: 8.3
+         install-path: "./bin"
+         pm-version-major: 5
+     - name: Install php-cs-fixer.
+       run: "curl -sL https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/releases/latest/download/php-cs-fixer.phar -o php-cs-fixer"
+     - name: Run php-cs-fixer.
+       run: "php php-cs-fixer fix src"
+     - name: Run build.php
+       run: "php -dphar.readonly=0 tools/build.php"
+     - name: Upload build artifact
+       uses: actions/upload-artifact@v7
+       with:
+          name: Zuri.phar
+          path: Zuri.phar
+     - name: Codespace Cleanup
+       run: "rm -rf *"

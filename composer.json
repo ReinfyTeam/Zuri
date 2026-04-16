@@ -1,8 +1,10 @@
 {
     "name": "reinfyteam/zuri",
-    "description": "Zuri Anticheat for PocketMine-MP",
+    "description": "A fast-development, lightweight, and asynchronous powerful anticheat made to destroy hackers and cheaters to your server for PocketMine-MP.",
     "type": "project",
+    "version": "1.4.0-BETA",
     "require": {
+        "sof3/infoapi": "dev-master",
         "paroxity/commando": "dev-master",
         "reinfyteam/discordwebhookapi": "dev-master",
         "reinfyteam/libpmform": "dev-main",
@@ -11,30 +13,16 @@
     },
     "require-dev": {
         "php": ">=8.2",
-		"reinfyteam/libvapm-pmmp": "dev-main",
-        "pocketmine/pocketmine-mp": "^5.42.1",
+        "pocketmine/pocketmine-mp": "^5.42",
         "phpstan/phpstan": "^1.2",
         "sof3/pharynx": "^0.3.8",
         "friendsofphp/php-cs-fixer": "^3.94.2"
     },
+    "license": "MIT",
     "autoload": {
-        "classmap": [
-            "src/"
-        ]
-    },
-    "config": {
-        "platform": {
-            "php": "8.2.0"
+        "psr-4": {
+            "Reinfyteam\\Zuri\\": "src/"
         }
     },
-    "scripts": {
-        "format": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes",
-        "format:check": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --dry-run --diff",
-        "analyze": "vendor/bin/phpstan --no-progress",
-        "build": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -p=./build/Zuri.phar",
-        "build-source": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -o=./build/",
-		"test": "for file in tests/*.php; do php -f \"$file\"; done"
-    },
-    "minimum-stability": "stable",
-    "prefer-stable": true
+    "minimum-stability": "stable"
 }
