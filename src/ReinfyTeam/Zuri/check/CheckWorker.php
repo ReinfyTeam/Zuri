@@ -46,13 +46,12 @@ use function min;
  * Handles queuing and batching of checks for asynchronous processing.
  */
 class CheckWorker {
-
 	/**
 	 * @param int $maxWorkers Maximum number of worker batches allowed.
 	 */
 	public function __construct(
-        private readonly int $maxWorkers
-    ) {
+		private readonly int $maxWorkers
+	) {
 		// NO-OP
 	}
 

@@ -45,4 +45,7 @@ interface ConfigPath {
 	public const THRESHOLD_TPS_DEFAULT_MULTIPLIER = "zuri.thresholds.tps.default";
 
 	public const CHECKS = "zuri.checks";
+
+	public const PUNISHMENT_BAN_DURATION = "zuri.punishment.ban.duration";
+	
 }

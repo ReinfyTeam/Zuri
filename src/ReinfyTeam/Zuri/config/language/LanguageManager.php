@@ -47,15 +47,15 @@ class LanguageManager {
 		$this->registeredLocale[$language->getCode()] = $language;
 	}
 
-	public function getLanguage() : Language {
+	public function getCurrentLanguage() : Language {
 		return $this->currentLanguage;
 	}
 
-	public function setLanguage(Language $language) : void {
-		if ($this->isRegisteredLocale($language->getCode())) {
-			throw new LanguageError("This language is not registered yet: " . $language->getCode());
+	public function setCurrentLanguage(Language $currentLanguage) : void {
+		if ($this->isRegisteredLocale($currentLanguage->getCode())) {
+			throw new LanguageError("This language is not registered yet: " . $currentLanguage->getCode());
 		}
-		$this->currentLanguage = $language;
+		$this->currentLanguage = $currentLanguage;
 	}
 
 	public function isRegisteredLocale(string $code) : bool {

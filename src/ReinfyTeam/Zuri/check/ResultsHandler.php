@@ -31,12 +31,11 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\check;
 
+use pocketmine\player\Player;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\ZuriAC;
-use pocketmine\player\Player;
-use function count;
 use function max;
 use function min;
 use function strtolower;
@@ -50,13 +49,11 @@ use function unserialize;
  * server conditions such as ping, TPS and player load.
  */
 final class ResultsHandler {
-
 	/**
 	 * Handles the result of a check and applies punishments if necessary.
 	 * Automatically adjusts threshold based on the player condition.
 	 *
 	 *	@param array $results The result data from a check.
-	 *	@return void
 	 */
 	public static function handle(array $results) : void {
 		if (($player = Server::getInstance()->getPlayerExact($results["player"])) !== null) {
@@ -81,7 +78,6 @@ final class ResultsHandler {
 	 *
 	 * @param Player $player The player to punish.
 	 * @param Check $check The check that was failed.
-	 * @return void
 	 */
 	public static function handlePunishment(Player $player, Check $check) : void {
 		$threshold = self::adjustThreshold($player, $check);
@@ -100,15 +96,38 @@ final class ResultsHandler {
 
 		if ($reachedMaxPreViolations && $reachedMaxViolations) {
 			$punishment = $check->getPunishment();
+			$banType = ZuriAC::getConfigManager()->getData(ConfigPath::PUNISHMENT_BAN_TYPE);
+			$kickType = ZuriAC::getConfigManager()->getData(ConfigPath::PUNISHMENT_KICK_TYPE);
 
 			match (strtolower($punishment)) {
-				"kick" => $player->kick(),
-				"ban" => "",
-				default => null
+				"kick" => match (strtolower($kickType)) {
+					"native" => self::nativeKick($player),
+					"command" => self::commandKick($player)
+				},
+				"ban" => match (strtolower($banType)) {
+					"native" => self::nativeBan($player),
+					"command" => self::commandBan($player),
+				},
+				default => $playerZuri->setFlagged(true),
 			};
 
 			$playerZuri->resetViolation($check->getName());
 		}
+	}
+
+	public static function nativeKick(Player $player) : void {
+		$player->kick(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::KICK_MESSAGE));
+	}
+
+	public static function commandKick(Player $player) : void {
+		Server::getInstance()->dispatchCommand(Server::getInstance()->getConsoleSender(), ZuriAC::getConfigManager()->getData(ConfigPath::PUNISHMENT_KICK_COMMAND, null, [
+			"{player}" => '"' . $player->getName() . '"' // safe player name insertion for names with spaces
+		]));
+	}
+
+	public static function nativeBan(Player $player) : void {
+		Server::getInstance()->getNameBans()->addBan($player->getName(), ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PUNISHMENT_BAN_MESSAGE), Utils::parseToDateTime(ZuriAC::getConfigManager()->getData(ConfigPath::PUNISHMENT_BAN_DURATION)), null);
+		$player->kick(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PUNISHMENT_BAN_MESSAGE));
 	}
 
 	/**
@@ -116,10 +135,6 @@ final class ResultsHandler {
 	 *
 	 * The returned threshold should be >= base threshold; it accounts for ping,
 	 * TPS and server load to allow more tolerance during laggy conditions.
-	 *
-	 * @param Player $player
-	 * @param Check $checkType
-	 * @return float
 	 */
 	public static function adjustThreshold(Player $player, Check $checkType) : float {
 		$multiplier = 1.0;
@@ -130,9 +145,9 @@ final class ResultsHandler {
 		$ping = $player->getNetworkSession()->getPing() ?? 0;
 		$multiplier *= self::getPingMultiplier($ping, $checkType);
 
-		$tps = $server->getTicksPerSecond();
-		$maxPlayers = $server->getMaxPlayers();
-		$onlinePlayers = count($server->getOnlinePlayers());
+		$tps = ZuriAC::getMetricsData()->getServerTPS();
+		$maxPlayers = ZuriAC::getMetricsData()->getMaxPlayerCount();
+		$onlinePlayers = ZuriAC::getMetricsData()->getPlayerCount();
 
 		// Apply TPS adjustment
 		$multiplier *= self::getTpsMultiplier($tps, $checkType);
@@ -152,9 +167,6 @@ final class ResultsHandler {
 
 	/**
 	 * Calculate a multiplier based on player ping.
-	 *	@param int $ping
-	 * @param Check $checkType
-	 * @return float
 	 */
 	public static function getPingMultiplier(int $ping, Check $checkType) : float {
 		// Movement checks are more sensitive to ping
@@ -175,7 +187,6 @@ final class ResultsHandler {
 	 * Calculate a multiplier based on server load factor.
 	 *
 	 * @param float $loadFactor Value in [0,1] describing normalized server load.
-	 * @return float
 	 */
 	public static function getLoadMultiplier(float $loadFactor) : float {
 		// Load affects all checks roughly equally
@@ -192,8 +203,6 @@ final class ResultsHandler {
 	 * Calculate a multiplier based on server TPS.
 	 *
 	 * @param float $tps Current server ticks per second.
-	 * @param Check $checkType
-	 * @return float
 	 */
 	public static function getTpsMultiplier(float $tps, Check $checkType) : float {
 		// Timer checks are most sensitive to TPS fluctuation

@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\utils;
 
 use pocketmine\utils\TextFormat;
+use function array_flip;
 use function array_keys;
 use function array_values;
 use function implode;
@@ -85,11 +86,11 @@ final class TextUtil {
 		];
 
 		if ($reverse) {
-			$text = str_replace(array_values($colors), array_keys($colors), $text);
-			$text = str_replace(array_values($formats), array_keys($formats), $text);
+			$text = self::replaceText($text, array_flip($colors));
+			$text = self::replaceText($text, array_flip($formats));
 		} else {
-			$text = str_replace(array_keys($colors), array_values($colors), $text);
-			$text = str_replace(array_keys($formats), array_values($formats), $text);
+			$text = self::replaceText($text, $colors);
+			$text = self::replaceText($text, $formats);
 		}
 
 		return $text;

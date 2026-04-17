@@ -63,7 +63,7 @@ use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionD
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
 use pocketmine\player\Player;
 use pocketmine\Server;
-use ReflectionClass;
+use pocketmine\utils\Utils as PMMPUtils;
 use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\player\ExternalDataPath;
 use ReinfyTeam\Zuri\player\PlayerManager;
@@ -146,7 +146,7 @@ class EventListener implements Listener {
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($packet))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($packet),
 			"player" => $player
 		], Check::TYPE_PACKET);
 	}
@@ -192,9 +192,10 @@ class EventListener implements Listener {
 		$playerZuri->setOnSnow(BlockUtil::isOnSnow($event->getTo(), 0));
 		$playerZuri->setLastMoveTick((double) Server::getInstance()->getTick());
 		$playerZuri->setBlockAbove(BlockUtil::getBlockAbove($player)->isSolid());
+		$playerZuri->setGroundSolid(BlockUtil::isGroundSolid($player));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
 	}
@@ -221,7 +222,7 @@ class EventListener implements Listener {
 		$playerZuri->setMotion($currentMotion->addVector($newMotion));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
 	}
@@ -247,7 +248,7 @@ class EventListener implements Listener {
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
 	}
@@ -271,7 +272,7 @@ class EventListener implements Listener {
 		$playerZuri->setInventoryOpen(true);
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
 	}
@@ -295,7 +296,7 @@ class EventListener implements Listener {
 		$playerZuri->setInventoryOpen(false);
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
 	}
@@ -319,7 +320,7 @@ class EventListener implements Listener {
 		$playerZuri->setTeleportTicks(microtime(true));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player,
 			"data" => [
 				"from" => Utils::vector3ToArray($event->getFrom()->asVector3()),
@@ -349,7 +350,7 @@ class EventListener implements Listener {
 		$playerZuri->setJumpTicks(microtime(true));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
 	}
@@ -369,7 +370,7 @@ class EventListener implements Listener {
 		$playerZuri->setJoinedAtTheTime(microtime(true));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
 	}
@@ -379,7 +380,7 @@ class EventListener implements Listener {
 	 */
 	public function onPlayerPreLogin(PlayerPreLoginEvent $event) : void {
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"data" => [
 				"ip" => $event->getIp(),
 				"port" => $event->getPort(),
@@ -413,7 +414,7 @@ class EventListener implements Listener {
 		$playerZuri->setHurtTicks(microtime(true));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player,
 			"data" => [
 				"cause" => $event->getCause(),
@@ -458,7 +459,7 @@ class EventListener implements Listener {
 			$damagerZuri->setAttackTicks(microtime(true));
 
 			ZuriAC::getCheckRegistry()->spawnCheck([
-				"type" => (new ReflectionClass($event))->getShortName(),
+				"type" => PMMPUtils::getNiceClassName($event),
 				"player" => $damager,
 				"data" => [
 					"position" => Utils::vector3ToArray($player->getPosition()->asVector3()),
@@ -491,7 +492,7 @@ class EventListener implements Listener {
 		$playerZuri->setProjectileAttackTicks(microtime(true));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player,
 			"data" => [
 				"projectileType" => $projectile->getTypeId(),
@@ -533,7 +534,7 @@ class EventListener implements Listener {
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
 	}
@@ -555,7 +556,7 @@ class EventListener implements Listener {
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
 	}
@@ -577,7 +578,7 @@ class EventListener implements Listener {
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player,
 			"data" => [
 				"amount" => $event->getAmount(),
@@ -605,7 +606,7 @@ class EventListener implements Listener {
 		$playerZuri->setCommandTicks(microtime(true));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $sender,
 			"data" => [
 				"command" => $event->getCommand()
@@ -632,7 +633,7 @@ class EventListener implements Listener {
 		$playerZuri->setBowShotTicks(microtime(true));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
 	}
@@ -654,7 +655,7 @@ class EventListener implements Listener {
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
 	}
@@ -676,7 +677,7 @@ class EventListener implements Listener {
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player,
 			"data" => [
 				"itemType" => $event->getItem()->getTypeId()
@@ -701,7 +702,7 @@ class EventListener implements Listener {
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => (new ReflectionClass($event))->getShortName(),
+			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
 	}

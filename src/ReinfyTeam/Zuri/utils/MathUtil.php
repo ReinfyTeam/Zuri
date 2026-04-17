@@ -31,7 +31,11 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
+use DateTime;
+use pocketmine\world\Position;
+use function preg_match_all;
 use function sqrt;
+use function strtolower;
 
 /**
  * Mathematical helpers used by movement checks.
@@ -63,5 +67,63 @@ final class MathUtil {
 		}
 
 		return 0.1 * $movement * $effectMultiplier * ((0.6 / $friction) ** 3);
+	}
+
+	/**
+	 * Parses a time string (e.g. "1h30m") into a DateTime object representing that duration from now.
+	 *
+	 * Supported units: years (y), months (mo), weeks (w), days (d), hours (h), minutes (m), seconds (s).
+	 *
+	 * @param string $time The time string to parse.
+	 * @return DateTime A DateTime object representing the parsed time duration from now.
+	 */
+	public static function parseToDateTime(string $time) : DateTime {
+		$date = new DateTime("NOW");
+
+		$units = [
+			'y' => 'year',
+			'year' => 'year',
+			'years' => 'year',
+
+			'mo' => 'month',
+			'month' => 'month',
+			'months' => 'month',
+
+			'w' => 'week',
+			'week' => 'week',
+			'weeks' => 'week',
+
+			'd' => 'day',
+			'day' => 'day',
+			'days' => 'day',
+
+			'h' => 'hour',
+			'hour' => 'hour',
+			'hours' => 'hour',
+
+			'm' => 'minute',
+			'min' => 'minute',
+			'mins' => 'minute',
+			'minute' => 'minute',
+			'minutes' => 'minute',
+
+			's' => 'second',
+			'sec' => 'second',
+			'secs' => 'second',
+			'second' => 'second',
+			'seconds' => 'second'
+		];
+
+		preg_match_all('/(\d+)\s*([a-z]+)/i', $time, $matches, PREG_SET_ORDER);
+
+		foreach ($matches as [, $value, $unit]) {
+			$unit = strtolower($unit);
+
+			if (isset($units[$unit])) {
+				$date->modify("+{$value} {$units[$unit]}");
+			}
+		}
+
+		return $date;
 	}
 }

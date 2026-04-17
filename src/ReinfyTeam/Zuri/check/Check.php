@@ -69,8 +69,6 @@ abstract class Check {
 	 *
 	 * Subtypes are used to group related checks (for example, different
 	 * variations of a speed check) under a single check name in config.
-	 *
-	 * @return string
 	 */
 	abstract public function getSubType() : string;
 
@@ -111,8 +109,6 @@ abstract class Check {
 	 *
 	 * The punishment value is read from the plugin config under
 	 * `checks.{checkName}.{subType}.maxvl`.
-	 *
-	 * @return string
 	 */
 	public function getPunishment() : string {
 		return ZuriAC::getConfigManager()->getData(ConfigPath::CHECKS . "." . strtolower($this->getName()) . "." . strtolower($this->getSubType()) . ".maxvl");
@@ -123,8 +119,6 @@ abstract class Check {
 	 * Returns whether this check is enabled.
 	 *
 	 * Reads from `checks.{checkName}.enable` and defaults to false.
-	 *
-	 * @return bool
 	 */
 	public function isEnabled() : bool {
 		return ZuriAC::getConfigManager()->getData(ConfigPath::CHECKS . "." . strtolower($this->getName()) . ".enable", false);
@@ -135,8 +129,6 @@ abstract class Check {
 	 * Returns the maximum number of pre-violations allowed for this check.
 	 *
 	 * Read from `checks.{checkName}.pre-vl.{subType}` with a default of 1.
-	 *
-	 * @return int
 	 */
 	public function getMaxPreViolation() : int {
 		return ZuriAC::getConfigManager()->getData(ConfigPath::CHECKS . "." . strtolower($this->getName()) . ".pre-vl." . strtolower($this->getSubType()), 1);
@@ -147,8 +139,6 @@ abstract class Check {
 	 * Returns the maximum number of violations allowed for this check.
 	 *
 	 * Read from `checks.{checkName}.maxvl` with a default of 1.
-	 *
-	 * @return int
 	 */
 	public function getMaxViolation() : int {
 		return ZuriAC::getConfigManager()->getData(ConfigPath::CHECKS . "." . strtolower($this->getName()) . ".maxvl", 1);

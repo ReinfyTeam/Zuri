@@ -51,6 +51,7 @@ class ZuriAC extends Loader {
 	private static ConfigManager $config;
 	private static ConstantValues $constants;
 	private static LanguageManager $languageManager;
+	private static MetricsData $metricsData;
 
 	/**
 	 * Called when the plugin is loaded.
@@ -72,6 +73,7 @@ class ZuriAC extends Loader {
 	protected function onEnable() : void {
 		self::$worker = CheckWorker::spawnWorker($this);
 		self::$checkRegistry = CheckRegistry::loadChecks();
+		self::$metricsData = new MetricsData();
 		self::registerEvents();
 	}
 
@@ -108,5 +110,12 @@ class ZuriAC extends Loader {
 	 */
 	public static function getLanguageManager() : LanguageManager {
 		return self::$languageManager;
+	}
+
+	/**
+	 * Returns the MetricsData instance.
+	 */
+	public static function getMetricsData() : MetricsData {
+		return self::$metricsData;
 	}
 }

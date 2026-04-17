@@ -62,7 +62,6 @@ class Violation {
 	 *
 	 * @param Check $check The check to add a pre-violation for.
 	 * @param int|float $amount Optional amount (unused numeric marker for future use).
-	 * @return void
 	 */
 	public function addPreViolation(Check $check, int|float $amount = 1) : void {
 		if (isset($this->preViolation[$check->getName()][$check->getSubType()])) {
@@ -78,9 +77,6 @@ class Violation {
 
 	/**
 	 * Resets pre-violation entries for a given check.
-	 *
-	 * @param Check $check
-	 * @return void
 	 */
 	public function resetPreViolation(Check $check) : void {
 		if (isset($this->preViolation[$check->getName()][$check->getSubType()])) {
@@ -90,9 +86,6 @@ class Violation {
 
 	/**
 	 * Returns the number of violations recorded for the given check.
-	 *
-	 * @param Check $check
-	 * @return int
 	 */
 	public function getViolations(Check $check) : int {
 		return $this->violation[$check->getName()][$check->getSubType()] ??= 0;
@@ -103,9 +96,7 @@ class Violation {
 	 *
 	 * Old violation timestamps are pruned during insertion.
 	 *
-	 * @param Check $check
 	 * @param int|float $amount Optional numeric marker for future use.
-	 * @return void
 	 */
 	public function addViolation(Check $check, int|float $amount = 1) : void {
 		if (isset($this->violation[$check->getName()][$check->getSubType()])) {
@@ -121,9 +112,6 @@ class Violation {
 
 	/**
 	 * Resets violation entries for a given check.
-	 *
-	 * @param Check $check
-	 * @return void
 	 */
 	public function resetViolation(Check $check) : void {
 		if (isset($this->violation[$check->getName()][$check->getSubType()])) {

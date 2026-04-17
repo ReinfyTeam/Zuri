@@ -31,6 +31,31 @@ zuri:
       speed: 1.5
       killaura: 1.2
       reach: 1.2
+  punishments:
+    ban:
+      # The command to execute when a player is banned. 
+      # Use {player} as a placeholder for the player's name.
+      # Available types: [native, command] (if none specified, defaults to command)
+      # If you choose "native", the plugin will use the server's built-in ban system. 
+      # If you choose "command", you can specify a custom command to execute.
+      type: command
+      # To customize ban messages, please see language files to edit manually.
+      command: "ban {player} Unfair Advantage"
+      # Ban Message for native bans. This is ignored if using a command-based ban.
+      message: "Unfair Advantage"
+      # Duration of ban if using the native ban system. 
+      # Use a format like "30d" for 30 days, "12h" for 12 hours, or "permanent" if permantent bans are allowed. 
+      # This is ignored if using a command-based ban.
+      duration: "30d"
+    kick:
+      # The command to execute when a player is kicked.
+      # Use {player} as a placeholder for the player's name.
+      # Available types: [native, command] (if none specified, defaults to command)
+      # If you choose "native", the plugin will use the server's built-in kick system. 
+      # If you choose "command", you can specify a custom command to execute.
+      type: command
+      # To customize kick messages, please see language files to edit manually.
+      command: "kick {player} Unfair Advantage"
     
     
     

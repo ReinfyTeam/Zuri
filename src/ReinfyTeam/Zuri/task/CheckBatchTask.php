@@ -43,13 +43,14 @@ class CheckBatchTask extends Task {
 	 * Called each tick by the scheduler to process queued checks.
 	 */
 	public function onRun() : void {
-		$batchInstance = ZuriAC::getWorker();
+		ZuriAC::getMetricsData()->update();
+		$worker = ZuriAC::getWorker();
 
-		if (!$batchInstance->isReady()) {
+		if (!$worker->isReady()) {
 			return;
 		}
 
-		$batches = $batchInstance->drain();
+		$batches = $worker->drain();
 		foreach ($batches as $batch) {
 			Server::getInstance()->getAsyncPool()->submitTask(
 				new AsyncCheckTask($batch)

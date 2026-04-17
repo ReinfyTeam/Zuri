@@ -54,9 +54,9 @@ class ConfigManager implements ConfigPath {
 		$this->path = $path;
 
 		ZuriAC::getInstance()->saveResource(basename($path));
-        
+
 		$this->config = new Config(
-			$path, 
+			$path,
 			Config::YAML
 		);
 
@@ -65,21 +65,13 @@ class ConfigManager implements ConfigPath {
 
 	/**
 	 * Retrieves nested configuration data by key.
-	 *
-	 * @param string $key
-	 * @param mixed $default
-	 * @return mixed
 	 */
-	public function getData(string $key, mixed $default = null) : mixed {
-		return $this->config->getNested($key, $default ?? $key);
+	public function getData(string $key, mixed $default = null, array $replacements = []) : mixed {
+		return TextUtil::replaceText($this->config->getNested($key, $default ?? $key), $replacements);
 	}
 
 	/**
 	 * Sets nested configuration data and persists the file.
-	 *
-	 * @param string $key
-	 * @param mixed $value
-	 * @return void
 	 */
 	public function setData(string $key, mixed $value) : void {
 		$this->config->setNested($key, $value);
@@ -88,16 +80,13 @@ class ConfigManager implements ConfigPath {
 
 	/**
 	 * Ensures configuration version compatibility and replaces resource if outdated.
-	 *
-	 * @param string $version
-	 * @return void
 	 */
 	public function checkVersion(string $version) : void {
 		if ($this->getData($version) !== null) {
 			if (version_compare($version, $this->getData(self::CONFIG_VERSION), '>=')) {
 				@copy(
 					$this->path,
-					str_replace(pathinfo($this->path, PATHINFO_FILENAME), pathinfo($this->path, PATHINFO_FILENAME) . "-old", $this->path) 
+					str_replace(pathinfo($this->path, PATHINFO_FILENAME), pathinfo($this->path, PATHINFO_FILENAME) . "-old", $this->path)
 				);
 				@unlink($this->path);
 				ZuriAC::getInstance()->saveResource(basename($this->path));
@@ -107,8 +96,6 @@ class ConfigManager implements ConfigPath {
 
 	/**
 	 * Exports the raw configuration data as an array.
-	 *
-	 * @return array
 	 */
 	public function export() : array {
 		return $this->config->getAll();

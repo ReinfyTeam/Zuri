@@ -38,15 +38,11 @@ use pocketmine\player\Player;
  * Manages PlayerZuri instances for active players.
  */
 class PlayerManager {
-	
 	/** @var PlayerZuri[] */
 	private static array $players = [];
-    
+
 	/**
 	 * Returns the PlayerZuri for a given Player, creating it if necessary.
-	 *
-	 * @param Player $player
-	 * @return PlayerZuri
 	 */
 	public static function get(Player $player) : PlayerZuri {
 		$playerZuri = self::$players[$player->getName()] ??= PlayerZuri::create($player);
@@ -54,22 +50,16 @@ class PlayerManager {
 
 		return $playerZuri;
 	}
-    
+
 	/**
 	 * Adds a new PlayerZuri for a player.
-	 *
-	 * @param Player $player
-	 * @return void
 	 */
 	public static function add(Player $player) : void {
 		self::$players[$player->getName()] = PlayerZuri::create($player);
 	}
-    
+
 	/**
 	 * Removes a PlayerZuri for a player.
-	 *
-	 * @param Player $player
-	 * @return void
 	 */
 	public static function remove(Player $player) : void {
 		unset(self::$players[$player->getName()]);

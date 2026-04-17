@@ -89,6 +89,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $blockAbove = false;
 	private bool $noClientPredictions = false;
 	private bool $startedJumping = false;
+	private bool $groundSolid = false;
 
 	private float $lastGroundY = 0.0;
 	private float $lastNoGroundY = 0.0;
@@ -134,9 +135,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	/**
 	 * Factory: creates a new PlayerZuri for a Player instance.
-	 *
-	 * @param Player $player
-	 * @return self
 	 */
 	public static function create(Player $player) : self {
 		return new self($player);
@@ -144,9 +142,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	/**
 	 * Gathers and updates internal state from the provided player.
-	 *
-	 * @param Player $player
-	 * @return self
 	 */
 	public function updateData(Player $player) : self {
 		$this->setNoClientPredictions($player->hasNoClientPredictions());
@@ -161,8 +156,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	/**
 	 * Returns the cached motion vector for the player.
-	 *
-	 * @return Vector3
 	 */
 	public function getMotion() : Vector3 {
 		return $this->motion ??= Vector3::zero();
@@ -170,9 +163,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	/**
 	 * Set the current motion vector for the player.
-	 *
-	 * @param Vector3 $motion
-	 * @return void
 	 */
 	public function setMotion(Vector3 $motion) : void {
 		$this->motion = $motion;
@@ -548,7 +538,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	 *
 	 * @param Vector3 $from Previous position vector.
 	 * @param Vector3 $to Next position vector.
-	 * @return void
 	 */
 	public function setMovement(Vector3 $from, Vector3 $to) : void {
 		$this->movement = ["from" => $from, "to" => $to];
@@ -694,10 +683,16 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		return (microtime(true) - $this->explosionTicks) * 20;
 	}
 
+	public function isGroundSolid() : bool {
+		return $this->groundSolid;
+	}
+
+	public function setGroundSolid(bool $groundSolid) : void {
+		$this->groundSolid = $groundSolid;
+	}
+
 	/**
 	 * Serializes relevant player-tracking data for async checks.
-	 *
-	 * @return array
 	 */
 	public function jsonSerialize() : array {
 		return [
@@ -750,7 +745,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isBlockAbove" => $this->isBlockAbove(),
 			"isRecentlyCancelledEvent" => $this->isRecentlyCancelledEvent(),
 			"isStartedJumping" => $this->isStartedJumping(),
-			"explosionTicks" => $this->getExplosionTicks()
+			"explosionTicks" => $this->getExplosionTicks(),
+			"isGroundSolid" => $this->isGroundSolid()
 		];
 	}
 }

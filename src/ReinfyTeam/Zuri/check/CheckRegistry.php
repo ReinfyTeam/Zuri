@@ -1,4 +1,5 @@
 <?php
+
 /*
  *
  *  ____           _            __           _____
@@ -111,5 +112,5 @@ class CheckRegistry {
 		return new self([
 			new SpeedA()
 		]);
-    }
+	}
 }
