@@ -2,7 +2,7 @@
 
 zuri:
   # Constant Configuration: For constant updating the suitable performance variables based on development testing.
-  config-version: 1.0.0
+  config-version: 0.4.0
   speed:
     friction_factor: 1.0
     jump_factor: 0.8

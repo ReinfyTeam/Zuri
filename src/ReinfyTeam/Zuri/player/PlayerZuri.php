@@ -1,17 +1,56 @@
 <?php
 
+/*
+ *
+ *  ____           _            __           _____
+ * |  _ \    ___  (_)  _ __    / _|  _   _  |_   _|   ___    __ _   _ __ ___
+ * | |_) |  / _ \ | | | '_ \  | |_  | | | |   | |    / _ \  / _` | | '_ ` _ \
+ * |  _ <  |  __/ | | | | | | |  _| | |_| |   | |   |  __/ | (_| | | | | | | |
+ * |_| \_\  \___| |_| |_| |_| |_|    \__, |   |_|    \___|  \__,_| |_| |_| |_|
+ *                                   |___/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zuri attempts to enforce "vanilla Minecraft" mechanics, as well as preventing
+ * players from abusing weaknesses in Minecraft or its protocol, making your server
+ * more safe. Organized in different sections, various checks are performed to test
+ * players doing, covering a wide range including flying and speeding, fighting
+ * hacks, fast block breaking and nukers, inventory hacks, chat spam and other types
+ * of malicious behaviour.
+ *
+ * @author ReinfyTeam
+ * @link https://github.com/ReinfyTeam/
+ *
+ *
+ */
+
+declare(strict_types=1);
+
 namespace ReinfyTeam\Zuri\player;
 
 use JsonSerializable;
-use ReinfyTeam\Zuri\check\Check;
-use ReinfyTeam\Zuri\utils\Utils;
-use pocketmine\player\Player;
 use pocketmine\entity\Location;
-use pocketmine\world\Position;
 use pocketmine\math\Vector3;
+use pocketmine\player\Player;
+use pocketmine\world\Position;
+use ReinfyTeam\Zuri\utils\Utils;
+use function abs;
+use function array_filter;
+use function count;
+use function microtime;
 
+/**
+ * Represents internal tracking data for a player used by ZuriAC checks.
+ *
+ * Stores movement, timing, and environmental state used by checks.
+ */
 class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath {
-
+	/**
+	 * @param Player $player The underlying PocketMine player instance.
+	 */
 	public function __construct(
 		private readonly Player $player
 	) {
@@ -50,7 +89,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $blockAbove = false;
 	private bool $noClientPredictions = false;
 	private bool $startedJumping = false;
-	
+
 	private float $lastGroundY = 0.0;
 	private float $lastNoGroundY = 0.0;
 	private float $lastDelayedMovePacket = 0.0;
@@ -68,7 +107,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $teleportCommandTicks = 0.0;
 	private float $eventCancelled = 0.0;
 	private float $explosionTicks = 0.0;
-	
+
 	private int $blocksBrokeASec = 0;
 	private int $blocksPlacedASec = 0;
 
@@ -77,7 +116,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	private array $movement;
 	private array $cpsData = [];
-	
+
 	private float $pitch = 0.0;
 	private float $yaw = 0.0;
 	private float $headYaw = 0.0;
@@ -94,14 +133,20 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private array $externalData = [];
 
 	/**
-	 * Create a new instance class.
+	 * Factory: creates a new PlayerZuri for a Player instance.
+	 *
+	 * @param Player $player
+	 * @return self
 	 */
 	public static function create(Player $player) : self {
 		return new self($player);
 	}
 
 	/**
-	 * Gather and update data from player.
+	 * Gathers and updates internal state from the provided player.
+	 *
+	 * @param Player $player
+	 * @return self
 	 */
 	public function updateData(Player $player) : self {
 		$this->setNoClientPredictions($player->hasNoClientPredictions());
@@ -113,15 +158,26 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 		return $this;
 	}
-	
+
+	/**
+	 * Returns the cached motion vector for the player.
+	 *
+	 * @return Vector3
+	 */
 	public function getMotion() : Vector3 {
 		return $this->motion ??= Vector3::zero();
 	}
 
+	/**
+	 * Set the current motion vector for the player.
+	 *
+	 * @param Vector3 $motion
+	 * @return void
+	 */
 	public function setMotion(Vector3 $motion) : void {
 		$this->motion = $motion;
 	}
-	
+
 	public function isInventoryOpen() : bool {
 		return $this->inventoryOpen;
 	}
@@ -129,7 +185,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function setInventoryOpen(bool $data) : void {
 		$this->inventoryOpen = $data;
 	}
-	
+
 	public function isTransactionArmorInventory() : bool {
 		return $this->transactionArmorInventory;
 	}
@@ -137,7 +193,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function setTransactionArmorInventory(bool $data) : void {
 		$this->transactionArmorInventory = $data;
 	}
-	
+
 	public function isUnderBlock() : bool {
 		return $this->underBlock;
 	}
@@ -157,7 +213,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		}
 		return true;
 	}
-	
+
 	public function isTopBlock() : bool {
 		return $this->topBlock;
 	}
@@ -165,7 +221,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function setTopBlock(bool $data) : void {
 		$this->topBlock = $data;
 	}
-	
+
 	public function isOnAdhesion() : bool {
 		return $this->onAdhesion;
 	}
@@ -173,7 +229,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function setOnAdhesion(bool $data) : void {
 		$this->onAdhesion = $data;
 	}
-	
+
 	public function isOnPlant() : bool {
 		return $this->onPlant;
 	}
@@ -223,7 +279,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function getHurtTicks() : float {
 		return (microtime(true) - $this->hurtTicks) * 20;
 	}
-	
+
 	public function isOnDoor() : bool {
 		return $this->onDoor;
 	}
@@ -231,7 +287,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function setOnDoor(bool $data) : void {
 		$this->onDoor = $data;
 	}
-	
+
 	public function isOnCarpet() : bool {
 		return $this->onCarpet;
 	}
@@ -239,7 +295,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function setOnCarpet(bool $data) : void {
 		$this->onCarpet = $data;
 	}
-	
+
 	public function isOnPlate() : bool {
 		return $this->onPlate;
 	}
@@ -247,7 +303,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function setOnPlate(bool $data) : void {
 		$this->onPlate = $data;
 	}
-	
+
 	public function isOnSnow() : bool {
 		return $this->onSnow;
 	}
@@ -255,7 +311,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function setOnSnow(bool $data) : void {
 		$this->onSnow = $data;
 	}
-	
+
 	public function isSprinting() : bool {
 		return $this->getPlayer()->isSprinting();
 	}
@@ -263,7 +319,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function setSprinting(bool $data) : void {
 		$this->getPlayer()->setSprinting($data);
 	}
-	
+
 	public function isOnGround() : bool {
 		return $this->onGround;
 	}
@@ -478,10 +534,22 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->deathTicks = $data;
 	}
 
+	/**
+	 * Returns the player's last movement snapshot.
+	 *
+	 * @return array{from:Vector3,to:Vector3}
+	 */
 	public function getMovement() : array {
 		return $this->movement ??= ["from" => Vector3::zero(), "to" => Vector3::zero()];
 	}
 
+	/**
+	 * Set the player's movement snapshot.
+	 *
+	 * @param Vector3 $from Previous position vector.
+	 * @param Vector3 $to Next position vector.
+	 * @return void
+	 */
 	public function setMovement(Vector3 $from, Vector3 $to) : void {
 		$this->movement = ["from" => $from, "to" => $to];
 	}
@@ -626,6 +694,11 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		return (microtime(true) - $this->explosionTicks) * 20;
 	}
 
+	/**
+	 * Serializes relevant player-tracking data for async checks.
+	 *
+	 * @return array
+	 */
 	public function jsonSerialize() : array {
 		return [
 			"name" => $this->getPlayer()->getName(),
@@ -663,7 +736,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"motion" => Utils::vector3ToArray($this->getMotion()),
 			"onlineTime" => $this->getOnlineTime(),
 			"movement" => [
-				"from" => Utils::vector3ToArray($this->getMovement()["from"]), 
+				"from" => Utils::vector3ToArray($this->getMovement()["from"]),
 				"to" => Utils::vector3ToArray($this->getMovement()["to"])
 			],
 			"isCurrentChunkLoaded" => $this->isCurrentChunkLoaded(),

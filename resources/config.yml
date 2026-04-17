@@ -1,8 +1,8 @@
-# Zuri Anticheat v2.0.0
+# Zuri Anticheat v1.4.0-BETA
 # Copyright (c) 2024-2026 ReinfyTeam
 
 zuri:
-  config_version: 2.0.0
+  config_version: 0.4.0
   # Asynchronous processing settings
   # Adjust these values based on your server's performance and workload.
   async:

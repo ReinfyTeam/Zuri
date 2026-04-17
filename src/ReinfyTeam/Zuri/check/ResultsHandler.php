@@ -1,39 +1,131 @@
 <?php
 
+/*
+ *
+ *  ____           _            __           _____
+ * |  _ \    ___  (_)  _ __    / _|  _   _  |_   _|   ___    __ _   _ __ ___
+ * | |_) |  / _ \ | | | '_ \  | |_  | | | |   | |    / _ \  / _` | | '_ ` _ \
+ * |  _ <  |  __/ | | | | | | |  _| | |_| |   | |   |  __/ | (_| | | | | | | |
+ * |_| \_\  \___| |_| |_| |_| |_|    \__, |   |_|    \___|  \__,_| |_| |_| |_|
+ *                                   |___/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Zuri attempts to enforce "vanilla Minecraft" mechanics, as well as preventing
+ * players from abusing weaknesses in Minecraft or its protocol, making your server
+ * more safe. Organized in different sections, various checks are performed to test
+ * players doing, covering a wide range including flying and speeding, fighting
+ * hacks, fast block breaking and nukers, inventory hacks, chat spam and other types
+ * of malicious behaviour.
+ *
+ * @author ReinfyTeam
+ * @link https://github.com/ReinfyTeam/
+ *
+ *
+ */
+
+declare(strict_types=1);
+
 namespace ReinfyTeam\Zuri\check;
 
 use pocketmine\Server;
+use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\ZuriAC;
-use ReinfyTeam\Zuri\config\ConfigPath;
+use pocketmine\player\Player;
+use function count;
+use function max;
+use function min;
+use function strtolower;
+use function unserialize;
 
 /**
  * Handles the results of checks and applies violations to players accordingly.
- * Responsible handling results and thresholds violations depending on the player conditions.
+ *
+ * This class receives check results produced by async worker tasks and applies
+ * pre-violations and violations to players. Thresholds are adjusted based on
+ * server conditions such as ping, TPS and player load.
  */
 final class ResultsHandler {
-    
-    /**
-     * Responsible for handling punishments within the server.
-     * Automatically adjust threshold based on the player condition.
-     */
-    public static function handle(array $results) : void {
-        if (($player = Server::getInstance()->getPlayerExact($results["player"])) !== null) {
-            $playerZuri = PlayerManager::get($player);
-            if ($results["result"]["failed"]) {
-                $playerZuri->addViolation($results["check"], self::adjustThreshold($player, $results["check"]));
-            }
-        }
-    }
 
 	/**
-	 * Adjusts the threshold for punishments.
+	 * Handles the result of a check and applies punishments if necessary.
+	 * Automatically adjusts threshold based on the player condition.
+	 *
+	 *	@param array $results The result data from a check.
+	 *	@return void
 	 */
-    public static function adjustThreshold(Player $player, Check $checkType) : float {
-        $multiplier = 1.0;
+	public static function handle(array $results) : void {
+		if (($player = Server::getInstance()->getPlayerExact($results["player"])) !== null) {
+			$playerZuri = PlayerManager::get($player);
+
+			$check = unserialize($results["check"]);
+
+			if ($results["result"]["failed"]) {
+				self::handlePunishment($player, $check);
+			}
+
+			if ($playerZuri->isDebug()) {
+			}
+		}
+	}
+
+	/**
+	 * Apply punishment logic for a failed check.
+	 *
+	 * This updates the player's pre-violation and violation counters and
+	 * performs configured punishments (kick/ban) when thresholds are reached.
+	 *
+	 * @param Player $player The player to punish.
+	 * @param Check $check The check that was failed.
+	 * @return void
+	 */
+	public static function handlePunishment(Player $player, Check $check) : void {
+		$threshold = self::adjustThreshold($player, $check);
+
+		$playerZuri = PlayerManager::get($player);
+
+		$reachedMaxPreViolations = $playerZuri->getPreViolation($check->getName()) > $check->getMaxPreViolation();
+		$reachedMaxViolations = $playerZuri->getViolation($check->getName()) > $check->getMaxViolation();
+
+		$playerZuri->addPreViolation($check->getName(), $threshold);
+
+		if ($reachedMaxPreViolations) {
+			$playerZuri->addViolation($check->getName(), $threshold);
+			$playerZuri->resetPreViolation($check->getName());
+		}
+
+		if ($reachedMaxPreViolations && $reachedMaxViolations) {
+			$punishment = $check->getPunishment();
+
+			match (strtolower($punishment)) {
+				"kick" => $player->kick(),
+				"ban" => "",
+				default => null
+			};
+
+			$playerZuri->resetViolation($check->getName());
+		}
+	}
+
+	/**
+	 * Adjust the punishment threshold based on player and server conditions.
+	 *
+	 * The returned threshold should be >= base threshold; it accounts for ping,
+	 * TPS and server load to allow more tolerance during laggy conditions.
+	 *
+	 * @param Player $player
+	 * @param Check $checkType
+	 * @return float
+	 */
+	public static function adjustThreshold(Player $player, Check $checkType) : float {
+		$multiplier = 1.0;
 
 		$server = Server::getInstance();
-		
+
 		// Apply ping adjustment
 		$ping = $player->getNetworkSession()->getPing() ?? 0;
 		$multiplier *= self::getPingMultiplier($ping, $checkType);
@@ -56,9 +148,15 @@ final class ResultsHandler {
 
 		// Thresholds should only increase (more lenient), never decrease
 		return $baseThreshold * max(1.0, $multiplier);
-    }
+	}
 
-    public static function getPingMultiplier(int $ping, Check $checkType) : float {
+	/**
+	 * Calculate a multiplier based on player ping.
+	 *	@param int $ping
+	 * @param Check $checkType
+	 * @return float
+	 */
+	public static function getPingMultiplier(int $ping, Check $checkType) : float {
 		// Movement checks are more sensitive to ping
 		$sensitivity = ZuriAC::getConfigManager()->getData(ConfigPath::THRESHOLDS_PING . strtolower($checkType->getName()), ZuriAC::getConfigManager()->getData(ConfigPath::THRESHOLD_PING_DEFAULT_MULTIPLIER, 1.0));
 
@@ -71,11 +169,15 @@ final class ResultsHandler {
 			$ping < 400 => 1.0 + (0.7 * $sensitivity),
 			default => 1.0 + (1.0 * $sensitivity),
 		};
+	}
 
-
-    }
-
-    public static function getLoadMultiplier(float $loadFactor) : float {
+	/**
+	 * Calculate a multiplier based on server load factor.
+	 *
+	 * @param float $loadFactor Value in [0,1] describing normalized server load.
+	 * @return float
+	 */
+	public static function getLoadMultiplier(float $loadFactor) : float {
 		// Load affects all checks roughly equally
 		return match (true) {
 			$loadFactor < 0.3 => 1.0,
@@ -86,7 +188,14 @@ final class ResultsHandler {
 		};
 	}
 
-    public static function getTpsMultiplier(float $tps, Check $checkType) : float {
+	/**
+	 * Calculate a multiplier based on server TPS.
+	 *
+	 * @param float $tps Current server ticks per second.
+	 * @param Check $checkType
+	 * @return float
+	 */
+	public static function getTpsMultiplier(float $tps, Check $checkType) : float {
 		// Timer checks are most sensitive to TPS fluctuation
 
 		$sensitivity = ZuriAC::getConfigManager()->getData(ConfigPath::THRESHOLDS_TPS . strtolower($checkType->getName()), ZuriAC::getConfigManager()->getData(ConfigPath::THRESHOLD_TPS_DEFAULT_MULTIPLIER, 1.0));
@@ -100,6 +209,4 @@ final class ResultsHandler {
 			default => 1.0 + (1.2 * $sensitivity), // Severe lag
 		};
 	}
-
-
 }

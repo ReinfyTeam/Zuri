@@ -14,6 +14,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
+ * Zuri attempts to enforce "vanilla Minecraft" mechanics, as well as preventing
+ * players from abusing weaknesses in Minecraft or its protocol, making your server
+ * more safe. Organized in different sections, various checks are performed to test
+ * players doing, covering a wide range including flying and speeding, fighting
+ * hacks, fast block breaking and nukers, inventory hacks, chat spam and other types
+ * of malicious behaviour.
+ *
  * @author ReinfyTeam
  * @link https://github.com/ReinfyTeam/
  *
@@ -44,30 +51,36 @@ $outputPath = getcwd() . DIRECTORY_SEPARATOR . $pluginYml["name"] . ".phar";
 $phar = new Phar($outputPath);
 $phar->buildFromDirectory($to);
 
-if (COMPRESS_FILES) $phar->compressFiles(COMPRESSION);
+if (COMPRESS_FILES) {
+	$phar->compressFiles(COMPRESSION);
+}
 
 removeDirectory($to);
 
 print("Succeed! Output path: $outputPath");
 
-function copyDirectory(string $from, string $to) : void{
+function copyDirectory(string $from, string $to) : void {
 	@mkdir($to, 0777, true);
 	$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($from, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
-	foreach($files as $fileInfo){
+	foreach ($files as $fileInfo) {
 		$target = str_replace($from, $to, $fileInfo->getPathname());
-		if($fileInfo->isDir()) @mkdir($target, 0777, true);
-		else{
+		if ($fileInfo->isDir()) {
+			@mkdir($target, 0777, true);
+		} else {
 			$contents = file_get_contents($fileInfo->getPathname());
 			file_put_contents($target, $contents);
 		}
 	}
 }
 
-function removeDirectory(string $dir) : void{
+function removeDirectory(string $dir) : void {
 	$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
-	foreach($files as $fileInfo){
-		if($fileInfo->isDir()) rmdir($fileInfo->getPathname());
-		else unlink($fileInfo->getPathname());
+	foreach ($files as $fileInfo) {
+		if ($fileInfo->isDir()) {
+			rmdir($fileInfo->getPathname());
+		} else {
+			unlink($fileInfo->getPathname());
+		}
 	}
 	rmdir($dir);
 }
