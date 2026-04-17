@@ -67,7 +67,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $lastMoveTick = 0.0;
 	private float $teleportCommandTicks = 0.0;
 	private float $eventCancelled = 0.0;
-	private float $projectileTicks = 0.0;
+	private float $explosionTicks = 0.0;
 	
 	private int $blocksBrokeASec = 0;
 	private int $blocksPlacedASec = 0;
@@ -618,6 +618,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->startedJumping = $startedJumping;
 	}
 
+	public function setExplosionTicks(float $explosionTick) : void {
+		$this->explosionTick = $explosionTick;
+	}
+
+	public function getExplosionTicks() : float {
+		return (microtime(true) - $this->explosionTicks) * 20;
+	}
+
 	public function jsonSerialize() : array {
 		return [
 			"name" => $this->getPlayer()->getName(),
@@ -668,7 +676,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"externalData" => $this->getAllExternalData(),
 			"isBlockAbove" => $this->isBlockAbove(),
 			"isRecentlyCancelledEvent" => $this->isRecentlyCancelledEvent(),
-			"isStartedJumping" => $this->isStartedJumping()
+			"isStartedJumping" => $this->isStartedJumping(),
+			"explosionTicks" => $this->getExplosionTicks()
 		];
 	}
 }

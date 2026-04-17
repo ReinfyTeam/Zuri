@@ -19,7 +19,7 @@ abstract class Check {
 	/**
 	 * Responsible for building array results for module.
 	 */
-	public static function buildResult(bool $failed, array $debug) : array {
+	public static function buildResult(bool $failed, array $debug = []) : array {
 		return ["failed" => $failed, "debug" => $debug];
 	}
 }

@@ -21,18 +21,12 @@ class CheckWorker {
     /** @var array<int, array> */
     private array $queue = [];
 
-    public function queue(array|PlayerZuri $data, Check $check): void {
-        if ($check->getType() === Check::TYPE_PLAYER || $check->getType() === Check::TYPE_PACKET) {
-            $this->queue[] = [
-                'type' => $check->getType(), 
-                'data' => ['player' => $data, 'check' => $check]
-            ];
-        } else {
-            $this->queue[] = [
-                'type' => $check->getType(), 
-                'data' => ['eventData' => $data, 'check' => $check]
-            ];
-        }
+    public function queue(array $data, Check $check): void {
+        $this->queue[] = [
+            'type' => $check->getType(), 
+            'checkData' => $data,
+            'check' => $check
+        ];
     }
 
     public function getSize(): int {
@@ -50,7 +44,6 @@ class CheckWorker {
         for ($i = 0; $i < $workers; $i++) {
             $batches[] = array_splice($this->queue, 0, $this->getBatchSize());
         }
-
         return $batches;
     }
 

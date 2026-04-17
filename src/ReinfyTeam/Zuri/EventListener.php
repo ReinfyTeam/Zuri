@@ -26,6 +26,21 @@ use ReinfyTeam\Zuri\player\ExternalDataPath;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\inventory\InventoryOpenEvent;
 use pocketmine\event\inventory\InventoryCloseEvent;
+use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\ProjectileHitEvent;
+use pocketmine\event\player\PlayerDeathEvent;
+use pocketmine\inventory\ArmorInventory;
+use pocketmine\math\Vector3;
+use pocketmine\event\player\PlayerChatEvent;
+use pocketmine\event\player\PlayerItemHeldEvent;
+use pocketmine\event\entity\EntityRegainHealthEvent;
+use pocketmine\event\player\PlayerItemConsumeEvent;
+use pocketmine\event\player\PlayerDropItemEvent;
+use pocketmine\event\entity\ProjectileLaunchEvent;
+use pocketmine\event\server\CommandEvent;
+use pocketmine\event\entity\EntityShootBowEvent;
+use ReflectionClass;
 
 class EventListener implements Listener {
 
@@ -92,7 +107,10 @@ class EventListener implements Listener {
             $playerZuri->setExternalData(ExternalDataPath::ACCELERATION, $acceleration);
         }
 
-        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PACKET);
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($packet))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PACKET);
     }
 
     public function onPlayerMove(PlayerMoveEvent $event) : void {
@@ -134,7 +152,10 @@ class EventListener implements Listener {
 		$playerZuri->setLastMoveTick((double) Server::getInstance()->getTick());
 		$playerZuri->setBlockAbove(BlockUtil::getBlockAbove($player)->isSolid());
 
-        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PACKET);
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PLAYER);
     }
 
     public function onMotion(EntityMotionEvent $event) : void {
@@ -154,6 +175,11 @@ class EventListener implements Listener {
         $newMotion = $event->getVector();
 
         $playerZuri->setMotion($currentMotion->addVector($newMotion));
+
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PLAYER);
     }
 
     public function onInventoryTransaction(InventoryTransactionEvent $event) : void {
@@ -173,7 +199,10 @@ class EventListener implements Listener {
 			$playerZuri->setTransactionArmorInventory(($inventory instanceof ArmorInventory));
 		}
 
-        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PLAYER);
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PLAYER);
     }
 
     public function onInventoryOpen(InventoryOpenEvent $event) : void {
@@ -191,7 +220,10 @@ class EventListener implements Listener {
 
         $playerZuri->setInventoryOpen(true);
 
-        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PLAYER);
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PLAYER);
     }
 
     public function onInventoryClose(InventoryCloseEvent $event) : void {
@@ -209,7 +241,10 @@ class EventListener implements Listener {
 
         $playerZuri->setInventoryOpen(false);
 
-        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PLAYER);
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PLAYER);
 	}
 
     public function onEntityTeleport(EntityTeleportEvent $event) : void {
@@ -227,7 +262,16 @@ class EventListener implements Listener {
 
         $playerZuri->setTeleportTicks(microtime(true));
 
-        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PLAYER);
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player,
+            "data" => [
+                "from" => Utils::vector3ToArray($event->getFrom()->asVector3()),
+                "fromWorld" => $event->getFrom()->getWorld()->getFolderName(),
+                "to" => Utils::vector3ToArray($event->getTo()->asVector3()),
+                "toWorld" => $event->getTo()->getWorld()->getFolderName()
+            ]
+        ], Check::TYPE_PLAYER);
     }
 
     public function onPlayerJump(PlayerJumpEvent $event) : void {
@@ -245,7 +289,10 @@ class EventListener implements Listener {
 
         $playerZuri->setJumpTicks(microtime(true));
 
-        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PLAYER);
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PLAYER);
     }
 
     public function onPlayerJoin(PlayerJoinEvent $event) : void {
@@ -259,21 +306,26 @@ class EventListener implements Listener {
 
         $playerZuri->setJoinedAtTheTime(microtime(true));
 
-        ZuriAC::getCheckRegistry()->spawnCheck($player, Check::TYPE_PLAYER);
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PLAYER);
     }
 
     public function onPlayerPreLogin(PlayerPreLoginEvent $event) : void {
         ZuriAC::getCheckRegistry()->spawnCheck([
-            "ip" => $event->getIp(),
-            "port" => $event->getPort(),
-            "port" => $event->getPort(),
-            "isAuthRequired" => $event->isAuthRequired(),
-            "getKickFlags" => $event->getKickFlags(),
-            "isKickFlagSet" => $event->isKickFlagSet(),
-            "getUsername" => $event->getPlayerInfo()->getUsername(),
-            "getLocale" => $event->getPlayerInfo()->getLocale(),
-            "getUuid" => $event->getPlayerInfo()->getUuid(),
-            "getExtraData" => $event->getPlayerInfo()->getExtraData()
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "data" => [
+                "ip" => $event->getIp(),
+                "port" => $event->getPort(),
+                "isAuthRequired" => $event->isAuthRequired(),
+                "getKickFlags" => $event->getKickFlags(),
+                "isKickFlagSet" => $event->isKickFlagSet(),
+                "getUsername" => $event->getPlayerInfo()->getUsername(),
+                "getLocale" => $event->getPlayerInfo()->getLocale(),
+                "getUuid" => $event->getPlayerInfo()->getUuid(),
+                "getExtraData" => $event->getPlayerInfo()->getExtraData()
+            ]
         ], Check::TYPE_EVENT);
     }
 
@@ -284,23 +336,24 @@ class EventListener implements Listener {
             return;
         }
 
+        $playerZuri = PlayerManager::get($player);
+
         if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
-
-		if (
-			$event->getCause() === EntityDamageEvent::CAUSE_ENTITY_ATTACK ||
-			$event->getCause() === EntityDamageEvent::CAUSE_PROJECTILE ||
-			$event->getCause() === EntityDamageEvent::CAUSE_SUFFOCATION ||
-			$event->getCause() === EntityDamageEvent::CAUSE_VOID ||
-			$event->getCause() === EntityDamageEvent::CAUSE_FALLING_BLOCK
-		) {
-			return;
-		}
-
-        $playerZuri = PlayerManager::get($player);
 		
         $playerZuri->setHurtTicks(microtime(true));
+
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player,
+            "data" => [
+                "cause" => $event->getCause(),
+                "position" => Utils::vector3ToArray($event->getEntity()->getPosition()->asVector3()),
+                "pitch" => $player->getLocation()->getPitch(),
+                "yaw" => $player->getLocation()->getYaw()
+            ]
+        ], Check::TYPE_PLAYER);
 	}
 
     public function onEntityDamageByEntity(EntityDamageByEntityEvent $event) : void {
@@ -315,22 +368,238 @@ class EventListener implements Listener {
             return;
         }
 
+        $playerZuri = PlayerManager::get($player);
+
         if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
 
         $cause = $event->getCause();
-        $playerZuri = PlayerManager::get($player);
-        $damagerZuri = PlayerManager::get($player);
-
-        if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK) {
-            $playerZuri->setAttackTicks(microtime(true));
-            $damagerZuri->setAttackTicks(microtime(true));
-        }
 
         if ($cause === EntityDamageEvent::CAUSE_ENTITY_EXPLOSION || $cause === EntityDamageEvent::CAUSE_BLOCK_EXPLOSION) {
             $playerZuri->setExplosionTicks(microtime(true));
-            $damagerZuri->setExplosionTicks(microtime(true));
         }
+
+        if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK) {
+            $damagerZuri = PlayerManager::get($damager);
+
+            $playerZuri->setAttackTicks(microtime(true));
+            $damagerZuri->setAttackTicks(microtime(true));
+
+            ZuriAC::getCheckRegistry()->spawnCheck([
+                "type" => (new ReflectionClass($event))->getShortName(),
+                "player" => $damager,
+                "data" => [
+                    "position" => Utils::vector3ToArray($player->getPosition()->asVector3()),
+                    "pitch" => $player->getLocation()->getPitch(),
+                    "yaw" => $player->getLocation()->getYaw()
+                ]
+            ], Check::TYPE_PLAYER);
+        }
+    }
+
+    public function onProjectileHit(ProjectileHitEvent $event) {
+        $projectile = $event->getEntity();
+		$player = $projectile->getOwningEntity();
+
+        if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+            $playerZuri->setRecentlyCancelledEvent(microtime(true));
+        }
+
+        $playerZuri->setProjectileAttackTicks(microtime(true));
+
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player,
+            "data" => [
+                "projectileType" => $projectile->getTypeId(),
+                "hitEntity" => $event->getHitEntity() ? $event->getHitEntity()->getId() : null,
+                "hitBlock" => $event->getHitBlock() ? $event->getHitBlock()->getPosition() : null,
+            ]
+        ], Check::TYPE_PLAYER);
+    }
+
+    public function onPlayerDeath(PlayerDeathEvent $event) : void {
+        $player = $event->getPlayer();
+
+        if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        $playerZuri->setDeathTicks(microtime(true));
+    }
+
+    public function onPlayerChat(PlayerChatEvent $event) : void {
+        $player = $event->getPlayer();
+
+        if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+            $playerZuri->setRecentlyCancelledEvent(microtime(true));
+        }
+
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PLAYER);
+    }
+
+    public function onPlayerItemHeld(PlayerItemHeldEvent $event) : void {
+        $player = $event->getPlayer();
+
+        if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+            $playerZuri->setRecentlyCancelledEvent(microtime(true));
+        }
+
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PLAYER);
+    }
+
+    public function onPlayerRegen(EntityRegainHealthEvent $event) : void {
+        $player = $event->getEntity();
+
+        if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+            $playerZuri->setRecentlyCancelledEvent(microtime(true));
+        }
+
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player,
+            "data" => [
+                "amount" => $event->getAmount(),
+                "regainReason" => $event->getRegainReason()
+            ]
+        ], Check::TYPE_PLAYER);
+    }
+
+    public function onCommandEvent(CommandEvent $event) : void {
+        $sender = $event->getSender();
+
+        if (!$sender instanceof Player || !$sender->isConnected() || !$sender->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($sender);
+
+        if ($event->isCancelled()) {
+            $playerZuri->setRecentlyCancelledEvent(microtime(true));
+        }
+
+        $playerZuri->setCommandTicks(microtime(true));
+
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $sender,
+            "data" => [
+                "command" => $event->getCommand()
+            ]
+        ], Check::TYPE_PLAYER);
+    }
+
+    public function onEntityShootBowEvent(EntityShootBowEvent $event) : void {
+        $player = $event->getEntity();
+
+        if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+            $playerZuri->setRecentlyCancelledEvent(microtime(true));
+        }
+
+        $playerZuri->setBowShotTicks(microtime(true));
+
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PLAYER);
+    }
+
+    public function onPlayerItemConsume(PlayerItemConsumeEvent $event) : void {
+        $player = $event->getPlayer();
+
+        if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+            $playerZuri->setRecentlyCancelledEvent(microtime(true));
+        }
+
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PLAYER);
+    }
+
+    public function onDropItem(PlayerDropItemEvent $event) : void {
+        $player = $event->getPlayer();
+
+        if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+            $playerZuri->setRecentlyCancelledEvent(microtime(true));
+        }
+
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player,
+            "data" => [
+                "itemType" => $event->getItem()->getTypeId()
+            ]
+        ], Check::TYPE_PLAYER);
+    }
+
+    public function onProjectileLaunch(ProjectileLaunchEvent $event) : void {
+        $player = $event->getEntity()->getOwningEntity();
+
+        if (!$player instanceof Player || !$player->isConnected() || !$player->spawned) {
+            return;
+        }
+
+        $playerZuri = PlayerManager::get($player);
+
+        if ($event->isCancelled()) {
+            $playerZuri->setRecentlyCancelledEvent(microtime(true));
+        }
+    
+        ZuriAC::getCheckRegistry()->spawnCheck([
+            "type" => (new ReflectionClass($event))->getShortName(),
+            "player" => $player
+        ], Check::TYPE_PLAYER);
     }
 }

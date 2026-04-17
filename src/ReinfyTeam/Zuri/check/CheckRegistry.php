@@ -28,10 +28,9 @@ class CheckRegistry {
     /**
      * Spawns all check based on its type.
      */
-    public function spawnCheck(Player $player, int $type) : void {
-        $playerZuri = PlayerManager::get($player);
+    public function spawnCheck(array $data, int $type) : void {
         foreach ($this->getChecksByType($type) as $check) {
-            ZuriAC::getWorker()->queue($playerZuri, $check);
+            ZuriAC::getWorker()->queue($data, $check);
         }
     }
 

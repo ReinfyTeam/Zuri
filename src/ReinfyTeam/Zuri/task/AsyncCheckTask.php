@@ -16,12 +16,25 @@ class AsyncCheckTask extends AsyncTask {
 	
 	public function __construct(array $batchCheck) {
 		$checkBatch = [];
-		foreach ($batchCheck as $checkData) {
-			$eventData = (isset($checkData["data"]["eventData"]) ? serialize($checkData["data"]["eventData"]) : null);
-			$player = $checkData["data"]["player"]->jsonSerialize();
-			$check = serialize($checkData["data"]["check"]);
+		foreach ($batchCheck as $data) {
+			$checkData = $data["checkData"];
+
+			$playerData = PlayerManager::get($checkData["player"]);
+
+			$player = isset($checkData["player"]) ? $playerData->jsonSerialize() : null;
+			$check = serialize($checkData["check"]);
+
 			$constants = serialize(ZuriAC::getConstants()->export());
-			$checkBatch[] = serialize(["eventData" => $eventData, "player" => $player, "check" => $check, "constants" => $constants]);
+
+			$data = isset($checkData["data"]) ? serialize($checkData["data"]) : null;
+			
+			$checkBatch[] = serialize([
+				"type" => $checkData["type"],
+				"player" => $player,
+				"check" => $check,
+				"data" => $data,
+				"constants" => $constants
+			]);
 		}
 
 		$this->batchCheck = serialize($checkBatch);
@@ -32,15 +45,24 @@ class AsyncCheckTask extends AsyncTask {
 		$results = [];
 		foreach (unserialize($this->batchCheck) as $checkData) {
 			$checkData = unserialize($checkData);
+
 			$check = unserialize($checkData["check"]);
+			$type = $checkData["type"];
+
 			$constants = unserialize($checkData["constants"]);
 			
-			$result = [];
-			
-			$playerData = $checkData["player"] ?? null;
-			$eventData = $checkData["eventData"] ?? null;
+			$playerData = isset($checkData["player"]) ? json_decode($checkData["player"], true) : null;
+			$data = isset($checkData["data"]) ? unserialize($checkData["data"]) : null;
 
-			$result["result"] = $check::check(["eventData" => $eventData, "playerData" => $playerData, "constantData" => $constants]);
+			$result = [];
+
+			$result["result"] = $check::check([
+				"type" => $type,
+				"data" => $data,
+				"playerData" => $playerData,
+				"constantData" => $constants
+			]);
+
 			$result["check"] = $check::class;
 			$result["player"] = $playerData["name"];
 			
