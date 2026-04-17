@@ -24,6 +24,19 @@
             "Reinfyteam\\Zuri\\": "src/"
         }
     },
+	"scripts": {
+        "format": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes",
+        "format:check": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --dry-run --diff",
+        "analyze": "vendor/bin/phpstan --no-progress",
+        "build": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -p=./build/Zuri.phar",
+        "build-source": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -o=./build/",
+		"test": "for file in tests/*.php; do php -f \"$file\"; done"
+    },
+    "config": {
+        "platform": {
+            "php": "8.2.0"
+        }
+    },
     "minimum-stability": "stable",
     "prefer-stable": true
 }
