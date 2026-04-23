@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "02a39f50166fd8c5256ee95b6fbf2c43",
+    "content-hash": "637989a3a52ccd113b27409884023551",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -127,16 +127,16 @@
         },
         {
             "name": "muqsit/simple-packet-handler",
-            "version": "0.1.5",
+            "version": "0.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Muqsit/SimplePacketHandler.git",
-                "reference": "3400302e0d77757e716ac69a4099561bde5634b3"
+                "reference": "4e7b399c61f2def3c088ecde96e15d1f9858914f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Muqsit/SimplePacketHandler/zipball/3400302e0d77757e716ac69a4099561bde5634b3",
-                "reference": "3400302e0d77757e716ac69a4099561bde5634b3",
+                "url": "https://api.github.com/repos/Muqsit/SimplePacketHandler/zipball/4e7b399c61f2def3c088ecde96e15d1f9858914f",
+                "reference": "4e7b399c61f2def3c088ecde96e15d1f9858914f",
                 "shasum": ""
             },
             "require": {
@@ -167,9 +167,9 @@
             "description": "Handle specific data packets (virion for PMMP API 4.0.0)",
             "support": {
                 "issues": "https://github.com/Muqsit/SimplePacketHandler/issues",
-                "source": "https://github.com/Muqsit/SimplePacketHandler/tree/0.1.5"
+                "source": "https://github.com/Muqsit/SimplePacketHandler/tree/0.1.6"
             },
-            "time": "2025-02-16T23:26:12+00:00"
+            "time": "2026-02-17T11:40:38+00:00"
         },
         {
             "name": "netresearch/jsonmapper",
