@@ -3,11 +3,13 @@
 
 zuri:
   config_version: 0.4.0
-  # Asynchronous processing settings
+  # Threaded processing settings
   # Adjust these values based on your server's performance and workload.
-  async:
-    # The maximum number of worker threads to use for asynchronous processing. More workers can handle more batches simultaneously but may consume more resources.
+  threads:
+    # Number of worker threads inside the check coordinator thread.
     max_worker: 4
+    # Maximum queued checks accepted by each worker.
+    worker_capacity: 1024
   # Punishment thresholds: Responsible for handling considerations of the player conditions.
   # This involves the ping, server tps, server load that affects modules.
   thresholds:

@@ -31,6 +31,8 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri;
 
+use pocketmine\event\block\BlockBreakEvent;
+use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityMotionEvent;
@@ -46,8 +48,10 @@ use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerDropItemEvent;
+use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerItemConsumeEvent;
 use pocketmine\event\player\PlayerItemHeldEvent;
+use pocketmine\event\player\PlayerItemUseEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerJumpEvent;
 use pocketmine\event\player\PlayerMoveEvent;
@@ -130,19 +134,20 @@ class EventListener implements Listener {
 			$playerZuri->setStartedJumping($packet->getInputFlags()->get(PlayerAuthInputFlags::START_JUMPING));
 
 			$frictionBlock = $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN));
-			$playerZuri->setExternalData(ExternalDataPath::FRICTION_FACTOR, $playerZuri->isOnGround() ? $frictionBlock->getFrictionFactor() : ZuriAC::getConstants()->getConstant(ConstantPath::FRICTION_FACTOR));
+			$externalData = ZuriAC::getExternalData();
+			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::FRICTION_FACTOR, $playerZuri->isOnGround() ? $frictionBlock->getFrictionFactor() : ZuriAC::getConstants()->getConstant(ConstantPath::FRICTION_FACTOR));
 
-			$lastDistanceXZ = $playerZuri->getExternalData(ExternalDataPath::LAST_DISTANCE_XZ);
-			$frictionFactor = $playerZuri->getExternalData(ExternalDataPath::FRICTION_FACTOR);
-			$playerZuri->setExternalData(ExternalDataPath::MOMENTUM, MathUtil::getMomentum($lastDistanceXZ, $frictionFactor));
+			$lastDistanceXZ = $externalData->getExternalData($playerZuri, "Zuri", ExternalDataPath::LAST_DISTANCE_XZ);
+			$frictionFactor = $externalData->getExternalData($playerZuri, "Zuri", ExternalDataPath::FRICTION_FACTOR);
+			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::MOMENTUM, MathUtil::getMomentum($lastDistanceXZ, $frictionFactor));
 
 			$movement = MathUtil::getMovement($player, new Vector3(max(-1, min(1, $packet->getMoveVecZ())), 0, max(-1, min(1, $packet->getMoveVecX()))));
-			$playerZuri->setExternalData(ExternalDataPath::MOVEMENT, $movement);
+			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::MOVEMENT, $movement);
 
 			$movementMultiplier = Utils::getMovementMultiplier($player);
 			$acceleration = MathUtil::getAcceleration($movement, $movementMultiplier, $frictionFactor, $playerZuri->isOnGround());
-			$playerZuri->setExternalData(ExternalDataPath::MOVEMENT_MULTIPLIER, $movementMultiplier);
-			$playerZuri->setExternalData(ExternalDataPath::ACCELERATION, $acceleration);
+			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::MOVEMENT_MULTIPLIER, $movementMultiplier);
+			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::ACCELERATION, $acceleration);
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
@@ -593,7 +598,7 @@ class EventListener implements Listener {
 	public function onCommandEvent(CommandEvent $event) : void {
 		$sender = $event->getSender();
 
-		if (!$player instanceof Player || !$player->isConnected()) {
+		if (!$sender instanceof Player || !$sender->isConnected()) {
 			return;
 		}
 
@@ -704,6 +709,81 @@ class EventListener implements Listener {
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
+		], Check::TYPE_PLAYER);
+	}
+
+	public function onPlayerInteract(PlayerInteractEvent $event) : void {
+		$block = $event->getBlock();
+		$player = $event->getPlayer();
+
+		$playerZuri = PlayerManager::get($player);
+		if ($event->isCancelled()) {
+			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+		}
+
+		ZuriAC::getCheckRegistry()->spawnCheck([
+			"type" => PMMPUtils::getNiceClassName($event),
+			"player" => $player,
+			"data" => [
+				"blockPos" => $event->getBlock()->getPosition()->asVector3(),
+				"blockType" => $event->getBlock()->getTypeId(),
+			]
+		], Check::TYPE_PLAYER);
+	}
+
+	public function onPlayerBreak(BlockBreakEvent $event) : void {
+		$block = $event->getBlock();
+		$x = $block->getPosition()->getX();
+		$z = $block->getPosition()->getZ();
+		$player = $event->getPlayer();
+
+		$playerZuri = PlayerManager::get($player);
+		if ($event->isCancelled()) {
+			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+		}
+
+		ZuriAC::getCheckRegistry()->spawnCheck([
+			"type" => PMMPUtils::getNiceClassName($event),
+			"player" => $player,
+			"data" => [
+				"blockPos" => $event->getBlock()->getPosition()->asVector3(),
+				"blockType" => $event->getBlock()->getTypeId(),
+			]
+		], Check::TYPE_PLAYER);
+	}
+
+	public function onPlayerPlace(BlockPlaceEvent $event) : void {
+		$player = $event->getPlayer();
+
+		$playerZuri = PlayerManager::get($player);
+		if ($event->isCancelled()) {
+			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+		}
+
+		ZuriAC::getCheckRegistry()->spawnCheck([
+			"type" => PMMPUtils::getNiceClassName($event),
+			"player" => $player,
+			"data" => [
+				"blockPos" => $event->getBlock()->getPosition()->asVector3(),
+				"blockType" => $event->getBlock()->getTypeId(),
+			]
+		], Check::TYPE_PLAYER);
+	}
+
+	public function onPlayerItemUse(PlayerItemUseEvent $event) : void {
+		$player = $event->getPlayer();
+
+		$playerZuri = PlayerManager::get($player);
+		if ($event->isCancelled()) {
+			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+		}
+
+		ZuriAC::getCheckRegistry()->spawnCheck([
+			"type" => PMMPUtils::getNiceClassName($event),
+			"player" => $player,
+			"data" => [
+				"itemType" => $event->getItem()->getTypeId()
+			]
 		], Check::TYPE_PLAYER);
 	}
 }

@@ -29,32 +29,53 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\task;
+namespace ReinfyTeam\Zuri\thread;
 
-use pocketmine\scheduler\Task;
-use pocketmine\Server;
-use ReinfyTeam\Zuri\ZuriAC;
+use pocketmine\thread\Thread;
+use function usleep;
 
-/**
- * Scheduled task that drains the CheckWorker queue into async batches.
- */
-class CheckBatchTask extends Task {
-	/**
-	 * Called each tick by the scheduler to process queued checks.
-	 */
-	public function onRun() : void {
-		ZuriAC::getMetricsData()->update();
-		$worker = ZuriAC::getWorker();
+final class CheckThread extends Thread {
+	public function __construct(
+		private CheckQueue $jobs,
+		private CheckResults $results,
+		private int $workerCount,
+		private int $workerCapacity
+	) {
+		$this->start();
+	}
 
-		if (!$worker->isReady()) {
-			return;
+	protected function onRun() : void {
+		/** @var CheckWorker[] $workers */
+		$workers = [];
+		for ($i = 0; $i < $this->workerCount; ++$i) {
+			$workers[] = new CheckWorker($this->results, $this->workerCapacity);
 		}
 
-		$batches = $worker->drain();
-		foreach ($batches as $batch) {
-			Server::getInstance()->getAsyncPool()->submitTask(
-				new AsyncCheckTask($batch)
-			);
+		while (!$this->isKilled) {
+			$queued = false;
+			foreach ($workers as $worker) {
+				while ($worker->canAccept()) {
+					$job = $this->jobs->getNextCheck();
+					if ($job === null) {
+						break;
+					}
+					$worker->enqueue($job);
+					$queued = true;
+				}
+			}
+
+			$processed = false;
+			foreach ($workers as $worker) {
+				$processed = $worker->processNext() || $processed;
+			}
+
+			if (!$queued && !$processed) {
+				usleep(1000);
+			}
 		}
+	}
+
+	public function getResults() : CheckResults {
+		return $this->results;
 	}
 }

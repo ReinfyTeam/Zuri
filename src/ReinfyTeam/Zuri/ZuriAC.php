@@ -31,12 +31,22 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri;
 
+use pocketmine\Server;
+use pocketmine\scheduler\ClosureTask;
 use pocketmine\utils\SingletonTrait;
+use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\check\CheckRegistry;
-use ReinfyTeam\Zuri\check\CheckWorker;
+use ReinfyTeam\Zuri\check\MetricsData;
+use ReinfyTeam\Zuri\check\ResultsHandler;
 use ReinfyTeam\Zuri\config\ConfigManager;
+use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\config\ConstantValues;
 use ReinfyTeam\Zuri\config\language\LanguageManager;
+use ReinfyTeam\Zuri\player\ExternalData;
+use ReinfyTeam\Zuri\thread\CheckQueue;
+use ReinfyTeam\Zuri\thread\CheckResults;
+use ReinfyTeam\Zuri\thread\CheckThread;
+use function max;
 
 /**
  * Main plugin class for ZuriAC.
@@ -46,12 +56,15 @@ use ReinfyTeam\Zuri\config\language\LanguageManager;
 class ZuriAC extends Loader {
 	use SingletonTrait;
 
-	private static CheckWorker $worker;
+	private static CheckQueue $checkQueue;
+	private static CheckResults $checkResults;
+	private static CheckThread $checkThread;
 	private static CheckRegistry $checkRegistry;
 	private static ConfigManager $config;
 	private static ConstantValues $constants;
 	private static LanguageManager $languageManager;
 	private static MetricsData $metricsData;
+	private static ExternalData $externalData;
 
 	/**
 	 * Called when the plugin is loaded.
@@ -71,17 +84,36 @@ class ZuriAC extends Loader {
 	 * Initializes worker and check registry.
 	 */
 	protected function onEnable() : void {
-		self::$worker = CheckWorker::spawnWorker($this);
+		self::$checkQueue = new CheckQueue();
+		self::$checkResults = new CheckResults();
 		self::$checkRegistry = CheckRegistry::loadChecks();
+		$workerCount = max(1, (int) self::$config->getData(ConfigPath::THREAD_MAX_WORKER, 1));
+		$workerCapacity = max(1, (int) self::$config->getData(ConfigPath::THREAD_WORKER_CAPACITY, 64));
+		self::$checkThread = new CheckThread(self::$checkQueue, self::$checkResults, $workerCount, $workerCapacity);
 		self::$metricsData = new MetricsData();
+		self::$externalData = new ExternalData();
+		/*$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(function() : void {
+			foreach (Server::getInstance()->getOnlinePlayers() as $player) {
+				if (!$player->isConnected()) {
+					continue;
+				}
+
+				self::$checkRegistry->spawnCheck([
+					"type" => "PlayerAuthInputPacket",
+					"player" => $player
+				], Check::TYPE_PACKET);
+			}
+		}), 1);*/
+		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(function() : void {
+			while (($result = self::$checkResults->getNextResult()) !== null) {
+				ResultsHandler::handle($result);
+			}
+		}), 1);
 		self::registerEvents();
 	}
 
-	/**
-	 * Returns the configured CheckWorker instance.
-	 */
-	public static function getWorker() : CheckWorker {
-		return self::$worker;
+	protected function onDisable() : void {
+		self::$checkThread->quit();
 	}
 
 	/**
@@ -117,5 +149,30 @@ class ZuriAC extends Loader {
 	 */
 	public static function getMetricsData() : MetricsData {
 		return self::$metricsData;
+	}
+
+	/**
+	 * Returns the ExternalData instance.
+	 */
+	public static function getExternalData() : ExternalData {
+		return self::$externalData;
+	}
+
+	public static function getCheckQueue() : CheckQueue {
+		return self::$checkQueue;
+	}
+
+	/**
+	 * Returns the CheckResults instance.
+	 */
+	public static function getCheckResults() : CheckResults {
+		return self::$checkResults;
+	}
+
+	/**
+	 * Returns the CheckThread instance.
+	 */
+	public static function getCheckThread() : CheckThread {
+		return self::$checkThread;
 	}
 }

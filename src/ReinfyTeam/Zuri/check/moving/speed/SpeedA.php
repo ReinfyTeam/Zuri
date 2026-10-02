@@ -102,7 +102,7 @@ class SpeedA extends Check {
 				!$playerData["isCurrentChunkLoaded"] ||
 				$playerData["isRecentlyCancelled"] < 40
 			) {
-				return false;
+				return self::buildResult(false);
 			}
 
 			$previous = $playerData["movement"]["from"];

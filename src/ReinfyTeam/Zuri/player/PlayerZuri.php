@@ -37,6 +37,7 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
 use ReinfyTeam\Zuri\utils\Utils;
+use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
 use function count;
@@ -130,8 +131,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private Vector3 $delta;
 	private Vector3 $motion;
 	private Vector2 $rawMove;
-
-	private array $externalData = [];
 
 	/**
 	 * Factory: creates a new PlayerZuri for a Player instance.
@@ -647,18 +646,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->currentChunkLoaded = $currentChunkLoaded;
 	}
 
-	public function setExternalData(string $parameter, mixed $value) : void {
-		$this->externalData[$parameter] = $value;
-	}
-
-	public function getExternalData(string $parameter) : mixed {
-		return $this->externalData[$parameter] ?? null;
-	}
-
-	public function getAllExternalData() : array {
-		return $this->externalData;
-	}
-
 	public function isBlockAbove() : bool {
 		return $this->blockAbove;
 	}
@@ -741,12 +728,12 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isFlying" => $this->isFlying(),
 			"allowFlight" => $this->getAllowFlight(),
 			"hasNoClientPredictions" => $this->hasNoClientPredictions(),
-			"externalData" => $this->getAllExternalData(),
 			"isBlockAbove" => $this->isBlockAbove(),
 			"isRecentlyCancelledEvent" => $this->isRecentlyCancelledEvent(),
 			"isStartedJumping" => $this->isStartedJumping(),
 			"explosionTicks" => $this->getExplosionTicks(),
-			"isGroundSolid" => $this->isGroundSolid()
+			"isGroundSolid" => $this->isGroundSolid(),
+			"externalData" => ZuriAC::getExternalData()->getAllExternalData($this)
 		];
 	}
 }

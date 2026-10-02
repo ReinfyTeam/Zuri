@@ -29,23 +29,42 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\config;
+namespace ReinfyTeam\Zuri\thread;
 
-interface ConfigPath {
-	public const CONFIG_VERSION = "2.0.0";
+use pmmp\thread\ThreadSafe;
+use pmmp\thread\ThreadSafeArray;
+use function count;
+use function is_array;
+use function unserialize;
+use function serialize;
 
-	public const CURRENT_CONFIG_VERSION = "zuri.config_version";
+final class CheckResults extends ThreadSafe {
+	private ThreadSafeArray $queue;
 
-	public const ASYNC_BATCH_SIZE = "zuri.async.batch_size";
-	public const THREAD_MAX_WORKER = "zuri.threads.max_worker";
-	public const THREAD_WORKER_CAPACITY = "zuri.threads.worker_capacity";
+	public function __construct() {
+		$this->queue = new ThreadSafeArray();
+	}
 
-	public const THRESHOLDS_PING = "zuri.thresholds.ping";
-	public const THRESHOLDS_TPS = "zuri.thresholds.tps";
-	public const THRESHOLD_PING_DEFAULT_MULTIPLIER = "zuri.thresholds.ping.default";
-	public const THRESHOLD_TPS_DEFAULT_MULTIPLIER = "zuri.thresholds.tps.default";
+	public function addResult(array $result, string $check, ?string $player) : void {
+		$this->queue[] = serialize([
+			'result' => $result,
+			'check' => $check,
+			'player' => $player
+		]);
+	}
 
-	public const CHECKS = "zuri.checks";
+	/** @return array{result:array,check:class-string,player:?string}|null */
+	public function getNextResult() : ?array {
+		$result = $this->queue->shift();
+		if(!is_string($result)){
+			return null;
+		}
 
-	public const PUNISHMENT_BAN_DURATION = "zuri.punishment.ban.duration";
+		$result = unserialize($result, ["allowed_classes" => false]);
+		return is_array($result) ? $result : null;
+	}
+
+	public function isEmpty() : bool {
+		return count($this->queue) === 0;
+	}
 }

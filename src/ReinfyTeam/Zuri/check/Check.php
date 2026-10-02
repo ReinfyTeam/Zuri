@@ -97,10 +97,15 @@ abstract class Check {
 	 *
 	 * @param bool $failed Whether the check failed.
 	 * @param array $debug Optional debug data.
+	 * @param array $externalData Optional external data to be set.
 	 * @return array{failed:bool,debug:array}
 	 */
-	public static function buildResult(bool $failed, array $debug = []) : array {
-		return ["failed" => $failed, "debug" => $debug];
+	public static function buildResult(bool $failed, array $debug = [], array $externalData = []) : array {
+		return [
+			"failed" => $failed,
+			"debug" => $debug,
+			"externalData" => $externalData
+		];
 	}
 
 

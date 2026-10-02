@@ -29,23 +29,40 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\config;
+namespace ReinfyTeam\Zuri\thread;
 
-interface ConfigPath {
-	public const CONFIG_VERSION = "2.0.0";
+final class CheckJob {
+	public function __construct(
+		private string $check,
+		private array $data
+	) {
+	}
 
-	public const CURRENT_CONFIG_VERSION = "zuri.config_version";
+	public function serialize() : string {
+		return serialize([
+			"check" => $this->check,
+			"data" => $this->data
+		]);
+	}
 
-	public const ASYNC_BATCH_SIZE = "zuri.async.batch_size";
-	public const THREAD_MAX_WORKER = "zuri.threads.max_worker";
-	public const THREAD_WORKER_CAPACITY = "zuri.threads.worker_capacity";
+	public function getCheck() : string {
+		return $this->check;
+	}
 
-	public const THRESHOLDS_PING = "zuri.thresholds.ping";
-	public const THRESHOLDS_TPS = "zuri.thresholds.tps";
-	public const THRESHOLD_PING_DEFAULT_MULTIPLIER = "zuri.thresholds.ping.default";
-	public const THRESHOLD_TPS_DEFAULT_MULTIPLIER = "zuri.thresholds.tps.default";
+	public function getData() : array {
+		return $this->data;
+	}
 
-	public const CHECKS = "zuri.checks";
-
-	public const PUNISHMENT_BAN_DURATION = "zuri.punishment.ban.duration";
+	public static function unserialize(string $serialized) : self {
+		$job = unserialize($serialized, ["allowed_classes" => false]);
+		if(
+			!is_array($job) ||
+			!isset($job["check"], $job["data"]) ||
+			!is_string($job["check"]) ||
+			!is_array($job["data"])
+		){
+			throw new \UnexpectedValueException("Invalid serialized check job");
+		}
+		return new self($job["check"], $job["data"]);
+	}
 }

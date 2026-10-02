@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri\check;
 
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\check\moving\speed\SpeedA;
+use ReinfyTeam\Zuri\check\moving\speed\SpeedB;
 use ReinfyTeam\Zuri\ZuriAC;
 use function array_filter;
 
@@ -76,14 +77,15 @@ class CheckRegistry {
 
 
 	/**
-	 * Queues all checks of a given type for asynchronous processing.
+	 * Queues all checks of a given type for threaded processing.
 	 *
 	 * @param array $data Data to pass to each check.
 	 * @param int $type The type of check (see Check::TYPE_* constants).
 	 */
 	public function spawnCheck(array $data, int $type) : void {
-		foreach ($this->getChecksByType($type) as $check) {
-			ZuriAC::getWorker()->queue($data, $check);
+		$checks = $this->getChecksByType($type);
+		foreach ($checks as $check) {
+			ZuriAC::getCheckQueue()->addCheck($data, $check);
 		}
 	}
 
@@ -91,7 +93,7 @@ class CheckRegistry {
 	/**
 	 * Retrieves all checks matching a specific type.
 	 *
-	 * Needed for filtering checks when running them asynchronously, as we don't want to run player checks on packet data, for example.
+	 * Needed for filtering checks when running them on worker threads, as we don't want to run player checks on packet data, for example.
 	 *
 	 * @param int $type The type of check (see Check::TYPE_* constants).
 	 * @return Check[]
@@ -110,7 +112,8 @@ class CheckRegistry {
 	 */
 	public static function loadChecks() : self {
 		return new self([
-			new SpeedA()
+			new SpeedA(),
+			new SpeedB()
 		]);
 	}
 }

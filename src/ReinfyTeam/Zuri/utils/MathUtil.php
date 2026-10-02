@@ -43,9 +43,6 @@ use function strtolower;
 final class MathUtil {
 	/**
 	 * Calculates Euclidean distance between two positions.
-	 *
-	 * @param \pocketmine\world\Position $a
-	 * @param \pocketmine\world\Position $b
 	 */
 	public static function distance(Position $a, Position $b) : float {
 		return sqrt((($a->getX() - $b->getX()) ** 2) + (($a->getY() - $b->getY()) ** 2) + (($a->getZ() - $b->getZ()) ** 2));

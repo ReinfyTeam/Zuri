@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri\check\moving\speed;
 
 use ReinfyTeam\Zuri\check\Check;
 use function abs;
+use function microtime;
 
 
 /**
@@ -67,7 +68,7 @@ class SpeedB extends Check {
 	 * @return int One of self::TYPE_PACKET, self::TYPE_PLAYER or self::TYPE_EVENT.
 	 */
 	public function getType() : int {
-		return self::TYPE_PACKET;
+		return self::TYPE_PLAYER;
 	}
 
 	/**
@@ -119,6 +120,16 @@ class SpeedB extends Check {
 			) {
 				return self::buildResult(false);
 			}
+
+			if ($playerData["externalData"]["moveTime"] === null) {
+				return self::buildResult(false);
+			}
+
+			return self::buildResult(false, [], [
+				"moveTime" => microtime(true),
+			]);
 		}
+
+		return self::buildResult(false);
 	}
 }

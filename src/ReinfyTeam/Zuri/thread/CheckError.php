@@ -29,23 +29,45 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\config;
+namespace ReinfyTeam\Zuri\check;
 
-interface ConfigPath {
-	public const CONFIG_VERSION = "2.0.0";
+use JsonSerializable;
 
-	public const CURRENT_CONFIG_VERSION = "zuri.config_version";
+final class CheckError implements JsonSerializable {
+	private string $message;
+	private string $file;
+	private int $line;
+	private string $trace;
 
-	public const ASYNC_BATCH_SIZE = "zuri.async.batch_size";
-	public const THREAD_MAX_WORKER = "zuri.threads.max_worker";
-	public const THREAD_WORKER_CAPACITY = "zuri.threads.worker_capacity";
+	public function __construct(string $message, string $file, int $line, string $trace) {
+		$this->message = $message;
+		$this->file = $file;
+		$this->line = $line;
+		$this->trace = $trace;
+	}
 
-	public const THRESHOLDS_PING = "zuri.thresholds.ping";
-	public const THRESHOLDS_TPS = "zuri.thresholds.tps";
-	public const THRESHOLD_PING_DEFAULT_MULTIPLIER = "zuri.thresholds.ping.default";
-	public const THRESHOLD_TPS_DEFAULT_MULTIPLIER = "zuri.thresholds.tps.default";
+	public function getMessage() : string {
+		return $this->message;
+	}
 
-	public const CHECKS = "zuri.checks";
+	public function getFile() : string {
+		return $this->file;
+	}
 
-	public const PUNISHMENT_BAN_DURATION = "zuri.punishment.ban.duration";
+	public function getLine() : int {
+		return $this->line;
+	}
+
+	public function getTrace() : string {
+		return $this->trace;
+	}
+
+	public function jsonSerialize() : array {
+		return [
+			"message" => $this->message,
+			"file" => $this->file,
+			"line" => $this->line,
+			"trace" => $this->trace
+		];
+	}
 }

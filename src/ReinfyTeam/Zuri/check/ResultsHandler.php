@@ -36,6 +36,8 @@ use pocketmine\Server;
 use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\ZuriAC;
+use function class_exists;
+use function is_string;
 use function max;
 use function min;
 use function strtolower;
@@ -44,7 +46,7 @@ use function unserialize;
 /**
  * Handles the results of checks and applies violations to players accordingly.
  *
- * This class receives check results produced by async worker tasks and applies
+ * This class receives check results produced by worker threads and applies
  * pre-violations and violations to players. Thresholds are adjusted based on
  * server conditions such as ping, TPS and player load.
  */
@@ -56,16 +58,36 @@ final class ResultsHandler {
 	 *	@param array $results The result data from a check.
 	 */
 	public static function handle(array $results) : void {
-		if (($player = Server::getInstance()->getPlayerExact($results["player"])) !== null) {
-			$playerZuri = PlayerManager::get($player);
+		$playerName = $results["player"] ?? null;
+		if (!is_string($playerName) || ($player = Server::getInstance()->getPlayerExact($playerName)) === null) {
+			return;
+		}
 
+		if (isset($results["result"]["error"])) {
+			Server::getInstance()->getLogger()->error(
+				"Check " . $results["check"] . " failed: " . $results["result"]["error"]["message"]
+			);
+			return;
+		}
+
+		if (is_string($results["check"]) && class_exists($results["check"])) {
+			$check = new $results["check"]();
+		} else {
 			$check = unserialize($results["check"]);
+		}
+
+		if ($check instanceof Check) {
+			$playerZuri = PlayerManager::get($player);
 
 			if ($results["result"]["failed"]) {
 				self::handlePunishment($player, $check);
 			}
 
-			if ($playerZuri->isDebug()) {
+			if (!empty($results["result"]["externalData"])) {
+				$externalData = ZuriAC::getExternalData();
+				foreach ($results["result"]["externalData"] as $parameter => $value) {
+					$externalData->setExternalData($playerZuri, $check->getName(), $parameter, $value);
+				}
 			}
 		}
 	}

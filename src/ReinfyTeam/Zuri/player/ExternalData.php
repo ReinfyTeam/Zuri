@@ -29,23 +29,36 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\config;
+namespace ReinfyTeam\Zuri\player;
 
-interface ConfigPath {
-	public const CONFIG_VERSION = "2.0.0";
+use JsonSerializable;
+use function array_merge;
+use function spl_object_id;
 
-	public const CURRENT_CONFIG_VERSION = "zuri.config_version";
+class ExternalData implements JsonSerializable {
+	private array $externalData = [];
 
-	public const ASYNC_BATCH_SIZE = "zuri.async.batch_size";
-	public const THREAD_MAX_WORKER = "zuri.threads.max_worker";
-	public const THREAD_WORKER_CAPACITY = "zuri.threads.worker_capacity";
+	public function setExternalData(PlayerZuri $player, string $module, string $parameter, mixed $value) : void {
+		$this->externalData[spl_object_id($player)][$module][$parameter] = $value;
+	}
 
-	public const THRESHOLDS_PING = "zuri.thresholds.ping";
-	public const THRESHOLDS_TPS = "zuri.thresholds.tps";
-	public const THRESHOLD_PING_DEFAULT_MULTIPLIER = "zuri.thresholds.ping.default";
-	public const THRESHOLD_TPS_DEFAULT_MULTIPLIER = "zuri.thresholds.tps.default";
+	public function getExternalData(PlayerZuri $player, string $module, string $parameter) : mixed {
+		return $this->externalData[spl_object_id($player)][$module][$parameter] ?? null;
+	}
 
-	public const CHECKS = "zuri.checks";
+	public function getAllExternalData(PlayerZuri $player) : array {
+		$data = [];
+		foreach ($this->externalData[spl_object_id($player)] ?? [] as $moduleData) {
+			$data = array_merge($data, $moduleData);
+		}
+		return $data;
+	}
 
-	public const PUNISHMENT_BAN_DURATION = "zuri.punishment.ban.duration";
+	public function getModuleExternalData(PlayerZuri $player, string $moduleName) : array {
+		return $this->externalData[spl_object_id($player)][$moduleName] ?? [];
+	}
+
+	public function jsonSerialize() : array {
+		return $this->externalData;
+	}
 }

@@ -32,9 +32,11 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\config;
 
 use pocketmine\utils\Config;
+use ReinfyTeam\Zuri\utils\TextUtil;
 use ReinfyTeam\Zuri\ZuriAC;
 use function basename;
 use function copy;
+use function is_string;
 use function pathinfo;
 use function str_replace;
 use function unlink;
@@ -67,7 +69,8 @@ class ConfigManager implements ConfigPath {
 	 * Retrieves nested configuration data by key.
 	 */
 	public function getData(string $key, mixed $default = null, array $replacements = []) : mixed {
-		return TextUtil::replaceText($this->config->getNested($key, $default ?? $key), $replacements);
+		$value = $this->config->getNested($key, $default ?? $key);
+		return is_string($value) ? TextUtil::replaceText($value, $replacements) : $value;
 	}
 
 	/**

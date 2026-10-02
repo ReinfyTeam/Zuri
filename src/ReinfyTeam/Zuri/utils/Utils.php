@@ -60,7 +60,6 @@ final class Utils {
 	 * Creates a Vector3 from an associative array.
 	 *
 	 * @param array{x: float, y: float, z: float} $array
-	 * @return Vector3
 	 */
 	public static function arrayToVector3(array $array) : Vector3 {
 		return new Vector3($array["x"], $array["y"], $array["z"]);
