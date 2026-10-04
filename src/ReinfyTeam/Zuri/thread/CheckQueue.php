@@ -39,6 +39,7 @@ use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\ZuriAC;
 use function count;
 use function is_array;
+use function is_string;
 
 final class CheckQueue extends ThreadSafe {
 	private ThreadSafeArray $queue;

@@ -29,36 +29,21 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\config\language;
+namespace ReinfyTeam\Zuri\task;
 
-use pocketmine\utils\Config;
-use ReinfyTeam\Zuri\utils\TextUtil;
-use function is_string;
-use function pathinfo;
+use pocketmine\scheduler\Task;
+use pocketmine\Server;
+use ReinfyTeam\Zuri\ZuriAC;
 
-class Language implements LanguagePath {
-	private Config $languageData;
-	private string $code;
-
-	public function __construct(string $path) {
-		$this->languageData = new Config($path, Config::YAML);
-		$this->code = pathinfo($path, PATHINFO_FILENAME);
+class MetricsTask extends Task {
+	public function __construct() {
+		ZuriAC::getInstance()->getScheduler()->scheduleRepeatingTask($this, (int) ZuriAC::getConfigManager()->getData(ZuriAC::METRICS_DELAY, 3) * 20);
 	}
 
-	public function getCode() : string {
-		return $this->code;
-	}
+	public function onRun() : void {
+		$server = Server::getInstance();
+		$metricsData = ZuriAC::getMetricsData();
 
-	public function translate(string $key, array $replacements = []) : string {
-		$value = $this->languageData->getNested($key, $key);
-		return TextUtil::parseColors(TextUtil::replaceText(is_string($value) ? $value : $key, $replacements));
-	}
-
-	public function save() : void {
-		$this->languageData->save();
-	}
-
-	public function reload() : void {
-		$this->languageData->reload();
+		$metricsData->update();
 	}
 }

@@ -31,6 +31,9 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri;
 
+use pocketmine\block\BlockTypeIds;
+use pocketmine\entity\effect\VanillaEffects;
+use pocketmine\entity\projectile\EnderPearl;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -71,11 +74,13 @@ use pocketmine\utils\Utils as PMMPUtils;
 use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\player\ExternalDataPath;
 use ReinfyTeam\Zuri\player\PlayerManager;
+use ReinfyTeam\Zuri\player\PlayerZuri;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function max;
 use function microtime;
 use function min;
+use function round;
 
 /**
  * Central event listener for ZuriAC.
@@ -95,6 +100,7 @@ class EventListener implements Listener {
 		}
 
 		$playerZuri = PlayerManager::get($player);
+		$this->updateMovementState($player, $playerZuri);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -167,12 +173,20 @@ class EventListener implements Listener {
 		}
 
 		$playerZuri = PlayerManager::get($player);
+		$this->updateMovementState($player, $playerZuri);
+		$wasOnGround = $playerZuri->isOnGround();
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
 
 		$playerZuri->setMovement($event->getFrom(), $event->getTo());
+		$playerZuri->synchronizeMovementPositions($event->getFrom(), $event->getTo());
+		$lastMovementTime = $playerZuri->getLastMovementTime();
+		$playerZuri->setMovementDeltaTicks(
+			$lastMovementTime > 0.0 ? (microtime(true) - $lastMovementTime) * 20 : 1.0
+		);
+		$playerZuri->setLastMovementTime(microtime(true));
 		$playerZuri->setOnGround(BlockUtil::isOnGround($event->getTo(), 0) || BlockUtil::isOnGround($event->getTo(), 1));
 
 		$playerZuri->isOnGround()
@@ -183,26 +197,75 @@ class EventListener implements Listener {
 			$playerZuri->setSlimeBlockTicks(microtime(true));
 		}
 
-		$playerZuri->setOnIce(BlockUtil::isOnIce($event->getTo(), 1) || BlockUtil::isOnIce($event->getTo(), 2));
+		$playerZuri->setIce(BlockUtil::isOnIce($event->getTo(), 1) || BlockUtil::isOnIce($event->getTo(), 2));
 
 		$playerZuri->setOnStairs(BlockUtil::isOnStairs($event->getTo(), 0) || BlockUtil::isOnStairs($event->getTo(), 1));
 		$playerZuri->setUnderBlock(BlockUtil::isOnGround($player->getLocation(), -2));
 		$playerZuri->setTopBlock(BlockUtil::isOnGround($player->getLocation(), 1));
-		$playerZuri->setInLiquid(BlockUtil::isOnLiquid($event->getTo(), 0) || BlockUtil::isOnLiquid($event->getTo(), 1));
-		$playerZuri->setOnAdhesion(BlockUtil::isOnAdhesion($event->getTo(), 0));
+		$playerZuri->setLiquid(BlockUtil::isOnLiquid($event->getTo(), 0) || BlockUtil::isOnLiquid($event->getTo(), 1));
+		$playerZuri->setLava(BlockUtil::isOnLava($event->getTo(), 0) || BlockUtil::isOnLava($event->getTo(), 1));
+		$playerZuri->setUnderwater(BlockUtil::isOnWater($event->getTo(), 0) && !BlockUtil::isOnGround($event->getTo(), 0));
+		$playerZuri->setTwoBlockPassage(BlockUtil::isTwoBlockPassage($event->getTo()));
+		$playerZuri->setClimbing(BlockUtil::isOnAdhesion($event->getTo(), 0));
 		$playerZuri->setOnPlant(BlockUtil::isOnPlant($event->getTo(), 0));
 		$playerZuri->setOnDoor(BlockUtil::isOnDoor($event->getTo(), 0));
 		$playerZuri->setOnCarpet(BlockUtil::isOnCarpet($event->getTo(), 0));
 		$playerZuri->setOnPlate(BlockUtil::isOnPlate($event->getTo(), 0));
-		$playerZuri->setOnSnow(BlockUtil::isOnSnow($event->getTo(), 0));
+		$playerZuri->setSnow(BlockUtil::isOnSnow($event->getTo(), 0));
 		$playerZuri->setLastMoveTick((double) Server::getInstance()->getTick());
 		$playerZuri->setBlockAbove(BlockUtil::getBlockAbove($player)->isSolid());
 		$playerZuri->setGroundSolid(BlockUtil::isGroundSolid($player));
+		$playerZuri->setCurrentSurface(
+			$playerZuri->isLava() ? PlayerZuri::SURFACE_LAVA :
+			($playerZuri->isUnderwater() ? PlayerZuri::SURFACE_WATER :
+			($playerZuri->isIce() ? PlayerZuri::SURFACE_ICE :
+			($playerZuri->isSoulSpeedSurface() ? PlayerZuri::SURFACE_SOUL :
+			($playerZuri->isOnStairs() ? PlayerZuri::SURFACE_STAIRS : PlayerZuri::SURFACE_NORMAL))))
+		);
+		$playerZuri->updateVerticalMovement(
+			$event->getFrom()->getY(),
+			$event->getTo()->getY(),
+			(int) round($playerZuri->getMovementDeltaTicks()),
+			$wasOnGround,
+			$playerZuri->isOnGround(),
+			$playerZuri->isLiquid() ||
+			$playerZuri->isClimbing() ||
+			$playerZuri->isGliding() ||
+			$playerZuri->isCreative() && $playerZuri->isFlying() ||
+			$playerZuri->isSpectator() ||
+			$playerZuri->isLava(),
+			$playerZuri->getJumpBoostLevel(),
+			$playerZuri->isBlockAbove() && $event->getTo()->getY() >= $event->getFrom()->getY()
+		);
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
+		$playerZuri->setMotion(Vector3::zero());
+	}
+
+	private function updateMovementState(Player $player, PlayerZuri $playerZuri) : void {
+		$playerZuri->setPreviousState($playerZuri->getCurrentState());
+		$effects = $player->getEffects();
+		$speed = $effects->get(VanillaEffects::SPEED());
+		$slowness = $effects->get(VanillaEffects::SLOWNESS());
+		$jumpBoost = $effects->get(VanillaEffects::JUMP_BOOST());
+		$boots = $player->getArmorInventory()->getBoots();
+		$position = $player->getPosition();
+		$underBlock = $player->getWorld()->getBlockAt((int) $position->x, (int) $position->y - 1, (int) $position->z);
+
+		$playerZuri->setSprinting($player->isSprinting());
+		$playerZuri->setSneaking($player->isSneakPressed());
+		$playerZuri->setGliding($player->isGliding());
+		$playerZuri->setDead(!$player->isAlive());
+		$playerZuri->setSpeedLevel($speed?->getEffectLevel() ?? 0);
+		$playerZuri->setSlownessLevel($slowness?->getEffectLevel() ?? 0);
+		$playerZuri->setJumpBoostLevel($jumpBoost?->getEffectLevel() ?? 0);
+		$playerZuri->setSoulSpeedSurface(
+			$underBlock->getTypeId() === BlockTypeIds::SOUL_SAND ||
+			$underBlock->getTypeId() === BlockTypeIds::SOUL_SOIL
+		);
 	}
 
 	/**
@@ -223,7 +286,11 @@ class EventListener implements Listener {
 
 		$currentMotion = $playerZuri->getMotion();
 		$newMotion = $event->getVector();
+		$source = $playerZuri->getExplosionTicks() < 10
+			? PlayerZuri::SOURCE_EXPLOSION
+			: ($playerZuri->getHurtTicks() < 10 ? PlayerZuri::SOURCE_KNOCKBACK : PlayerZuri::SOURCE_EXTERNAL);
 
+		$playerZuri->setVerticalVelocity($newMotion->getY(), $source);
 		$playerZuri->setMotion($currentMotion->addVector($newMotion));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
@@ -323,6 +390,7 @@ class EventListener implements Listener {
 		}
 
 		$playerZuri->setTeleportTicks(microtime(true));
+		$playerZuri->synchronizePositions($event->getTo()->asVector3());
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
@@ -373,6 +441,8 @@ class EventListener implements Listener {
 		$playerZuri = PlayerManager::get($player);
 
 		$playerZuri->setJoinedAtTheTime(microtime(true));
+		$playerZuri->setTeleportTicks(microtime(true));
+		$playerZuri->synchronizePositions($player->getPosition()->asVector3());
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
@@ -417,6 +487,12 @@ class EventListener implements Listener {
 		}
 
 		$playerZuri->setHurtTicks(microtime(true));
+		if (
+			$event->getCause() === EntityDamageEvent::CAUSE_ENTITY_EXPLOSION ||
+			$event->getCause() === EntityDamageEvent::CAUSE_BLOCK_EXPLOSION
+		) {
+			$playerZuri->setExplosionTicks(microtime(true));
+		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
@@ -520,6 +596,8 @@ class EventListener implements Listener {
 		$playerZuri = PlayerManager::get($player);
 
 		$playerZuri->setDeathTicks(microtime(true));
+		$playerZuri->setTeleportTicks(microtime(true));
+		$playerZuri->synchronizePositions($player->getPosition()->asVector3());
 	}
 
 	/**
@@ -694,13 +772,18 @@ class EventListener implements Listener {
 	 * Handles projectile launch events.
 	 */
 	public function onProjectileLaunch(ProjectileLaunchEvent $event) : void {
-		$player = $event->getEntity()->getOwningEntity();
+		$projectile = $event->getEntity();
+		$player = $projectile->getOwningEntity();
 
 		if (!$player instanceof Player || !$player->isConnected()) {
 			return;
 		}
 
 		$playerZuri = PlayerManager::get($player);
+
+		if ($projectile instanceof EnderPearl) {
+			$playerZuri->setTeleportTicks(microtime(true));
+		}
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));

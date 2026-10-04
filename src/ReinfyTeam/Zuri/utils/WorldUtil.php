@@ -32,6 +32,8 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
+use pocketmine\player\Player;
+
 /**
  * Utility helpers related to world/terrain checks.
  */

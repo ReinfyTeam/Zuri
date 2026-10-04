@@ -32,8 +32,12 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\check\moving\speed;
 
 use ReinfyTeam\Zuri\check\Check;
+use ReinfyTeam\Zuri\player\PlayerZuri;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use function abs;
-use function microtime;
+use function in_array;
+use function max;
+use function min;
 
 
 /**
@@ -82,51 +86,119 @@ class SpeedB extends Check {
 	 */
 	public static function check(array $data) : array {
 		if ($data["type"] === "PlayerMoveEvent") {
-			$playerData = $data["playerData"];
-			$constantData = $data["constantData"];
+			$playerData = $data["playerData"] ?? [];
+			$movement = $playerData["movement"] ?? [];
+			$externalData = $playerData["externalData"] ?? [];
+			$from = $movement["from"] ?? [];
+			$to = $movement["to"] ?? [];
+			$fromX = (float) ($from["x"] ?? 0.0);
+			$fromZ = (float) ($from["z"] ?? 0.0);
+			$toX = (float) ($to["x"] ?? 0.0);
+			$toZ = (float) ($to["z"] ?? 0.0);
+			$state = (int) ($playerData["currentState"] ?? PlayerZuri::STATE_WALK);
+			$deltaTicks = max(1.0, (float) ($playerData["deltaTicks"] ?? 1.0));
+			$velocity = MathUtil::horizontalVelocity($fromX, $fromZ, $toX, $toZ, $deltaTicks);
+			$actualSpeed = MathUtil::horizontalSpeed($velocity["x"], $velocity["z"]);
+			$previousVelocity = $externalData["speedBVelocity"] ?? [];
+			$previousVelocityX = (float) ($previousVelocity["x"] ?? 0.0);
+			$previousVelocityZ = (float) ($previousVelocity["z"] ?? 0.0);
+			$previousSpeed = MathUtil::horizontalSpeed($previousVelocityX, $previousVelocityZ);
+			$acceleration = MathUtil::horizontalAcceleration(
+				$velocity["x"],
+				$velocity["z"],
+				$previousVelocityX,
+				$previousVelocityZ
+			);
+			$directionChange = MathUtil::directionChange(
+				$velocity["x"],
+				$velocity["z"],
+				$previousVelocityX,
+				$previousVelocityZ
+			);
+			$verticalError = (float) ($playerData["verticalError"] ?? 0.0);
+			$verticalState = (int) ($playerData["verticalState"] ?? PlayerZuri::VERTICAL_GROUND);
+			$specialVerticalState = in_array($state, [
+				PlayerZuri::STATE_GRACE,
+				PlayerZuri::STATE_GLIDING,
+				PlayerZuri::STATE_CREATIVE,
+				PlayerZuri::STATE_SPECTATOR,
+				PlayerZuri::STATE_LAVA,
+				PlayerZuri::STATE_SWIMMING,
+				PlayerZuri::STATE_CLIMBING,
+				PlayerZuri::STATE_STAIRS
+			], true);
 
-			$movement = $playerData["movement"];
-			$movementX = abs($movement["to"]["x"] - $movement["from"]["x"]);
-			$movementZ = abs($movement["to"]["z"] - $movement["from"]["z"]);
-			$movementY = abs($movement["to"]["y"] - $movement["from"]["y"]);
-
-			if (
-				$movementX < 0.0001 &&
-				$movementY < 0.0001 &&
-				$movementZ < 0.0001
-			) {
-				return self::buildResult(false);
+			if ($state === PlayerZuri::STATE_GRACE || ($playerData["isCurrentChunkLoaded"] ?? true) === false) {
+				return self::buildResult(false, [], [
+					"speedBVelocity" => $velocity,
+					"speedBBuffer" => 0.0,
+					"speedBVerticalBuffer" => 0.0
+				]);
 			}
 
-			if (
-				$playerData["isSurvival"] ||
-				$playerData["attackTicks"] < 40 ||
-				$playerData["projectileAttackTicks"] < 20 ||
-				$playerData["bowShotTicks"] < 20 ||
-				$playerData["hurtTicks"] < 10 ||
-				$playerData["teleportTicks"] < 60 ||
-				$playerData["slimeBlockTicks"] < 20 ||
-				$playerData["teleportCommandTicks"] < 40 ||
-				$playerData["onlineTime"] < 2 ||
-				$playerData["isOnAdhesion"] ||
-				!$playerData["isOnGround"] ||
-				$playerData["isFlying"] ||
-				$playerData["getAllowFlight"] ||
-				$playerData["hasNoClientPredictions"] ||
-				!$playerData["isCurrentChunkLoaded"] ||
-				$playerData["isGroundSolid"] ||
-				$playerData["isGliding"] ||
-				$playerData["isRecentlyCancelledEvent"]
-			) {
-				return self::buildResult(false);
-			}
+			$expectedSpeed = MathUtil::movementSpeed(
+				$state,
+				(bool) ($playerData["isUnderwater"] ?? false),
+				(bool) ($playerData["isSprinting"] ?? false),
+				(bool) ($playerData["isSneaking"] ?? false),
+				(bool) ($playerData["isStartedJumping"] ?? false) || !($playerData["isOnGround"] ?? true),
+				(bool) ($playerData["twoBlockPassage"] ?? false),
+				(float) ($playerData["pitch"] ?? 0.0),
+				(int) ($playerData["speedLevel"] ?? 0),
+				(int) ($playerData["slownessLevel"] ?? 0),
+				(bool) ($playerData["isSoulSpeedSurface"] ?? false),
+				(int) ($playerData["soulSpeedLevel"] ?? 0)
+			);
+			$expectedSpeed = MathUtil::iceSpeed(
+				$expectedSpeed,
+				$previousSpeed,
+				$state === PlayerZuri::STATE_ICE,
+				(int) ($playerData["previousSurface"] ?? PlayerZuri::SURFACE_UNKNOWN) === PlayerZuri::SURFACE_ICE
+			);
+			$externalVelocity = (int) ($playerData["externalVelocityTicks"] ?? 0) > 0 &&
+				(int) ($playerData["horizontalVelocitySource"] ?? PlayerZuri::SOURCE_UNKNOWN) !== PlayerZuri::SOURCE_UNKNOWN
+				? ($playerData["motion"] ?? ["x" => 0.0, "z" => 0.0])
+				: ["x" => 0.0, "z" => 0.0];
+			$allowedSpeed = MathUtil::applyExternalVelocity(
+				$expectedSpeed,
+				(float) ($externalVelocity["x"] ?? 0.0),
+				(float) ($externalVelocity["z"] ?? 0.0)
+			);
+			$allowedSpeed += ($deltaTicks - 1.0) * $expectedSpeed;
+			$allowedSpeed += ($expectedSpeed * 0.10) + 0.10;
+			$allowedSpeed += min(4.0, $acceleration * 0.25);
+			$allowedSpeed += min(1.0, $directionChange * 0.25);
 
-			if ($playerData["externalData"]["moveTime"] === null) {
-				return self::buildResult(false);
-			}
+			$excess = max(0.0, $actualSpeed - $allowedSpeed);
+			$buffer = (float) ($externalData["speedBBuffer"] ?? 0.0);
+			$verticalBuffer = (float) ($externalData["speedBVerticalBuffer"] ?? 0.0);
+			$verticalExcess = $specialVerticalState || $verticalState === PlayerZuri::VERTICAL_GROUND
+				? 0.0
+				: max(0.0, abs($verticalError) - 0.35);
+			$buffer = $excess > 0.25
+				? min(10.0, $buffer + min(2.0, $excess * 0.5))
+				: max(0.0, $buffer - 0.15);
+			$verticalBuffer = $verticalExcess > 0.2
+				? min(10.0, $verticalBuffer + min(2.0, $verticalExcess * 0.5))
+				: max(0.0, $verticalBuffer - 0.15);
+			$failed = $buffer >= 4.0 || $verticalBuffer >= 4.0;
 
-			return self::buildResult(false, [], [
-				"moveTime" => microtime(true),
+			return self::buildResult($failed, [
+				"state" => $state,
+				"actualSpeed" => $actualSpeed,
+				"expectedSpeed" => $expectedSpeed,
+				"allowedSpeed" => $allowedSpeed,
+				"excess" => $excess,
+				"verticalError" => $verticalError,
+				"verticalExcess" => $verticalExcess,
+				"verticalState" => $verticalState,
+				"acceleration" => $acceleration,
+				"directionChange" => $directionChange,
+				"buffer" => $buffer
+			], [
+				"speedBVelocity" => $velocity,
+				"speedBBuffer" => $failed ? 0.0 : $buffer,
+				"speedBVerticalBuffer" => $failed ? 0.0 : $verticalBuffer
 			]);
 		}
 

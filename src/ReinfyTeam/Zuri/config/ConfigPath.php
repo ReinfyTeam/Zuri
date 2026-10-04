@@ -39,6 +39,7 @@ interface ConfigPath {
 	public const ASYNC_BATCH_SIZE = "zuri.async.batch_size";
 	public const THREAD_MAX_WORKER = "zuri.threads.max_worker";
 	public const THREAD_WORKER_CAPACITY = "zuri.threads.worker_capacity";
+	public const METRICS_DELAY = "zuri.metrics.delay";
 
 	public const THRESHOLDS_PING = "zuri.thresholds.ping";
 	public const THRESHOLDS_TPS = "zuri.thresholds.tps";

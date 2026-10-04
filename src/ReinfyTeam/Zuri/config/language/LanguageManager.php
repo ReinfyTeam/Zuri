@@ -32,8 +32,10 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\config\language;
 
 use ReinfyTeam\Zuri\ZuriAC;
-use function str_contains;
+use function array_key_first;
 use function str_ends_with;
+use function str_replace;
+use function str_starts_with;
 
 class LanguageManager {
 	private array $registeredLocale = [];
@@ -52,7 +54,7 @@ class LanguageManager {
 	}
 
 	public function setCurrentLanguage(Language $currentLanguage) : void {
-		if ($this->isRegisteredLocale($currentLanguage->getCode())) {
+		if (!$this->isRegisteredLocale($currentLanguage->getCode())) {
 			throw new LanguageError("This language is not registered yet: " . $currentLanguage->getCode());
 		}
 		$this->currentLanguage = $currentLanguage;
@@ -68,11 +70,22 @@ class LanguageManager {
 
 	public static function loadLanguage() : self {
 		$instance = new LanguageManager();
-		foreach (ZuriAC::getInstance()->getResources() as $resource) {
-			if (str_contains($resource->getPath(), "language/") && str_ends_with($resource->getPath(), ".yml")) {
-				$language = new Language($resource->getPath());
+		$plugin = ZuriAC::getInstance();
+		foreach ($plugin->getResources() as $path => $resource) {
+			$path = str_replace("\\", "/", $path);
+			if (str_starts_with($path, "lang/") && str_ends_with($path, ".yml")) {
+				$plugin->saveResource($path);
+				$language = new Language($plugin->getDataFolder() . $path);
 				$instance->registerLanguage($language);
 			}
+		}
+
+		if (isset($instance->registeredLocale["en_US"])) {
+			$instance->setCurrentLanguage($instance->registeredLocale["en_US"]);
+		} elseif ($instance->registeredLocale !== []) {
+			$instance->setCurrentLanguage($instance->registeredLocale[array_key_first($instance->registeredLocale)]);
+		} else {
+			throw new LanguageError("No language resources were found");
 		}
 		return $instance;
 	}

@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\thread;
 use pmmp\thread\ThreadSafeArray;
 use Throwable;
 use function count;
+use function is_string;
 
 final class CheckWorker {
 	private ThreadSafeArray $jobs;

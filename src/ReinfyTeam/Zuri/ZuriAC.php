@@ -31,7 +31,6 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri;
 
-use pocketmine\Server;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\utils\SingletonTrait;
 use ReinfyTeam\Zuri\check\Check;
@@ -84,26 +83,17 @@ class ZuriAC extends Loader {
 	 * Initializes worker and check registry.
 	 */
 	protected function onEnable() : void {
+		$workerCount = max(1, (int) self::$config->getData(ConfigPath::THREAD_MAX_WORKER, 1));
+		$workerCapacity = max(1, (int) self::$config->getData(ConfigPath::THREAD_WORKER_CAPACITY, 64));
+
 		self::$checkQueue = new CheckQueue();
 		self::$checkResults = new CheckResults();
 		self::$checkRegistry = CheckRegistry::loadChecks();
-		$workerCount = max(1, (int) self::$config->getData(ConfigPath::THREAD_MAX_WORKER, 1));
-		$workerCapacity = max(1, (int) self::$config->getData(ConfigPath::THREAD_WORKER_CAPACITY, 64));
+
 		self::$checkThread = new CheckThread(self::$checkQueue, self::$checkResults, $workerCount, $workerCapacity);
 		self::$metricsData = new MetricsData();
 		self::$externalData = new ExternalData();
-		/*$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(function() : void {
-			foreach (Server::getInstance()->getOnlinePlayers() as $player) {
-				if (!$player->isConnected()) {
-					continue;
-				}
-
-				self::$checkRegistry->spawnCheck([
-					"type" => "PlayerAuthInputPacket",
-					"player" => $player
-				], Check::TYPE_PACKET);
-			}
-		}), 1);*/
+		self::$languageManager = LanguageManager::loadLanguage();
 		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(function() : void {
 			while (($result = self::$checkResults->getNextResult()) !== null) {
 				ResultsHandler::handle($result);

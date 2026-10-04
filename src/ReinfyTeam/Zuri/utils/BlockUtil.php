@@ -45,6 +45,19 @@ use function implode;
  * Utilities for block-related environment checks.
  */
 final class BlockUtil {
+	public static function isSoulSpeedSurface(int $blockId) : bool {
+		return $blockId === BlockTypeIds::SOUL_SAND || $blockId === BlockTypeIds::SOUL_SOIL;
+	}
+
+	public static function getSurfaceMultiplier(string $surface) : float {
+		return match ($surface) {
+			"ice" => 0.98,
+			"liquid" => 0.8,
+			"snow" => 0.98,
+			default => 1.0
+		};
+	}
+
 	/**
 	 * Check if the entity location is on ground.
 	 *
@@ -304,6 +317,24 @@ final class BlockUtil {
 			BlockTypeIds::LAVA
 		];
 		return self::isUnderBlock($location, $liquid, $down);
+	}
+
+	public static function isOnWater(Location $location, int $down) : bool {
+		return self::isUnderBlock($location, [BlockTypeIds::WATER], $down);
+	}
+
+	public static function isOnLava(Location $location, int $down) : bool {
+		return self::isUnderBlock($location, [BlockTypeIds::LAVA], $down);
+	}
+
+	public static function isTwoBlockPassage(Location $location) : bool {
+		$world = $location->getWorld();
+		$x = (int) $location->getX();
+		$y = (int) $location->getY();
+		$z = (int) $location->getZ();
+
+		return !$world->getBlockAt($x, $y + 1, $z)->isSolid() &&
+			!$world->getBlockAt($x, $y + 2, $z)->isSolid();
 	}
 
 	/**

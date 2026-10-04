@@ -33,6 +33,12 @@ namespace ReinfyTeam\Zuri\utils;
 
 use DateTime;
 use pocketmine\world\Position;
+use ReinfyTeam\Zuri\player\PlayerZuri;
+use function abs;
+use function floor;
+use function in_array;
+use function max;
+use function min;
 use function preg_match_all;
 use function sqrt;
 use function strtolower;
@@ -64,6 +70,163 @@ final class MathUtil {
 		}
 
 		return 0.1 * $movement * $effectMultiplier * ((0.6 / $friction) ** 3);
+	}
+
+	public static function horizontalDistance(float $fromX, float $fromZ, float $toX, float $toZ) : float {
+		$dx = $toX - $fromX;
+		$dz = $toZ - $fromZ;
+		return sqrt(($dx * $dx) + ($dz * $dz));
+	}
+
+	public static function horizontalVelocity(float $fromX, float $fromZ, float $toX, float $toZ, float $deltaTicks) : array {
+		$scale = 20.0 / max(1.0, $deltaTicks);
+		return [
+			"x" => ($toX - $fromX) * $scale,
+			"z" => ($toZ - $fromZ) * $scale
+		];
+	}
+
+	public static function horizontalSpeed(float $velocityX, float $velocityZ) : float {
+		return sqrt(($velocityX ** 2) + ($velocityZ ** 2));
+	}
+
+	public static function horizontalAcceleration(
+		float $velocityX,
+		float $velocityZ,
+		float $previousVelocityX,
+		float $previousVelocityZ
+	) : float {
+		return self::horizontalSpeed(
+			$velocityX - $previousVelocityX,
+			$velocityZ - $previousVelocityZ
+		);
+	}
+
+	public static function directionChange(
+		float $velocityX,
+		float $velocityZ,
+		float $previousVelocityX,
+		float $previousVelocityZ
+	) : float {
+		$currentSpeed = self::horizontalSpeed($velocityX, $velocityZ);
+		$previousSpeed = self::horizontalSpeed($previousVelocityX, $previousVelocityZ);
+		if ($currentSpeed <= 0.0001 || $previousSpeed <= 0.0001) {
+			return 0.0;
+		}
+
+		$cosine = (($velocityX * $previousVelocityX) + ($velocityZ * $previousVelocityZ)) / ($currentSpeed * $previousSpeed);
+		return 1.0 - max(-1.0, min(1.0, $cosine));
+	}
+
+	public static function verticalVelocityAfterTicks(float $initialVelocity, int $ticks) : float {
+		if ($ticks <= 0) {
+			return $initialVelocity;
+		}
+
+		return (0.98 ** ($ticks - 1)) * ($initialVelocity + 3.92) - 3.92;
+	}
+
+	public static function verticalDisplacement(float $initialVelocity, int $ticks) : float {
+		if ($ticks <= 0) {
+			return 0.0;
+		}
+
+		return 50.0 * ($initialVelocity + 3.92) * (1.0 - (0.98 ** $ticks)) - (3.92 * $ticks);
+	}
+
+	public static function verticalVelocityAtSeconds(float $initialVelocity, float $seconds) : float {
+		$ticks = max(0, (int) floor(20.0 * $seconds));
+		return self::verticalVelocityAfterTicks($initialVelocity, $ticks);
+	}
+
+	public static function verticalDisplacementAtSeconds(float $initialVelocity, float $seconds) : float {
+		$ticks = max(0, (int) floor(20.0 * $seconds));
+		return self::verticalDisplacement($initialVelocity, $ticks);
+	}
+
+	public static function speed3D(float $velocityX, float $velocityY, float $velocityZ) : float {
+		return sqrt(($velocityX ** 2) + ($velocityY ** 2) + ($velocityZ ** 2));
+	}
+
+	public static function nextVerticalVelocity(float $velocity) : float {
+		return ($velocity - 0.08) * 0.98;
+	}
+
+	public static function movementSpeed(
+		int $state,
+		bool $underwater,
+		bool $sprinting,
+		bool $sneaking,
+		bool $jumping,
+		bool $twoBlockPassage,
+		float $pitch,
+		int $speedLevel,
+		int $slownessLevel,
+		bool $soulSpeedSurface,
+		int $soulSpeedLevel
+	) : float {
+		$base = match ($state) {
+			PlayerZuri::STATE_SWIMMING => $underwater ? ($sprinting ? 5.612 : 1.97) : ($sprinting ? 5.612 : 2.2),
+			PlayerZuri::STATE_LAVA => 1.0,
+			PlayerZuri::STATE_CREATIVE => $sprinting ? 22.0 : 11.0,
+			PlayerZuri::STATE_SPECTATOR => $sprinting ? 87.111 : 43.556,
+			PlayerZuri::STATE_GLIDING => self::glideSpeed($pitch),
+			PlayerZuri::STATE_CLIMBING => 2.35,
+			PlayerZuri::STATE_STAIRS,
+			PlayerZuri::STATE_ICE,
+			PlayerZuri::STATE_SOUL_SPEED,
+			PlayerZuri::STATE_SPRINT_JUMP,
+			PlayerZuri::STATE_SPRINT,
+			PlayerZuri::STATE_SNEAK,
+			PlayerZuri::STATE_WALK => 4.317,
+			default => 4.317
+		};
+
+		if ($state === PlayerZuri::STATE_SNEAK || ($state === PlayerZuri::STATE_ICE && $sneaking)) {
+			$base = 1.3;
+		} elseif ($state === PlayerZuri::STATE_SPRINT_JUMP && $sprinting && $jumping) {
+			$base = $twoBlockPassage ? 9.346 : 7.127;
+		} elseif ($state === PlayerZuri::STATE_SPRINT && $sprinting) {
+			$base = 5.612;
+		}
+
+		$directMovement = !in_array($state, [
+			PlayerZuri::STATE_CLIMBING,
+			PlayerZuri::STATE_LAVA,
+			PlayerZuri::STATE_CREATIVE,
+			PlayerZuri::STATE_SPECTATOR,
+			PlayerZuri::STATE_GLIDING
+		], true);
+		if ($directMovement) {
+			$speedLevel = max(0, $speedLevel);
+			$slownessLevel = max(0, $slownessLevel);
+			$base *= 1.0 + (0.20 * $speedLevel);
+			$base *= max(0.0, 1.0 - (0.15 * $slownessLevel));
+		}
+
+		if ($soulSpeedSurface) {
+			$soulSpeedLevel = max(0, $soulSpeedLevel);
+			$base *= $soulSpeedLevel > 0 ? (1.3 + (0.105 * $soulSpeedLevel)) : 0.4;
+		}
+
+		return $base;
+	}
+
+	public static function applyExternalVelocity(float $speed, float $velocityX, float $velocityZ) : float {
+		return $speed + self::horizontalSpeed($velocityX, $velocityZ);
+	}
+
+	public static function iceSpeed(float $baseSpeed, float $previousSpeed, bool $onIce, bool $wasOnIce) : float {
+		if (!$onIce && !$wasOnIce) {
+			return $baseSpeed;
+		}
+		$momentum = ($previousSpeed * 0.98) + ($baseSpeed * 0.10);
+		return min(40.0, max($baseSpeed, $momentum));
+	}
+
+	public static function glideSpeed(float $pitch) : float {
+		$downward = max(0.0, min(90.0, abs($pitch)));
+		return 30.0 + (($downward / 90.0) * (78.4 - 30.0));
 	}
 
 	/**

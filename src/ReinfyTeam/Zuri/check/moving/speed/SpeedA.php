@@ -90,8 +90,8 @@ class SpeedA extends Check {
 				$playerData["teleportTicks"] < 60 ||
 				$playerData["bowShotTicks"] < 20 ||
 				$playerData["hurtTicks"] < 40 ||
-				$playerData["commandTicks"] < 40 ||
-				$playerData["isOnAdhesion"] ||
+				$playerData["teleportCommandTicks"] < 40 ||
+				$playerData["isClimbing"] ||
 				$playerData["allowFlight"] ||
 				$playerData["airTicks"] > 40 ||
 				$playerData["isFlying"] ||
@@ -106,7 +106,7 @@ class SpeedA extends Check {
 			}
 
 			$previous = $playerData["movement"]["from"];
-			$next = $playerData["movement"]["from"];
+			$next = $playerData["movement"]["to"];
 
 			$externalData = $playerData["externalData"];
 
@@ -117,11 +117,11 @@ class SpeedA extends Check {
 			$acceleration = $externalData[ExternalDataPath::ACCELERATION];
 
 			$expected = $momentum + $acceleration;
-			$expected += ($playerData["jumpTicks"] < 5 && $player["isBlockAbove"]) ? $constantData[ConstantPath::JUMP_FACTOR] : 0;
+			$expected += ($playerData["jumpTicks"] < 5 && $playerData["isBlockAbove"]) ? $constantData[ConstantPath::JUMP_FACTOR] : 0;
 			$expected += ($playerData["isOnGround"]) ? $constantData[ConstantPath::GROUND_FACTOR] : 0;
 			$expected += ($playerData["isStartedJumping"] && $playerData["lastMoveTick"] > 5) ? $constantData[ConstantPath::LAST_JUMP_FACTOR] : 0;
 			$expected += ($playerData["jumpTicks"] <= 20 && $playerData["isOnIce"]) ? $constantData[ConstantPath::ICE_FACTOR] : 0;
-
+			$expected += ($playerData["isOnSnow"]) ? $constantData[ConstantPath::SNOW_FACTOR] : 0;
 			$motion = Utils::arrayToVector3($playerData["motion"]);
 			if (abs($motion->getX()) > 0 || abs($motion->getZ()) > 0) {
 				$motion = Utils::arrayToVector3($playerData["motion"]);

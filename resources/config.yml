@@ -9,7 +9,12 @@ zuri:
     # Number of worker threads inside the check coordinator thread.
     max_worker: 4
     # Maximum queued checks accepted by each worker.
-    worker_capacity: 1024
+    worker_capacity: 64
+  # Metrics settings: This helps to monitor the performance of the anticheat system and can be used for debugging or optimization.
+  # Adjust the delay for metrics collection based on your server's performance and workload.
+  metrics:
+    # Adjust delay for updating metrics data. In miliseconds. Default is every 3 seconds.
+    delay: 3
   # Punishment thresholds: Responsible for handling considerations of the player conditions.
   # This involves the ping, server tps, server load that affects modules.
   thresholds:

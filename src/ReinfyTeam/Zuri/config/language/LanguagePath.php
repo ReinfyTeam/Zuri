@@ -32,5 +32,6 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\config\language;
 
 interface LanguagePath {
-	public const PUNISHMENT_BAN_MESSAGE = "punishment.ban_message";
+	public const PUNISHMENT_BAN_MESSAGE = "punishments.ban_message";
+	public const KICK_MESSAGE = "punishments.kick_message";
 }

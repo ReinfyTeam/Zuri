@@ -31,6 +31,11 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\thread;
 
+use function is_array;
+use function is_string;
+use function serialize;
+use function unserialize;
+
 final class CheckJob {
 	public function __construct(
 		private string $check,
@@ -55,12 +60,12 @@ final class CheckJob {
 
 	public static function unserialize(string $serialized) : self {
 		$job = unserialize($serialized, ["allowed_classes" => false]);
-		if(
+		if (
 			!is_array($job) ||
 			!isset($job["check"], $job["data"]) ||
 			!is_string($job["check"]) ||
 			!is_array($job["data"])
-		){
+		) {
 			throw new \UnexpectedValueException("Invalid serialized check job");
 		}
 		return new self($job["check"], $job["data"]);

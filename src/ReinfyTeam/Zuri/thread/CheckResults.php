@@ -35,8 +35,9 @@ use pmmp\thread\ThreadSafe;
 use pmmp\thread\ThreadSafeArray;
 use function count;
 use function is_array;
-use function unserialize;
+use function is_string;
 use function serialize;
+use function unserialize;
 
 final class CheckResults extends ThreadSafe {
 	private ThreadSafeArray $queue;
@@ -56,7 +57,7 @@ final class CheckResults extends ThreadSafe {
 	/** @return array{result:array,check:class-string,player:?string}|null */
 	public function getNextResult() : ?array {
 		$result = $this->queue->shift();
-		if(!is_string($result)){
+		if (!is_string($result)) {
 			return null;
 		}
 
