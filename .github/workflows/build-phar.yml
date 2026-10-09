@@ -1,4 +1,4 @@
-name: Build Phar with Virions
+name: Build
 
 on:
   push:

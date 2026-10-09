@@ -1,4 +1,4 @@
-name: PHP-CS-FIXER Analyze Code Style
+name: Code style
 
 on:
   push:
