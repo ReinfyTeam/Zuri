@@ -1,4 +1,4 @@
-name: PHPStan
+name: Analyze PHP code with PHPStan
 
 on:
   push:
@@ -12,17 +12,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Check out repository
         uses: actions/checkout@v7
 
-      - name: Setup PHP for PocketMine-MP
+      - name: Set up PHP for PocketMine-MP
         uses: pmmp/setup-php-action@3.2.0
         with:
           php-version: 8.2
           pm-version-major: 5
 
-      - name: Install composer dependencies
+      - name: Install Composer dependencies
         run: composer install --prefer-dist
 
-      - name: Run PHPStan
+      - name: Run PHPStan at maximum level
         run: composer run-script analyze
