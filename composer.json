@@ -37,7 +37,8 @@
             "@php tools/prepare-build.php",
             "@php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -o=./build/"
         ],
-		"test": "@php tools/test.php"
+		"test": "@php tools/test.php",
+        "test:runtime": "@php -dphar.readonly=0 tools/test-runtime.php"
     },
     "config": {
         "platform": {

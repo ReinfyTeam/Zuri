@@ -38,6 +38,7 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
 use ReinfyTeam\Zuri\utils\Utils;
+use ReinfyTeam\Zuri\utils\WorldUtil;
 use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
@@ -303,6 +304,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->setSurvival($player->isSurvival());
 		$this->setSpectator($player->isSpectator());
 		$this->setAllowFlight($player->getAllowFlight());
+		$this->setCurrentChunkLoaded(WorldUtil::isCurrentChunkIsLoaded($player));
 
 		return $this;
 	}

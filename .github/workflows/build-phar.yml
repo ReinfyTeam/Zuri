@@ -27,6 +27,11 @@ jobs:
       - name: Build plugin phar
         run: composer run-script build
 
+      - name: Test plugin lifecycle and metrics on PocketMine-MP
+        run: |
+          curl --fail --location --retry 3 --output build/PocketMine-MP.phar https://github.com/pmmp/PocketMine-MP/releases/download/5.44.3/PocketMine-MP.phar
+          composer test:runtime -- build/PocketMine-MP.phar
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
         with:

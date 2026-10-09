@@ -99,6 +99,7 @@ if ($buildPath !== null) {
 $world = new class extends World {
 	public int $roofY = 67;
 	public int $highestBlockQueries = 0;
+	public bool $terrainLoaded = false;
 
 	public function __construct() {
 	}
@@ -107,11 +108,15 @@ $world = new class extends World {
 		++$this->highestBlockQueries;
 		return $this->roofY;
 	}
+
+	public function isInLoadedTerrain(Vector3 $pos) : bool {
+		return $this->terrainLoaded;
+	}
 };
-$player = new class extends Player {
+$player = new class($world) extends Player {
 	public int $teleports = 0;
 
-	public function __construct() {
+	public function __construct(private World $testWorld) {
 	}
 
 	public function __destruct() {
@@ -119,6 +124,14 @@ $player = new class extends Player {
 
 	public function getName() : string {
 		return "Trapdoor Regression";
+	}
+
+	public function getWorld() : World {
+		return $this->testWorld;
+	}
+
+	public function getLocation() : Location {
+		return new Location(8.5, 64.0, 24.5, $this->testWorld, 0, 0);
 	}
 
 	public function isConnected() : bool {
@@ -170,11 +183,12 @@ foreach (["checkRegistry" => CheckRegistry::loadChecks(), "checkQueue" => $queue
 $tracking = PlayerManager::get($player);
 $from = new Location(8.5, 64.0, 24.5, $world, 0, 0);
 $to = new Location(8.5, 63.9, 24.5, $world, 0, 0);
-$reset = static function() use ($tracking, $externalData, $from, $to) : void {
+$reset = static function() use ($tracking, $externalData, $from, $to, $world, $player) : void {
 	$tracking->setRecentlyCancelledEvent(0.0);
 	$tracking->setJoinedAtTheTime(microtime(true) - 10.0);
 	$tracking->setTeleportTicks(microtime(true) - 10.0);
-	$tracking->setCurrentChunkLoaded(true);
+	$world->terrainLoaded = true;
+	PlayerManager::get($player);
 	$tracking->synchronizePositions($from);
 	$tracking->setMovement($from, $to);
 	$externalData->setExternalData($tracking, "Speed", "speedBBuffer", 3.9);
@@ -197,6 +211,30 @@ $runChecks = static function() use ($tracking, $constants) : array {
 	}
 	return $output;
 };
+
+foreach ([false, true, false, true] as $loaded) {
+	$reset();
+	$world->terrainLoaded = $loaded;
+	$tracking->setMovement($from, new Location($from->x + 5.0, $from->y, $from->z, $world, 0, 0));
+	$results = new CheckResults();
+	$worker = new CheckWorker($results, 2);
+	foreach ([new SpeedA(), new SpeedB()] as $check) {
+		$queue->addCheck(["player" => $player, "type" => $check instanceof SpeedA ? "PlayerAuthInputPacket" : "PlayerMoveEvent"], $check);
+		$serialized = $queue->getNextCheck();
+		$expect($serialized !== null, "Terrain regression must use the production snapshot queue");
+		$job = CheckJob::unserialize($serialized);
+		$expect($job->getData()["playerData"]["isCurrentChunkLoaded"] === $loaded, "Queued terrain readiness must refresh when chunks unload and reload");
+		$worker->enqueue($serialized);
+	}
+	$world->terrainLoaded = !$loaded;
+	while ($worker->processNext()) {
+		$result = $results->getNextResult();
+		$expect($result["result"]["failed"] === $loaded, "Speed checks must detect excessive movement only in the snapshot's loaded terrain");
+		if (!$loaded && $result["check"] === SpeedB::class) {
+			$expect($result["result"]["externalData"]["speedBBuffer"] === 0.0, "Unloaded terrain must reset speed accumulation");
+		}
+	}
+}
 
 foreach ([67, 164] as $roofY) {
 	$world->roofY = $roofY;
@@ -250,4 +288,4 @@ $expect($tracking->getCurrentPosition()->equals($from), "Cancelled movement must
 $expect($queue->isEmpty() && $player->teleports === 0, "Cancelled movement must not queue checks or teleport the player");
 HandlerListManager::global()->unregisterAll();
 PlayerManager::remove($player);
-echo "Issue #76 regression (" . ($buildPath === null ? "source" : "PHAR") . "): " . $assertions . " assertions passed\n";
+echo "Movement regression (#76 and terrain, " . ($buildPath === null ? "source" : "PHAR") . "): " . $assertions . " assertions passed\n";

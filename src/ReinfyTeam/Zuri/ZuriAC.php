@@ -42,6 +42,7 @@ use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\config\ConstantValues;
 use ReinfyTeam\Zuri\config\language\LanguageManager;
 use ReinfyTeam\Zuri\player\ExternalData;
+use ReinfyTeam\Zuri\task\MetricsTask;
 use ReinfyTeam\Zuri\thread\CheckQueue;
 use ReinfyTeam\Zuri\thread\CheckResults;
 use ReinfyTeam\Zuri\thread\CheckThread;
@@ -92,6 +93,8 @@ class ZuriAC extends Loader {
 
 		self::$checkThread = new CheckThread(self::$checkQueue, self::$checkResults, $workerCount, $workerCapacity);
 		self::$metricsData = new MetricsData();
+		self::$metricsData->update();
+		$this->getScheduler()->scheduleRepeatingTask(new MetricsTask(), max(1, self::$config->getInt(ConfigPath::METRICS_DELAY, 3)) * 20);
 		self::$externalData = new ExternalData();
 		self::$languageManager = LanguageManager::loadLanguage();
 		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(function() : void {

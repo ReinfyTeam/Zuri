@@ -1,222 +1,75 @@
-# Zuri Pocketmine-MP Anticheat 🛡️
+# Zuri PocketMine-MP Anticheat 🛡️
 
-[![](https://poggit.pmmp.io/shield.state/Zuri)](https://poggit.pmmp.io/p/Zuri) [![](https://poggit.pmmp.io/shield.api/Zuri)](https://poggit.pmmp.io/p/Zuri) [![](https://poggit.pmmp.io/shield.dl.total/Zuri)](https://poggit.pmmp.io/p/Zuri) [![](https://poggit.pmmp.io/shield.dl/Zuri)](https://poggit.pmmp.io/p/Zuri)
+[![](https://poggit.pmmp.io/shield.state/Zuri)](https://poggit.pmmp.io/p/Zuri) [![](https://poggit.pmmp.io/shield.api/Zuri)](https://poggit.pmmp.io/p/Zuri) [![](https://poggit.pmmp.io/shield.dl.total/Zuri)](https://poggit.pmmp.io/p/Zuri)
 
-**Zuri** is an anticheat made to protect the server from any may unfair advantages from the players. A powerful anticheat made to destroy hackers from your server for PocketMine-MP.
+Zuri is a movement anticheat for PocketMine-MP. The current `main` branch is the **1.4.0-BETA rewrite** and registers two checks: **SpeedA** and **SpeedB**. This document describes that branch; older releases have a different feature set.
 
-**Zuri** attempts to enforce "vanilla Minecraft" mechanics, as well as preventing players from abusing weaknesses in Minecraft or its protocol, making your server more safe. 
+The rewrite is intended for a **pre-release**. Test it on a staging server with your protection plugins and normal player movement before enabling kick or ban punishments.
 
-Organized in different sections, various checks are performed to test player behavior across movement, combat, block interaction, inventory handling, chat abuse, and packet consistency. 
+## Current checks and behavior
 
-The plugin is designed to combine fast main-thread checks with heavier calculations that can be offloaded when needed, so servers can keep detection active without turning every event into a lag spike.
+| Check | Input | Behavior |
+| --- | --- | --- |
+| SpeedA | `PlayerAuthInputPacket` | Compares horizontal movement with the expected movement allowance. |
+| SpeedB | `PlayerMoveEvent` | Tracks horizontal and vertical movement with accumulating detection buffers and movement-state allowances. |
 
-> ⚠️ **Spoon or Fork of Pocketmine-MP are not supported.** Do not try to create an issue, it will closed automatically.
+Player movement and terrain state are captured on the main thread. Serialized snapshots are processed by check workers within one background coordinator thread, and results return to the main thread for violation handling. `zuri.threads.max_worker` controls the number of check workers within that coordinator.
 
-😁 If you are interested with our projects, you may help us by:
-- [Donate via Ko-Fi](https://ko-fi.com/xqwtxon)
-- [Become a Patreon](https://patreon.com/xwertxy)
+Checks skip movement in terrain that has not loaded and resume after it loads. Cancelled movement and denied block interactions receive a short movement grace period. The legacy Phase trapdoor correction from [issue #76](https://github.com/ReinfyTeam/Zuri/issues/76) is absent from this rewrite; Zuri does not teleport players onto the highest block in a column.
 
-Also, adding :star: a **Star** is also appreciated. ✨
+Server metrics are initialized when the plugin enables and refreshed periodically. TPS, ping and player load feed the punishment threshold calculation. The metrics delay is measured in seconds, with a minimum of one second.
 
-🤔 Do you struggling with **bugs and issues?** Don't hesitate to tell us about it by [creating an issue](https://github.com/ReinfyTeam/Zuri-Rewrite/issues) or you may join us on our official [discord server](https://discord.com/invite/7u7qKsvSxg)!
+**Legacy features:** combat, fly, reach, scaffold, inventory, chat, proxy/VPN, IP limits, cross-check correlation, tuning presets, and the `/zuri` commands/UI are not implemented in the current rewrite. The old list of 40+ checks and wiki examples do not describe its current capabilities. Configuration entries that mention another module do not register that module.
 
-> ☢ For Plugin Developers:
-> The full documentation about API and it's usage is can be found in the [github wiki](https://github.com/ReinfyTeam/Zuri/wiki).
+## Requirements and installation
 
-> ![Zuri Anticheat Meme](https://raw.githubusercontent.com/ReinfyTeam/Zuri/main/meme.jpg)
->
-> Zuri can catch hacker efficiently, with over **40+ check modules**. Unlike other **$100 Anticheat**, it is more systematic, lightweight, and easy to configure. It's too good right? 🤦
+- Official PocketMine-MP 5 and its compatible PHP runtime; PHP 8.2 or newer is required. Development dependencies target PocketMine-MP 5.42 or newer.
+- A compiled `Zuri.phar`. Virion dependencies are bundled by the build; Composer is required to build from source.
+- Forks of PocketMine-MP are unsupported.
 
-# Features
-- This plugin has total of 40+ checks that cover the most common public cheat categories, including speed, fly, reach, scaffold, timer, and packet manipulation.
-- Checks are organized by module groups, and new modules can self-declare their name, subtype, and correlation group for easier extension.
-- You can easily configure everything in the config. ✅
-   - Configure easily the max violations, punishment type, thresholds, bypass rules, and module constants without editing source code.
-- You can switch ready tuning presets for combat-sensitive detections (`custom`, `low-latency`, `high-latency`) from `zuri.tuning-presets.active`.
-   - This is useful when your server has either very stable low ping PvP traffic or mixed high-latency public traffic.
-- It is more **lightweight** compared to paid anticheat. You don't have to struggle about the performance, with this anticheat, it can possible block them all easily! 💰
-   - The checks are split so the simple ones stay direct while heavier calculations are evaluated through the async pipeline, with payload identity handled by module name and subtype.
-- ✨ It is easy to use when it comes at the game, you can easily debug things, manage them all at the game, and **disable checks** according to your command.
-   - This is useful when a server owner wants to test a module, reduce false positives, or temporarily isolate a problem during maintenance.
-- Cross-check correlation can delay high-impact punishments until enough behavior groups are seen in the configured time window.
-  - This helps reduce over-aggressive punishments when only one detection family is active.
-- ❌ Limit players joining by their ip limit, you can change and configure on how many players can join with same ip address. *(optional)*
-   - This helps reduce duplicate account flooding and simple bot joins from the same network.
-- 🌟 It also checks the player if they are using a **Proxy or VPN** *(optional)*
-   - This can be used to block suspicious network sources before they reach gameplay checks.
-- ‼ It also have support for ProxyUDP. *(on development stage)*
-   - That is intended for environments that need proxy-aware packet handling beyond standard player checks.
-- 💥 You can manage plugin at the in-game using **Interactive UI** by using command! `/zuri ui`
-   - The UI is meant for quick inspection and administrative control without requiring the console.
+1. Back up the existing Zuri PHAR and its data folder, especially when upgrading from 1.3.x.
+2. Stop the server, place `Zuri.phar` in `plugins/`, and restart.
+3. Review the generated files in `plugin_data/Zuri/`, then restart after making configuration changes.
+4. Test regular movement, chunk loading, teleports and interactions with protection plugins on a staging server.
 
-If you want to create your own module or create contributions, we are open always. Please see [`Plugin Wiki`](https://github.com/ReinfyTeam/Zuri/wiki) on how Zuri anticheat works.
+Configuration files include `config.yml`, `constants.yml` and language files. An older configuration version can be copied to a `-old.yml` backup and replaced with the bundled defaults. Review and reapply relevant custom settings after upgrading; the 1.3.x configuration and plugin API are not a drop-in match for this rewrite.
 
-# Forks / Dependencies
-Here are the **dependencies** were used in the plugin:
+`config.yml` controls check worker capacity, metrics collection and punishment thresholds. Per-check options are read under `zuri.checks.speed`, including `pre-vl.a`, `pre-vl.b`, `maxvl`, `a.punishment` and `b.punishment`. Punishments default to an internal flag; `kick` and `ban` use the configured native or command action. Adjust movement constants in `constants.yml` only after reproducing a detection issue.
 
-- [Updated libpmform](https://github.com/ReinfyTeam/libpmform) for newest updated PocketMine-MP.
-- [Updated DiscordWebhookAPI](https://github.com/ReinfyTeam/DiscordWebhookAPI/) for sending discord webhooks.
-- [AntiInstabreak by PMMP](https://github.com/pmmp/AntiInstabreak) (for **Instabreak (A)**)
-- [Commando by Paroxity & CortexPE](https://github.com/Paroxity/Commando) for commands and sub commands
-- [InfoAPI](https://github.com/SOF3/InfoAPI) for API placeholders used languages for server developers.
+## Build and validation
 
-Some are for fixes and some are modified for compability.
-These libraries cover the parts that are outside the anticheat core itself, such as forms, webhook delivery, and specific block-break detection support. 
+Use the PHP runtime supplied for PocketMine-MP, including its required extensions, and Composer:
 
-# The Origin of the Plugin
-This plugin is an inspirational, continued work and rewritten of old anticheat plugin by [ReallyCheat](https://github.com/hachkingtohach1/ReallyCheat/) by [hachkingtohach1](https://github.com/hachkingtohach1/).
+```sh
+composer install --prefer-dist
+composer test
+composer analyze
+composer format:check
+composer build
+```
 
-All modules are based on ReallyCheat structure and math calculations.
-It is maintained by the developers to enhance their gameplay against unfair advantages.
+The build produces `build/Zuri.phar`, verifies required resources and PHP syntax inside the archive, and runs movement regressions against the packaged classes. Source tests cover queued terrain snapshots, interaction cancellation, detection grace, violations and release metadata.
 
-# Current Modules
-**BETA** - means to be in testing, and to be optimize in the next version. <br>
-**DISABLED** - means the code is not working or has a false-positive in certain methods. <br>
-**OPTIONAL** - means this is optional optimization checks for certain purposes. <br>
+A runtime smoke test starts the compiled plugin on a real PocketMine server, verifies metrics at startup and after two scheduled refreshes, and checks clean shutdown. It covers the default metrics delay and zero/negative delays. Supply a compatible PocketMine-MP PHAR:
 
-Every module below is grouped by the type of behavior it watches so server owners can quickly understand what part of the game is being monitored. Some checks only flag when they see repeated suspicious behavior, while others can punish immediately when a limit is crossed.
+```sh
+composer test:runtime -- /path/to/PocketMine-MP.phar
+```
 
-- **AimAssist** (BETA)
-    - **A:** Check if the player yaw is normalized and valid on the auth input.
-    - **B:** Check if the player pitch is normalized and valid on the auth input.
-    - **C:** Check if the player exceeds the pitch and yaw limit.
-    - **D:** Calculate the possible yaw and pitch limit.
-- **Crasher**
-   - **A:** Check if the player is on impossible y-axis.
-- **FastDrop**
-   - **A:** Check the time difference every drops.
-- **FastEat**
-   - **A:** Check the animation time difference when the item is consumed.
-- **FastThrow**
-   - **A:** Check if the player is throwing so fast, just like java edition but different in bedrock edition.
-- **ImpossiblePitch**
-   - **A:** Check if the player pitch is valid.
-- **InvalidPackets**
-   - **A:** Check the packet consistency is balance against the auth input and move event.
-- **InputSpoof**
-   - **A:** Detect invalid or spoofed movement vector values in PlayerAuthInput packets.
-- **MessageSpoof**
-   - **A:** Checks if the message exceeds the minecraft chat limit.
-- **SelfHit**
-   - **A:** Check if the entity id are same with damager id.
-- **Regen** (BETA)
-   - **A:** Check the heal rate is valid for the damage.
-   - **B:** Check the consistency and tolerance of heal rate is valid when player regenerated hearts.
-- **Timer** (BETA)
-   - **A:** Check the packet time consistency if it is balanced.
-   - **B:** Check the ticks between packet is balanced.
-   - **C:** Check MovePlayerPacket is stable or has delay with PlayerAuthInputPacket.
-   - **D:** Correlate auth-input ticks and real-time drift to detect sustained timer acceleration patterns.
-- **Instabreak** 
-   - **A:** Check the block break information and calculate the possible expected time to break the block.
-- **WrongMining**
-   - **A:** Check the block break per seconds is valid for their gamemode.
-- **BlockReach**
-   - **A:** Check if the player is interacting block that is not currently interactable.
-- **FillBlock**
-   - **A:** Check if the player is placing many blocks in one instance.
-- **Tower** (BETA)
-   - **A:** Check if the player is actually placing blocks upwards.
-- **Spam**
-   - **A:** Check time consistency sending to many messages per seconds.
-   - **B:** Check characters that are repeated on the last message.
-- **FastBow** (BETA)
-   - **A:** Check ticks consistency of the bow and calculate the time difference of the last shoot.
-- **ImpossibleHit**
-    - **A:** Check if the player has any opening chest or eating a food while hitting the entity.
-- **GhostHand**
-   - **A:** Detect hits that pass through solid block lines between damager and target.
-- **Hitbox**
-   - **A:** Detect invalid aim alignment and off-hitbox attack vectors during combat.
-- **ItemLerp**
-   - **A:** Detect repeated attacks immediately after held-slot swaps that mimic item-lerp abuse.
-- **Velocity** (BETA)
-   - **A:** Detect suspicious anti-knockback style movement after recent combat hits.
-- **Autoclick**
-    - **A:** Check the average speed of ticks clicked and calculate the average deviation.
-    - **B:** Check the last ticks clicked per hit.
-    - **C:** Check if the animation swing time difference are balanced.
-- **Killaura**
-    - **A:** Check if the player is breaking block while attacking.
-    - **B:** Calculate the delta pitch and yaw is valid.
-    - **C:** Check multiple entities were in combat by player has a valid distance to attack the another entity.
-    - **D:** Check player if it is actually hand has swingging animation or not.
-    - **E:** Checks the range of the entities if it is valid.
-- **Rotation** (BETA)
-   - **A:** Detect repeated fixed-step combat rotation patterns commonly used by aim-assist style clients.
-   - **B:** Detect repeated combat yaw snap patterns with near-locked pitch changes.
-- **Reach**
-    - **A:** Check distance between the player, check also if the player is in top.
-    - **B:** Check distance squared between the player. Check also gamemode for possible reach distance.
-    - **C:** Check eye height and cuboid if it is actually hitting the player legitable.
-   - **D:** Correlate eye-to-eye distance with sprint and ping compensation through async evaluation.
-    - **E:** Detect out-of-bounds eye-to-hitbox edge reach with stability and ping gating.
-- **Fly**
-    - **A:** Check if the player is moving the air upwards.
-    - **B:** Check bad packet flags exploit affects the fly ability.
-    - **C:** Check block surroundings and air ticks if the player is legitable to fly.
-- **AutoArmor** (BETA)
-    - **A:** Check if they opened actually the inventory.
-- **ChestAura**
-    - **A:** Check if player is opening so fast the inventory and too many transactions in one 1 seconds.
-- **Cheststealer**
-    - **A:** Check if the player is legitably getting items not so fast.
-- **InventoryCleaner** (BETA)
-    - **A:** Check if the player is dropping many items once.
-- **InventoryMove**
-    - **A:** Check if the player is moving when inventory is open.
-- **AirMovement**
-    - **A:** Check if the player is moving air upwards legitably.
-- **AntiImmobile** (BETA)
-    - **A:** Check the player if has a immobile flags and moving.
-- **AntiVoid** (BETA)
-     - **A:** Check y is getting back to last y impossibly.
-- **ClickTP** (BETA)
-     - **A:** Check if the player is teleporting without actually use of teleportation.
-- **FastLadder** (BETA)
-     - **A:** Check if the player is climbing fast in ladders.
-- **Jesus** (DISABLED)
-     - **A:** Check the player is walking through water.
-- **Omnisprint** (DISABLED)
-     - **A:** Check keys input by the player.
-- **NoSlow** (BETA)
-   - **A:** Detect abnormal movement speed while using consumables, bows, and similar slowdown states.
-- **Phase** (legacy releases only)
-     - The current `main` rewrite does not register a Phase check. Legacy `1.3.x` releases could teleport players above the highest block after a cancelled trapdoor interaction ([#76](https://github.com/ReinfyTeam/Zuri/issues/76)); that teleport logic was removed in `v1.4.0-ALPHA`.
-- **Speed**
-     - **A:** Calculates the possible speed motion of the player.
-    - **B:** Calculates the distance difference from to the player.
-- **Spider** (DISABLED)
-     - **A:** Check if the player is climbing or abnormally moving upwards to non-climbable blocks.
-- **Step** (DISABLED)
-     - **A:** Check if the player is moving upwards so fast.
-- **AntiBot**
-     - **A:** Check if the player has a valid device os.
-     - **B:** Check if the player is using hack client a.k.a. toolbox.
-- **EditionFaker**
-     - **A:** Check if the player has a valid platform.
-     - **B:** Check device title id if it is valid.
-- **DeviceSpoofID**
-   - **A:** Validate device-id entropy and pattern consistency to catch spoofed client identities.
-- **ProxyBot** (OPTIONAL)
-     - **A:** Check player if it is using proxy, tor or other internet exploit ip services.
-- **Scaffold** (BETA)
-     - **A:** Check if the hand item is null while placing multiple blocks in 1 instance.
-     - **B:** Check pitch if it is valid when placing blocks.
-     - **C:** Check pitch if it is valid and the block distance is valid.
-     - **D:** Check if the hand item is null while placing blocks.
-   - **E:** Detect fast expansion bridging patterns with abnormal player-to-block and sequential block distances.
-   - **F:** Detect fast block expansion where block advancement exceeds player movement progression.
-- **Tower** (BETA)
-     - **A:** Check if the player moving upwards straight while placing blocks check if the player is actually placing the block downwards.
-- **NetworkLimit** (BETA)
-     - **A:** Limit players same ip to prevent malicious bots.
-- **AirJump** (BETA)
-     - **A:** Compare up distance and last data and calculate delta up distance.
+The build workflow runs this test on PocketMine-MP **5.44.3**. Runtime smoke tests and synthetic movement regressions do not replace gameplay testing with actual Bedrock clients.
 
-# Feedbacks and Issues
-- 😁 Your feedback and reviews are highly appriciated, if you ever find a bug or false-positive in certain modules, you can create an issue in our [github repository](https://github.com/ReinfyTeam/Zuri/issues)!
-   - Please include the module name, subtype, server version, and what the player was doing so the issue can be reproduced faster.
-- 👍 You can also view [Frequently asked questions article](https://github.com/ReinfyTeam/Zuri/wiki/Well-Known-Issues) about common encountered issues to our plugin, be sure to read that before creating an issue!
-   - This is especially useful for lag-related detections, teleport behavior, and other cases where server conditions can affect the result.
-> Please wait for the developer response to the issue since we have high amount of task and issue that we to do fix also ;)
+## Releases
+
+The release workflow accepts a version through manual dispatch or a commit subject such as `release: v1.4.0-BETA`. It marks versions with a suffix as **Pre-release** and sets `make_latest=false`. A plain version such as `1.4.0` is treated as stable and may become Latest.
+
+Use `v1.4.0-BETA` for the current rewrite. A stable release requires further gameplay and compatibility validation for the supported checks.
+
+## Feedback and contributions
+
+Report bugs at [ReinfyTeam/Zuri issues](https://github.com/ReinfyTeam/Zuri/issues). Include the Zuri version, PocketMine-MP version, relevant check, configuration, other plugins and the steps needed to reproduce the behavior. You can also join the [community Discord](https://discord.com/invite/7u7qKsvSxg).
+
+The [wiki](https://github.com/ReinfyTeam/Zuri/wiki) contains historical documentation; verify its API examples against the current source before using them with 1.4.0-BETA.
+
+The project originated as a continuation and rewrite of [ReallyCheat](https://github.com/hachkingtohach1/ReallyCheat/) by [hachkingtohach1](https://github.com/hachkingtohach1/). Current bundled dependencies are listed in [composer.json](composer.json) and pinned in [composer.lock](composer.lock).
+
+Support the maintainers through [Ko-Fi](https://ko-fi.com/xqwtxon) or [Patreon](https://patreon.com/xwertxy). Stars and reproducible bug reports are also appreciated.
