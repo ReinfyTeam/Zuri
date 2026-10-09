@@ -30,7 +30,8 @@
         "build": [
             "@php tools/prepare-build.php",
             "@php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -p=./build/Zuri.phar",
-            "@php tools/verify-build.php"
+            "@php tools/verify-build.php",
+            "@php tests/trapdoor-regression.php build/Zuri.phar"
         ],
         "build-source": [
             "@php tools/prepare-build.php",

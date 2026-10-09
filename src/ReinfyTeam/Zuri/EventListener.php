@@ -168,6 +168,9 @@ class EventListener implements Listener {
 
 	/**
 	 * Handles player move events.
+	 *
+	 * @priority MONITOR
+	 * @handleCancelled
 	 */
 	public function onPlayerMove(PlayerMoveEvent $event) : void {
 		$player = $event->getPlayer();
@@ -177,12 +180,12 @@ class EventListener implements Listener {
 		}
 
 		$playerZuri = PlayerManager::get($player);
-		$this->updateMovementState($player, $playerZuri);
-		$wasOnGround = $playerZuri->isOnGround();
-
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+			return;
 		}
+		$this->updateMovementState($player, $playerZuri);
+		$wasOnGround = $playerZuri->isOnGround();
 
 		$playerZuri->setMovement($event->getFrom(), $event->getTo());
 		$playerZuri->synchronizeMovementPositions($event->getFrom(), $event->getTo());
@@ -787,13 +790,20 @@ class EventListener implements Listener {
 		], Check::TYPE_PLAYER);
 	}
 
+	/**
+	 * @priority MONITOR
+	 * @handleCancelled
+	 */
 	public function onPlayerInteract(PlayerInteractEvent $event) : void {
-		$block = $event->getBlock();
 		$player = $event->getPlayer();
+		if (!$player->isConnected()) {
+			return;
+		}
 
 		$playerZuri = PlayerManager::get($player);
-		if ($event->isCancelled()) {
+		if ($event->isCancelled() || !$event->useBlock()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
+			return;
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([

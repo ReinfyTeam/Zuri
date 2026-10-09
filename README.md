@@ -181,8 +181,8 @@ Every module below is grouped by the type of behavior it watches so server owner
      - **A:** Check keys input by the player.
 - **NoSlow** (BETA)
    - **A:** Detect abnormal movement speed while using consumables, bows, and similar slowdown states.
-- **Phase**
-     - **A:** Check if the player stucks at the block, teleport when to a safe place.
+- **Phase** (legacy releases only)
+     - The current `main` rewrite does not register a Phase check. Legacy `1.3.x` releases could teleport players above the highest block after a cancelled trapdoor interaction ([#76](https://github.com/ReinfyTeam/Zuri/issues/76)); that teleport logic was removed in `v1.4.0-ALPHA`.
 - **Speed**
      - **A:** Calculates the possible speed motion of the player.
     - **B:** Calculates the distance difference from to the player.

@@ -741,7 +741,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	}
 
 	public function getCurrentState() : int {
-		if ($this->getTeleportTicks() < 20 || $this->getOnlineTime() < 2 || $this->isDead()) {
+		if ($this->getTeleportTicks() < 20 || $this->getOnlineTime() < 2 || $this->isDead() || $this->isRecentlyCancelledEvent()) {
 			return self::STATE_GRACE;
 		}
 		if ($this->isGliding()) {
