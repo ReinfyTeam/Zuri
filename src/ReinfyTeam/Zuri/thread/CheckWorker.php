@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\thread;
 use pmmp\thread\ThreadSafeArray;
 use Throwable;
 use function count;
+use function is_array;
 use function is_string;
 
 final class CheckWorker {
@@ -86,12 +87,19 @@ final class CheckWorker {
 		return true;
 	}
 
+	/** @param array<string,mixed> $data */
+	private static function getPlayerName(array $data) : ?string {
+		$playerData = $data["playerData"] ?? null;
+		$name = is_array($playerData) ? ($playerData["name"] ?? null) : null;
+		return is_string($name) ? $name : null;
+	}
+
 	private function runJob(CheckJob $job) : void {
 		try {
 			$check = $job->getCheck();
 			$data = $job->getData();
 			$result = $check::check($data);
-			$player = $data["playerData"]["name"] ?? null;
+			$player = self::getPlayerName($data);
 			$this->results->addResult($result, $check, $player);
 		} catch(Throwable $e) {
 			$data = isset($data) ? $data : [];
@@ -102,7 +110,7 @@ final class CheckWorker {
 					"line" => $e->getLine(),
 					"trace" => $e->getTraceAsString()
 				]
-			], $job->getCheck(), $data["playerData"]["name"] ?? null);
+			], $job->getCheck(), self::getPlayerName($data));
 		}
 	}
 }

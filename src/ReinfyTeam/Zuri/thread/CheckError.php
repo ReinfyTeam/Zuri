@@ -29,7 +29,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\check;
+namespace ReinfyTeam\Zuri\thread;
 
 use JsonSerializable;
 
@@ -62,6 +62,7 @@ final class CheckError implements JsonSerializable {
 		return $this->trace;
 	}
 
+	/** @return array{message:string,file:string,line:int,trace:string} */
 	public function jsonSerialize() : array {
 		return [
 			"message" => $this->message,

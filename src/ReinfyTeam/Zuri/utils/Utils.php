@@ -32,10 +32,17 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\utils;
 
 use pocketmine\block\BlockTypeIds;
+use pocketmine\data\bedrock\EnchantmentIdMap;
+use pocketmine\data\bedrock\EnchantmentIds;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\item\enchantment\VanillaEnchantments;
 use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
+use pocketmine\player\Player;
+use function is_array;
+use function is_bool;
+use function is_float;
+use function is_int;
 use function max;
 use function min;
 
@@ -43,6 +50,22 @@ use function min;
  * General utilities for vector conversion and movement calculations.
  */
 final class Utils {
+	public static function readFloat(mixed $value, float $default = 0.0) : float {
+		return is_int($value) || is_float($value) ? (float) $value : $default;
+	}
+
+	/** @return array<array-key,mixed> */
+	public static function readArray(mixed $value) : array {
+		return is_array($value) ? $value : [];
+	}
+
+	public static function readInt(mixed $value, int $default = 0) : int {
+		return is_int($value) ? $value : $default;
+	}
+
+	public static function readBool(mixed $value, bool $default = false) : bool {
+		return is_bool($value) ? $value : $default;
+	}
 	/**
 	 * Converts a Vector3 to an associative array.
 	 *
@@ -73,7 +96,7 @@ final class Utils {
 	public static function vector2ToArray(Vector2 $vector2) : array {
 		return [
 			"x" => $vector2->getX(),
-			"z" => $vector2->getZ()
+			"z" => $vector2->getY()
 		];
 	}
 
@@ -88,8 +111,6 @@ final class Utils {
 
 	/**
 	 * Calculates the movement multiplier for a player based on state and effects.
-	 *
-	 * @param \pocketmine\player\Player $player
 	 */
 	public static function getMovementMultiplier(Player $player) : float {
 		$multiplier = 1.0;
@@ -100,7 +121,7 @@ final class Utils {
 
 		if ($player->isSneaking()) {
 			$leggings = $player->getArmorInventory()->getLeggings();
-			$swift = $leggings?->getEnchantmentLevel(VanillaEnchantments::SWIFT_SNEAK()) ?? 0;
+			$swift = $leggings->getEnchantmentLevel(VanillaEnchantments::SWIFT_SNEAK());
 
 			$multiplier *= self::getSneakMultiplier($swift);
 		}
@@ -129,7 +150,6 @@ final class Utils {
 	/**
 	 * Returns the strength of speed and slowness effects on the player.
 	 *
-	 * @param \pocketmine\player\Player $player
 	 * @return int[] [speedLevel, slownessLevel]
 	 */
 	public static function getSpeedEffects(Player $player) : array {
@@ -145,8 +165,6 @@ final class Utils {
 
 	/**
 	 * Calculates the soul speed multiplier based on boots enchant and ground block.
-	 *
-	 * @param \pocketmine\player\Player $player
 	 */
 	public static function getSoulSpeedMultiplier(Player $player) : float {
 		$pos = $player->getPosition();
@@ -163,7 +181,7 @@ final class Utils {
 		}
 
 		$boots = $player->getArmorInventory()->getBoots();
-		$level = $boots?->getEnchantmentLevel(VanillaEnchantments::SOUL_SPEED()) ?? 0;
+		$level = ($enchantment = EnchantmentIdMap::getInstance()->fromId(EnchantmentIds::SOUL_SPEED)) !== null ? $boots->getEnchantmentLevel($enchantment) : 0;
 
 		if ($level > 0) {
 			return 1.0 + (0.105 * $level);

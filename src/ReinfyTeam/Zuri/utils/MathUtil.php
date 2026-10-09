@@ -78,6 +78,7 @@ final class MathUtil {
 		return sqrt(($dx * $dx) + ($dz * $dz));
 	}
 
+	/** @return array{x:float,z:float} */
 	public static function horizontalVelocity(float $fromX, float $fromZ, float $toX, float $toZ, float $deltaTicks) : array {
 		$scale = 20.0 / max(1.0, $deltaTicks);
 		return [

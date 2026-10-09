@@ -38,6 +38,7 @@ use function str_replace;
 use function str_starts_with;
 
 class LanguageManager {
+	/** @var array<string,Language> */
 	private array $registeredLocale = [];
 	private Language $currentLanguage;
 
@@ -64,6 +65,7 @@ class LanguageManager {
 		return isset($this->registeredLocale[$code]);
 	}
 
+	/** @return array<string,Language> */
 	public function getRegisteredLocale() : array {
 		return $this->registeredLocale;
 	}

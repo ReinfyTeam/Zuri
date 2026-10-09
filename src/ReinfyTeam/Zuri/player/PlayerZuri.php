@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri\player;
 
 use JsonSerializable;
 use pocketmine\entity\Location;
+use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
@@ -48,6 +49,91 @@ use function microtime;
  * Represents internal tracking data for a player used by ZuriAC checks.
  *
  * Stores movement, timing, and environmental state used by checks.
+ *
+ * @phpstan-type PlayerData array{
+ *     isInventoryOpen:bool,
+ *     isTransactionArmorInventory:bool,
+ *     isUnderBlock:bool,
+ *     isClimbing:bool,
+ *     isOnPlant:bool,
+ *     isOnDoor:bool,
+ *     isOnCarpet:bool,
+ *     isOnPlate:bool,
+ *     isOnSnow:bool,
+ *     isSniffing:bool,
+ *     isLiquid:bool,
+ *     isLava:bool,
+ *     isOnStairs:bool,
+ *     isIce:bool,
+ *     isOnGround:bool,
+ *     isDebug:bool,
+ *     isTopBlock:bool,
+ *     lastGroundY:float,
+ *     lastNoGroundY:float,
+ *     lastDelayedMovePacket:float,
+ *     joinedAtTime:float,
+ *     jumpTicks:float,
+ *     teleportTicks:float,
+ *     attackTicks:float,
+ *     slimeBlockTicks:float,
+ *     deathTicks:float,
+ *     placingTicks:float,
+ *     bowShotTicks:float,
+ *     hurtTicks:float,
+ *     projectileAttackTicks:float,
+ *     lastMoveTick:float,
+ *     teleportCommandTicks:float,
+ *     cps:int,
+ *     onlineTime:int,
+ *     deltaTicks:float,
+ *     verticalState:int,
+ *     airTicks:int,
+ *     groundTicks:int,
+ *     lastY:float,
+ *     predictedY:float,
+ *     predictedVerticalDelta:float,
+ *     verticalError:float,
+ *     verticalVelocity:float,
+ *     lastVerticalVelocity:float,
+ *     hasInitialVelocity:bool,
+ *     velocitySource:int,
+ *     horizontalVelocitySource:int,
+ *     externalVelocityTicks:int,
+ *     pitch:float,
+ *     isDead:bool,
+ *     isCurrentChunkLoaded:bool,
+ *     isSurvival:bool,
+ *     isCreative:bool,
+ *     isSpectator:bool,
+ *     isFlying:bool,
+ *     allowFlight:bool,
+ *     hasNoClientPredictions:bool,
+ *     isBlockAbove:bool,
+ *     isRecentlyCancelledEvent:bool,
+ *     isStartedJumping:bool,
+ *     explosionTicks:float,
+ *     isGroundSolid:bool,
+ *     isSprinting:bool,
+ *     isSneaking:bool,
+ *     isGliding:bool,
+ *     speedLevel:int,
+ *     slownessLevel:int,
+ *     jumpBoostLevel:int,
+ *     isSoulSpeedSurface:bool,
+ *     isUnderwater:bool,
+ *     twoBlockPassage:bool,
+ *     previousState:int,
+ *     currentSurface:int,
+ *     previousSurface:int,
+ *     currentState:int,
+ *     name:string,
+ *     motion:array{x:float,y:float,z:float},
+ *     movement:array{from:array{x:float,y:float,z:float},to:array{x:float,y:float,z:float}},
+ *     previousPosition:array{x:float,y:float,z:float},
+ *     safePosition:array{x:float,y:float,z:float},
+ *     currentPosition:array{x:float,y:float,z:float},
+ *     externalData:array<string,mixed>,
+ * }
  */
 class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath {
 	public const STATE_GRACE = 0;
@@ -97,8 +183,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	private const DELTAL_TIME_CLICK = 1;
 
-	private bool $actionBreakingSpecial = false;
-	private bool $actionPlacingSpecial = false;
 	private bool $inventoryOpen = false;
 	private bool $transactionArmorInventory = false;
 	private bool $underBlock = false;
@@ -114,6 +198,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $onStairs = false;
 	private bool $onIce = false;
 	private bool $debug = false;
+	private bool $flagged = false;
 	private bool $onGround = false;
 	private bool $topBlock = false;
 	private bool $onWeb = false;
@@ -179,13 +264,13 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $lastMovementTime = 0.0;
 	private float $movementDeltaTicks = 1.0;
 
-	private int $blocksBrokeASec = 0;
-	private int $blocksPlacedASec = 0;
 
 	private Location $location;
 	private Position $position;
 
+	/** @var array{from:Vector3,to:Vector3} */
 	private array $movement;
+	/** @var list<float> */
 	private array $cpsData = [];
 
 	private float $pitch = 0.0;
@@ -272,12 +357,12 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->underBlock = $data;
 	}
 
-	public function setRecentlyCancelledEvent(float $tick) : bool {
-		return $this->eventCancelled = $tick;
+	public function setRecentlyCancelledEvent(float $tick) : void {
+		$this->eventCancelled = $tick;
 	}
 
 	public function isRecentlyCancelledEvent() : bool {
-		if ($this->eventCancelled === 0 || abs($this->eventCancelled - microtime(true)) * 20 > 40) {
+		if ($this->eventCancelled === 0.0 || abs($this->eventCancelled - microtime(true)) * 20 > 40) {
 			$this->eventCancelled = 0;
 			return false;
 		}
@@ -800,7 +885,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	public function getCPS() : int {
 		$newTime = microtime(true);
-		return count(array_filter($this->cpsData ?? [], static function(float $lastTime) use ($newTime) : bool {
+		return count(array_filter($this->cpsData, static function(float $lastTime) use ($newTime) : bool {
 			return ($newTime - $lastTime) <= self::DELTAL_TIME_CLICK;
 		}));
 	}
@@ -846,6 +931,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	public function setDebug(bool $value = true) : void {
 		$this->debug = $value;
+	}
+
+	public function setFlagged(bool $flagged) : void {
+		$this->flagged = $flagged;
+	}
+
+	public function isFlagged() : bool {
+		return $this->flagged;
 	}
 
 	public function isDebug() : bool {
@@ -992,7 +1085,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	}
 
 	public function getRawMove() : Vector2 {
-		return $this->rawMove ??= Vector2::zero();
+		return $this->rawMove ??= new Vector2(0.0, 0.0);
 	}
 
 	public function setRawMove(Vector2 $rawMove) : void {
@@ -1089,6 +1182,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	/**
 	 * Serializes relevant player-tracking data for async checks.
+	 *
+	 * @return PlayerData
 	 */
 	public function jsonSerialize() : array {
 		return [
@@ -1107,6 +1202,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isLava" => $this->isLava(),
 			"isOnStairs" => $this->isOnStairs(),
 			"isIce" => $this->isIce(),
+			"isOnGround" => $this->isOnGround(),
 			"isDebug" => $this->isDebug(),
 			"isTopBlock" => $this->isTopBlock(),
 			"lastGroundY" => $this->getLastGroundY(),

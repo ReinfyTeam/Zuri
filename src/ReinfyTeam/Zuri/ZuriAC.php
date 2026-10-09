@@ -83,8 +83,8 @@ class ZuriAC extends Loader {
 	 * Initializes worker and check registry.
 	 */
 	protected function onEnable() : void {
-		$workerCount = max(1, (int) self::$config->getData(ConfigPath::THREAD_MAX_WORKER, 1));
-		$workerCapacity = max(1, (int) self::$config->getData(ConfigPath::THREAD_WORKER_CAPACITY, 64));
+		$workerCount = max(1, self::$config->getInt(ConfigPath::THREAD_MAX_WORKER, 1));
+		$workerCapacity = max(1, self::$config->getInt(ConfigPath::THREAD_WORKER_CAPACITY, 64));
 
 		self::$checkQueue = new CheckQueue();
 		self::$checkResults = new CheckResults();

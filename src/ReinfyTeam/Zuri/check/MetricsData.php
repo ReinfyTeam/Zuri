@@ -38,7 +38,7 @@ use function count;
 class MetricsData {
 	private float $serverTPS = 0.0;
 	private int $playerCount = 0;
-	private float $cpuUsage = 0.0;
+	private int $maxPlayerCount = 0;
 	private int $threadCount = 0;
 	private float $reservedMemoryUsage = 0.0;
 	private float $virtualMemoryUsage = 0.0;

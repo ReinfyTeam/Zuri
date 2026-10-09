@@ -35,8 +35,10 @@ use pocketmine\utils\TextFormat;
 use function array_flip;
 use function array_keys;
 use function array_values;
+use function get_debug_type;
 use function implode;
 use function is_array;
+use function is_scalar;
 use function is_string;
 use function str_replace;
 
@@ -108,6 +110,7 @@ final class TextUtil {
 	/**
 	 * Pretty prints a nested array into a compact string representation.
 	 */
+	/** @param array<array-key,mixed> $array */
 	public static function prettyPrintArray(array $array) : string {
 		$parts = [];
 
@@ -115,7 +118,7 @@ final class TextUtil {
 			if (is_array($value)) {
 				$parts[] = $key . '=[' . self::prettyPrintArray($value) . ']';
 			} else {
-				$parts[] = $key . '=' . $value;
+				$parts[] = $key . '=' . (is_scalar($value) || $value === null ? (string) $value : get_debug_type($value));
 			}
 		}
 

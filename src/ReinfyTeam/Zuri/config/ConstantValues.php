@@ -31,14 +31,31 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\config;
 
+use function is_string;
+
 class ConstantValues extends ConfigManager implements ConstantPath {
 	public function __construct(string $path) {
 		parent::__construct($path);
 
-		$this->checkVersion(self::CONSTANT_VERSION);
+		$this->checkVersion(self::CONSTANT_VERSION, "zuri.config-version");
 	}
 
 	public function getConstant(string $key, mixed $default = null) : mixed {
-		return parent::getData("zuri.constants." . $key, $default);
+		return parent::getData("zuri." . $key, $default);
+	}
+
+	public function getNumber(string $key, float $default = 0.0) : float {
+		return $this->getFloat("zuri." . $key, $default);
+	}
+
+	/** @return array<string,float> */
+	public function exportNumbers() : array {
+		$numbers = [];
+		foreach ((new \ReflectionClass(ConstantPath::class))->getConstants() as $key) {
+			if (is_string($key) && $key !== self::CONSTANT_VERSION) {
+				$numbers[$key] = $this->getNumber($key);
+			}
+		}
+		return $numbers;
 	}
 }

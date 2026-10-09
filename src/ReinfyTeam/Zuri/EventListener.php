@@ -42,6 +42,8 @@ use pocketmine\event\entity\EntityMotionEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\entity\EntityTeleportEvent;
+use pocketmine\event\entity\ProjectileHitBlockEvent;
+use pocketmine\event\entity\ProjectileHitEntityEvent;
 use pocketmine\event\entity\ProjectileHitEvent;
 use pocketmine\event\entity\ProjectileLaunchEvent;
 use pocketmine\event\inventory\InventoryCloseEvent;
@@ -62,25 +64,29 @@ use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\server\CommandEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\inventory\ArmorInventory;
+use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
+use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
 use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\Utils as PMMPUtils;
 use ReinfyTeam\Zuri\check\Check;
+use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\player\ExternalDataPath;
 use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\player\PlayerZuri;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
-use function max;
 use function microtime;
 use function min;
 use function round;
+use function sqrt;
 
 /**
  * Central event listener for ZuriAC.
@@ -129,8 +135,6 @@ class EventListener implements Listener {
 			$playerZuri->setPitch($packet->getPitch());
 			$playerZuri->setYaw($packet->getYaw());
 			$playerZuri->setHeadYaw($packet->getHeadYaw());
-			$playerZuri->setMoveVecX($packet->getMoveVecX());
-			$playerZuri->setMoveVecZ($packet->getMoveVecZ());
 			$playerZuri->setInputMode($packet->getInputMode());
 			$playerZuri->setPlayMode($packet->getPlayMode());
 			$playerZuri->setInteractionMode($packet->getInteractionMode());
@@ -141,13 +145,13 @@ class EventListener implements Listener {
 
 			$frictionBlock = $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN));
 			$externalData = ZuriAC::getExternalData();
-			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::FRICTION_FACTOR, $playerZuri->isOnGround() ? $frictionBlock->getFrictionFactor() : ZuriAC::getConstants()->getConstant(ConstantPath::FRICTION_FACTOR));
+			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::FRICTION_FACTOR, $playerZuri->isOnGround() ? $frictionBlock->getFrictionFactor() : ZuriAC::getConstants()->getNumber(ConstantPath::FRICTION_FACTOR, 1.0));
 
-			$lastDistanceXZ = $externalData->getExternalData($playerZuri, "Zuri", ExternalDataPath::LAST_DISTANCE_XZ);
-			$frictionFactor = $externalData->getExternalData($playerZuri, "Zuri", ExternalDataPath::FRICTION_FACTOR);
+			$lastDistanceXZ = Utils::readFloat($externalData->getExternalData($playerZuri, "Zuri", ExternalDataPath::LAST_DISTANCE_XZ));
+			$frictionFactor = Utils::readFloat($externalData->getExternalData($playerZuri, "Zuri", ExternalDataPath::FRICTION_FACTOR), 1.0);
 			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::MOMENTUM, MathUtil::getMomentum($lastDistanceXZ, $frictionFactor));
 
-			$movement = MathUtil::getMovement($player, new Vector3(max(-1, min(1, $packet->getMoveVecZ())), 0, max(-1, min(1, $packet->getMoveVecX()))));
+			$movement = min(1.0, sqrt($packet->getMoveVecX() ** 2 + $packet->getMoveVecZ() ** 2));
 			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::MOVEMENT, $movement);
 
 			$movementMultiplier = Utils::getMovementMultiplier($player);
@@ -168,7 +172,7 @@ class EventListener implements Listener {
 	public function onPlayerMove(PlayerMoveEvent $event) : void {
 		$player = $event->getPlayer();
 
-		if (!$player instanceof Player || !$player->isConnected()) {
+		if (!$player->isConnected()) {
 			return;
 		}
 
@@ -303,9 +307,9 @@ class EventListener implements Listener {
 	 * Handles inventory transaction events.
 	 */
 	public function onInventoryTransaction(InventoryTransactionEvent $event) : void {
-		$player = $event->getPlayer();
+		$player = $event->getTransaction()->getSource();
 
-		if (!$player instanceof Player || !$player->isConnected()) {
+		if (!$player->isConnected()) {
 			return;
 		}
 
@@ -331,7 +335,7 @@ class EventListener implements Listener {
 	public function onInventoryOpen(InventoryOpenEvent $event) : void {
 		$player = $event->getPlayer();
 
-		if (!$player instanceof Player || !$player->isConnected()) {
+		if (!$player->isConnected()) {
 			return;
 		}
 
@@ -355,15 +359,11 @@ class EventListener implements Listener {
 	public function onInventoryClose(InventoryCloseEvent $event) : void {
 		$player = $event->getPlayer();
 
-		if (!$player instanceof Player || !$player->isConnected()) {
+		if (!$player->isConnected()) {
 			return;
 		}
 
 		$playerZuri = PlayerManager::get($player);
-
-		if ($event->isCancelled()) {
-			$playerZuri->setRecentlyCancelledEvent(microtime(true));
-		}
 
 		$playerZuri->setInventoryOpen(false);
 
@@ -410,15 +410,11 @@ class EventListener implements Listener {
 	public function onPlayerJump(PlayerJumpEvent $event) : void {
 		$player = $event->getPlayer();
 
-		if (!$player instanceof Player || !$player->isConnected()) {
+		if (!$player->isConnected()) {
 			return;
 		}
 
 		$playerZuri = PlayerManager::get($player);
-
-		if ($event->isCancelled()) {
-			$playerZuri->setRecentlyCancelledEvent(microtime(true));
-		}
 
 		$playerZuri->setJumpTicks(microtime(true));
 
@@ -434,7 +430,7 @@ class EventListener implements Listener {
 	public function onPlayerJoin(PlayerJoinEvent $event) : void {
 		$player = $event->getPlayer();
 
-		if (!$player instanceof Player || !$player->isConnected()) {
+		if (!$player->isConnected()) {
 			return;
 		}
 
@@ -461,7 +457,7 @@ class EventListener implements Listener {
 				"port" => $event->getPort(),
 				"isAuthRequired" => $event->isAuthRequired(),
 				"getKickFlags" => $event->getKickFlags(),
-				"isKickFlagSet" => $event->isKickFlagSet(),
+				"isKickFlagSet" => $event->getKickFlags() !== [],
 				"getUsername" => $event->getPlayerInfo()->getUsername(),
 				"getLocale" => $event->getPlayerInfo()->getLocale(),
 				"getUuid" => $event->getPlayerInfo()->getUuid(),
@@ -566,19 +562,15 @@ class EventListener implements Listener {
 
 		$playerZuri = PlayerManager::get($player);
 
-		if ($event->isCancelled()) {
-			$playerZuri->setRecentlyCancelledEvent(microtime(true));
-		}
-
 		$playerZuri->setProjectileAttackTicks(microtime(true));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player,
 			"data" => [
-				"projectileType" => $projectile->getTypeId(),
-				"hitEntity" => $event->getHitEntity() ? $event->getHitEntity()->getId() : null,
-				"hitBlock" => $event->getHitBlock() ? $event->getHitBlock()->getPosition() : null,
+				"projectileType" => $projectile::getNetworkTypeId(),
+				"hitEntity" => $event instanceof ProjectileHitEntityEvent ? $event->getEntityHit()->getId() : null,
+				"hitBlock" => $event instanceof ProjectileHitBlockEvent ? Utils::vector3ToArray($event->getBlockHit()->getPosition()) : null,
 			]
 		], Check::TYPE_PLAYER);
 	}
@@ -589,7 +581,7 @@ class EventListener implements Listener {
 	public function onPlayerDeath(PlayerDeathEvent $event) : void {
 		$player = $event->getPlayer();
 
-		if (!$player instanceof Player || !$player->isConnected()) {
+		if (!$player->isConnected()) {
 			return;
 		}
 
@@ -606,7 +598,7 @@ class EventListener implements Listener {
 	public function onPlayerChat(PlayerChatEvent $event) : void {
 		$player = $event->getPlayer();
 
-		if (!$player instanceof Player || !$player->isConnected()) {
+		if (!$player->isConnected()) {
 			return;
 		}
 
@@ -628,7 +620,7 @@ class EventListener implements Listener {
 	public function onPlayerItemHeld(PlayerItemHeldEvent $event) : void {
 		$player = $event->getPlayer();
 
-		if (!$player instanceof Player || !$player->isConnected()) {
+		if (!$player->isConnected()) {
 			return;
 		}
 
@@ -686,7 +678,7 @@ class EventListener implements Listener {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
 
-		$playerZuri->setCommandTicks(microtime(true));
+		$playerZuri->setTeleportCommandTicks(microtime(true));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
@@ -727,7 +719,7 @@ class EventListener implements Listener {
 	public function onPlayerItemConsume(PlayerItemConsumeEvent $event) : void {
 		$player = $event->getPlayer();
 
-		if (!$player instanceof Player || !$player->isConnected()) {
+		if (!$player->isConnected()) {
 			return;
 		}
 
@@ -749,7 +741,7 @@ class EventListener implements Listener {
 	public function onDropItem(PlayerDropItemEvent $event) : void {
 		$player = $event->getPlayer();
 
-		if (!$player instanceof Player || !$player->isConnected()) {
+		if (!$player->isConnected()) {
 			return;
 		}
 
@@ -843,14 +835,16 @@ class EventListener implements Listener {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
 
-		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => PMMPUtils::getNiceClassName($event),
-			"player" => $player,
-			"data" => [
-				"blockPos" => $event->getBlock()->getPosition()->asVector3(),
-				"blockType" => $event->getBlock()->getTypeId(),
-			]
-		], Check::TYPE_PLAYER);
+		foreach ($event->getTransaction()->getBlocks() as [$x, $y, $z, $block]) {
+			ZuriAC::getCheckRegistry()->spawnCheck([
+				"type" => PMMPUtils::getNiceClassName($event),
+				"player" => $player,
+				"data" => [
+					"blockPos" => Utils::vector3ToArray(new Vector3($x, $y, $z)),
+					"blockType" => $block->getTypeId(),
+				]
+			], Check::TYPE_PLAYER);
+		}
 	}
 
 	public function onPlayerItemUse(PlayerItemUseEvent $event) : void {

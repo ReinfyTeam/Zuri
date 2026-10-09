@@ -32,7 +32,11 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\check\moving\speed;
 
 use ReinfyTeam\Zuri\check\Check;
+use ReinfyTeam\Zuri\config\ConstantPath;
+use ReinfyTeam\Zuri\player\ExternalDataPath;
+use ReinfyTeam\Zuri\utils\Utils;
 use function abs;
+use function sqrt;
 
 
 /**
@@ -76,71 +80,72 @@ class SpeedA extends Check {
 	 * The worker provides a payload containing player and environment data.
 	 * Implementations should return an array created via `self::buildResult`.
 	 *
-	 * @param array $data Worker payload (keys: 'type', 'playerData', 'constantData', etc.)
-	 * @return array{failed:bool,debug:array} Result array with `failed` and `debug` keys.
+	 * @param array<string,mixed> $data Worker payload (keys: 'type', 'playerData', 'constantData', etc.)
+	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>} Result array with `failed` and `debug` keys.
 	 */
 	public static function check(array $data) : array {
-		if ($data["type"] === "PlayerAuthInputPacket") {
-			$playerData = $data["playerData"];
-			$constantData = $data["constantData"];
+		if (($data["type"] ?? null) === "PlayerAuthInputPacket") {
+			$playerData = Utils::readArray($data["playerData"] ?? null);
+			$constantData = Utils::readArray($data["constantData"] ?? null);
 
 			if (
-				$playerData["attackTicks"] < 20 ||
-				$playerData["projectileAttackTicks"] < 20 ||
-				$playerData["teleportTicks"] < 60 ||
-				$playerData["bowShotTicks"] < 20 ||
-				$playerData["hurtTicks"] < 40 ||
-				$playerData["teleportCommandTicks"] < 40 ||
-				$playerData["isClimbing"] ||
-				$playerData["allowFlight"] ||
-				$playerData["airTicks"] > 40 ||
-				$playerData["isFlying"] ||
-				$playerData["hasNoClientPredictions"] ||
-				$playerData["isSurvival"] ||
-				$playerData["isCreative"] ||
-				$playerData["isSpectator"] ||
-				!$playerData["isCurrentChunkLoaded"] ||
-				$playerData["isRecentlyCancelled"] < 40
+				Utils::readFloat($playerData["attackTicks"] ?? null) < 20 ||
+				Utils::readFloat($playerData["projectileAttackTicks"] ?? null) < 20 ||
+				Utils::readFloat($playerData["teleportTicks"] ?? null) < 60 ||
+				Utils::readFloat($playerData["bowShotTicks"] ?? null) < 20 ||
+				Utils::readFloat($playerData["hurtTicks"] ?? null) < 40 ||
+				Utils::readFloat($playerData["teleportCommandTicks"] ?? null) < 40 ||
+				Utils::readBool($playerData["isClimbing"] ?? null) ||
+				Utils::readBool($playerData["allowFlight"] ?? null) ||
+				Utils::readFloat($playerData["airTicks"] ?? null) > 40 ||
+				Utils::readBool($playerData["isFlying"] ?? null) ||
+				Utils::readBool($playerData["hasNoClientPredictions"] ?? null) ||
+				Utils::readBool($playerData["isCreative"] ?? null) ||
+				Utils::readBool($playerData["isSpectator"] ?? null) ||
+				!Utils::readBool($playerData["isCurrentChunkLoaded"] ?? null) ||
+				Utils::readBool($playerData["isRecentlyCancelledEvent"] ?? null)
 			) {
 				return self::buildResult(false);
 			}
 
-			$previous = $playerData["movement"]["from"];
-			$next = $playerData["movement"]["to"];
+			$movement = Utils::readArray($playerData["movement"] ?? null);
+			$from = Utils::readArray($movement["from"] ?? null);
+			$to = Utils::readArray($movement["to"] ?? null);
+			$previous = new \pocketmine\math\Vector3(Utils::readFloat($from["x"] ?? null), Utils::readFloat($from["y"] ?? null), Utils::readFloat($from["z"] ?? null));
+			$next = new \pocketmine\math\Vector3(Utils::readFloat($to["x"] ?? null), Utils::readFloat($to["y"] ?? null), Utils::readFloat($to["z"] ?? null));
 
-			$externalData = $playerData["externalData"];
+			$externalData = Utils::readArray($playerData["externalData"] ?? null);
 
-			$friction = $externalData[ExternalDataPath::FRICTION_FACTOR];
-			$lastDistanceXZ = $externalData[ExternalDataPath::LAST_DISTANCE_XZ];
-			$momentum = $externalData[ExternalDataPath::MOMENTUM];
-			$movementMultiplier = $externalData[ExternalDataPath::MOVEMENT_MULTIPLIER];
-			$acceleration = $externalData[ExternalDataPath::ACCELERATION];
+			$friction = Utils::readFloat($externalData[ExternalDataPath::FRICTION_FACTOR] ?? null);
+			$lastDistanceXZ = Utils::readFloat($externalData[ExternalDataPath::LAST_DISTANCE_XZ] ?? null);
+			$momentum = Utils::readFloat($externalData[ExternalDataPath::MOMENTUM] ?? null);
+			$movementMultiplier = Utils::readFloat($externalData[ExternalDataPath::MOVEMENT_MULTIPLIER] ?? null);
+			$acceleration = Utils::readFloat($externalData[ExternalDataPath::ACCELERATION] ?? null);
 
 			$expected = $momentum + $acceleration;
-			$expected += ($playerData["jumpTicks"] < 5 && $playerData["isBlockAbove"]) ? $constantData[ConstantPath::JUMP_FACTOR] : 0;
-			$expected += ($playerData["isOnGround"]) ? $constantData[ConstantPath::GROUND_FACTOR] : 0;
-			$expected += ($playerData["isStartedJumping"] && $playerData["lastMoveTick"] > 5) ? $constantData[ConstantPath::LAST_JUMP_FACTOR] : 0;
-			$expected += ($playerData["jumpTicks"] <= 20 && $playerData["isOnIce"]) ? $constantData[ConstantPath::ICE_FACTOR] : 0;
-			$expected += ($playerData["isOnSnow"]) ? $constantData[ConstantPath::SNOW_FACTOR] : 0;
-			$motion = Utils::arrayToVector3($playerData["motion"]);
+			$expected += (Utils::readFloat($playerData["jumpTicks"] ?? null) < 5 && Utils::readBool($playerData["isBlockAbove"] ?? null)) ? Utils::readFloat($constantData[ConstantPath::JUMP_FACTOR] ?? null) : 0;
+			$expected += (Utils::readBool($playerData["isOnGround"] ?? null)) ? Utils::readFloat($constantData[ConstantPath::GROUND_FACTOR] ?? null) : 0;
+			$expected += (Utils::readBool($playerData["isStartedJumping"] ?? null) && Utils::readFloat($playerData["lastMoveTick"] ?? null) > 5) ? Utils::readFloat($constantData[ConstantPath::LAST_JUMP_FACTOR] ?? null) : 0;
+			$expected += (Utils::readFloat($playerData["jumpTicks"] ?? null) <= 20 && Utils::readBool($playerData["isIce"] ?? null)) ? Utils::readFloat($constantData[ConstantPath::ICE_FACTOR] ?? null) : 0;
+			$expected += (Utils::readBool($playerData["isOnSnow"] ?? null)) ? Utils::readFloat($constantData[ConstantPath::SNOW_FACTOR] ?? null) : 0;
+			$motionData = Utils::readArray($playerData["motion"] ?? null);
+			$motion = (new \pocketmine\math\Vector3(Utils::readFloat($motionData["x"] ?? null), Utils::readFloat($motionData["y"] ?? null), Utils::readFloat($motionData["z"] ?? null)));
 			if (abs($motion->getX()) > 0 || abs($motion->getZ()) > 0) {
-				$motion = Utils::arrayToVector3($playerData["motion"]);
+				$motion = (new \pocketmine\math\Vector3(Utils::readFloat($motionData["x"] ?? null), Utils::readFloat($motionData["y"] ?? null), Utils::readFloat($motionData["z"] ?? null)));
 				$motionX = abs($motion->getX());
 				$motionZ = abs($motion->getZ());
 				$knockback = $motionX * $motionX + $motionZ * $motionZ;
 
-				$knockback *= $constantData[ConstantPath::KNOCKBACK_FACTOR];
+				$knockback *= Utils::readFloat($constantData[ConstantPath::KNOCKBACK_FACTOR] ?? null);
 				$expected += $knockback;
 			}
 
-			$expected += $playerData["lastMoveTick"] < 5 ? $constantData[ConstantPath::LAST_MOVE_FACTOR] : 0;
+			$expected += Utils::readFloat($playerData["lastMoveTick"] ?? null) < 5 ? Utils::readFloat($constantData[ConstantPath::LAST_MOVE_FACTOR] ?? null) : 0;
 
-			$dist = $previous->distance($next);
+			$dist = sqrt(($previous->x - $next->x) ** 2 + ($previous->z - $next->z) ** 2);
 			$distDiff = abs($dist - $expected);
 
-			if ($dist > $expected && $distDiff > $constantData[ConstantPath::SPEED_THRESHOLD]) {
-				$failed = true;
-			}
+			$failed = $dist > $expected && $distDiff > Utils::readFloat($constantData[ConstantPath::SPEED_THRESHOLD] ?? null);
 
 			return self::buildResult($failed, [
 				"expected" => $expected,

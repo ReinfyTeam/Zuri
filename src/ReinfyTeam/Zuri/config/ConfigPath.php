@@ -32,7 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\config;
 
 interface ConfigPath {
-	public const CONFIG_VERSION = "2.0.0";
+	public const CONFIG_VERSION = "0.4.0";
 
 	public const CURRENT_CONFIG_VERSION = "zuri.config_version";
 
@@ -48,5 +48,9 @@ interface ConfigPath {
 
 	public const CHECKS = "zuri.checks";
 
-	public const PUNISHMENT_BAN_DURATION = "zuri.punishment.ban.duration";
+	public const PUNISHMENT_BAN_DURATION = "zuri.punishments.ban.duration";
+	public const PUNISHMENT_BAN_TYPE = "zuri.punishments.ban.type";
+	public const PUNISHMENT_BAN_COMMAND = "zuri.punishments.ban.command";
+	public const PUNISHMENT_KICK_TYPE = "zuri.punishments.kick.type";
+	public const PUNISHMENT_KICK_COMMAND = "zuri.punishments.kick.command";
 }

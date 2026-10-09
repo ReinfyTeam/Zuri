@@ -33,15 +33,16 @@ namespace ReinfyTeam\Zuri\player;
 
 use ReinfyTeam\Zuri\check\Check;
 use function abs;
+use function count;
 use function microtime;
 
 /**
  * Tracks pre-violations and violations per check and subtype for a player.
  */
 class Violation {
-	/** @var array<string, array> */
+	/** @var array<string,array<string,array<int,float>>> */
 	public array $preViolation = [];
-	/** @var array<string, array> */
+	/** @var array<string,array<string,array<int,float>>> */
 	public array $violation = [];
 
 	/**
@@ -51,7 +52,7 @@ class Violation {
 	 * @return int Number of pre-violation timestamps stored.
 	 */
 	public function getPreViolations(Check $check) : int {
-		return $this->preViolation[$check->getName()][$check->getSubType()] ??= 0;
+		return count($this->preViolation[$check->getName()][$check->getSubType()] ?? []);
 	}
 
 	/**
@@ -88,7 +89,7 @@ class Violation {
 	 * Returns the number of violations recorded for the given check.
 	 */
 	public function getViolations(Check $check) : int {
-		return $this->violation[$check->getName()][$check->getSubType()] ??= 0;
+		return count($this->violation[$check->getName()][$check->getSubType()] ?? []);
 	}
 
 	/**
