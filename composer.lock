@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5ece59f17746865ba2d435a53423fd41",
+    "content-hash": "a4b4711e87b9270c92f5378f14961e07",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -1069,16 +1069,16 @@
         },
         {
             "name": "reinfyteam/discordwebhookapi",
-            "version": "dev-master",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ReinfyTeam/DiscordWebhookAPI.git",
-                "reference": "b98763ab6df357ada749b5ba11bc07706366e0d3"
+                "reference": "7395f4ae63122e65f3424c1f6214545b5ff61ae4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ReinfyTeam/DiscordWebhookAPI/zipball/b98763ab6df357ada749b5ba11bc07706366e0d3",
-                "reference": "b98763ab6df357ada749b5ba11bc07706366e0d3",
+                "url": "https://api.github.com/repos/ReinfyTeam/DiscordWebhookAPI/zipball/7395f4ae63122e65f3424c1f6214545b5ff61ae4",
+                "reference": "7395f4ae63122e65f3424c1f6214545b5ff61ae4",
                 "shasum": ""
             },
             "require": {
@@ -1089,7 +1089,6 @@
                 "friendsofphp/php-cs-fixer": "^3.94.2",
                 "phpstan/phpstan": "^2.1"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "virion": {
@@ -1109,9 +1108,9 @@
             "description": "A PocketMine-MP Virion to easily send messages via Discord Webhooks",
             "support": {
                 "issues": "https://github.com/ReinfyTeam/DiscordWebhookAPI/issues",
-                "source": "https://github.com/ReinfyTeam/DiscordWebhookAPI/tree/master"
+                "source": "https://github.com/ReinfyTeam/DiscordWebhookAPI/tree/2.0.1"
             },
-            "time": "2026-10-10T20:02:44+00:00"
+            "time": "2026-10-10T20:32:24+00:00"
         },
         {
             "name": "reinfyteam/libpmform",
@@ -4845,7 +4844,6 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "paroxity/commando": 20,
-        "reinfyteam/discordwebhookapi": 20,
         "reinfyteam/libpmform": 20,
         "sof3/infoapi": 10
     },

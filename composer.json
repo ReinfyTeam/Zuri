@@ -4,7 +4,7 @@
     "type": "project",
     "require": {
         "paroxity/commando": "dev-master",
-        "reinfyteam/discordwebhookapi": "dev-master",
+        "reinfyteam/discordwebhookapi": "2.0.1",
         "reinfyteam/libpmform": "dev-main",
         "muqsit/simple-packet-handler": "0.1.6",
         "sof3/infoapi": "^2.0.0-beta.1"
