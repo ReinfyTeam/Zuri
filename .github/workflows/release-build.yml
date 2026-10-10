@@ -20,6 +20,7 @@ permissions:
 
 jobs:
   release:
+    name: Publish plugin release
     if: >-
       github.event_name == 'workflow_dispatch' ||
       startsWith(github.event.head_commit.message, 'release:') ||
@@ -30,10 +31,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Set up PHP for PocketMine-MP
-        uses: pmmp/setup-php-action@3.2.0
+        uses: pmmp/setup-php-action@3c38c259834f945351a662392836d90eb08abff0
         with:
           php-version: 8.2
           pm-version-major: 5
@@ -55,7 +56,7 @@ jobs:
         run: php tools/release-metadata.php
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64
         with:
           tag_name: ${{ steps.meta.outputs.tag }}
           name: ${{ steps.meta.outputs.title }}

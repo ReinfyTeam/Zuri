@@ -38,7 +38,7 @@ foreach ($steps as $step) {
 	if (($step["id"] ?? null) === "meta") {
 		$metadataStep = $step;
 	}
-	if (($step["uses"] ?? null) === "softprops/action-gh-release@v3") {
+	if (($step["uses"] ?? null) === "softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64") {
 		$releaseStep = $step;
 	}
 }

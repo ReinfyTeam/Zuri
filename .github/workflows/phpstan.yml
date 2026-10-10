@@ -9,14 +9,15 @@ on:
 
 jobs:
   phpstan:
+    name: Run PHPStan at maximum level
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Set up PHP for PocketMine-MP
-        uses: pmmp/setup-php-action@3.2.0
+        uses: pmmp/setup-php-action@3c38c259834f945351a662392836d90eb08abff0
         with:
           php-version: 8.2
           pm-version-major: 5
