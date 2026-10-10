@@ -2,7 +2,6 @@
     "name": "reinfyteam/zuri",
     "description": "A fast-development, lightweight, and asynchronous powerful anticheat made to destroy hackers and cheaters to your server for PocketMine-MP.",
     "type": "project",
-    "version": "1.4.0-BETA",
     "require": {
         "paroxity/commando": "dev-master",
         "reinfyteam/discordwebhookapi": "dev-master",
