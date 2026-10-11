@@ -63,19 +63,23 @@ use pocketmine\event\server\CommandEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\inventory\ArmorInventory;
 use pocketmine\math\Vector3;
+use pocketmine\math\Facing;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
+use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
 use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\Utils as PMMPUtils;
 use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\player\ExternalDataPath;
 use ReinfyTeam\Zuri\player\PlayerManager;
+use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\player\PlayerZuri;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function max;
 use function microtime;
@@ -138,22 +142,6 @@ class EventListener implements Listener {
 			$playerZuri->setDelta($packet->getDelta());
 			$playerZuri->setRawMove($packet->getRawMove());
 			$playerZuri->setStartedJumping($packet->getInputFlags()->get(PlayerAuthInputFlags::START_JUMPING));
-
-			$frictionBlock = $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN));
-			$externalData = ZuriAC::getExternalData();
-			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::FRICTION_FACTOR, $playerZuri->isOnGround() ? $frictionBlock->getFrictionFactor() : ZuriAC::getConstants()->getConstant(ConstantPath::FRICTION_FACTOR));
-
-			$lastDistanceXZ = $externalData->getExternalData($playerZuri, "Zuri", ExternalDataPath::LAST_DISTANCE_XZ);
-			$frictionFactor = $externalData->getExternalData($playerZuri, "Zuri", ExternalDataPath::FRICTION_FACTOR);
-			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::MOMENTUM, MathUtil::getMomentum($lastDistanceXZ, $frictionFactor));
-
-			$movement = MathUtil::getMovement($player, new Vector3(max(-1, min(1, $packet->getMoveVecZ())), 0, max(-1, min(1, $packet->getMoveVecX()))));
-			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::MOVEMENT, $movement);
-
-			$movementMultiplier = Utils::getMovementMultiplier($player);
-			$acceleration = MathUtil::getAcceleration($movement, $movementMultiplier, $frictionFactor, $playerZuri->isOnGround());
-			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::MOVEMENT_MULTIPLIER, $movementMultiplier);
-			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::ACCELERATION, $acceleration);
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
@@ -461,7 +449,6 @@ class EventListener implements Listener {
 				"port" => $event->getPort(),
 				"isAuthRequired" => $event->isAuthRequired(),
 				"getKickFlags" => $event->getKickFlags(),
-				"isKickFlagSet" => $event->isKickFlagSet(),
 				"getUsername" => $event->getPlayerInfo()->getUsername(),
 				"getLocale" => $event->getPlayerInfo()->getLocale(),
 				"getUuid" => $event->getPlayerInfo()->getUuid(),

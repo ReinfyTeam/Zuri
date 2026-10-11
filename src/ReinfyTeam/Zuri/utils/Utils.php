@@ -89,7 +89,7 @@ final class Utils {
 	/**
 	 * Calculates the movement multiplier for a player based on state and effects.
 	 *
-	 * @param \pocketmine\player\Player $player
+	 * @param Player $player
 	 */
 	public static function getMovementMultiplier(Player $player) : float {
 		$multiplier = 1.0;
@@ -146,7 +146,7 @@ final class Utils {
 	/**
 	 * Calculates the soul speed multiplier based on boots enchant and ground block.
 	 *
-	 * @param \pocketmine\player\Player $player
+	 * @param Player $player
 	 */
 	public static function getSoulSpeedMultiplier(Player $player) : float {
 		$pos = $player->getPosition();
