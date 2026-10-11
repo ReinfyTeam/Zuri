@@ -2,35 +2,41 @@
     "name": "reinfyteam/zuri",
     "description": "A fast-development, lightweight, and asynchronous powerful anticheat made to destroy hackers and cheaters to your server for PocketMine-MP.",
     "type": "project",
-    "version": "1.4.0-BETA",
     "require": {
-        "sof3/infoapi": "dev-master",
         "paroxity/commando": "dev-master",
-        "reinfyteam/discordwebhookapi": "dev-master",
-        "reinfyteam/libpmform": "dev-main",
-        "muqsit/simple-packet-handler": "0.1.5",
+        "reinfyteam/discordwebhookapi": "2.0.1",
+        "muqsit/simple-packet-handler": "0.1.6",
         "sof3/infoapi": "^2.0.0-beta.1"
     },
     "require-dev": {
         "php": ">=8.2",
         "pocketmine/pocketmine-mp": "^5.42",
-        "phpstan/phpstan": "^1.2",
+        "phpstan/phpstan": "^2.2",
         "sof3/pharynx": "^0.3.8",
         "friendsofphp/php-cs-fixer": "^3.94.2"
     },
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Reinfyteam\\Zuri\\": "src/"
+            "ReinfyTeam\\Zuri\\": "src/ReinfyTeam/Zuri/"
         }
     },
 	"scripts": {
         "format": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes",
         "format:check": "php-cs-fixer fix --config=.php-cs-fixer.php --allow-risky=yes --dry-run --diff",
-        "analyze": "vendor/bin/phpstan --no-progress",
-        "build": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -p=./build/Zuri.phar",
-        "build-source": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -o=./build/",
-		"test": "for file in tests/*.php; do php -f \"$file\"; done"
+        "analyze": "phpstan analyse --no-progress",
+        "build": [
+            "@php tools/prepare-build.php",
+            "@php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -p=./build/Zuri.phar",
+            "@php tools/verify-build.php",
+            "@php tests/trapdoor-regression.php build/Zuri.phar"
+        ],
+        "build-source": [
+            "@php tools/prepare-build.php",
+            "@php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -o=./build/"
+        ],
+		"test": "@php tools/test.php",
+        "test:runtime": "@php -dphar.readonly=0 tools/test-runtime.php"
     },
     "config": {
         "platform": {

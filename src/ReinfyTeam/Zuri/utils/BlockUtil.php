@@ -45,6 +45,9 @@ use function implode;
  * Utilities for block-related environment checks.
  */
 final class BlockUtil {
+	/** @var array<string,array<int,int>> */
+	private static array $blockMaps = [];
+
 	public static function isSoulSpeedSurface(int $blockId) : bool {
 		return $blockId === BlockTypeIds::SOUL_SAND || $blockId === BlockTypeIds::SOUL_SOIL;
 	}
@@ -128,11 +131,8 @@ final class BlockUtil {
 	 * @param int $down Vertical offset below location.
 	 */
 	public static function isUnderBlock(Location $location, array $id, int $down) : bool {
-		static $map = [];
 		$key = implode(':', $id);
-
-		$map[$key] ??= array_flip($id);
-		$idMap = $map[$key];
+		$idMap = self::$blockMaps[$key] ??= array_flip($id);
 
 		$world = $location->getWorld();
 
@@ -146,7 +146,7 @@ final class BlockUtil {
 		$fx = $x - $bx;
 		$fz = $z - $bz;
 
-		$b = static fn($x, $z) =>
+		$b = static fn(int $x, int $z) =>
 			isset($idMap[$world->getBlockAt($x, $by, $z)->getTypeId()]);
 
 		return
@@ -244,7 +244,7 @@ final class BlockUtil {
 	/**
 	 * Returns the block directly above the player's position.
 	 */
-	public static function getBlockAbove(Player $player) : ?Block {
+	public static function getBlockAbove(Player $player) : Block {
 		$pos = $player->getPosition();
 		$world = $player->getWorld();
 
@@ -259,7 +259,7 @@ final class BlockUtil {
 	 * Checks whether the given location is on stairs.
 	 */
 	public static function isOnStairs(Location $location, int $down) : bool {
-		static $stairs = [
+		$stairs = [
 			BlockTypeIds::STONE_STAIRS,
 			BlockTypeIds::OAK_STAIRS,
 			BlockTypeIds::BIRCH_STAIRS,
@@ -299,7 +299,7 @@ final class BlockUtil {
 	 * Checks whether the given location is on ice.
 	 */
 	public static function isOnIce(Location $location, int $down) : bool {
-		static $ice = [
+		$ice = [
 			BlockTypeIds::ICE,
 			BlockTypeIds::BLUE_ICE,
 			BlockTypeIds::PACKED_ICE,
@@ -312,7 +312,7 @@ final class BlockUtil {
 	 * Checks whether the given location is over a liquid block.
 	 */
 	public static function isOnLiquid(Location $location, int $down) : bool {
-		static $liquid = [
+		$liquid = [
 			BlockTypeIds::WATER,
 			BlockTypeIds::LAVA
 		];
@@ -341,7 +341,7 @@ final class BlockUtil {
 	 * Checks whether the given location is on adhesion blocks (ladders, vines).
 	 */
 	public static function isOnAdhesion(Location $location, int $down) : bool {
-		static $adhesion = [
+		$adhesion = [
 			BlockTypeIds::LADDER,
 			BlockTypeIds::VINES
 		];
@@ -352,7 +352,7 @@ final class BlockUtil {
 	 * Checks whether the given location is on plant-type blocks.
 	 */
 	public static function isOnPlant(Location $location, int $down) : bool {
-		static $plants = [
+		$plants = [
 			BlockTypeIds::GRASS_PATH,
 			BlockTypeIds::CARROTS,
 			BlockTypeIds::SUGARCANE,
@@ -377,7 +377,7 @@ final class BlockUtil {
 	 * Checks whether the given location is on door-type blocks.
 	 */
 	public static function isOnDoor(Location $location, int $down) : bool {
-		static $doors = [
+		$doors = [
 			BlockTypeIds::OAK_DOOR,
 			BlockTypeIds::IRON_DOOR,
 			BlockTypeIds::DARK_OAK_DOOR,
@@ -401,7 +401,7 @@ final class BlockUtil {
 	 * Checks whether the given location is on carpet.
 	 */
 	public static function isOnCarpet(Location $location, int $down) : bool {
-		static $carpets = [
+		$carpets = [
 			BlockTypeIds::CARPET
 		];
 		return self::isUnderBlock($location, $carpets, $down);
@@ -411,7 +411,7 @@ final class BlockUtil {
 	 * Checks whether the given location is on a pressure plate.
 	 */
 	public static function isOnPlate(Location $location, int $down) : bool {
-		static $plates = [
+		$plates = [
 			BlockTypeIds::CARPET,
 			BlockTypeIds::BIRCH_PRESSURE_PLATE,
 			BlockTypeIds::STONE_PRESSURE_PLATE,
@@ -430,7 +430,7 @@ final class BlockUtil {
 	 * Checks whether the given location is on snow blocks.
 	 */
 	public static function isOnSnow(Location $location, int $down) : bool {
-		static $snow = [
+		$snow = [
 			BlockTypeIds::SNOW,
 			BlockTypeIds::SNOW_LAYER
 		];

@@ -36,6 +36,9 @@ use ReinfyTeam\Zuri\utils\TextUtil;
 use ReinfyTeam\Zuri\ZuriAC;
 use function basename;
 use function copy;
+use function is_bool;
+use function is_float;
+use function is_int;
 use function is_string;
 use function pathinfo;
 use function str_replace;
@@ -67,10 +70,32 @@ class ConfigManager implements ConfigPath {
 
 	/**
 	 * Retrieves nested configuration data by key.
+	 * @param array<string,string> $replacements
 	 */
 	public function getData(string $key, mixed $default = null, array $replacements = []) : mixed {
 		$value = $this->config->getNested($key, $default ?? $key);
 		return is_string($value) ? TextUtil::replaceText($value, $replacements) : $value;
+	}
+
+	/** @param array<string,string> $replacements */
+	public function getString(string $key, string $default = "", array $replacements = []) : string {
+		$value = $this->getData($key, $default, $replacements);
+		return is_string($value) ? $value : $default;
+	}
+
+	public function getInt(string $key, int $default = 0) : int {
+		$value = $this->getData($key, $default);
+		return is_int($value) ? $value : $default;
+	}
+
+	public function getFloat(string $key, float $default = 0.0) : float {
+		$value = $this->getData($key, $default);
+		return is_int($value) || is_float($value) ? (float) $value : $default;
+	}
+
+	public function getBool(string $key, bool $default = false) : bool {
+		$value = $this->getData($key, $default);
+		return is_bool($value) ? $value : $default;
 	}
 
 	/**
@@ -84,21 +109,24 @@ class ConfigManager implements ConfigPath {
 	/**
 	 * Ensures configuration version compatibility and replaces resource if outdated.
 	 */
-	public function checkVersion(string $version) : void {
-		if ($this->getData($version) !== null) {
-			if (version_compare($version, $this->getData(self::CONFIG_VERSION), '>=')) {
+	public function checkVersion(string $version, string $versionKey = self::CURRENT_CONFIG_VERSION) : void {
+		$currentVersion = $this->getString($versionKey);
+		if ($currentVersion !== "") {
+			if (version_compare($version, $currentVersion, '>')) {
 				@copy(
 					$this->path,
 					str_replace(pathinfo($this->path, PATHINFO_FILENAME), pathinfo($this->path, PATHINFO_FILENAME) . "-old", $this->path)
 				);
 				@unlink($this->path);
 				ZuriAC::getInstance()->saveResource(basename($this->path));
+				$this->config->reload();
 			}
 		}
 	}
 
 	/**
 	 * Exports the raw configuration data as an array.
+	 * @return array<array-key,mixed>
 	 */
 	public function export() : array {
 		return $this->config->getAll();

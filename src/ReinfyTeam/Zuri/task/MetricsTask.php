@@ -32,18 +32,10 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\task;
 
 use pocketmine\scheduler\Task;
-use pocketmine\Server;
 use ReinfyTeam\Zuri\ZuriAC;
 
 class MetricsTask extends Task {
-	public function __construct() {
-		ZuriAC::getInstance()->getScheduler()->scheduleRepeatingTask($this, (int) ZuriAC::getConfigManager()->getData(ZuriAC::METRICS_DELAY, 3) * 20);
-	}
-
 	public function onRun() : void {
-		$server = Server::getInstance();
-		$metricsData = ZuriAC::getMetricsData();
-
-		$metricsData->update();
+		ZuriAC::getMetricsData()->update();
 	}
 }

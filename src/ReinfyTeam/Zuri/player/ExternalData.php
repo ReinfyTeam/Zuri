@@ -36,6 +36,7 @@ use function array_merge;
 use function spl_object_id;
 
 class ExternalData implements JsonSerializable {
+	/** @var array<int,array<string,array<string,mixed>>> */
 	private array $externalData = [];
 
 	public function setExternalData(PlayerZuri $player, string $module, string $parameter, mixed $value) : void {
@@ -46,6 +47,7 @@ class ExternalData implements JsonSerializable {
 		return $this->externalData[spl_object_id($player)][$module][$parameter] ?? null;
 	}
 
+	/** @return array<string,mixed> */
 	public function getAllExternalData(PlayerZuri $player) : array {
 		$data = [];
 		foreach ($this->externalData[spl_object_id($player)] ?? [] as $moduleData) {
@@ -54,10 +56,12 @@ class ExternalData implements JsonSerializable {
 		return $data;
 	}
 
+	/** @return array<string,mixed> */
 	public function getModuleExternalData(PlayerZuri $player, string $moduleName) : array {
 		return $this->externalData[spl_object_id($player)][$moduleName] ?? [];
 	}
 
+	/** @return array<int,array<string,array<string,mixed>>> */
 	public function jsonSerialize() : array {
 		return $this->externalData;
 	}

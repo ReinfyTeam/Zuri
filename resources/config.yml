@@ -6,14 +6,14 @@ zuri:
   # Threaded processing settings
   # Adjust these values based on your server's performance and workload.
   threads:
-    # Number of worker threads inside the check coordinator thread.
+    # Number of check workers managed by the coordinator thread.
     max_worker: 4
     # Maximum queued checks accepted by each worker.
     worker_capacity: 64
   # Metrics settings: This helps to monitor the performance of the anticheat system and can be used for debugging or optimization.
   # Adjust the delay for metrics collection based on your server's performance and workload.
   metrics:
-    # Adjust delay for updating metrics data. In miliseconds. Default is every 3 seconds.
+    # Delay between metrics updates in seconds (minimum 1). Default: 3.
     delay: 3
   # Punishment thresholds: Responsible for handling considerations of the player conditions.
   # This involves the ping, server tps, server load that affects modules.
@@ -40,29 +40,29 @@ zuri:
       reach: 1.2
   punishments:
     ban:
-      # The command to execute when a player is banned. 
+      # The command to execute when a player is banned.
       # Use {player} as a placeholder for the player's name.
       # Available types: [native, command] (if none specified, defaults to command)
-      # If you choose "native", the plugin will use the server's built-in ban system. 
+      # If you choose "native", the plugin will use the server's built-in ban system.
       # If you choose "command", you can specify a custom command to execute.
       type: command
       # To customize ban messages, please see language files to edit manually.
       command: "ban {player} Unfair Advantage"
       # Ban Message for native bans. This is ignored if using a command-based ban.
       message: "Unfair Advantage"
-      # Duration of ban if using the native ban system. 
-      # Use a format like "30d" for 30 days, "12h" for 12 hours, or "permanent" if permantent bans are allowed. 
+      # Duration of ban if using the native ban system.
+      # Use a format like "30d" for 30 days, "12h" for 12 hours, or "permanent" if permantent bans are allowed.
       # This is ignored if using a command-based ban.
       duration: "30d"
     kick:
       # The command to execute when a player is kicked.
       # Use {player} as a placeholder for the player's name.
       # Available types: [native, command] (if none specified, defaults to command)
-      # If you choose "native", the plugin will use the server's built-in kick system. 
+      # If you choose "native", the plugin will use the server's built-in kick system.
       # If you choose "command", you can specify a custom command to execute.
       type: command
       # To customize kick messages, please see language files to edit manually.
       command: "kick {player} Unfair Advantage"
-    
-    
-    
+
+
+

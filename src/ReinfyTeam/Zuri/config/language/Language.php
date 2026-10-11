@@ -49,6 +49,7 @@ class Language implements LanguagePath {
 		return $this->code;
 	}
 
+	/** @param array<string,string> $replacements */
 	public function translate(string $key, array $replacements = []) : string {
 		$value = $this->languageData->getNested($key, $key);
 		return TextUtil::parseColors(TextUtil::replaceText(is_string($value) ? $value : $key, $replacements));

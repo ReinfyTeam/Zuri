@@ -31,12 +31,18 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\thread;
 
+use ReinfyTeam\Zuri\check\Check;
+use function is_a;
 use function is_array;
 use function is_string;
 use function serialize;
 use function unserialize;
 
 final class CheckJob {
+	/**
+	 * @param class-string<Check> $check
+	 * @param array<string,mixed> $data
+	 */
 	public function __construct(
 		private string $check,
 		private array $data
@@ -50,10 +56,12 @@ final class CheckJob {
 		]);
 	}
 
+	/** @return class-string<Check> */
 	public function getCheck() : string {
 		return $this->check;
 	}
 
+	/** @return array<string,mixed> */
 	public function getData() : array {
 		return $this->data;
 	}
@@ -64,10 +72,18 @@ final class CheckJob {
 			!is_array($job) ||
 			!isset($job["check"], $job["data"]) ||
 			!is_string($job["check"]) ||
-			!is_array($job["data"])
+			!is_array($job["data"]) ||
+			!is_a($job["check"], Check::class, true)
 		) {
 			throw new \UnexpectedValueException("Invalid serialized check job");
 		}
-		return new self($job["check"], $job["data"]);
+		$data = [];
+		foreach ($job["data"] as $key => $value) {
+			if (!is_string($key)) {
+				throw new \UnexpectedValueException("Invalid check payload key");
+			}
+			$data[$key] = $value;
+		}
+		return new self($job["check"], $data);
 	}
 }

@@ -1,4 +1,4 @@
-name: Release Build
+name: Publish plugin release
 
 on:
   push:
@@ -20,6 +20,7 @@ permissions:
 
 jobs:
   release:
+    name: Publish plugin release
     if: >-
       github.event_name == 'workflow_dispatch' ||
       startsWith(github.event.head_commit.message, 'release:') ||
@@ -29,20 +30,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
-      - name: Setup PHP for PocketMine-MP
-        uses: pmmp/setup-php-action@3.2.0
+      - name: Set up PHP for PocketMine-MP
+        uses: pmmp/setup-php-action@3c38c259834f945351a662392836d90eb08abff0
         with:
           php-version: 8.2
           pm-version-major: 5
 
-      - name: Install composer dependencies
+      - name: Install Composer dependencies
         run: composer install --prefer-dist
 
-      - name: Build plugin phar
-        run: mkdir build && composer run-script build
+      - name: Build plugin PHAR
+        run: composer run-script build
 
       - name: Resolve release metadata (from commit or manual input)
         id: meta
@@ -52,69 +53,10 @@ jobs:
           INPUT_VERSION: ${{ inputs.version }}
           INPUT_CHANGELOG: ${{ inputs.changelog }}
           SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-
-          normalize_version() {
-            local v="$1"
-            v="${v#v}"
-            if [[ ! "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
-              echo "Invalid version format: '$1'. Expected semver-like format (e.g. 1.2.3 or v1.2.3)." >&2
-              exit 1
-            fi
-            echo "$v"
-          }
-
-          subject=""
-          body=""
-
-          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
-            if [[ -z "${INPUT_VERSION:-}" ]]; then
-              echo "workflow_dispatch requires input 'version'." >&2
-              exit 1
-            fi
-            version="$(normalize_version "$INPUT_VERSION")"
-            subject="release: v$version"
-            body="${INPUT_CHANGELOG:-}"
-          else
-            if [[ -z "${RAW_MESSAGE:-}" ]]; then
-              echo "Push event missing head commit message; cannot determine release metadata." >&2
-              exit 1
-            fi
-
-            subject="$(printf '%s' "$RAW_MESSAGE" | head -n 1)"
-            body="$(printf '%s' "$RAW_MESSAGE" | tail -n +2 | sed '/^[[:space:]]*$/d')"
-
-            if [[ "$subject" =~ ^[Rr]elease[:[:space:]]+v?([0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?)$ ]]; then
-              version="${BASH_REMATCH[1]}"
-            else
-              echo "Commit subject must look like: 'release: v1.2.3' (got: '$subject')." >&2
-              exit 1
-            fi
-          fi
-
-          tag="v$version"
-          title="Zuri $tag"
-
-          {
-            echo "version=$version"
-            echo "tag=$tag"
-            echo "title=$title"
-            echo "target=$SHA"
-          } >> "$GITHUB_OUTPUT"
-
-          {
-            echo "# $title"
-            echo
-            if [[ -n "${body:-}" ]]; then
-              printf '%s\n' "$body"
-            else
-              echo "- Release $tag"
-            fi
-          } > release-notes.md
+        run: php tools/release-metadata.php
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64
         with:
           tag_name: ${{ steps.meta.outputs.tag }}
           name: ${{ steps.meta.outputs.title }}
@@ -122,3 +64,5 @@ jobs:
           target_commitish: ${{ steps.meta.outputs.target }}
           files: build/Zuri.phar
           fail_on_unmatched_files: true
+          prerelease: ${{ steps.meta.outputs.prerelease }}
+          make_latest: ${{ steps.meta.outputs.make_latest }}

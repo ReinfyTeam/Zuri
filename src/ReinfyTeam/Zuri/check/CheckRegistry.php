@@ -79,7 +79,7 @@ class CheckRegistry {
 	/**
 	 * Queues all checks of a given type for threaded processing.
 	 *
-	 * @param array $data Data to pass to each check.
+	 * @param array<string,mixed> $data Data to pass to each check.
 	 * @param int $type The type of check (see Check::TYPE_* constants).
 	 */
 	public function spawnCheck(array $data, int $type) : void {

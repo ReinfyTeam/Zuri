@@ -48,6 +48,7 @@ final class CheckQueue extends ThreadSafe {
 		$this->queue = new ThreadSafeArray();
 	}
 
+	/** @param array<string,mixed> $data */
 	public function addCheck(array $data, Check $check) : void {
 		$player = $data["player"] ?? null;
 		$playerData = $player instanceof Player ? PlayerManager::get($player)->jsonSerialize() : null;
@@ -56,7 +57,7 @@ final class CheckQueue extends ThreadSafe {
 			'type' => $data["type"] ?? null,
 			'data' => $this->snapshot($data["data"] ?? null),
 			'playerData' => $playerData,
-			'constantData' => ZuriAC::getConstants()->export()
+			'constantData' => ZuriAC::getConstants()->exportNumbers()
 		]))->serialize();
 	}
 

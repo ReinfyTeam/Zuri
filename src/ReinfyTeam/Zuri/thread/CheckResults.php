@@ -46,6 +46,7 @@ final class CheckResults extends ThreadSafe {
 		$this->queue = new ThreadSafeArray();
 	}
 
+	/** @param array<array-key,mixed> $result */
 	public function addResult(array $result, string $check, ?string $player) : void {
 		$this->queue[] = serialize([
 			'result' => $result,
@@ -54,7 +55,7 @@ final class CheckResults extends ThreadSafe {
 		]);
 	}
 
-	/** @return array{result:array,check:class-string,player:?string}|null */
+	/** @return array{result:array<array-key,mixed>,check:string,player:?string}|null */
 	public function getNextResult() : ?array {
 		$result = $this->queue->shift();
 		if (!is_string($result)) {
@@ -62,7 +63,11 @@ final class CheckResults extends ThreadSafe {
 		}
 
 		$result = unserialize($result, ["allowed_classes" => false]);
-		return is_array($result) ? $result : null;
+		if (!is_array($result) || !is_array($result["result"] ?? null) || !is_string($result["check"] ?? null)) {
+			return null;
+		}
+		$player = $result["player"] ?? null;
+		return ["result" => $result["result"], "check" => $result["check"], "player" => is_string($player) ? $player : null];
 	}
 
 	public function isEmpty() : bool {
