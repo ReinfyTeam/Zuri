@@ -136,13 +136,33 @@ class SpeedB extends Check {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_LEVITATION]);
 			}
-		} elseif ((Utils::readBool($playerData["iscreative"]) || Utils::readBool($playerData["isSpectator"])) && Utils::readBool($playerData["isFlying"])) {
+		} elseif ((Utils::readBool($playerData["isCreative"]) || Utils::readBool($playerData["isSpectator"])) && Utils::readBool($playerData["isFlying"])) {
 			if ($isMovingUp || $isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]);
 			}
 		} elseif (!Utils::readBool($playerData["isOnGround"]) && $isMovingDown && !Utils::readBool($playerData["isOnLiquid"]) && !Utils::readBool($playerData["isOnClimbable"]) && !Utils::readBool($playerData["isGliding"])) {
-			$limit += Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]);
-		} elseif (Utils::readBool($playerData["isOnScaffolding"])) {
+			// Calculations from https://minecraft.fandom.com/wiki/Transportation
+			// Falling terminal calculation player logic
+			$fallTicks = Utils::readInt($playerData["getFallTicks"]) ?? 0;
+			
+			// fetch the initial vertical motion when the player left the ground
+			$vt0 = Utils::arraytoVector3(Utils::readArray($playerData["getMotion"]))->getY();
+			
+			// Apply exact displacement formula with initial conditions
+			// Shift N by +1 to account for the formula's internal 1-tick latency offset
+			$N = $fallTicks + 1;
+			
+			$currentDisplacement = 50 * ($vt0 + 3.92) * (1 - pow(0.98, $N)) - (3.92 * $N);
+			$previousDisplacement = 50 * ($vt0 + 3.92) * (1 - pow(0.98, max(0, $N - 1))) - (3.92 * max(0, $N - 1));
+			
+			// Calculate the delta step limit allowed for this single frame
+			$limit = abs($currentDisplacement - $previousDisplacement);
+			
+			// Fallback floor boundary safety layer for the first tick frame
+			if ($limit < 0.08) {
+				$limit = 0.08;
+			}
+		} elseif (Utils::readBool($playerData["isOnScaffold"])) {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SCAFFOLDING_UP]);
 			}
@@ -153,7 +173,7 @@ class SpeedB extends Check {
 		} elseif (Utils::readBool($playerData["isSwimming"])) {
 			$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_UNDERWATER]);
 		} else {
-			if (Utils::readBool($playerData["isRecentlyJumped"])) {
+			if (Utils::readBool($playerData["isJumping"])) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING]); // Base limit for jumping.
 			}
 

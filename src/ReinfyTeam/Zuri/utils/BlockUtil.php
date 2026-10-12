@@ -48,7 +48,7 @@ final class BlockUtil {
 	/** @var array<string,array<int,int>> */
 	private static array $blockMaps = [];
 
-	public static function isSoulSpeedSurface(int $blockId) : bool {
+	public static function isSoulSurface(int $blockId) : bool {
 		return $blockId === BlockTypeIds::SOUL_SAND || $blockId === BlockTypeIds::SOUL_SOIL;
 	}
 

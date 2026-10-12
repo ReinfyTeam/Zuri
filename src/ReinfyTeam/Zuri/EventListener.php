@@ -134,7 +134,47 @@ class EventListener implements Listener {
 			$playerZuri->setTick($packet->getTick());
 			$playerZuri->setDelta($packet->getDelta());
 			$playerZuri->setRawMove($packet->getRawMove());
-			$playerZuri->setStartedJumping($packet->getInputFlags()->get(PlayerAuthInputFlags::START_JUMPING));
+
+			$inputFlags = $packet->getInputFlags();
+
+			$playerZuri->setJumping($inputFlags->get(PlayerAuthInputFlags::JUMPING));
+			$playerZuri->setOnScaffold($inputFlags->get(PlayerAuthInputFlags::ASCEND_BLOCK) || $inputFlags->get(PlayerAuthInputFlags::DESCEND_BLOCK));
+
+			// Sprinting
+			if ($inputFlags->get(PlayerAuthInputFlags::START_SPRINTING)) {
+				$playerZuri->setSprinting(true);
+			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_SPRINTING)) {
+				$playerZuri->setSprinting(false);
+			}
+
+			// Gliding
+			if ($inputFlags->get(PlayerAuthInputFlags::START_GLIDING)) {
+				$playerZuri->setGliding(true);
+			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_GLIDING)) {
+				$playerZuri->setGliding(false);
+			}
+
+			// Crawling
+			if ($inputFlags->get(PlayerAuthInputFlags::START_CRAWLING)) {
+				$playerZuri->setCrawling(true);
+			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_CRAWLING)) {
+				$playerZuri->setCrawling(false);
+			}
+
+			// Sneaking
+			if ($inputFlags->get(PlayerAuthInputFlags::START_SNEAKING)) {
+				$playerZuri->setSneaking(true);
+			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_SNEAKING)) {
+				$playerZuri->setSneaking(false);
+			}
+
+			// Swimming
+			if ($inputFlags->get(PlayerAuthInputFlags::START_SWIMMING)) {
+				$playerZuri->setSwimming(true);
+			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_SWIMMING)) {
+				$playerZuri->setSwimming(false);
+			}
+
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
@@ -175,8 +215,8 @@ class EventListener implements Listener {
 			$playerZuri->setSlimeBlockTicks(microtime(true));
 		}
 
+		// Block related checks
 		$playerZuri->setIce(BlockUtil::isOnIce($event->getTo(), 1) || BlockUtil::isOnIce($event->getTo(), 2));
-
 		$playerZuri->setOnStairs(BlockUtil::isOnStairs($event->getTo(), 0) || BlockUtil::isOnStairs($event->getTo(), 1));
 		$playerZuri->setUnderBlock(BlockUtil::isOnGround($player->getLocation(), -2));
 		$playerZuri->setTopBlock(BlockUtil::isOnGround($player->getLocation(), 1));
@@ -193,7 +233,8 @@ class EventListener implements Listener {
 		$playerZuri->setLastMoveTick((double) Server::getInstance()->getTick());
 		$playerZuri->setBlockAbove(BlockUtil::getBlockAbove($player)->isSolid());
 		$playerZuri->setGroundSolid(BlockUtil::isGroundSolid($player));
-
+		$playerZuri->setMotion($player->getMotion());
+		 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player

@@ -46,96 +46,7 @@ use function array_filter;
 use function count;
 use function microtime;
 
-/**
- * Represents internal tracking data for a player used by ZuriAC checks.
- *
- * Stores movement, timing, and environmental state used by checks.
- *
- * @phpstan-type PlayerData array{
- *     isInventoryOpen:bool,
- *     isTransactionArmorInventory:bool,
- *     isUnderBlock:bool,
- *     isClimbing:bool,
- *     isOnPlant:bool,
- *     isOnDoor:bool,
- *     isOnCarpet:bool,
- *     isOnPlate:bool,
- *     isOnSnow:bool,
- *     isSniffing:bool,
- *     isLiquid:bool,
- *     isLava:bool,
- *     isOnStairs:bool,
- *     isIce:bool,
- *     isOnGround:bool,
- *     isDebug:bool,
- *     isTopBlock:bool,
- *     lastGroundY:float,
- *     lastNoGroundY:float,
- *     lastDelayedMovePacket:float,
- *     joinedAtTime:float,
- *     jumpTicks:float,
- *     teleportTicks:float,
- *     attackTicks:float,
- *     slimeBlockTicks:float,
- *     deathTicks:float,
- *     placingTicks:float,
- *     bowShotTicks:float,
- *     hurtTicks:float,
- *     projectileAttackTicks:float,
- *     lastMoveTick:float,
- *     teleportCommandTicks:float,
- *     cps:int,
- *     onlineTime:int,
- *     deltaTicks:float,
- *     verticalState:int,
- *     airTicks:int,
- *     groundTicks:int,
- *     lastY:float,
- *     predictedY:float,
- *     predictedVerticalDelta:float,
- *     verticalError:float,
- *     verticalVelocity:float,
- *     lastVerticalVelocity:float,
- *     hasInitialVelocity:bool,
- *     velocitySource:int,
- *     horizontalVelocitySource:int,
- *     externalVelocityTicks:int,
- *     pitch:float,
- *     isDead:bool,
- *     isCurrentChunkLoaded:bool,
- *     isSurvival:bool,
- *     isCreative:bool,
- *     isSpectator:bool,
- *     isFlying:bool,
- *     allowFlight:bool,
- *     hasNoClientPredictions:bool,
- *     isBlockAbove:bool,
- *     isRecentlyCancelledEvent:bool,
- *     isStartedJumping:bool,
- *     explosionTicks:float,
- *     isGroundSolid:bool,
- *     isSprinting:bool,
- *     isSneaking:bool,
- *     isGliding:bool,
- *     speedLevel:int,
- *     slownessLevel:int,
- *     jumpBoostLevel:int,
- *     isSoulSpeedSurface:bool,
- *     isUnderwater:bool,
- *     twoBlockPassage:bool,
- *     previousState:int,
- *     currentSurface:int,
- *     previousSurface:int,
- *     currentState:int,
- *     name:string,
- *     motion:array{x:float,y:float,z:float},
- *     movement:array{from:array{x:float,y:float,z:float},to:array{x:float,y:float,z:float}},
- *     previousPosition:array{x:float,y:float,z:float},
- *     safePosition:array{x:float,y:float,z:float},
- *     currentPosition:array{x:float,y:float,z:float},
- *     externalData:array<string,mixed>,
- * }
- */
+
 class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath {
 	/**
 	 * @param Player $player The underlying PocketMine player instance.
@@ -157,7 +68,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $onCarpet = false;
 	private bool $onPlate = false;
 	private bool $onSnow = false;
-	private bool $sniffing = false;
 	private bool $inLiquid = false;
 	private bool $inLava = false;
 	private bool $onStairs = false;
@@ -177,26 +87,18 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $allowFlight = false;
 	private bool $blockAbove = false;
 	private bool $noClientPredictions = false;
-	private bool $startedJumping = false;
+	private bool $jumping = false;
 	private bool $groundSolid = false;
 	private bool $sprinting = false;
+	private bool $scaffolding = false;
 	private bool $sneaking = false;
 	private bool $gliding = false;
-	private int $speedLevel = 0;
-	private int $slownessLevel = 0;
-	private int $jumpBoostLevel = 0;
-	private bool $soulSpeedSurface = false;
+	private bool $onSoul = false;
 	private bool $underwater = false;
 	private bool $twoBlockPassage = false;
-	private bool $elevated = false;
 	private bool $dead = false;
 	private int $airTicks = 0;
 	private int $groundTicks = 0;
-	private float $lastY = 0.0;
-	private float $predictedY = 0.0;
-	private float $lastVerticalVelocity = 0.0;
-	private bool $hasInitialVelocity = false;
-	private int $externalVelocityTicks = 0;
 
 	private float $lastGroundY = 0.0;
 	private float $lastNoGroundY = 0.0;
@@ -215,7 +117,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $teleportCommandTicks = 0.0;
 	private float $eventCancelled = 0.0;
 	private float $explosionTicks = 0.0;
-	private float $lastMovementTime = 0.0;
 
 	private Location $location;
 	private Position $position;
@@ -231,14 +132,9 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $moveVecX = 0.0;
 	private float $moveVecZ = 0.0;
 
-	private int $inputMode = 0;
-	private int $playMode = 0;
-	private int $interactionMode = 0;
 	private int $tick = 0;
 
-	private Vector3 $delta;
 	private Vector3 $motion;
-	private Vector2 $rawMove;
 
 
 	/**
@@ -258,8 +154,9 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->setSurvival($player->isSurvival());
 		$this->setSpectator($player->isSpectator());
 		$this->setAllowFlight($player->getAllowFlight());
+		$this->setOnSoul($player->isOnSoul());
 		$this->setCurrentChunkLoaded(WorldUtil::isCurrentChunkIsLoaded($player));
-
+		$this->setNoClientPredictions($player->hasNoClientPredictions());
 		return $this;
 	}
 
@@ -279,6 +176,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->moveVecZ = $data;
 	}
 
+	public function isOnScaffold() : bool {
+		return $this->scaffolding;
+	}
+
+	public function setOnScaffold(bool $data) : void {
+		$this->scaffolding = $data;
+	}
+
 	/**
 	 * Returns the cached motion vector for the player.
 	 */
@@ -291,18 +196,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	 */
 	public function setMotion(Vector3 $motion) : void {
 		$this->motion = $motion;
-	}
-
-	public function setHorizontalVelocitySource(int $source) : void {
-		$this->horizontalVelocitySource = $source;
-	}
-
-	public function getHorizontalVelocitySource() : int {
-		return $this->horizontalVelocitySource;
-	}
-
-	public function getExternalVelocityTicks() : int {
-		return $this->externalVelocityTicks;
 	}
 
 	public function isInventoryOpen() : bool {
@@ -503,12 +396,12 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->jumpBoostLevel = $data;
 	}
 
-	public function isOnSoulSurface() : bool {
-		return $this->soulSurface;
+	public function isOnSoul() : bool {
+		return $this->onSoul;
 	}
 
 	public function setOnSoulSurface(bool $data) : void {
-		$this->soulSurface = $data;
+		$this->onSoul = $data;
 	}
 
 	public function isOnUnderwater() : bool {
@@ -646,14 +539,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	public function setLastNoGroundY(float $data) : void {
 		$this->lastNoGroundY = $data;
-	}
-
-	public function getLastDelayedMovePacket() : float {
-		return $this->lastDelayedMovePacket;
-	}
-
-	public function setLastDelayedMovePacket(float $data) : void {
-		$this->lastDelayedMovePacket = $data;
 	}
 
 	public function addCPS() : void {
@@ -929,6 +814,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		return (microtime(true) - $this->explosionTicks) * 20;
 	}
 
+	public function isJumping() : bool {
+		return $this->jumping;
+	}
+
+	public function setJumping(bool $data) : void {
+		$this->jumping = $data;
+	}
+
 	public function isGroundSolid() : bool {
 		return $this->groundSolid;
 	}
@@ -998,18 +891,16 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"hasNoClientPredictions" => $this->hasNoClientPredictions(),
 			"isBlockAbove" => $this->isBlockAbove(),
 			"isRecentlyCancelledEvent" => $this->isRecentlyCancelledEvent(),
-			"isStartedJumping" => $this->isStartedJumping(),
+			"isJumping" => $this->isJumping(),
 			"explosionTicks" => $this->getExplosionTicks(),
 			"isGroundSolid" => $this->isGroundSolid(),
 			"isSprinting" => $this->isSprinting(),
 			"isSneaking" => $this->isSneaking(),
 			"isGliding" => $this->isGliding(),
-			"speedLevel" => $this->getSpeedLevel(),
-			"slownessLevel" => $this->getSlownessLevel(),
-			"jumpBoostLevel" => $this->getJumpBoostLevel(),
-			"isOnSoulSurface" => $this->isOnSoulSurface(),
-			"isUnderwater" => $this->isOnUnderwater(),
-			"twoBlockPassage" => $this->hasTwoBlockPassage(),
+			"isOnScaffold" => $this->isOnScaffold(),
+			"isOnSoul" => $this->isOnSoul(),
+			"isOnUnderwater" => $this->isOnUnderwater(),
+			"hasTwoBlockPassage" => $this->hasTwoBlockPassage(),
 			"safePosition" => Utils::vector3ToArray($this->getSafePosition()),
 			"externalData" => ZuriAC::getExternalData()->getAllExternalData($this)
 		];

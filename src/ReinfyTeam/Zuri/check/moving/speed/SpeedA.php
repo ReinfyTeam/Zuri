@@ -92,7 +92,7 @@ class SpeedA extends Check {
 		$constantData = Utils::readArray($data["constantData"]);
 		$externalData = Utils::readArray($playerData["externalData"]);
 
-		if ($playerData["isRecentlyEnderPearled"] && $player["hasNoClientPredictions"]) {
+		if ($playerData["isRecentlyEnderPearled"] && $playerData["hasNoClientPredictions"]) {
 			return self::buildResult(false); // Prevent flag with ender pearls teleportation and frozen/no client prediction movements.
 		}
 
@@ -140,15 +140,15 @@ class SpeedA extends Check {
 		} elseif (Utils::readBool($playerZuri["isCreative"]) && Utils::readBool($playerZuri["isFlying"])) { // Creative flight
 			$baseLimit = Utils::readBool($playerZuri["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]);
 		} elseif (Utils::readBool($playerZuri["isSpectator"]) && Utils::readBool($playerZuri["isFlying"])) { // Spectator flight
-			$baseLimit = Utils::readBool($playerZuri["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]);
-		} else {
-			// For Walking
-			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]); // Base speed for walking
+			$baseLimit = Utils::readBool($playerZuri["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]);
+		}
 
-			// Check if diagonally moving, add threshold
-			if (abs($dx) !== 0 || abs($dz) !== 0) {
-				$limit += $baseLimit - Utils::readFloat($constantData[ConstantPath::SPEED_WALK_DIAGONAL]);
-			}
+		// For Walking
+		$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]); // Base speed for walking
+
+		// Check if diagonally moving, add threshold
+		if (abs($dx) !== 0 || abs($dz) !== 0) {
+			$limit += $baseLimit - Utils::readFloat($constantData[ConstantPath::SPEED_WALK_DIAGONAL]);
 		}
 
 		$limit += $baseLimit * $constantData[ConstantPath::THRESHOLD_PERCENTAGE]; // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
