@@ -191,20 +191,15 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $soulSpeedSurface = false;
 	private bool $underwater = false;
 	private bool $twoBlockPassage = false;
+	private bool $elevated = false;
 	private bool $dead = false;
 	private int $airTicks = 0;
 	private int $groundTicks = 0;
 	private float $lastY = 0.0;
 	private float $predictedY = 0.0;
-	private float $predictedVerticalDelta = 0.0;
-	private float $verticalError = 0.0;
-	private float $verticalVelocity = 0.0;
 	private float $lastVerticalVelocity = 0.0;
 	private bool $hasInitialVelocity = false;
 	private int $externalVelocityTicks = 0;
-	private Vector3 $previousPosition;
-	private Vector3 $safePosition;
-	private Vector3 $currentPosition;
 
 	private float $lastGroundY = 0.0;
 	private float $lastNoGroundY = 0.0;
@@ -224,8 +219,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $eventCancelled = 0.0;
 	private float $explosionTicks = 0.0;
 	private float $lastMovementTime = 0.0;
-	private float $movementDeltaTicks = 1.0;
-
 
 	private Location $location;
 	private Position $position;
@@ -481,72 +474,12 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->dead = $data;
 	}
 
-	public function setVerticalVelocity(float $velocity, int $source = self::SOURCE_UNKNOWN) : void {
-		$this->verticalVelocity = $velocity;
-		$this->hasInitialVelocity = true;
-		$this->velocitySource = $source;
-		$this->horizontalVelocitySource = $source;
-		$this->externalVelocityTicks = $source === self::SOURCE_UNKNOWN ? 0 : 10;
-	}
-
-	public function getVerticalState() : int {
-		return $this->verticalState;
-	}
-
 	public function getAirTicks() : int {
 		return $this->airTicks;
 	}
 
 	public function getGroundTicks() : int {
 		return $this->groundTicks;
-	}
-
-	public function getLastY() : float {
-		return $this->lastY;
-	}
-
-	public function getPredictedY() : float {
-		return $this->predictedY;
-	}
-
-	public function getPredictedVerticalDelta() : float {
-		return $this->predictedVerticalDelta;
-	}
-
-	public function getVerticalError() : float {
-		return $this->verticalError;
-	}
-
-	public function getVerticalVelocity() : float {
-		return $this->verticalVelocity;
-	}
-
-	public function getLastVerticalVelocity() : float {
-		return $this->lastVerticalVelocity;
-	}
-
-	public function hasInitialVelocity() : bool {
-		return $this->hasInitialVelocity;
-	}
-
-	public function getVelocitySource() : int {
-		return $this->velocitySource;
-	}
-
-	public function setMovementDeltaTicks(float $ticks) : void {
-		$this->movementDeltaTicks = max(1.0, $ticks);
-	}
-
-	public function getMovementDeltaTicks() : float {
-		return $this->movementDeltaTicks;
-	}
-
-	public function getLastMovementTime() : float {
-		return $this->lastMovementTime;
-	}
-
-	public function setLastMovementTime(float $time) : void {
-		$this->lastMovementTime = $time;
 	}
 
 	public function getSpeedLevel() : int {
@@ -573,19 +506,19 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->jumpBoostLevel = $data;
 	}
 
-	public function isSoulSpeedSurface() : bool {
-		return $this->soulSpeedSurface;
+	public function isOnSoulSurface() : bool {
+		return $this->soulSurface;
 	}
 
-	public function setSoulSpeedSurface(bool $data) : void {
-		$this->soulSpeedSurface = $data;
+	public function setOnSoulSurface(bool $data) : void {
+		$this->soulSurface = $data;
 	}
 
-	public function isUnderwater() : bool {
+	public function isOnUnderwater() : bool {
 		return $this->underwater;
 	}
 
-	public function setUnderwater(bool $data) : void {
+	public function setOnUnderwater(bool $data) : void {
 		$this->underwater = $data;
 	}
 
@@ -616,22 +549,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	public function getPreviousSurface() : int {
 		return $this->previousSurface;
-	}
-
-	public function synchronizePositions(Vector3 $position) : void {
-		$this->previousPosition = $position;
-		$this->safePosition = $position;
-		$this->currentPosition = $position;
-		$this->setMovement($position, $position);
-		$this->lastY = $position->y;
-		$this->predictedY = $position->y;
-		$this->verticalError = 0.0;
-		$this->verticalVelocity = 0.0;
-		$this->lastVerticalVelocity = 0.0;
-		$this->hasInitialVelocity = false;
-		$this->velocitySource = self::SOURCE_UNKNOWN;
-		$this->horizontalVelocitySource = self::SOURCE_UNKNOWN;
-		$this->externalVelocityTicks = 0;
 	}
 
 	public function getPreviousPosition() : Vector3 {
@@ -782,6 +699,10 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	public function getJumpTicks() : float {
 		return (microtime(true) - $this->jumpTicks) * 20;
+	}
+
+	public function isRecentlyJumped() : bool{ 
+		return $this->jumpTicks <= 5;
 	}
 
 	public function getPlacingTicks() : float {
@@ -939,22 +860,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->tick = $tick;
 	}
 
-	public function getDelta() : Vector3 {
-		return $this->delta ??= Vector3::zero();
-	}
-
-	public function setDelta(Vector3 $delta) : void {
-		$this->delta = $delta;
-	}
-
-	public function getRawMove() : Vector2 {
-		return $this->rawMove ??= new Vector2(0.0, 0.0);
-	}
-
-	public function setRawMove(Vector2 $rawMove) : void {
-		$this->rawMove = $rawMove;
-	}
-
 	public function setAllowFlight(bool $allowFlight) : void {
 		$this->allowFlight = $allowFlight;
 	}
@@ -1019,14 +924,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->blockAbove = $blockAbove;
 	}
 
-	public function isStartedJumping() : bool {
-		return $this->startedJumping;
-	}
-
-	public function setStartedJumping(bool $startedJumping) : void {
-		$this->startedJumping = $startedJumping;
-	}
-
 	public function setExplosionTicks(float $explosionTick) : void {
 		$this->explosionTicks = $explosionTick;
 	}
@@ -1073,6 +970,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"lastDelayedMovePacket" => $this->getLastDelayedMovePacket(),
 			"joinedAtTime" => $this->getJoinedAtTheTime(),
 			"jumpTicks" => $this->getJumpTicks(),
+			"isRecentlyJumped" => $this->isRecentlyJumped(),
 			"teleportTicks" => $this->getTeleportTicks(),
 			"attackTicks" => $this->getAttackTicks(),
 			"slimeBlockTicks" => $this->getSlimeBlockTicks(),
@@ -1090,20 +988,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 				"from" => Utils::vector3ToArray($this->getMovement()["from"]),
 				"to" => Utils::vector3ToArray($this->getMovement()["to"])
 			],
-			"deltaTicks" => $this->getMovementDeltaTicks(),
-			"verticalState" => $this->getVerticalState(),
 			"airTicks" => $this->getAirTicks(),
 			"groundTicks" => $this->getGroundTicks(),
-			"lastY" => $this->getLastY(),
-			"predictedY" => $this->getPredictedY(),
-			"predictedVerticalDelta" => $this->getPredictedVerticalDelta(),
-			"verticalError" => $this->getVerticalError(),
-			"verticalVelocity" => $this->getVerticalVelocity(),
-			"lastVerticalVelocity" => $this->getLastVerticalVelocity(),
-			"hasInitialVelocity" => $this->hasInitialVelocity(),
-			"velocitySource" => $this->getVelocitySource(),
-			"horizontalVelocitySource" => $this->getHorizontalVelocitySource(),
-			"externalVelocityTicks" => $this->getExternalVelocityTicks(),
 			"pitch" => $this->getPitch(),
 			"isDead" => $this->isDead(),
 			"isCurrentChunkLoaded" => $this->isCurrentChunkLoaded(),
@@ -1124,8 +1010,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"speedLevel" => $this->getSpeedLevel(),
 			"slownessLevel" => $this->getSlownessLevel(),
 			"jumpBoostLevel" => $this->getJumpBoostLevel(),
-			"isSoulSpeedSurface" => $this->isSoulSpeedSurface(),
-			"isUnderwater" => $this->isUnderwater(),
+			"isOnSoulSurface" => $this->isOnSoulSurface(),
+			"isUnderwater" => $this->isOnUnderwater(),
 			"twoBlockPassage" => $this->hasTwoBlockPassage(),
 			"safePosition" => Utils::vector3ToArray($this->getSafePosition()),
 			"externalData" => ZuriAC::getExternalData()->getAllExternalData($this)

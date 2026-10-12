@@ -35,8 +35,6 @@ use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\player\ExternalDataPath;
 use ReinfyTeam\Zuri\utils\Utils;
-use function abs;
-use function sqrt;
 
 
 /**
@@ -71,11 +69,12 @@ class SpeedA extends Check {
 	 * @return int One of self::TYPE_PACKET, self::TYPE_PLAYER or self::TYPE_EVENT.
 	 */
 	public function getType() : int {
-		return self::TYPE_PACKET;
+		return self::TYPE_PLAYER;
 	}
 
 	/**
-	 * Runs the SpeedA check logic on the provided data.
+	 * Runs the Speed (A) check logic on the provided data.
+	 * Speed (A) focuses on horizontal logic for base threshold for speed.
 	 *
 	 * The worker provides a payload containing player and environment data.
 	 * Implementations should return an array created via `self::buildResult`.
@@ -84,76 +83,81 @@ class SpeedA extends Check {
 	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>} Result array with `failed` and `debug` keys.
 	 */
 	public static function check(array $data) : array {
-		if (($data["type"] ?? null) === "PlayerAuthInputPacket") {
-			$playerData = Utils::readArray($data["playerData"] ?? null);
-			$constantData = Utils::readArray($data["constantData"] ?? null);
-
-			if (
-				Utils::readFloat($playerData["attackTicks"] ?? null) < 20 ||
-				Utils::readFloat($playerData["projectileAttackTicks"] ?? null) < 20 ||
-				Utils::readFloat($playerData["teleportTicks"] ?? null) < 60 ||
-				Utils::readFloat($playerData["bowShotTicks"] ?? null) < 20 ||
-				Utils::readFloat($playerData["hurtTicks"] ?? null) < 40 ||
-				Utils::readFloat($playerData["teleportCommandTicks"] ?? null) < 40 ||
-				Utils::readBool($playerData["isClimbing"] ?? null) ||
-				Utils::readBool($playerData["allowFlight"] ?? null) ||
-				Utils::readFloat($playerData["airTicks"] ?? null) > 40 ||
-				Utils::readBool($playerData["isFlying"] ?? null) ||
-				Utils::readBool($playerData["hasNoClientPredictions"] ?? null) ||
-				Utils::readBool($playerData["isCreative"] ?? null) ||
-				Utils::readBool($playerData["isSpectator"] ?? null) ||
-				!Utils::readBool($playerData["isCurrentChunkLoaded"] ?? null) ||
-				Utils::readBool($playerData["isRecentlyCancelledEvent"] ?? null)
-			) {
-				return self::buildResult(false);
-			}
-
-			$movement = Utils::readArray($playerData["movement"] ?? null);
-			$from = Utils::readArray($movement["from"] ?? null);
-			$to = Utils::readArray($movement["to"] ?? null);
-			$previous = new \pocketmine\math\Vector3(Utils::readFloat($from["x"] ?? null), Utils::readFloat($from["y"] ?? null), Utils::readFloat($from["z"] ?? null));
-			$next = new \pocketmine\math\Vector3(Utils::readFloat($to["x"] ?? null), Utils::readFloat($to["y"] ?? null), Utils::readFloat($to["z"] ?? null));
-
-			$externalData = Utils::readArray($playerData["externalData"] ?? null);
-
-			$friction = Utils::readFloat($externalData[ExternalDataPath::FRICTION_FACTOR] ?? null);
-			$lastDistanceXZ = Utils::readFloat($externalData[ExternalDataPath::LAST_DISTANCE_XZ] ?? null);
-			$momentum = Utils::readFloat($externalData[ExternalDataPath::MOMENTUM] ?? null);
-			$movementMultiplier = Utils::readFloat($externalData[ExternalDataPath::MOVEMENT_MULTIPLIER] ?? null);
-			$acceleration = Utils::readFloat($externalData[ExternalDataPath::ACCELERATION] ?? null);
-
-			$expected = $momentum + $acceleration;
-			$expected += (Utils::readFloat($playerData["jumpTicks"] ?? null) < 5 && Utils::readBool($playerData["isBlockAbove"] ?? null)) ? Utils::readFloat($constantData[ConstantPath::JUMP_FACTOR] ?? null) : 0;
-			$expected += (Utils::readBool($playerData["isOnGround"] ?? null)) ? Utils::readFloat($constantData[ConstantPath::GROUND_FACTOR] ?? null) : 0;
-			$expected += (Utils::readBool($playerData["isStartedJumping"] ?? null) && Utils::readFloat($playerData["lastMoveTick"] ?? null) > 5) ? Utils::readFloat($constantData[ConstantPath::LAST_JUMP_FACTOR] ?? null) : 0;
-			$expected += (Utils::readFloat($playerData["jumpTicks"] ?? null) <= 20 && Utils::readBool($playerData["isIce"] ?? null)) ? Utils::readFloat($constantData[ConstantPath::ICE_FACTOR] ?? null) : 0;
-			$expected += (Utils::readBool($playerData["isOnSnow"] ?? null)) ? Utils::readFloat($constantData[ConstantPath::SNOW_FACTOR] ?? null) : 0;
-			$motionData = Utils::readArray($playerData["motion"] ?? null);
-			$motion = (new \pocketmine\math\Vector3(Utils::readFloat($motionData["x"] ?? null), Utils::readFloat($motionData["y"] ?? null), Utils::readFloat($motionData["z"] ?? null)));
-			if (abs($motion->getX()) > 0 || abs($motion->getZ()) > 0) {
-				$motion = (new \pocketmine\math\Vector3(Utils::readFloat($motionData["x"] ?? null), Utils::readFloat($motionData["y"] ?? null), Utils::readFloat($motionData["z"] ?? null)));
-				$motionX = abs($motion->getX());
-				$motionZ = abs($motion->getZ());
-				$knockback = $motionX * $motionX + $motionZ * $motionZ;
-
-				$knockback *= Utils::readFloat($constantData[ConstantPath::KNOCKBACK_FACTOR] ?? null);
-				$expected += $knockback;
-			}
-
-			$expected += Utils::readFloat($playerData["lastMoveTick"] ?? null) < 5 ? Utils::readFloat($constantData[ConstantPath::LAST_MOVE_FACTOR] ?? null) : 0;
-
-			$dist = sqrt(($previous->x - $next->x) ** 2 + ($previous->z - $next->z) ** 2);
-			$distDiff = abs($dist - $expected);
-
-			$failed = $dist > $expected && $distDiff > Utils::readFloat($constantData[ConstantPath::SPEED_THRESHOLD] ?? null);
-
-			return self::buildResult($failed, [
-				"expected" => $expected,
-				"dist" => $dist,
-				"distDiff" => $distDiff,
-			]);
+		if ((Utils::readString($data["type"]) ?? null) !== "PlayerMoveEvent") {
+			return self::buildResult(false);
 		}
 
-		return self::buildResult(false);
+		$playerData = Utils::readArray($data["playerData"]);
+		$constantData = Utils::readArray($data["constantData"]);
+		$externalData = Utils::readArray($playerData["externalData"]);
+
+		if ($playerData["isRecentlyEnderPearled"] && $player["hasNoClientPredictions"]) {
+			return self::buildResult(false); // Prevent flag with ender pearls teleportation and frozen/no client prediction movements.
+		}
+
+		$movement = Utils::readArray($playerData["movement"]);
+		$from = Utils::arrayToVector3($movement["from"]);
+		$to = Utils::arrayToVector3($movement["to"]);
+
+		// Calculate distance (X, Y)
+		$dx = $to->getX() - $from->getX();
+        $dz = $to->getZ() - $from->getZ();
+		$distance = sqrt(($dx * $dx) + ($dz * $dz));
+
+		$limit = 0.0;
+		if (Utils::readBool($playerZuri["isSprinting"])) { // Sprinting
+			$baseLimit = Utils::readBool($playerZuri["isRecentlyJumped"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT]); // Sprinting threshold
+
+    		if (Utils::readBool($playerZuri["isElevated"])){
+        		$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_ELEVATION]) - $baseLimit;
+    		}
+
+			if (Utils::readBool($playerZuri["hasTwoBlockPassage"])){
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_2_BLOCK_PASSAGE])
+				- $baseLimit;
+			}
+		} elseif (Utils::readBool($playerZuri["isSneaking"])) { // Sneaking
+			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_FLAT]);
+
+			if(abs($dx) !== 0 || abs($dz) !== 0) {
+				$limit += $limit - Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_DIAGONAL]);
+			}
+
+			if (Utils::readBool($playerZuri["isOnSoulSurface"])) {
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SOUL]) - $baseLimit;
+			}
+
+			if (Utils::readBool($playerZuri["hasSwiftSneak"])) {
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SWIFT]) - $baseLimit;
+			}
+		} elseif (Utils::readBool($playerZuri["isSwimming"])) { // Swimming
+			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_SURFACE]);
+
+			if (Utils::readBool($playerZuri["isDiving"])) {
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_DIVING]);
+			}
+		} elseif (Utils::readBool($playerZuri["isCreative"]) && Utils::readBool($playerZuri["isFlying"])) { // Creative flight
+			$baseLimit = (Utils::readBool($playerZuri["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]);
+
+		} elseif (Utils::readBool($playerZuri["isSpectator"]) && Utils::readBool($playerZuri["isFlying"])) { // Spectator flight
+			$baseLimit = (Utils::readBool($playerZuri["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]);
+		} else {
+			// For Walking
+			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]); // Base speed for walking
+
+			// Check if diagonally moving, add threshold
+			if(abs($dx) !== 0 || abs($dz) !== 0) {
+				$limit += $baseLimit - Utils::readFloat($constantData[ConstantPath::SPEED_WALK_DIAGONAL]);
+			}
+		}
+
+		$limit += $baseLimit * $constantData[ConstantPath::THRESHOLD_PERCENTAGE]; // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
+
+		if (($result = $distance > $limit)) {
+			return self::buildResult($result, [
+				"limit" => $limit,
+				"distance" => $distance
+			]); 
+		}
 	}
 }
