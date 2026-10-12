@@ -34,7 +34,6 @@ namespace ReinfyTeam\Zuri\player;
 use JsonSerializable;
 use pocketmine\entity\Location;
 use pocketmine\math\Vector2;
-use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
@@ -92,6 +91,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $sprinting = false;
 	private bool $scaffolding = false;
 	private bool $sneaking = false;
+	private bool $rawSneaking = false;
 	private bool $gliding = false;
 	private bool $onSoul = false;
 	private bool $underwater = false;
@@ -117,6 +117,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $teleportCommandTicks = 0.0;
 	private float $eventCancelled = 0.0;
 	private float $explosionTicks = 0.0;
+	private float $dropTicks = 0.0;
 
 	private Location $location;
 	private Position $position;
@@ -135,6 +136,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private int $tick = 0;
 
 	private Vector3 $motion;
+	private Vector3 $safePosition;
 
 
 	/**
@@ -157,6 +159,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->setOnSoul($player->isOnSoul());
 		$this->setCurrentChunkLoaded(WorldUtil::isCurrentChunkIsLoaded($player));
 		$this->setNoClientPredictions($player->hasNoClientPredictions());
+		$this->setSafePosition(BlockUtil::findSafePosition($player->getPosition()));
 		return $this;
 	}
 
@@ -275,6 +278,13 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		return (microtime(true) - $this->projectileAttackTicks) * 20;
 	}
 
+	public function setDropTicks(float $data) : void {
+		$this->dropTicks = $data;
+	}
+
+	public function getDropTicks() : float {
+		return (microtime(true) - $this->dropTicks) * 20;
+	}
 
 	public function setBowShotTicks(float $data) : void {
 		$this->bowShotTicks = $data;
@@ -347,6 +357,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function setSneaking(bool $data) : void {
 		$this->sneaking = $data;
 	}
+	
+	public function isRawSneaking() : bool {
+		return $this->rawSneaking;
+	}
+
+	public function setRawSneaking(bool $data) : void {
+		$this->rawSneaking = $data;
+	}
 
 	public function isGliding() : bool {
 		return $this->gliding;
@@ -370,30 +388,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	public function getGroundTicks() : int {
 		return $this->groundTicks;
-	}
-
-	public function getSpeedLevel() : int {
-		return $this->speedLevel;
-	}
-
-	public function setSpeedLevel(int $data) : void {
-		$this->speedLevel = $data;
-	}
-
-	public function getSlownessLevel() : int {
-		return $this->slownessLevel;
-	}
-
-	public function setSlownessLevel(int $data) : void {
-		$this->slownessLevel = $data;
-	}
-
-	public function getJumpBoostLevel() : int {
-		return $this->jumpBoostLevel;
-	}
-
-	public function setJumpBoostLevel(int $data) : void {
-		$this->jumpBoostLevel = $data;
 	}
 
 	public function isOnSoul() : bool {
@@ -420,33 +414,12 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->twoBlockPassage = $data;
 	}
 
-	public function getPreviousState() : int {
-		return $this->previousState;
-	}
-
-	public function setPreviousState(int $state) : void {
-		$this->previousState = $state;
-	}
-
-	public function getCurrentSurface() : int {
-		return $this->currentSurface;
-	}
-
-	public function setCurrentSurface(int $surface) : void {
-		$this->previousSurface = $this->currentSurface;
-		$this->currentSurface = $surface;
-	}
-
-	public function getPreviousSurface() : int {
-		return $this->previousSurface;
-	}
-
-	public function getPreviousPosition() : Vector3 {
-		return $this->previousPosition ??= Vector3::zero();
-	}
-
 	public function getSafePosition() : Vector3 {
 		return $this->safePosition ??= Vector3::zero();
+	}
+
+	public function setSafePosition(?Vector3 $data) : void {
+		$this->safePosition = $data ?? Vector3::zero();
 	}
 
 	public function getCurrentPosition() : Vector3 {
@@ -698,42 +671,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->movement = ["from" => $from, "to" => $to];
 	}
 
-	public function syncMovePos(Vector3 $from, Vector3 $to) : void {
-		$this->previousPosition = $from;
-		$this->currentPosition = $to;
-		$safePosition = $this->getSafePosition();
-		if (
-			$this->getTeleportTicks() < 20 ||
-			($safePosition->x === 0.0 && $safePosition->y === 0.0 && $safePosition->z === 0.0)
-		) {
-			$this->safePosition = $to;
-		}
-	}
-
-	public function getInputMode() : int {
-		return $this->inputMode;
-	}
-
-	public function setInputMode(int $inputMode) : void {
-		$this->inputMode = $inputMode;
-	}
-
-	public function setPlayMode(int $playMode) : void {
-		$this->playMode = $playMode;
-	}
-
-	public function getPlayMode() : int {
-		return $this->playMode;
-	}
-
-	public function getInteractionMode() : int {
-		return $this->interactionMode;
-	}
-
-	public function setInteractionMode(int $interactionMode) : void {
-		$this->interactionMode = $interactionMode;
-	}
-
+	
 	public function getTick() : int {
 		return $this->tick;
 	}
@@ -896,6 +834,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isGroundSolid" => $this->isGroundSolid(),
 			"isSprinting" => $this->isSprinting(),
 			"isSneaking" => $this->isSneaking(),
+			"isRawSneaking" => $this->isRawSneaking(),
 			"isGliding" => $this->isGliding(),
 			"isOnScaffold" => $this->isOnScaffold(),
 			"isOnSoul" => $this->isOnSoul(),

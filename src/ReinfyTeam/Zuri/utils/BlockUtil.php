@@ -48,8 +48,8 @@ final class BlockUtil {
 	/** @var array<string,array<int,int>> */
 	private static array $blockMaps = [];
 
-	public static function isSoulSurface(int $blockId) : bool {
-		return $blockId === BlockTypeIds::SOUL_SAND || $blockId === BlockTypeIds::SOUL_SOIL;
+	public static function isOnSoul(Player $player, int $depth = 1) : bool {
+		return self::isUnderblock($player, [BlockTypeIds::SOUL_SAND, BlockTypeIds::SOUL_SOIL], $depth);
 	}
 
 	public static function getSurfaceMultiplier(string $surface) : float {
@@ -327,11 +327,11 @@ final class BlockUtil {
 		return self::isUnderBlock($location, [BlockTypeIds::LAVA], $down);
 	}
 
-	public static function isTwoBlockPassage(Location $location) : bool {
+	public static function isTwoBlockPassage(Location $location) : bool{
 		$world = $location->getWorld();
-		$x = (int) $location->getX();
-		$y = (int) $location->getY();
-		$z = (int) $location->getZ();
+		$x = (int) floor($location->getX());
+		$y = (int) floor($location->getY());
+		$z = (int) floor($location->getZ());
 
 		return !$world->getBlockAt($x, $y + 1, $z)->isSolid() &&
 			!$world->getBlockAt($x, $y + 2, $z)->isSolid();
@@ -457,5 +457,95 @@ final class BlockUtil {
 		$z = (int) $location->getZ();
 
 		return $world->getBlockAt($x, $y, $z);
+	}
+
+	/**
+	 * Finds a safe position in the world.
+	 *
+	 * @param World $world The world to search in.
+	 * @param int $x The X coordinate to search at.
+	 * @param int $z The Z coordinate to search at.
+	 * @param int $startHintY The Y coordinate to start the search from.
+	 * @return Vector3|null The safe position, or null if none is found.
+	 */
+	public static function findSafePosition(Position $pos) : ?Vector3 {
+		$world = $pos->getWorld();
+
+		$x = (int) $pos->getX();
+		$z = (int) $pos->getZ();
+		$startHintY = (int) $pos->getY();
+
+		$minY = $world->getMinY();
+		$maxY = $world->getMaxY();
+
+		// Clamp the starting Y search coordinate within world boundaries
+		$startHintY = max($minY + 1, min($maxY - 2, $startHintY));
+
+		// Search outward from the initial Y hint position
+		for ($offset = 0; $offset <= $maxY - $minY; $offset++) {
+			foreach ([$startHintY + $offset, $startHintY - $offset] as $y) {
+				// Stay within world barriers
+				if ($y < $minY + 1 || $y >= $maxY - 1) {
+					continue;
+				}
+
+				$feetBlock = $world->getBlockAt($x, $y, $z);
+				$torsoBlock = $world->getBlockAt($x, $y + 1, $z);
+				$groundBlock = $world->getBlockAt($x, $y - 1, $z);
+
+				// Safety rules:
+				// 1. Feet position must be passable (Air, tall grass, flowers, etc.)
+				// 2. Torso position must be passable (Air, etc.)
+				// 3. Ground position must be solid to stand on, and NOT dangerous (Lava/Fire)
+				if (
+					$feetBlock->isPassable() && 
+					$torsoBlock->isPassable() && 
+					$groundBlock->isSolid() && 
+					$groundBlock->getTypeId() !== BlockTypeIds::LAVA &&
+					$groundBlock->getTypeId() !== BlockTypeIds::FIRE
+				) {
+					// Return center alignment of the safe block coordinate
+					return new Vector3($x + 0.5, $y, $z + 0.5);
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Scans horizontally outward from the player's position in a grid,
+	 * using the player's current Y height as the origin point.
+	 *
+	 * @param World $world
+	 * @param int $centerX The player's current block X
+	 * @param int $centerZ The player's current block Z
+	 * @param int $hintY    The player's current block Y
+	 * @param int $radius   How many blocks out horizontally to search
+	 * @return Vector3|null
+	 */
+	public static function findSafePositionInRadius(World $world, int $centerX, int $centerZ, int $hintY, int $radius = 5) : ?Vector3 {
+		// Ring loop out from radius 0 (center column) to maximum boundary radius
+		for ($r = 0; $r <= $radius; $r++) {
+			for ($dx = -$r; $dx <= $r; $dx++) {
+				for ($dz = -$r; $dz <= $r; $dz++) {
+					// Only scan blocks sitting directly on the outer crust of the current ring
+					if (abs($dx) !== $r && abs($dz) !== $r) {
+						continue;
+					}
+
+					$targetX = $centerX + $dx;
+					$targetZ = $centerZ + $dz;
+
+					// Run the original column check function using the player's current Y height layer
+					$pos = self::findSafePosition($world, $targetX, $targetZ, $hintY);
+					if ($pos !== null) {
+						return $pos;
+					}
+				}
+			}
+		}
+
+    	return null;
 	}
 }

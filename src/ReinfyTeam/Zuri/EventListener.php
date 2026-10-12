@@ -99,7 +99,11 @@ class EventListener implements Listener {
 		}
 
 		$playerZuri = PlayerManager::get($player);
-		$this->updateMovementState($player, $playerZuri);
+		$playerZuri->setSprinting($player->isSprinting());
+		$playerZuri->setSneaking($player->isSneakPressed());
+		$playerZuri->setGliding($player->isGliding());
+		$playerZuri->setDead(!$player->isAlive());
+		$playerZuri->setOnSoul(BlockUtil::isOnSoul($player));
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -163,9 +167,9 @@ class EventListener implements Listener {
 
 			// Sneaking
 			if ($inputFlags->get(PlayerAuthInputFlags::START_SNEAKING)) {
-				$playerZuri->setSneaking(true);
+				$playerZuri->setRawSneaking(true);
 			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_SNEAKING)) {
-				$playerZuri->setSneaking(false);
+				$playerZuri->setRawSneaking(false);
 			}
 
 			// Swimming
@@ -229,6 +233,7 @@ class EventListener implements Listener {
 		$playerZuri->setOnDoor(BlockUtil::isOnDoor($event->getTo(), 0));
 		$playerZuri->setOnCarpet(BlockUtil::isOnCarpet($event->getTo(), 0));
 		$playerZuri->setOnPlate(BlockUtil::isOnPlate($event->getTo(), 0));
+		$playerZuri->
 		$playerZuri->setSnow(BlockUtil::isOnSnow($event->getTo(), 0));
 		$playerZuri->setLastMoveTick((double) Server::getInstance()->getTick());
 		$playerZuri->setBlockAbove(BlockUtil::getBlockAbove($player)->isSolid());
@@ -239,29 +244,6 @@ class EventListener implements Listener {
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
-	}
-
-	private function updateMovementState(PlayerZuri $playerZuri) : void {
-		$player = $playerZuri->getPlayer();
-		$effects = $player->getEffects();
-		$speed = $effects->get(VanillaEffects::SPEED());
-		$slowness = $effects->get(VanillaEffects::SLOWNESS());
-		$jumpBoost = $effects->get(VanillaEffects::JUMP_BOOST());
-		$boots = $player->getArmorInventory()->getBoots();
-		$position = $player->getPosition();
-		$underBlock = $player->getWorld()->getBlockAt((int) $position->x, (int) $position->y - 1, (int) $position->z);
-
-		$playerZuri->setSprinting($player->isSprinting());
-		$playerZuri->setSneaking($player->isSneakPressed());
-		$playerZuri->setGliding($player->isGliding());
-		$playerZuri->setDead(!$player->isAlive());
-		$playerZuri->setSpeedLevel($speed?->getEffectLevel() ?? 0);
-		$playerZuri->setSlownessLevel($slowness?->getEffectLevel() ?? 0);
-		$playerZuri->setJumpBoostLevel($jumpBoost?->getEffectLevel() ?? 0);
-		$playerZuri->setOnSoulSurface(
-			$underBlock->getTypeId() === BlockTypeIds::SOUL_SAND ||
-			$underBlock->getTypeId() === BlockTypeIds::SOUL_SOIL
-		);
 	}
 
 	/**
@@ -735,6 +717,8 @@ class EventListener implements Listener {
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
+
+		$playerZuri->setDropTicks(microtime(true));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),

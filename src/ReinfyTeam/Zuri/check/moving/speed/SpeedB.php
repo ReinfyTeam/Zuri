@@ -143,7 +143,7 @@ class SpeedB extends Check {
 		} elseif (!Utils::readBool($playerData["isOnGround"]) && $isMovingDown && !Utils::readBool($playerData["isOnLiquid"]) && !Utils::readBool($playerData["isOnClimbable"]) && !Utils::readBool($playerData["isGliding"])) {
 			// Calculations from https://minecraft.fandom.com/wiki/Transportation
 			// Falling terminal calculation player logic
-			$fallTicks = Utils::readInt($playerData["getFallTicks"]) ?? 0;
+			$fallTicks = Utils::readInt($playerData["getFallTicks"]);
 			
 			// fetch the initial vertical motion when the player left the ground
 			$vt0 = Utils::arraytoVector3(Utils::readArray($playerData["getMotion"]))->getY();

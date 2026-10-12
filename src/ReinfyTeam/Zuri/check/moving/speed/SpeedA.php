@@ -117,7 +117,7 @@ class SpeedA extends Check {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_2_BLOCK_PASSAGE])
 				- $baseLimit;
 			}
-		} elseif (Utils::readBool($playerZuri["isSneaking"])) { // Sneaking
+		} elseif (Utils::readBool($playerZuri["isSneaking"]) || Utils::readBool($playerZuri["isRawSneaking"]))  { // Sneaking
 			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_FLAT]);
 
 			if (abs($dx) !== 0 || abs($dz) !== 0) {
