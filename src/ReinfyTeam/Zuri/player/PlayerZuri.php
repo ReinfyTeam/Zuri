@@ -34,9 +34,8 @@ namespace ReinfyTeam\Zuri\player;
 use JsonSerializable;
 use pocketmine\entity\Location;
 use pocketmine\math\Vector2;
-use pocketmine\math\Vector3;
 use pocketmine\math\Vector2;
-use ReinfyTeam\Zuri\utils\MathUtil;
+use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
 use ReinfyTeam\Zuri\utils\Utils;
@@ -45,7 +44,6 @@ use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
 use function count;
-use function max;
 use function microtime;
 
 /**
@@ -139,7 +137,6 @@ use function microtime;
  * }
  */
 class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath {
-
 	/**
 	 * @param Player $player The underlying PocketMine player instance.
 	 */
@@ -701,7 +698,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		return (microtime(true) - $this->jumpTicks) * 20;
 	}
 
-	public function isRecentlyJumped() : bool{ 
+	public function isRecentlyJumped() : bool {
 		return $this->jumpTicks <= 5;
 	}
 

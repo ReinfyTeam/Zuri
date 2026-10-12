@@ -64,9 +64,7 @@ use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\server\CommandEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\inventory\ArmorInventory;
-use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
-use pocketmine\math\Facing;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
@@ -77,18 +75,11 @@ use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\Utils as PMMPUtils;
 use ReinfyTeam\Zuri\check\Check;
-use ReinfyTeam\Zuri\config\ConstantPath;
-use ReinfyTeam\Zuri\player\ExternalDataPath;
 use ReinfyTeam\Zuri\player\PlayerManager;
-use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\player\PlayerZuri;
 use ReinfyTeam\Zuri\utils\BlockUtil;
-use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function microtime;
-use function min;
-use function round;
-use function sqrt;
 
 /**
  * Central event listener for ZuriAC.

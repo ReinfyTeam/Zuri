@@ -33,8 +33,9 @@ namespace ReinfyTeam\Zuri\check\moving\speed;
 
 use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
-use ReinfyTeam\Zuri\player\ExternalDataPath;
 use ReinfyTeam\Zuri\utils\Utils;
+use function abs;
+use function sqrt;
 
 
 /**
@@ -101,25 +102,25 @@ class SpeedA extends Check {
 
 		// Calculate distance (X, Y)
 		$dx = $to->getX() - $from->getX();
-        $dz = $to->getZ() - $from->getZ();
+		$dz = $to->getZ() - $from->getZ();
 		$distance = sqrt(($dx * $dx) + ($dz * $dz));
 
 		$limit = 0.0;
 		if (Utils::readBool($playerZuri["isSprinting"])) { // Sprinting
 			$baseLimit = Utils::readBool($playerZuri["isRecentlyJumped"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT]); // Sprinting threshold
 
-    		if (Utils::readBool($playerZuri["isElevated"])){
-        		$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_ELEVATION]) - $baseLimit;
-    		}
+			if (Utils::readBool($playerZuri["isElevated"])) {
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_ELEVATION]) - $baseLimit;
+			}
 
-			if (Utils::readBool($playerZuri["hasTwoBlockPassage"])){
+			if (Utils::readBool($playerZuri["hasTwoBlockPassage"])) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_2_BLOCK_PASSAGE])
 				- $baseLimit;
 			}
 		} elseif (Utils::readBool($playerZuri["isSneaking"])) { // Sneaking
 			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_FLAT]);
 
-			if(abs($dx) !== 0 || abs($dz) !== 0) {
+			if (abs($dx) !== 0 || abs($dz) !== 0) {
 				$limit += $limit - Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_DIAGONAL]);
 			}
 
@@ -137,16 +138,15 @@ class SpeedA extends Check {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_DIVING]);
 			}
 		} elseif (Utils::readBool($playerZuri["isCreative"]) && Utils::readBool($playerZuri["isFlying"])) { // Creative flight
-			$baseLimit = (Utils::readBool($playerZuri["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]);
-
+			$baseLimit = Utils::readBool($playerZuri["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]);
 		} elseif (Utils::readBool($playerZuri["isSpectator"]) && Utils::readBool($playerZuri["isFlying"])) { // Spectator flight
-			$baseLimit = (Utils::readBool($playerZuri["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]);
+			$baseLimit = Utils::readBool($playerZuri["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]);
 		} else {
 			// For Walking
 			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]); // Base speed for walking
 
 			// Check if diagonally moving, add threshold
-			if(abs($dx) !== 0 || abs($dz) !== 0) {
+			if (abs($dx) !== 0 || abs($dz) !== 0) {
 				$limit += $baseLimit - Utils::readFloat($constantData[ConstantPath::SPEED_WALK_DIAGONAL]);
 			}
 		}
@@ -157,7 +157,7 @@ class SpeedA extends Check {
 			return self::buildResult($result, [
 				"limit" => $limit,
 				"distance" => $distance
-			]); 
+			]);
 		}
 	}
 }

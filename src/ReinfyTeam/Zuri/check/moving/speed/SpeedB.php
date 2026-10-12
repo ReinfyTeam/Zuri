@@ -32,13 +32,8 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\check\moving\speed;
 
 use ReinfyTeam\Zuri\check\Check;
-use ReinfyTeam\Zuri\player\PlayerZuri;
-use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function abs;
-use function in_array;
-use function max;
-use function min;
 
 
 /**
@@ -106,7 +101,7 @@ class SpeedB extends Check {
 		// Calculate distance (Old Y and New Y)
 		// Delta Y is used to determine if the player is moving up or down, which affects the speed limit.
 		$distance = abs($to->getX() - $from->getX());
-		$deltaY = $to->getY() - $from->getY(); 
+		$deltaY = $to->getY() - $from->getY();
 		$isMovingUp = $deltaY > 0.0001;
 		$isMovingDown = $deltaY < -0.0001;
 
@@ -145,8 +140,8 @@ class SpeedB extends Check {
 			if ($isMovingUp || $isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]);
 			}
-		} elseif(!Utils::readBool($playerData["isOnGround"]) && $isMovingDown && !Utils::readBool($playerData["isOnLiquid"]) && !Utils::readBool($playerData["isOnClimbable"]) && !Utils::readBool($playerData["isGliding"])) {
-    		$limit += Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]);
+		} elseif (!Utils::readBool($playerData["isOnGround"]) && $isMovingDown && !Utils::readBool($playerData["isOnLiquid"]) && !Utils::readBool($playerData["isOnClimbable"]) && !Utils::readBool($playerData["isGliding"])) {
+			$limit += Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]);
 		} elseif (Utils::readBool($playerData["isOnScaffolding"])) {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SCAFFOLDING_UP]);
@@ -155,10 +150,10 @@ class SpeedB extends Check {
 			if ($isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SCAFFOLDING_DOWN]);
 			}
-		} elseif(Utils::readBool($playerData["isSwimming"])) {
+		} elseif (Utils::readBool($playerData["isSwimming"])) {
 			$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_UNDERWATER]);
 		} else {
-			if(Utils::readBool($playerData["isRecentlyJumped"])) {
+			if (Utils::readBool($playerData["isRecentlyJumped"])) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING]); // Base limit for jumping.
 			}
 
