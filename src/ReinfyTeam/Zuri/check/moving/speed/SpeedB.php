@@ -102,6 +102,12 @@ class SpeedB extends Check {
 		if (Utils::readBool($playerData["isRecentlyCancelledEvent"] ?? false)) {
 			return self::buildResult(false);
 		}
+		if (
+			Utils::readFloat($playerData["teleportTicks"] ?? 100.0) < 60.0 ||
+			Utils::readFloat($playerData["teleportCommandTicks"] ?? 100.0) < 40.0
+		) {
+			return self::buildResult(false);
+		}
 		if (!Utils::readBool($playerData["isCurrentChunkLoaded"] ?? true)) {
 			return self::buildResult(false);
 		}

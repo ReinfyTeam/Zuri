@@ -165,6 +165,14 @@ $speedPayload["type"] = "pocketmine\\event\\player\\PlayerMoveEvent";
 $expect(isset(SpeedA::check($speedPayload)["debug"]["distance"]), "SpeedA must accept fully-qualified movement event names");
 $speedPayload["playerData"]["isRecentlyCancelledEvent"] = true;
 $expect(SpeedA::check($speedPayload)["failed"] === false, "Cancelled movement must receive its grace period");
+$speedPayload["playerData"]["isRecentlyCancelledEvent"] = false;
+$speedPayload["playerData"]["teleportTicks"] = 0.0;
+$speedPayload["playerData"]["teleportCommandTicks"] = 100.0;
+$expect(SpeedA::check($speedPayload)["failed"] === false, "SpeedA must ignore movement immediately after a teleport");
+$speedPayload["playerData"]["teleportTicks"] = 100.0;
+$speedPayload["playerData"]["teleportCommandTicks"] = 0.0;
+$expect(SpeedA::check($speedPayload)["failed"] === false, "SpeedA must ignore movement immediately after a teleport command");
+$speedPayload["playerData"]["teleportCommandTicks"] = 100.0;
 $expect(SpeedB::check(["type" => "PlayerMoveEvent", "playerData" => []])["failed"] === false, "SpeedB must handle an empty movement snapshot");
 $speedBPayload = [
 	"type" => "PlayerMoveEvent",
@@ -179,6 +187,12 @@ $speedBPayload = [
 $expect(SpeedB::check($speedBPayload)["failed"] === false, "SpeedB must accept vertical movement within the configured allowance");
 $speedBPayload["playerData"]["movement"]["to"]["y"] = 5.0;
 $expect(SpeedB::check($speedBPayload)["failed"] === true, "SpeedB must reject excessive vertical movement");
+$speedBPayload["playerData"]["teleportTicks"] = 0.0;
+$expect(SpeedB::check($speedBPayload)["failed"] === false, "SpeedB must ignore movement immediately after a teleport");
+$speedBPayload["playerData"]["teleportTicks"] = 100.0;
+$speedBPayload["playerData"]["teleportCommandTicks"] = 0.0;
+$expect(SpeedB::check($speedBPayload)["failed"] === false, "SpeedB must ignore movement immediately after a teleport command");
+$speedBPayload["playerData"]["teleportCommandTicks"] = 100.0;
 $fullyQualifiedSpeedBPayload = $speedBPayload;
 $fullyQualifiedSpeedBPayload["type"] = "pocketmine\\event\\player\\PlayerMoveEvent";
 $expect(isset(SpeedB::check($fullyQualifiedSpeedBPayload)["debug"]["distance"]), "SpeedB must accept fully-qualified movement event names");
