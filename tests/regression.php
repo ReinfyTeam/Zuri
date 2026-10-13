@@ -158,6 +158,23 @@ $speedPayload["playerData"]["isRecentlyCancelledEvent"] = true;
 $expect(SpeedA::check($speedPayload)["failed"] === false, "Cancelled movement must receive its grace period");
 $expect(SpeedB::check(["type" => "PlayerMoveEvent", "playerData" => []])["failed"] === false, "SpeedB must handle an empty movement snapshot");
 $expect(SpeedB::check(["type" => "PlayerMoveEvent", "playerData" => ["currentState" => PlayerZuri::STATE_GRACE]])["externalData"]["speedBBuffer"] === 0.0, "Grace state must reset the speed buffer");
+$speedBPayload = [
+	"type" => "PlayerMoveEvent",
+	"playerData" => [
+		"movement" => ["from" => ["x" => 0.0, "z" => 0.0], "to" => ["x" => 0.05, "z" => 0.0]],
+		"isCurrentChunkLoaded" => true,
+		"currentState" => PlayerZuri::STATE_WALK,
+		"isOnGround" => true
+	]
+];
+$expect(SpeedB::check($speedBPayload)["failed"] === false, "SpeedB must accept movement within the configured allowance");
+$speedBPayload["playerData"]["movement"]["to"]["x"] = 1.0;
+$firstSpeedBResult = SpeedB::check($speedBPayload);
+$expect($firstSpeedBResult["failed"] === false, "SpeedB must accumulate an excessive movement sample before failing");
+$speedBPayload["playerData"]["externalData"] = $firstSpeedBResult["externalData"];
+$speedBPayload["playerData"]["movement"]["from"]["x"] = 1.0;
+$speedBPayload["playerData"]["movement"]["to"]["x"] = 2.0;
+$expect(SpeedB::check($speedBPayload)["failed"] === true, "SpeedB must fail after its excessive-movement buffer reaches the threshold");
 $expect(count(CheckRegistry::loadChecks()->getChecksByType(Check::TYPE_PACKET)) === 1, "Packet checks must retain their registration");
 $metrics = new MetricsData();
 $expect($metrics->getMaxPlayerCount() === 0, "Metrics must initialize maximum player count");
