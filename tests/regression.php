@@ -173,6 +173,10 @@ $speedPayload["playerData"]["teleportTicks"] = 100.0;
 $speedPayload["playerData"]["teleportCommandTicks"] = 0.0;
 $expect(SpeedA::check($speedPayload)["failed"] === false, "SpeedA must ignore movement immediately after a teleport command");
 $speedPayload["playerData"]["teleportCommandTicks"] = 100.0;
+$sprintPayload = $speedPayload;
+$sprintPayload["playerData"]["movement"]["to"]["x"] = 5.0;
+$sprintPayload["playerData"]["isSprinting"] = true;
+$expect(SpeedA::check($sprintPayload)["failed"] === false, "SpeedA must use the sprint movement limit");
 $expect(SpeedB::check(["type" => "PlayerMoveEvent", "playerData" => []])["failed"] === false, "SpeedB must handle an empty movement snapshot");
 $speedBPayload = [
 	"type" => "PlayerMoveEvent",

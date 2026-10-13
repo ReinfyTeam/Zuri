@@ -123,7 +123,10 @@ class SpeedA extends Check {
 		$distance = sqrt(($dx * $dx) + ($dz * $dz));
 
 		$limit = 0.0;
+		$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]);
+		$isWalking = true;
 		if (Utils::readBool($playerData["isSprinting"] ?? false)) { // Sprinting
+			$isWalking = false;
 			$baseLimit = Utils::readBool($playerData["isRecentlyJumped"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT]); // Sprinting threshold
 
 			if (Utils::readBool($playerData["isElevated"] ?? false)) {
@@ -135,10 +138,11 @@ class SpeedA extends Check {
 				- $baseLimit;
 			}
 		} elseif (Utils::readBool($playerData["isSneaking"] ?? false)) { // Sneaking
+			$isWalking = false;
 			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_FLAT]);
 
-			if (abs($dx) !== 0 || abs($dz) !== 0) {
-				$limit += $limit - Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_DIAGONAL]);
+			if (abs($dx) !== 0 && abs($dz) !== 0) {
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_DIAGONAL]) - $baseLimit;
 			}
 
 			if (Utils::readBool($playerData["isOnSoulSurface"] ?? false)) {
@@ -149,24 +153,24 @@ class SpeedA extends Check {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SWIFT]) - $baseLimit;
 			}
 		} elseif (Utils::readBool($playerData["isSwimming"] ?? false)) { // Swimming
+			$isWalking = false;
 			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_SURFACE]);
 
 
 			if (Utils::readBool($playerData["isDiving"] ?? false)) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_DIVING]);
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_DIVING]) - $baseLimit;
 			}
 		} elseif (Utils::readBool($playerData["isCreative"] ?? false) && Utils::readBool($playerData["isFlying"] ?? false)) { // Creative flight
+			$isWalking = false;
 			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]); // @phpstan-ignore ternary.alwaysFalse
 		} elseif (Utils::readBool($playerData["isSpectator"] ?? false) && Utils::readBool($playerData["isFlying"] ?? false)) { // Spectator flight
+			$isWalking = false;
 			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]); // @phpstan-ignore ternary.alwaysFalse
 		}
 
-		// For Walking
-		$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]); // Base speed for walking
-
-		// Check if diagonally moving, add threshold
-		if (abs($dx) !== 0 || abs($dz) !== 0) {
-			$limit += $baseLimit - Utils::readFloat($constantData[ConstantPath::SPEED_WALK_DIAGONAL]);
+		$limit += $baseLimit;
+		if ($isWalking && abs($dx) !== 0 && abs($dz) !== 0) {
+			$limit = Utils::readFloat($constantData[ConstantPath::SPEED_WALK_DIAGONAL]);
 		}
 
 		// this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
