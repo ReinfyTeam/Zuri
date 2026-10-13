@@ -37,8 +37,10 @@ use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function abs;
 use function in_array;
+use function is_string;
 use function max;
 use function min;
+use function str_ends_with;
 
 
 /**
@@ -86,7 +88,8 @@ class SpeedB extends Check {
 	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>} Result array with `failed` and `debug` keys.
 	 */
 	public static function check(array $data) : array {
-		if (($data["type"] ?? null) === "PlayerMoveEvent") {
+		$type = $data["type"] ?? null;
+		if ($type === "PlayerMoveEvent" || (is_string($type) && str_ends_with($type, "\\PlayerMoveEvent"))) {
 			$playerData = Utils::readArray($data["playerData"] ?? null);
 			$movement = Utils::readArray($playerData["movement"] ?? null);
 			$externalData = Utils::readArray($playerData["externalData"] ?? null);

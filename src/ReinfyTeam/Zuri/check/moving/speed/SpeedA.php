@@ -36,7 +36,9 @@ use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\player\ExternalDataPath;
 use ReinfyTeam\Zuri\utils\Utils;
 use function abs;
+use function is_string;
 use function sqrt;
+use function str_ends_with;
 
 
 /**
@@ -84,7 +86,8 @@ class SpeedA extends Check {
 	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>} Result array with `failed` and `debug` keys.
 	 */
 	public static function check(array $data) : array {
-		if (($data["type"] ?? null) === "PlayerAuthInputPacket") {
+		$type = $data["type"] ?? null;
+		if ($type === "PlayerAuthInputPacket" || (is_string($type) && str_ends_with($type, "\\PlayerAuthInputPacket"))) {
 			$playerData = Utils::readArray($data["playerData"] ?? null);
 			$constantData = Utils::readArray($data["constantData"] ?? null);
 

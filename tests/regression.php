@@ -154,6 +154,8 @@ $speedPayload = ["type" => "PlayerAuthInputPacket", "playerData" => $playerData,
 $expect(SpeedA::check($speedPayload)["failed"] === false, "Stationary movement must pass SpeedA without an undefined result flag");
 $speedPayload["playerData"]["movement"]["to"]["x"] = 5.0;
 $expect(SpeedA::check($speedPayload)["failed"] === true, "SpeedA must evaluate excessive survival movement using serialized vectors");
+$speedPayload["type"] = "pocketmine\\network\\mcpe\\protocol\\PlayerAuthInputPacket";
+$expect(isset(SpeedA::check($speedPayload)["debug"]["dist"]), "SpeedA must accept fully-qualified packet class names");
 $speedPayload["playerData"]["isRecentlyCancelledEvent"] = true;
 $expect(SpeedA::check($speedPayload)["failed"] === false, "Cancelled movement must receive its grace period");
 $expect(SpeedB::check(["type" => "PlayerMoveEvent", "playerData" => []])["failed"] === false, "SpeedB must handle an empty movement snapshot");
@@ -171,6 +173,9 @@ $expect(SpeedB::check($speedBPayload)["failed"] === false, "SpeedB must accept m
 $speedBPayload["playerData"]["movement"]["to"]["x"] = 1.0;
 $firstSpeedBResult = SpeedB::check($speedBPayload);
 $expect($firstSpeedBResult["failed"] === false, "SpeedB must accumulate an excessive movement sample before failing");
+$fullyQualifiedSpeedBPayload = $speedBPayload;
+$fullyQualifiedSpeedBPayload["type"] = "pocketmine\\event\\player\\PlayerMoveEvent";
+$expect(isset(SpeedB::check($fullyQualifiedSpeedBPayload)["externalData"]["speedBBuffer"]), "SpeedB must accept fully-qualified event class names");
 $speedBPayload["playerData"]["externalData"] = $firstSpeedBResult["externalData"];
 $speedBPayload["playerData"]["movement"]["from"]["x"] = 1.0;
 $speedBPayload["playerData"]["movement"]["to"]["x"] = 2.0;
