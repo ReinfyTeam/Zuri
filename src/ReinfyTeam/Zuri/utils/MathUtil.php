@@ -153,66 +153,6 @@ final class MathUtil {
 		return ($velocity - 0.08) * 0.98;
 	}
 
-	public static function movementSpeed(
-		int $state,
-		bool $underwater,
-		bool $sprinting,
-		bool $sneaking,
-		bool $jumping,
-		bool $twoBlockPassage,
-		float $pitch,
-		int $speedLevel,
-		int $slownessLevel,
-		bool $soulSpeedSurface,
-		int $soulSpeedLevel
-	) : float {
-		$base = match ($state) {
-			PlayerZuri::STATE_SWIMMING => $underwater ? ($sprinting ? 5.612 : 1.97) : ($sprinting ? 5.612 : 2.2),
-			PlayerZuri::STATE_LAVA => 1.0,
-			PlayerZuri::STATE_CREATIVE => $sprinting ? 22.0 : 11.0,
-			PlayerZuri::STATE_SPECTATOR => $sprinting ? 87.111 : 43.556,
-			PlayerZuri::STATE_GLIDING => self::glideSpeed($pitch),
-			PlayerZuri::STATE_CLIMBING => 2.35,
-			PlayerZuri::STATE_STAIRS,
-			PlayerZuri::STATE_ICE,
-			PlayerZuri::STATE_SOUL_SPEED,
-			PlayerZuri::STATE_SPRINT_JUMP,
-			PlayerZuri::STATE_SPRINT,
-			PlayerZuri::STATE_SNEAK,
-			PlayerZuri::STATE_WALK => 4.317,
-			default => 4.317
-		};
-
-		if ($state === PlayerZuri::STATE_SNEAK || ($state === PlayerZuri::STATE_ICE && $sneaking)) {
-			$base = 1.3;
-		} elseif ($state === PlayerZuri::STATE_SPRINT_JUMP && $sprinting && $jumping) {
-			$base = $twoBlockPassage ? 9.346 : 7.127;
-		} elseif ($state === PlayerZuri::STATE_SPRINT && $sprinting) {
-			$base = 5.612;
-		}
-
-		$directMovement = !in_array($state, [
-			PlayerZuri::STATE_CLIMBING,
-			PlayerZuri::STATE_LAVA,
-			PlayerZuri::STATE_CREATIVE,
-			PlayerZuri::STATE_SPECTATOR,
-			PlayerZuri::STATE_GLIDING
-		], true);
-		if ($directMovement) {
-			$speedLevel = max(0, $speedLevel);
-			$slownessLevel = max(0, $slownessLevel);
-			$base *= 1.0 + (0.20 * $speedLevel);
-			$base *= max(0.0, 1.0 - (0.15 * $slownessLevel));
-		}
-
-		if ($soulSpeedSurface) {
-			$soulSpeedLevel = max(0, $soulSpeedLevel);
-			$base *= $soulSpeedLevel > 0 ? (1.3 + (0.105 * $soulSpeedLevel)) : 0.4;
-		}
-
-		return $base;
-	}
-
 	public static function applyExternalVelocity(float $speed, float $velocityX, float $velocityZ) : float {
 		return $speed + self::horizontalSpeed($velocityX, $velocityZ);
 	}

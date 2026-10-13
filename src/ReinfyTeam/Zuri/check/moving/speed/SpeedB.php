@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\check\moving\speed;
 
 use ReinfyTeam\Zuri\check\Check;
+use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\Utils;
 use function abs;
 
@@ -82,7 +83,7 @@ class SpeedB extends Check {
 	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>} Result array with `failed` and `debug` keys.
 	 */
 	public static function check(array $data) : array {
-		if ((Utils::readString($data["type"]) ?? null) !== "PlayerMoveEvent") {
+		if ((Utils::readString($data["type"] ?? null)) !== "PlayerMoveEvent") {
 			return self::buildResult(false);
 		}
 
@@ -95,8 +96,8 @@ class SpeedB extends Check {
 		}
 
 		$movement = Utils::readArray($playerData["movement"]);
-		$from = Utils::arrayToVector3($movement["from"]);
-		$to = Utils::arrayToVector3($movement["to"]);
+		$from = Utils::arrayToVector3($movement["from"]); // @phpstan-ignore argument.type
+		$to = Utils::arrayToVector3($movement["to"]);  // @phpstan-ignore argument.type
 
 		// Calculate distance (Old Y and New Y)
 		// Delta Y is used to determine if the player is moving up or down, which affects the speed limit.
@@ -140,13 +141,13 @@ class SpeedB extends Check {
 			if ($isMovingUp || $isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]);
 			}
-		} elseif (!Utils::readBool($playerData["isOnGround"]) && $isMovingDown && !Utils::readBool($playerData["isOnLiquid"]) && !Utils::readBool($playerData["isOnClimbable"]) && !Utils::readBool($playerData["isGliding"])) {
+		} elseif (!Utils::readBool($playerData["isOnGround"]) && $isMovingDown && !Utils::readBool($playerData["isOnLiquid"]) && !Utils::readBool($playerData["isOnClimbable"]) && !Utils::readBool($playerData["isGliding"])) { // @phpstan-ignore booleanNot.alwaysTrue
 			// Calculations from https://minecraft.fandom.com/wiki/Transportation
 			// Falling terminal calculation player logic
 			$fallTicks = Utils::readInt($playerData["getFallTicks"]);
 			
 			// fetch the initial vertical motion when the player left the ground
-			$vt0 = Utils::arraytoVector3(Utils::readArray($playerData["getMotion"]))->getY();
+			$vt0 = Utils::arraytoVector3(Utils::readArray($playerData["getMotion"]))->getY(); // @phpstan-ignore argument.type
 			
 			// Apply exact displacement formula with initial conditions
 			// Shift N by +1 to account for the formula's internal 1-tick latency offset
@@ -180,13 +181,12 @@ class SpeedB extends Check {
 			// Todo: Add additional vertical movement checks for other scenarios if needed.
 		}
 
-		$limit += $limit * $constantData[ConstantPath::THRESHOLD_PERCENTAGE]; // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
-
-		if (($result = $distance > $limit)) {
-			return self::buildResult($result, [
-				"distance" => $distance,
-				"limit" => $limit
-			]);
-		}
+		$limit += $limit * Utils::readFloat($constantData[ConstantPath::THRESHOLD_PERCENTAGE]); // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
+		$result = $distance > $limit;
+		
+		return self::buildResult($result, [
+			"distance" => $distance,
+			"limit" => $limit
+		]);
 	}
 }

@@ -54,7 +54,7 @@ final class Utils {
 		return is_int($value) || is_float($value) ? (float) $value : $default;
 	}
 
-	/** @return array<array-key,mixed> */
+	/** @return array<array-key|mixed> */
 	public static function readArray(mixed $value) : array {
 		return is_array($value) ? $value : [];
 	}
@@ -66,6 +66,11 @@ final class Utils {
 	public static function readBool(mixed $value, bool $default = false) : bool {
 		return is_bool($value) ? $value : $default;
 	}
+
+	public static function readString(mixed $value, string $default = "") : string {
+		return is_string($value) ? $value : $default;
+	}
+
 	/**
 	 * Converts a Vector3 to an associative array.
 	 *

@@ -36,6 +36,8 @@ use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Location;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
+use pocketmine\world\World;
+use pocketmine\math\Vector3;
 use function array_flip;
 use function count;
 use function floor;
@@ -48,17 +50,8 @@ final class BlockUtil {
 	/** @var array<string,array<int,int>> */
 	private static array $blockMaps = [];
 
-	public static function isOnSoul(Player $player, int $depth = 1) : bool {
-		return self::isUnderblock($player, [BlockTypeIds::SOUL_SAND, BlockTypeIds::SOUL_SOIL], $depth);
-	}
-
-	public static function getSurfaceMultiplier(string $surface) : float {
-		return match ($surface) {
-			"ice" => 0.98,
-			"liquid" => 0.8,
-			"snow" => 0.98,
-			default => 1.0
-		};
+	public static function isOnSoul(Location $location, int $depth = 1) : bool {
+		return self::isUnderblock($location, [BlockTypeIds::SOUL_SAND, BlockTypeIds::SOUL_SOIL], $depth);
 	}
 
 	/**
@@ -427,6 +420,13 @@ final class BlockUtil {
 	}
 
 	/**
+	 * Checks whether the given location is on a web block.
+	 */
+	public static function isOnWeb(Location $location, int $down) : bool {
+		return self::isUnderBlock($location, [BlockTypeIds::COBWEB], $down);
+	}
+
+	/**
 	 * Checks whether the given location is on snow blocks.
 	 */
 	public static function isOnSnow(Location $location, int $down) : bool {
@@ -462,10 +462,7 @@ final class BlockUtil {
 	/**
 	 * Finds a safe position in the world.
 	 *
-	 * @param World $world The world to search in.
-	 * @param int $x The X coordinate to search at.
-	 * @param int $z The Z coordinate to search at.
-	 * @param int $startHintY The Y coordinate to start the search from.
+	 * @param Position $pos The position to search from.
 	 * @return Vector3|null The safe position, or null if none is found.
 	 */
 	public static function findSafePosition(Position $pos) : ?Vector3 {
@@ -498,8 +495,8 @@ final class BlockUtil {
 				// 2. Torso position must be passable (Air, etc.)
 				// 3. Ground position must be solid to stand on, and NOT dangerous (Lava/Fire)
 				if (
-					$feetBlock->isPassable() && 
-					$torsoBlock->isPassable() && 
+					$feetBlock->isSolid() && 
+					$torsoBlock->isSolid() && 
 					$groundBlock->isSolid() && 
 					$groundBlock->getTypeId() !== BlockTypeIds::LAVA &&
 					$groundBlock->getTypeId() !== BlockTypeIds::FIRE
@@ -517,14 +514,11 @@ final class BlockUtil {
 	 * Scans horizontally outward from the player's position in a grid,
 	 * using the player's current Y height as the origin point.
 	 *
-	 * @param World $world
-	 * @param int $centerX The player's current block X
-	 * @param int $centerZ The player's current block Z
-	 * @param int $hintY    The player's current block Y
+	 * @param Position $position The position to search from.
 	 * @param int $radius   How many blocks out horizontally to search
 	 * @return Vector3|null
 	 */
-	public static function findSafePositionInRadius(World $world, int $centerX, int $centerZ, int $hintY, int $radius = 5) : ?Vector3 {
+	public static function findSafePositionInRadius(Position $position, int $radius = 5) : ?Vector3 {
 		// Ring loop out from radius 0 (center column) to maximum boundary radius
 		for ($r = 0; $r <= $radius; $r++) {
 			for ($dx = -$r; $dx <= $r; $dx++) {
@@ -534,11 +528,13 @@ final class BlockUtil {
 						continue;
 					}
 
+					$centerX = $position->getX();
+					$centerZ = $position->getZ();
 					$targetX = $centerX + $dx;
 					$targetZ = $centerZ + $dz;
 
 					// Run the original column check function using the player's current Y height layer
-					$pos = self::findSafePosition($world, $targetX, $targetZ, $hintY);
+					$pos = self::findSafePosition($position);
 					if ($pos !== null) {
 						return $pos;
 					}

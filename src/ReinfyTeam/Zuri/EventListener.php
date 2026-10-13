@@ -103,7 +103,6 @@ class EventListener implements Listener {
 		$playerZuri->setSneaking($player->isSneakPressed());
 		$playerZuri->setGliding($player->isGliding());
 		$playerZuri->setDead(!$player->isAlive());
-		$playerZuri->setOnSoul(BlockUtil::isOnSoul($player));
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -136,7 +135,6 @@ class EventListener implements Listener {
 			$playerZuri->setPlayMode($packet->getPlayMode());
 			$playerZuri->setInteractionMode($packet->getInteractionMode());
 			$playerZuri->setTick($packet->getTick());
-			$playerZuri->setDelta($packet->getDelta());
 			$playerZuri->setRawMove($packet->getRawMove());
 
 			$inputFlags = $packet->getInputFlags();
@@ -208,7 +206,7 @@ class EventListener implements Listener {
 		$wasOnGround = $playerZuri->isOnGround();
 
 		$playerZuri->setMovement($event->getFrom(), $event->getTo());
-		$playerZuri->setLastMovementTime(microtime(true));
+		$playerZuri->setLastMoveTick(microtime(true));
 		$playerZuri->setOnGround(BlockUtil::isOnGround($event->getTo(), 0) || BlockUtil::isOnGround($event->getTo(), 1));
 
 		$playerZuri->isOnGround()
@@ -220,12 +218,13 @@ class EventListener implements Listener {
 		}
 
 		// Block related checks
-		$playerZuri->setIce(BlockUtil::isOnIce($event->getTo(), 1) || BlockUtil::isOnIce($event->getTo(), 2));
+		$playerZuri->setOnIce(BlockUtil::isOnIce($event->getTo(), 1) || BlockUtil::isOnIce($event->getTo(), 2));
 		$playerZuri->setOnStairs(BlockUtil::isOnStairs($event->getTo(), 0) || BlockUtil::isOnStairs($event->getTo(), 1));
 		$playerZuri->setUnderBlock(BlockUtil::isOnGround($player->getLocation(), -2));
 		$playerZuri->setTopBlock(BlockUtil::isOnGround($player->getLocation(), 1));
-		$playerZuri->setOnLiquid(BlockUtil::isOnLiquid($event->getTo(), 0) || BlockUtil::isOnLiquid($event->getTo(), 1));
-		$playerZuri->setOnLava(BlockUtil::isOnLava($event->getTo(), 0) || BlockUtil::isOnLava($event->getTo(), 1));
+		$playerZuri->setOnWeb(BlockUtil::isOnWeb($event->getTo(), 0));
+		$playerZuri->setInLiquid(BlockUtil::isOnLiquid($event->getTo(), 0) || BlockUtil::isOnLiquid($event->getTo(), 1));
+		$playerZuri->setInLava(BlockUtil::isOnLava($event->getTo(), 0) || BlockUtil::isOnLava($event->getTo(), 1));
 		$playerZuri->setOnUnderwater(BlockUtil::isOnWater($event->getTo(), 0) && !BlockUtil::isOnGround($event->getTo(), 0));
 		$playerZuri->setTwoBlockPassage(BlockUtil::isTwoBlockPassage($event->getTo()));
 		$playerZuri->setClimbing(BlockUtil::isOnAdhesion($event->getTo(), 0));
@@ -233,13 +232,11 @@ class EventListener implements Listener {
 		$playerZuri->setOnDoor(BlockUtil::isOnDoor($event->getTo(), 0));
 		$playerZuri->setOnCarpet(BlockUtil::isOnCarpet($event->getTo(), 0));
 		$playerZuri->setOnPlate(BlockUtil::isOnPlate($event->getTo(), 0));
-		$playerZuri->
-		$playerZuri->setSnow(BlockUtil::isOnSnow($event->getTo(), 0));
-		$playerZuri->setLastMoveTick((double) Server::getInstance()->getTick());
+		$playerZuri->setOnSoul(BlockUtil::isOnSoul($event->getTo(), 0));
+		$playerZuri->setOnSnow(BlockUtil::isOnSnow($event->getTo(), 0));
+		$playerZuri->setLastMoveTick((float) Server::getInstance()->getTick());
 		$playerZuri->setBlockAbove(BlockUtil::getBlockAbove($player)->isSolid());
 		$playerZuri->setGroundSolid(BlockUtil::isGroundSolid($player));
-		$playerZuri->setMotion($player->getMotion());
-		 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
@@ -262,7 +259,7 @@ class EventListener implements Listener {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
 
-		$playerZuri->setMotion($event->getMotion());
+		$playerZuri->setMotion($event->getVector());
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
@@ -357,7 +354,6 @@ class EventListener implements Listener {
 		}
 
 		$playerZuri->setTeleportTicks(microtime(true));
-		$playerZuri->synchronizePositions($event->getTo()->asVector3());
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
@@ -405,7 +401,6 @@ class EventListener implements Listener {
 
 		$playerZuri->setJoinedAtTheTime(microtime(true));
 		$playerZuri->setTeleportTicks(microtime(true));
-		$playerZuri->synchronizePositions($player->getPosition()->asVector3());
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
@@ -556,7 +551,6 @@ class EventListener implements Listener {
 
 		$playerZuri->setDeathTicks(microtime(true));
 		$playerZuri->setTeleportTicks(microtime(true));
-		$playerZuri->synchronizePositions($player->getPosition()->asVector3());
 	}
 
 	/**

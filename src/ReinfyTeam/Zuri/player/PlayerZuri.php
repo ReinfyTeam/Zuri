@@ -39,6 +39,7 @@ use pocketmine\player\Player;
 use pocketmine\world\Position;
 use ReinfyTeam\Zuri\utils\Utils;
 use ReinfyTeam\Zuri\utils\WorldUtil;
+use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
@@ -90,9 +91,12 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $groundSolid = false;
 	private bool $sprinting = false;
 	private bool $scaffolding = false;
+	private bool $sniffing = false;
 	private bool $sneaking = false;
 	private bool $rawSneaking = false;
 	private bool $gliding = false;
+	private bool $crawling = false;
+	private bool $swimming = false;
 	private bool $onSoul = false;
 	private bool $underwater = false;
 	private bool $twoBlockPassage = false;
@@ -100,9 +104,16 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private int $airTicks = 0;
 	private int $groundTicks = 0;
 
+	// Input related things
+	private int $inputMode = 0;
+	private int $playMode = 0;
+	private int $interactionMode = 0;
+
+	// Raw movement
+	private ?Vector2 $rawMovement = null;
+
 	private float $lastGroundY = 0.0;
 	private float $lastNoGroundY = 0.0;
-	private float $lastDelayedMovePacket = 0.0;
 	private float $joinedAtTime = 0.0;
 	private float $jumpTicks = 0.0;
 	private float $teleportTicks = 0.0;
@@ -156,7 +167,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->setSurvival($player->isSurvival());
 		$this->setSpectator($player->isSpectator());
 		$this->setAllowFlight($player->getAllowFlight());
-		$this->setOnSoul($player->isOnSoul());
 		$this->setCurrentChunkLoaded(WorldUtil::isCurrentChunkIsLoaded($player));
 		$this->setNoClientPredictions($player->hasNoClientPredictions());
 		$this->setSafePosition(BlockUtil::findSafePosition($player->getPosition()));
@@ -192,6 +202,62 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	 */
 	public function getMotion() : Vector3 {
 		return $this->motion ??= Vector3::zero();
+	}
+
+	public function isInLava() : bool {
+		return $this->inLava;
+	}
+
+	public function setInLava(bool $data) : void {
+		$this->inLava = $data;
+	}
+
+	public function isCrawling() : bool {
+		return $this->crawling;
+	}
+
+	public function setCrawling(bool $data) : void {
+		$this->crawling = $data;
+	}
+
+	public function isSwimming() : bool {
+		return $this->swimming;
+	}
+
+	public function setSwimming(bool $data) : void {
+		$this->swimming = $data;
+	}
+
+	public function getInputMode() : int {
+		return $this->inputMode;
+	}
+
+	public function setPlayMode(int $data) : void {
+		$this->playMode = $data;
+	}
+
+	public function getPlayMode() : int {
+		return $this->playMode;
+	}
+
+	public function setInputMode(int $mode = 0) : void {
+		$this->inputMode = $mode;
+	}
+
+	public function setRawMove(?Vector2 $data) : void {
+		$this->rawMovement = $data;
+	}
+
+	public function getRawMove() : ?Vector2 {
+		return $this->rawMovement;
+	}
+
+	public function setInteractionMode(int $data = 0) : void {
+		$this->interactionMode = $data;
+	}
+
+	public function getInteractMode() : int {
+		return $this->interactionMode;
 	}
 
 	/**
@@ -394,7 +460,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		return $this->onSoul;
 	}
 
-	public function setOnSoulSurface(bool $data) : void {
+	public function setOnSoul(bool $data) : void {
 		$this->onSoul = $data;
 	}
 
@@ -422,10 +488,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->safePosition = $data ?? Vector3::zero();
 	}
 
-	public function getCurrentPosition() : Vector3 {
-		return $this->currentPosition ??= Vector3::zero();
-	}
-
 	public function isOnGround() : bool {
 		return $this->onGround;
 	}
@@ -442,20 +504,20 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->sniffing = $data;
 	}
 
-	public function isLiquid() : bool {
+	public function isInLiquid() : bool {
 		return $this->inLiquid;
 	}
 
-	public function setLiquid(bool $data) : void {
+	public function setInLiquid(bool $data) : void {
 		$this->inLiquid = $data;
 	}
 
 	public function isOnLava() : bool {
-		return $this->inOnLava;
+		return $this->inLava;
 	}
 
 	public function setOnLava(bool $data) : void {
-		$this->inOnLava = $data;
+		$this->inLava = $data;
 	}
 
 	public function isOnStairs() : bool {
@@ -771,7 +833,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	/**
 	 * Serializes relevant player-tracking data for async checks.
 	 *
-	 * @return PlayerData
+	 * @return array<string, mixed> An associative array of player data for serialization.
 	 */
 	public function jsonSerialize() : array {
 		return [
@@ -786,7 +848,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isOnPlate" => $this->isOnPlate(),
 			"isOnSnow" => $this->isOnSnow(),
 			"isSniffing" => $this->isSniffing(),
-			"isOnLiquid" => $this->isOnLiquid(),
+			"isInLiquid" => $this->isInLiquid(),
 			"isOnLava" => $this->isOnLava(),
 			"isOnStairs" => $this->isOnStairs(),
 			"isOnIce" => $this->isOnIce(),
@@ -795,7 +857,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"hasTopBlock" => $this->hasTopBlock(),
 			"lastGroundY" => $this->getLastGroundY(),
 			"lastNoGroundY" => $this->getLastNoGroundY(),
-			"lastDelayedMovePacket" => $this->getLastDelayedMovePacket(),
 			"joinedAtTime" => $this->getJoinedAtTheTime(),
 			"jumpTicks" => $this->getJumpTicks(),
 			"isRecentlyJumped" => $this->isRecentlyJumped(),

@@ -84,7 +84,7 @@ class SpeedA extends Check {
 	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>} Result array with `failed` and `debug` keys.
 	 */
 	public static function check(array $data) : array {
-		if ((Utils::readString($data["type"]) ?? null) !== "PlayerMoveEvent") {
+		if ((Utils::readString($data["type"])) !== "PlayerMoveEvent") { 
 			return self::buildResult(false);
 		}
 
@@ -97,50 +97,50 @@ class SpeedA extends Check {
 		}
 
 		$movement = Utils::readArray($playerData["movement"]);
-		$from = Utils::arrayToVector3($movement["from"]);
-		$to = Utils::arrayToVector3($movement["to"]);
+		$from = Utils::arrayToVector3(Utils::readArray($movement["from"])); // @phpstan-ignore argument.type
+		$to = Utils::arrayToVector3(Utils::readArray($movement["to"])); // @phpstan-ignore argument.type
 
 		// Calculate distance (X, Y)
 		$dx = $to->getX() - $from->getX();
 		$dz = $to->getZ() - $from->getZ();
 		$distance = sqrt(($dx * $dx) + ($dz * $dz));
 
-		$limit = 0.0;
-		if (Utils::readBool($playerZuri["isSprinting"])) { // Sprinting
-			$baseLimit = Utils::readBool($playerZuri["isRecentlyJumped"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT]); // Sprinting threshold
+		(float) $limit = 0.0;
+		if (Utils::readBool($playerData["isSprinting"])) { // Sprinting
+			$baseLimit = Utils::readBool($playerData["isRecentlyJumped"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT]); // Sprinting threshold
 
-			if (Utils::readBool($playerZuri["isElevated"])) {
+			if (Utils::readBool($playerData["isElevated"])) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_ELEVATION]) - $baseLimit;
 			}
-
-			if (Utils::readBool($playerZuri["hasTwoBlockPassage"])) {
+ 
+			if (Utils::readBool($playerData["hasTwoBlockPassage"])) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_2_BLOCK_PASSAGE])
 				- $baseLimit;
 			}
-		} elseif (Utils::readBool($playerZuri["isSneaking"]) || Utils::readBool($playerZuri["isRawSneaking"]))  { // Sneaking
+		} elseif (Utils::readBool($playerData["isSneaking"]) || Utils::readBool($playerData["isRawSneaking"]))  { // Sneaking
 			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_FLAT]);
 
 			if (abs($dx) !== 0 || abs($dz) !== 0) {
 				$limit += $limit - Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_DIAGONAL]);
 			}
 
-			if (Utils::readBool($playerZuri["isOnSoulSurface"])) {
+			if (Utils::readBool($playerData["isOnSoulSurface"])) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SOUL]) - $baseLimit;
 			}
 
-			if (Utils::readBool($playerZuri["hasSwiftSneak"])) {
+			if (Utils::readBool($playerData["hasSwiftSneak"])) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SWIFT]) - $baseLimit;
 			}
-		} elseif (Utils::readBool($playerZuri["isSwimming"])) { // Swimming
+		} elseif (Utils::readBool($playerData["isSwimming"])) { // Swimming
 			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_SURFACE]);
 
-			if (Utils::readBool($playerZuri["isDiving"])) {
+			if (Utils::readBool($playerData["isDiving"])) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_DIVING]);
 			}
-		} elseif (Utils::readBool($playerZuri["isCreative"]) && Utils::readBool($playerZuri["isFlying"])) { // Creative flight
-			$baseLimit = Utils::readBool($playerZuri["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]);
-		} elseif (Utils::readBool($playerZuri["isSpectator"]) && Utils::readBool($playerZuri["isFlying"])) { // Spectator flight
-			$baseLimit = Utils::readBool($playerZuri["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]);
+		} elseif (Utils::readBool($playerData["isCreative"]) && Utils::readBool($playerData["isFlying"])) { // Creative flight
+			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]);
+		} elseif (Utils::readBool($playerData["isSpectator"]) && Utils::readBool($playerData["isFlying"])) { // Spectator flight
+			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]);
 		}
 
 		// For Walking
@@ -151,13 +151,12 @@ class SpeedA extends Check {
 			$limit += $baseLimit - Utils::readFloat($constantData[ConstantPath::SPEED_WALK_DIAGONAL]);
 		}
 
-		$limit += $baseLimit * $constantData[ConstantPath::THRESHOLD_PERCENTAGE]; // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
+		$limit += $baseLimit * Utils::readFloat($constantData[ConstantPath::THRESHOLD_PERCENTAGE]); // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
+		$result = $distance > $limit;
 
-		if (($result = $distance > $limit)) {
-			return self::buildResult($result, [
-				"limit" => $limit,
-				"distance" => $distance
-			]);
-		}
+		return self::buildResult($result, [
+			"limit" => $limit,
+			"distance" => $distance
+		]);
 	}
 }
