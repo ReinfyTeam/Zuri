@@ -22,7 +22,7 @@
         "sof3/pharynx": "^0.3.8",
         "friendsofphp/php-cs-fixer": "^3.94.2"
     },
-    "license": "MIT",
+    "license": "LGPL-2.1-only",
     "autoload": {
         "psr-4": {
             "ReinfyTeam\\Zuri\\": "src/ReinfyTeam/Zuri/"
