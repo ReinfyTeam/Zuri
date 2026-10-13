@@ -31,8 +31,6 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri;
 
-use pocketmine\block\BlockTypeIds;
-use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\entity\projectile\EnderPearl;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
@@ -76,7 +74,6 @@ use pocketmine\Server;
 use pocketmine\utils\Utils as PMMPUtils;
 use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\player\PlayerManager;
-use ReinfyTeam\Zuri\player\PlayerZuri;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function microtime;
@@ -176,7 +173,6 @@ class EventListener implements Listener {
 			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_SWIMMING)) {
 				$playerZuri->setSwimming(false);
 			}
-
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([

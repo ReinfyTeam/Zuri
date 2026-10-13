@@ -34,14 +34,17 @@ namespace ReinfyTeam\Zuri\utils;
 use pocketmine\block\Block;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Location;
+use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
 use pocketmine\world\World;
-use pocketmine\math\Vector3;
+use function abs;
 use function array_flip;
 use function count;
 use function floor;
 use function implode;
+use function max;
+use function min;
 
 /**
  * Utilities for block-related environment checks.
@@ -320,7 +323,7 @@ final class BlockUtil {
 		return self::isUnderBlock($location, [BlockTypeIds::LAVA], $down);
 	}
 
-	public static function isTwoBlockPassage(Location $location) : bool{
+	public static function isTwoBlockPassage(Location $location) : bool {
 		$world = $location->getWorld();
 		$x = (int) floor($location->getX());
 		$y = (int) floor($location->getY());
@@ -495,9 +498,9 @@ final class BlockUtil {
 				// 2. Torso position must be passable (Air, etc.)
 				// 3. Ground position must be solid to stand on, and NOT dangerous (Lava/Fire)
 				if (
-					$feetBlock->isSolid() && 
-					$torsoBlock->isSolid() && 
-					$groundBlock->isSolid() && 
+					$feetBlock->isSolid() &&
+					$torsoBlock->isSolid() &&
+					$groundBlock->isSolid() &&
 					$groundBlock->getTypeId() !== BlockTypeIds::LAVA &&
 					$groundBlock->getTypeId() !== BlockTypeIds::FIRE
 				) {
@@ -516,7 +519,6 @@ final class BlockUtil {
 	 *
 	 * @param Position $position The position to search from.
 	 * @param int $radius   How many blocks out horizontally to search
-	 * @return Vector3|null
 	 */
 	public static function findSafePositionInRadius(Position $position, int $radius = 5) : ?Vector3 {
 		// Ring loop out from radius 0 (center column) to maximum boundary radius
@@ -542,6 +544,6 @@ final class BlockUtil {
 			}
 		}
 
-    	return null;
+		return null;
 	}
 }

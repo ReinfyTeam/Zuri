@@ -43,6 +43,7 @@ use function is_array;
 use function is_bool;
 use function is_float;
 use function is_int;
+use function is_string;
 use function max;
 use function min;
 

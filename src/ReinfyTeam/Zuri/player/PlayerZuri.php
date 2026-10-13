@@ -37,9 +37,9 @@ use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
+use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use ReinfyTeam\Zuri\utils\WorldUtil;
-use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
@@ -423,7 +423,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function setSneaking(bool $data) : void {
 		$this->sneaking = $data;
 	}
-	
+
 	public function isRawSneaking() : bool {
 		return $this->rawSneaking;
 	}
@@ -733,7 +733,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->movement = ["from" => $from, "to" => $to];
 	}
 
-	
+
 	public function getTick() : int {
 		return $this->tick;
 	}

@@ -33,10 +33,8 @@ namespace ReinfyTeam\Zuri\utils;
 
 use DateTime;
 use pocketmine\world\Position;
-use ReinfyTeam\Zuri\player\PlayerZuri;
 use function abs;
 use function floor;
-use function in_array;
 use function max;
 use function min;
 use function preg_match_all;

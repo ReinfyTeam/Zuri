@@ -84,7 +84,7 @@ class SpeedA extends Check {
 	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>} Result array with `failed` and `debug` keys.
 	 */
 	public static function check(array $data) : array {
-		if ((Utils::readString($data["type"])) !== "PlayerMoveEvent") { 
+		if ((Utils::readString($data["type"])) !== "PlayerMoveEvent") {
 			return self::buildResult(false);
 		}
 
@@ -112,12 +112,12 @@ class SpeedA extends Check {
 			if (Utils::readBool($playerData["isElevated"])) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_ELEVATION]) - $baseLimit;
 			}
- 
+
 			if (Utils::readBool($playerData["hasTwoBlockPassage"])) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_2_BLOCK_PASSAGE])
 				- $baseLimit;
 			}
-		} elseif (Utils::readBool($playerData["isSneaking"]) || Utils::readBool($playerData["isRawSneaking"]))  { // Sneaking
+		} elseif (Utils::readBool($playerData["isSneaking"]) || Utils::readBool($playerData["isRawSneaking"])) { // Sneaking
 			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_FLAT]);
 
 			if (abs($dx) !== 0 || abs($dz) !== 0) {
