@@ -153,7 +153,7 @@ class SpeedA extends Check {
 		}
 
 		// this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
-		$limit += $baseLimit * Utils::readFloat($constantData[ConstantPath::THRESHOLD_PERCENTAGE]); 
+		$limit += $baseLimit * Utils::readFloat($constantData[ConstantPath::THRESHOLD_PERCENTAGE]);
 		$result = $distance > $limit;
 
 		return self::buildResult($result, [
