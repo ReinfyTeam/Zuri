@@ -38,7 +38,7 @@ interface ConstantPath {
 
 	// Types of Speed (Vertical/Horizontal)
 	public const SPEED_HORIZONTAL = "speed.horizontal";
-	public const SPEED_VERTICAL = "speed.horizontal";
+	public const SPEED_VERTICAL = "speed.vertical";
 
 	// Walking, Sprinting, and Jump
 	public const SPEED_WALKING = self::SPEED_HORIZONTAL . ".walking";

@@ -62,6 +62,7 @@ use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\server\CommandEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\inventory\ArmorInventory;
+use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
@@ -73,8 +74,11 @@ use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\Utils as PMMPUtils;
 use ReinfyTeam\Zuri\check\Check;
+use ReinfyTeam\Zuri\config\ConstantPath;
+use ReinfyTeam\Zuri\player\ExternalDataPath;
 use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function microtime;
 
@@ -133,13 +137,9 @@ class EventListener implements Listener {
 			$playerZuri->setInteractionMode($packet->getInteractionMode());
 			$playerZuri->setTick($packet->getTick());
 			$playerZuri->setRawMove($packet->getRawMove());
-
-			$inputFlags = $packet->getInputFlags();
-
-			$playerZuri->setJumping($inputFlags->get(PlayerAuthInputFlags::JUMPING));
-			$playerZuri->setOnScaffold($inputFlags->get(PlayerAuthInputFlags::ASCEND_BLOCK) || $inputFlags->get(PlayerAuthInputFlags::DESCEND_BLOCK));
-
+			
 			// Sprinting
+			$inputFlags = $packet->getInputFlags();
 			if ($inputFlags->get(PlayerAuthInputFlags::START_SPRINTING)) {
 				$playerZuri->setSprinting(true);
 			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_SPRINTING)) {
@@ -199,7 +199,6 @@ class EventListener implements Listener {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 			return;
 		}
-		$wasOnGround = $playerZuri->isOnGround();
 
 		$playerZuri->setMovement($event->getFrom(), $event->getTo());
 		$playerZuri->setLastMoveTick(microtime(true));
@@ -237,6 +236,7 @@ class EventListener implements Listener {
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
+		$playerZuri->setMotion(Vector3::zero());
 	}
 
 	/**
@@ -256,11 +256,6 @@ class EventListener implements Listener {
 		}
 
 		$playerZuri->setMotion($event->getVector());
-
-		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => PMMPUtils::getNiceClassName($event),
-			"player" => $player
-		], Check::TYPE_PLAYER);
 	}
 
 	/**

@@ -40,12 +40,10 @@ use pocketmine\world\Position;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use ReinfyTeam\Zuri\utils\WorldUtil;
-use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
 use function count;
 use function microtime;
-
 
 class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath {
 	/**
@@ -152,6 +150,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	/**
 	 * Factory: creates a new PlayerZuri for a Player instance.
+	 * @param Player $player The underlying PocketMine player instance.
+	 * @return self A new PlayerZuri instance.
 	 */
 	public static function create(Player $player) : self {
 		return new self($player);
@@ -159,6 +159,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	/**
 	 * Gathers and updates internal state from the provided player.
+	 * @param Player $player The player instance to update data from.
+	 * @return self Returns the current instance for method chaining.
 	 */
 	public function updateData(Player $player) : self {
 		$this->setNoClientPredictions($player->hasNoClientPredictions());
@@ -842,6 +844,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isTransactionArmorInventory" => $this->isTransactionArmorInventory(),
 			"isUnderBlock" => $this->isUnderBlock(),
 			"isClimbing" => $this->isClimbing(),
+
 			"isOnPlant" => $this->isOnPlant(),
 			"isOnDoor" => $this->isOnDoor(),
 			"isOnCarpet" => $this->isOnCarpet(),
@@ -902,7 +905,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isOnUnderwater" => $this->isOnUnderwater(),
 			"hasTwoBlockPassage" => $this->hasTwoBlockPassage(),
 			"safePosition" => Utils::vector3ToArray($this->getSafePosition()),
-			"externalData" => ZuriAC::getExternalData()->getAllExternalData($this)
 		];
 	}
 }

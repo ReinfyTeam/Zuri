@@ -41,7 +41,7 @@ final class WorldUtil {
 	/**
 	 * Checks whether the player's current chunk is loaded.
 	 *
-	 * @param Player $player The player to check.
+	 * @param \pocketmine\player\Player $player The player to check.
 	 * @return bool True if the chunk is loaded, false otherwise.
 	 */
 	public static function isCurrentChunkIsLoaded(Player $player) : bool {

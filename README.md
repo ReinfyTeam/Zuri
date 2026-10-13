@@ -23,9 +23,9 @@ Server metrics are initialized when the plugin enables and refreshed periodicall
 
 ## Requirements and installation
 
-- Official PocketMine-MP 5 and its compatible PHP runtime; PHP 8.2 or newer is required. Development dependencies target PocketMine-MP 5.42 or newer.
+- Axolotl-PM 5.49.1 is the current Composer and CI test baseline, with PHP 8.2 or newer. This is the verified campaign runtime, not a claim that every API 5 patch or fork has been tested.
 - A compiled `Zuri.phar`. Virion dependencies are bundled by the build; Composer is required to build from source.
-- Forks of PocketMine-MP are unsupported.
+- Other PocketMine-MP forks and versions outside the tested baseline are not covered by this compatibility claim.
 
 1. Back up the existing Zuri PHAR and its data folder, especially when upgrading from 1.3.x.
 2. Stop the server, place `Zuri.phar` in `plugins/`, and restart.
@@ -56,7 +56,7 @@ A runtime smoke test starts the compiled plugin on a real PocketMine server, ver
 composer test:runtime -- /path/to/PocketMine-MP.phar
 ```
 
-The build workflow runs this test on PocketMine-MP **5.44.3**. Runtime smoke tests and synthetic movement regressions do not replace gameplay testing with actual Bedrock clients.
+The build workflow runs this test on the pinned Axolotl-PM **5.49.1** baseline. Runtime smoke tests and synthetic movement regressions do not replace gameplay testing with actual Bedrock clients.
 
 ## Releases
 
