@@ -200,6 +200,25 @@ $speedBPayload["playerData"]["teleportCommandTicks"] = 100.0;
 $fullyQualifiedSpeedBPayload = $speedBPayload;
 $fullyQualifiedSpeedBPayload["type"] = "pocketmine\\event\\player\\PlayerMoveEvent";
 $expect(isset(SpeedB::check($fullyQualifiedSpeedBPayload)["debug"]["distance"]), "SpeedB must accept fully-qualified movement event names");
+$fallingPayload = [
+	"type" => "PlayerMoveEvent",
+	"playerData" => [
+		"movement" => ["from" => ["x" => 0.0, "y" => 10.0, "z" => 0.0], "to" => ["x" => 0.0, "y" => 9.95, "z" => 0.0]],
+		"isCurrentChunkLoaded" => true,
+		"isOnGround" => false,
+		"getFallTicks" => 0,
+		"getMotion" => ["x" => 0.0, "y" => 0.0, "z" => 0.0]
+	],
+	"constantData" => $constants->exportNumbers()
+];
+$expect(SpeedB::check($fallingPayload)["failed"] === false, "SpeedB must allow the first falling tick within its safety floor");
+$fallingPayload["playerData"]["movement"]["to"]["y"] = 9.91;
+$expect(SpeedB::check($fallingPayload)["failed"] === true, "SpeedB must reject excessive first-tick falling distance");
+$fallingPayload["playerData"]["getFallTicks"] = 2;
+$fallingPayload["playerData"]["movement"]["to"]["y"] = 9.85;
+$expect(SpeedB::check($fallingPayload)["failed"] === false, "SpeedB must allow displacement predicted after multiple falling ticks");
+$fallingPayload["playerData"]["movement"]["to"]["y"] = 9.82;
+$expect(SpeedB::check($fallingPayload)["failed"] === true, "SpeedB must reject displacement above the multi-tick falling limit");
 $expect(count(CheckRegistry::loadChecks()->getChecksByType(Check::TYPE_PLAYER)) === 2, "Player movement checks must retain their registration");
 $metrics = new MetricsData();
 $expect($metrics->getMaxPlayerCount() === 0, "Metrics must initialize maximum player count");
