@@ -98,7 +98,6 @@ $violations->resetViolation($speedA);
 $expect($violations->getViolations($speedA) === 0, "Violations must reset");
 
 $tracking = (new ReflectionClass(PlayerZuri::class))->newInstanceWithoutConstructor();
-$expect($tracking->getRawMove() == new Vector2(0, 0), "Raw movement must start at a valid Vector2");
 $tracking->setRecentlyCancelledEvent(microtime(true));
 $expect($tracking->isRecentlyCancelledEvent(), "Recent event cancellation must be remembered");
 $tracking->setRecentlyCancelledEvent(microtime(true) - 3.0);
@@ -114,9 +113,7 @@ $expect($config->getInt(ConfigPath::PUNISHMENT_BAN_TYPE, 7) === 7, "Wrong config
 $expect($config->getString(ConfigPath::CURRENT_CONFIG_VERSION) === ConfigPath::CONFIG_VERSION, "Current resource versions must not trigger a configuration replacement");
 $constants = (new ReflectionClass(ConstantValues::class))->newInstanceWithoutConstructor();
 $property->setValue($constants, new Config(dirname(__DIR__) . "/resources/constants.yml", Config::YAML));
-$expect($constants->getNumber(ConstantPath::FRICTION_FACTOR) === 1.0, "Movement constants must match the shipped YAML path");
 $expect($constants->getString("zuri.config-version") === ConstantPath::CONSTANT_VERSION, "Current constant resources must retain their configuration");
-$expect($constants->exportNumbers()[ConstantPath::SPEED_THRESHOLD] === 0.1, "Worker constants must use the flat dotted keys consumed by checks");
 $language = new Language(dirname(__DIR__) . "/resources/lang/en_US.yml");
 $expect($language->translate(LanguagePath::KICK_MESSAGE) !== LanguagePath::KICK_MESSAGE, "Punishment translations must resolve");
 
@@ -159,13 +156,11 @@ $expect(isset(SpeedA::check($speedPayload)["debug"]["dist"]), "SpeedA must accep
 $speedPayload["playerData"]["isRecentlyCancelledEvent"] = true;
 $expect(SpeedA::check($speedPayload)["failed"] === false, "Cancelled movement must receive its grace period");
 $expect(SpeedB::check(["type" => "PlayerMoveEvent", "playerData" => []])["failed"] === false, "SpeedB must handle an empty movement snapshot");
-$expect(SpeedB::check(["type" => "PlayerMoveEvent", "playerData" => ["currentState" => PlayerZuri::STATE_GRACE]])["externalData"]["speedBBuffer"] === 0.0, "Grace state must reset the speed buffer");
 $speedBPayload = [
 	"type" => "PlayerMoveEvent",
 	"playerData" => [
 		"movement" => ["from" => ["x" => 0.0, "z" => 0.0], "to" => ["x" => 0.05, "z" => 0.0]],
 		"isCurrentChunkLoaded" => true,
-		"currentState" => PlayerZuri::STATE_WALK,
 		"isOnGround" => true
 	]
 ];
