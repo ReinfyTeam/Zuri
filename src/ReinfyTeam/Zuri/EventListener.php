@@ -64,6 +64,7 @@ use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\server\CommandEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\inventory\ArmorInventory;
+use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
@@ -75,11 +76,17 @@ use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\Utils as PMMPUtils;
 use ReinfyTeam\Zuri\check\Check;
+use ReinfyTeam\Zuri\config\ConstantPath;
+use ReinfyTeam\Zuri\player\ExternalDataPath;
 use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\player\PlayerZuri;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function microtime;
+use function min;
+use function round;
+use function sqrt;
 
 /**
  * Central event listener for ZuriAC.
@@ -134,47 +141,23 @@ class EventListener implements Listener {
 			$playerZuri->setTick($packet->getTick());
 			$playerZuri->setDelta($packet->getDelta());
 			$playerZuri->setRawMove($packet->getRawMove());
+			$playerZuri->setStartedJumping($packet->getInputFlags()->get(PlayerAuthInputFlags::START_JUMPING));
 
-			$inputFlags = $packet->getInputFlags();
+			$frictionBlock = $player->getWorld()->getBlock($player->getPosition()->getSide(Facing::DOWN));
+			$externalData = ZuriAC::getExternalData();
+			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::FRICTION_FACTOR, $playerZuri->isOnGround() ? $frictionBlock->getFrictionFactor() : ZuriAC::getConstants()->getNumber(ConstantPath::FRICTION_FACTOR, 1.0));
 
-			$playerZuri->setJumping($inputFlags->get(PlayerAuthInputFlags::JUMPING));
-			$playerZuri->setOnScaffold($inputFlags->get(PlayerAuthInputFlags::ASCEND_BLOCK) || $inputFlags->get(PlayerAuthInputFlags::DESCEND_BLOCK));
+			$lastDistanceXZ = Utils::readFloat($externalData->getExternalData($playerZuri, "Zuri", ExternalDataPath::LAST_DISTANCE_XZ));
+			$frictionFactor = Utils::readFloat($externalData->getExternalData($playerZuri, "Zuri", ExternalDataPath::FRICTION_FACTOR), 1.0);
+			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::MOMENTUM, MathUtil::getMomentum($lastDistanceXZ, $frictionFactor));
 
-			// Sprinting
-			if ($inputFlags->get(PlayerAuthInputFlags::START_SPRINTING)) {
-				$playerZuri->setSprinting(true);
-			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_SPRINTING)) {
-				$playerZuri->setSprinting(false);
-			}
+			$movement = min(1.0, sqrt($packet->getMoveVecX() ** 2 + $packet->getMoveVecZ() ** 2));
+			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::MOVEMENT, $movement);
 
-			// Gliding
-			if ($inputFlags->get(PlayerAuthInputFlags::START_GLIDING)) {
-				$playerZuri->setGliding(true);
-			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_GLIDING)) {
-				$playerZuri->setGliding(false);
-			}
-
-			// Crawling
-			if ($inputFlags->get(PlayerAuthInputFlags::START_CRAWLING)) {
-				$playerZuri->setCrawling(true);
-			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_CRAWLING)) {
-				$playerZuri->setCrawling(false);
-			}
-
-			// Sneaking
-			if ($inputFlags->get(PlayerAuthInputFlags::START_SNEAKING)) {
-				$playerZuri->setSneaking(true);
-			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_SNEAKING)) {
-				$playerZuri->setSneaking(false);
-			}
-
-			// Swimming
-			if ($inputFlags->get(PlayerAuthInputFlags::START_SWIMMING)) {
-				$playerZuri->setSwimming(true);
-			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_SWIMMING)) {
-				$playerZuri->setSwimming(false);
-			}
-
+			$movementMultiplier = Utils::getMovementMultiplier($player);
+			$acceleration = MathUtil::getAcceleration($movement, $movementMultiplier, $frictionFactor, $playerZuri->isOnGround());
+			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::MOVEMENT_MULTIPLIER, $movementMultiplier);
+			$externalData->setExternalData($playerZuri, "Zuri", ExternalDataPath::ACCELERATION, $acceleration);
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
@@ -201,9 +184,15 @@ class EventListener implements Listener {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 			return;
 		}
+		$this->updateMovementState($player, $playerZuri);
 		$wasOnGround = $playerZuri->isOnGround();
 
 		$playerZuri->setMovement($event->getFrom(), $event->getTo());
+		$playerZuri->synchronizeMovementPositions($event->getFrom(), $event->getTo());
+		$lastMovementTime = $playerZuri->getLastMovementTime();
+		$playerZuri->setMovementDeltaTicks(
+			$lastMovementTime > 0.0 ? (microtime(true) - $lastMovementTime) * 20 : 1.0
+		);
 		$playerZuri->setLastMovementTime(microtime(true));
 		$playerZuri->setOnGround(BlockUtil::isOnGround($event->getTo(), 0) || BlockUtil::isOnGround($event->getTo(), 1));
 
@@ -215,14 +204,14 @@ class EventListener implements Listener {
 			$playerZuri->setSlimeBlockTicks(microtime(true));
 		}
 
-		// Block related checks
 		$playerZuri->setIce(BlockUtil::isOnIce($event->getTo(), 1) || BlockUtil::isOnIce($event->getTo(), 2));
+
 		$playerZuri->setOnStairs(BlockUtil::isOnStairs($event->getTo(), 0) || BlockUtil::isOnStairs($event->getTo(), 1));
 		$playerZuri->setUnderBlock(BlockUtil::isOnGround($player->getLocation(), -2));
 		$playerZuri->setTopBlock(BlockUtil::isOnGround($player->getLocation(), 1));
-		$playerZuri->setOnLiquid(BlockUtil::isOnLiquid($event->getTo(), 0) || BlockUtil::isOnLiquid($event->getTo(), 1));
-		$playerZuri->setOnLava(BlockUtil::isOnLava($event->getTo(), 0) || BlockUtil::isOnLava($event->getTo(), 1));
-		$playerZuri->setOnUnderwater(BlockUtil::isOnWater($event->getTo(), 0) && !BlockUtil::isOnGround($event->getTo(), 0));
+		$playerZuri->setLiquid(BlockUtil::isOnLiquid($event->getTo(), 0) || BlockUtil::isOnLiquid($event->getTo(), 1));
+		$playerZuri->setLava(BlockUtil::isOnLava($event->getTo(), 0) || BlockUtil::isOnLava($event->getTo(), 1));
+		$playerZuri->setUnderwater(BlockUtil::isOnWater($event->getTo(), 0) && !BlockUtil::isOnGround($event->getTo(), 0));
 		$playerZuri->setTwoBlockPassage(BlockUtil::isTwoBlockPassage($event->getTo()));
 		$playerZuri->setClimbing(BlockUtil::isOnAdhesion($event->getTo(), 0));
 		$playerZuri->setOnPlant(BlockUtil::isOnPlant($event->getTo(), 0));
@@ -233,16 +222,38 @@ class EventListener implements Listener {
 		$playerZuri->setLastMoveTick((double) Server::getInstance()->getTick());
 		$playerZuri->setBlockAbove(BlockUtil::getBlockAbove($player)->isSolid());
 		$playerZuri->setGroundSolid(BlockUtil::isGroundSolid($player));
-		$playerZuri->setMotion($player->getMotion());
-		 
+		$playerZuri->setCurrentSurface(
+			$playerZuri->isLava() ? PlayerZuri::SURFACE_LAVA :
+			($playerZuri->isUnderwater() ? PlayerZuri::SURFACE_WATER :
+			($playerZuri->isIce() ? PlayerZuri::SURFACE_ICE :
+			($playerZuri->isSoulSpeedSurface() ? PlayerZuri::SURFACE_SOUL :
+			($playerZuri->isOnStairs() ? PlayerZuri::SURFACE_STAIRS : PlayerZuri::SURFACE_NORMAL))))
+		);
+		$playerZuri->updateVerticalMovement(
+			$event->getFrom()->getY(),
+			$event->getTo()->getY(),
+			(int) round($playerZuri->getMovementDeltaTicks()),
+			$wasOnGround,
+			$playerZuri->isOnGround(),
+			$playerZuri->isLiquid() ||
+			$playerZuri->isClimbing() ||
+			$playerZuri->isGliding() ||
+			$playerZuri->isCreative() && $playerZuri->isFlying() ||
+			$playerZuri->isSpectator() ||
+			$playerZuri->isLava(),
+			$playerZuri->getJumpBoostLevel(),
+			$playerZuri->isBlockAbove() && $event->getTo()->getY() >= $event->getFrom()->getY()
+		);
+
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player
 		], Check::TYPE_PLAYER);
+		$playerZuri->setMotion(Vector3::zero());
 	}
 
-	private function updateMovementState(PlayerZuri $playerZuri) : void {
-		$player = $playerZuri->getPlayer();
+	private function updateMovementState(Player $player, PlayerZuri $playerZuri) : void {
+		$playerZuri->setPreviousState($playerZuri->getCurrentState());
 		$effects = $player->getEffects();
 		$speed = $effects->get(VanillaEffects::SPEED());
 		$slowness = $effects->get(VanillaEffects::SLOWNESS());
@@ -258,7 +269,7 @@ class EventListener implements Listener {
 		$playerZuri->setSpeedLevel($speed?->getEffectLevel() ?? 0);
 		$playerZuri->setSlownessLevel($slowness?->getEffectLevel() ?? 0);
 		$playerZuri->setJumpBoostLevel($jumpBoost?->getEffectLevel() ?? 0);
-		$playerZuri->setOnSoulSurface(
+		$playerZuri->setSoulSpeedSurface(
 			$underBlock->getTypeId() === BlockTypeIds::SOUL_SAND ||
 			$underBlock->getTypeId() === BlockTypeIds::SOUL_SOIL
 		);
@@ -280,7 +291,14 @@ class EventListener implements Listener {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
 
-		$playerZuri->setMotion($event->getMotion());
+		$currentMotion = $playerZuri->getMotion();
+		$newMotion = $event->getVector();
+		$source = $playerZuri->getExplosionTicks() < 10
+			? PlayerZuri::SOURCE_EXPLOSION
+			: ($playerZuri->getHurtTicks() < 10 ? PlayerZuri::SOURCE_KNOCKBACK : PlayerZuri::SOURCE_EXTERNAL);
+
+		$playerZuri->setVerticalVelocity($newMotion->getY(), $source);
+		$playerZuri->setMotion($currentMotion->addVector($newMotion));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),

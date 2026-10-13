@@ -3,48 +3,12 @@
 zuri:
   # Constant Configuration: For constant updating the suitable performance variables based on development testing.
   config-version: 0.4.0
-  threshold-percentage: 0.10 # 10% threshold for base limit add-up
   speed:
-    # Source Data from https://minecraft.fandom.com/wiki/Transportation
-    # May update frequently as new data is discovered. The values are based on the player's movement speed, which is affected by the player's movement speed attribute and any status effects that may be applied.
-    # Horizontal Calculations for Speed (A)
-    horizontal:
-      walking: 4.317 # Base speed for Flat terrain (no sprint or jump)
-      walk_diagonal: 4.405 # Diagonal movement (no jumping)
-      sprint: 5.612 # Base speed for Flat terrain (no jump)
-      sprint_jump: 7.127 # Base speed for Flat terrain (jumping + sprint)
-      sprint_jump_elevation: 7.508 # Sprint-jumping with + 1 block elevation momentum
-      sprint_jump_2_block_passage: 9.732 # Sprint-jumping 2 block-high passage
-      sneaking_flat: 1.300 # Base speed for Flat terrain (no jump)
-      sneaking_diagonal: 1.830 # Approximately 45-degree angle
-      sneaking_swift: 1.940 # Sneaking with Swift Sneak effect
-      sneaking_soul: 1.819 # Sneeking on Soul Sand / Soul Soil
-      # Swimming speeds are based on the player's movement speed, which is affected by the player's swim speed attribute and any status effects that may be applied.
-      swim_surface: 2.200 # Still water surface / skimming
-      swim_underwater_still: 1.970 # Still water, underwater
-      swim_surface: 2.200 # Still water, underwater (downward)
-      swim_diving: 0.390
-      swim_downstream_standing: 1.370 # Downstream, standing
-      # Game modes and projectiles
-      creative_flight: 11.000
-      creative_sprint_flight: 22.000
-      spectator_flight: 43.556
-      spectator_sprint_flight: 87.111
-      ender_pearl: 23.000 # Thrown 15 degrees above horizontal (approximately)
-      speed_percentage_per_level: 1.20 # Speed increase per level of the Speed effect (Walk + 20% per level)
-    # Vertical Calculations on Speed (B)
-    vertical:
-      jumping: 2.000 # Pillar jumping / climbing a slope without stairs
-      stairs_up: 3.200 # Ascending
-      stairs_down: 3.600 # Descending
-      climbable_up: 2.350 # Ascending ladders, vines, etc.
-      climbable_down: 3.000 # Descending ladders, vines, etc.
-      magma_bubble_down: 4.900 # Descending in water
-      soul_sand_bubble_up: 11.000 # Ascending in water
-      lavafall_fire_resistance: 0.800
-      levitation: 0.900 # Approximate levitation upward
-      creative_spectator_vertical: 7.490 # Creative / spectator flight
-      falling_player_terminal: 78.400 # Terminal velocity for a falling player (no feather falling)
-      scaffolding_up: 1.200 # Ascending scaffolding
-      scaffolding_down: 2.940 # Descending scaffolding
-      swim_underwater: 0.390 # Upstream, underwater
+    friction_factor: 1.0
+    jump_factor: 0.8
+    ground_factor: 0.4
+    lastjump_factor: 0.26
+    ice_factor: 0.2
+    knockback_factor: 4.0
+    last_move_factor: 0.9
+    threshold: 0.1

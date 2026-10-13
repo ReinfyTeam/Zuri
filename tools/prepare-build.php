@@ -34,3 +34,22 @@ if (!is_dir($buildDirectory) && !mkdir($buildDirectory, 0777, true)) {
 	fwrite(STDERR, "Unable to create build directory\n");
 	exit(1);
 }
+
+// Pharynx 0.3.x still reads the historical PocketMine metadata path while
+// the project installs the maintained Axolotl-PM package. Expose metadata
+// only at that path; do not duplicate the runtime source tree.
+$axolotlMetadata = dirname(__DIR__) . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "axolotl-pm" . DIRECTORY_SEPARATOR . "pocketmine-mp" . DIRECTORY_SEPARATOR . "composer.json";
+$legacyMetadataDirectory = dirname(__DIR__) . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "pocketmine" . DIRECTORY_SEPARATOR . "pocketmine-mp";
+$legacyMetadata = $legacyMetadataDirectory . DIRECTORY_SEPARATOR . "composer.json";
+if (!is_file($axolotlMetadata)) {
+	fwrite(STDERR, "Axolotl-PM Composer metadata is missing\n");
+	exit(1);
+}
+if (!is_dir($legacyMetadataDirectory) && !mkdir($legacyMetadataDirectory, 0777, true)) {
+	fwrite(STDERR, "Unable to create the Pharynx metadata directory\n");
+	exit(1);
+}
+if (!copy($axolotlMetadata, $legacyMetadata)) {
+	fwrite(STDERR, "Unable to expose Axolotl-PM Composer metadata to Pharynx\n");
+	exit(1);
+}
