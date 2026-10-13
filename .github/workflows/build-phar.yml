@@ -1,4 +1,4 @@
-name: Build and validate plugin
+name: Build and validate Zuri plugin
 
 on:
   push:
