@@ -143,39 +143,46 @@ $expect($results->getNextResult() === null, "Result queue must drain");
 $playerData = [
 	"movement" => ["from" => ["x" => 0.0, "y" => 0.0, "z" => 0.0], "to" => ["x" => 0.0, "y" => 0.0, "z" => 0.0]],
 	"isCurrentChunkLoaded" => true,
+	"externalData" => [],
+	"isRecentlyEnderPearled" => false,
+	"isRecentlyCancelledEvent" => false,
+	"hasNoClientPredictions" => false,
+	"isSprinting" => false,
+	"isSneaking" => false,
+	"isSwimming" => false,
+	"isCreative" => false,
+	"isFlying" => false,
+	"isSpectator" => false,
 	"attackTicks" => 100.0, "projectileAttackTicks" => 100.0, "teleportTicks" => 100.0,
 	"bowShotTicks" => 100.0, "hurtTicks" => 100.0, "teleportCommandTicks" => 100.0,
 	"lastMoveTick" => 100.0, "isSurvival" => true
 ];
-$speedPayload = ["type" => "PlayerAuthInputPacket", "playerData" => $playerData, "constantData" => $constants->exportNumbers()];
+$speedPayload = ["type" => "PlayerMoveEvent", "playerData" => $playerData, "constantData" => $constants->exportNumbers()];
 $expect(SpeedA::check($speedPayload)["failed"] === false, "Stationary movement must pass SpeedA without an undefined result flag");
 $speedPayload["playerData"]["movement"]["to"]["x"] = 5.0;
 $expect(SpeedA::check($speedPayload)["failed"] === true, "SpeedA must evaluate excessive survival movement using serialized vectors");
-$speedPayload["type"] = "pocketmine\\network\\mcpe\\protocol\\PlayerAuthInputPacket";
-$expect(isset(SpeedA::check($speedPayload)["debug"]["dist"]), "SpeedA must accept fully-qualified packet class names");
+$speedPayload["type"] = "pocketmine\\event\\player\\PlayerMoveEvent";
+$expect(isset(SpeedA::check($speedPayload)["debug"]["distance"]), "SpeedA must accept fully-qualified movement event names");
 $speedPayload["playerData"]["isRecentlyCancelledEvent"] = true;
 $expect(SpeedA::check($speedPayload)["failed"] === false, "Cancelled movement must receive its grace period");
 $expect(SpeedB::check(["type" => "PlayerMoveEvent", "playerData" => []])["failed"] === false, "SpeedB must handle an empty movement snapshot");
 $speedBPayload = [
 	"type" => "PlayerMoveEvent",
 	"playerData" => [
-		"movement" => ["from" => ["x" => 0.0, "z" => 0.0], "to" => ["x" => 0.05, "z" => 0.0]],
+		"movement" => ["from" => ["x" => 0.0, "y" => 0.0, "z" => 0.0], "to" => ["x" => 0.0, "y" => 0.05, "z" => 0.0]],
 		"isCurrentChunkLoaded" => true,
-		"isOnGround" => true
-	]
+		"isOnGround" => true,
+		"isOnStairs" => true
+	],
+	"constantData" => $constants->exportNumbers()
 ];
-$expect(SpeedB::check($speedBPayload)["failed"] === false, "SpeedB must accept movement within the configured allowance");
-$speedBPayload["playerData"]["movement"]["to"]["x"] = 1.0;
-$firstSpeedBResult = SpeedB::check($speedBPayload);
-$expect($firstSpeedBResult["failed"] === false, "SpeedB must accumulate an excessive movement sample before failing");
+$expect(SpeedB::check($speedBPayload)["failed"] === false, "SpeedB must accept vertical movement within the configured allowance");
+$speedBPayload["playerData"]["movement"]["to"]["y"] = 5.0;
+$expect(SpeedB::check($speedBPayload)["failed"] === true, "SpeedB must reject excessive vertical movement");
 $fullyQualifiedSpeedBPayload = $speedBPayload;
 $fullyQualifiedSpeedBPayload["type"] = "pocketmine\\event\\player\\PlayerMoveEvent";
-$expect(isset(SpeedB::check($fullyQualifiedSpeedBPayload)["externalData"]["speedBBuffer"]), "SpeedB must accept fully-qualified event class names");
-$speedBPayload["playerData"]["externalData"] = $firstSpeedBResult["externalData"];
-$speedBPayload["playerData"]["movement"]["from"]["x"] = 1.0;
-$speedBPayload["playerData"]["movement"]["to"]["x"] = 2.0;
-$expect(SpeedB::check($speedBPayload)["failed"] === true, "SpeedB must fail after its excessive-movement buffer reaches the threshold");
-$expect(count(CheckRegistry::loadChecks()->getChecksByType(Check::TYPE_PACKET)) === 1, "Packet checks must retain their registration");
+$expect(isset(SpeedB::check($fullyQualifiedSpeedBPayload)["debug"]["distance"]), "SpeedB must accept fully-qualified movement event names");
+$expect(count(CheckRegistry::loadChecks()->getChecksByType(Check::TYPE_PLAYER)) === 2, "Player movement checks must retain their registration");
 $metrics = new MetricsData();
 $expect($metrics->getMaxPlayerCount() === 0, "Metrics must initialize maximum player count");
 $metrics->setMaxPlayerCount(20);

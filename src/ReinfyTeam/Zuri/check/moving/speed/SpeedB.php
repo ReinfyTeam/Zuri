@@ -35,8 +35,10 @@ use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\Utils;
 use function abs;
+use function is_string;
 use function max;
 use function pow;
+use function str_ends_with;
 
 
 /**
@@ -85,71 +87,81 @@ class SpeedB extends Check {
 	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>} Result array with `failed` and `debug` keys.
 	 */
 	public static function check(array $data) : array {
-		if ((Utils::readString($data["type"] ?? "")) !== "PlayerMoveEvent") {
+		$type = $data["type"] ?? null;
+		if ($type !== "PlayerMoveEvent" && !(is_string($type) && str_ends_with($type, "\\PlayerMoveEvent"))) {
 			return self::buildResult(false);
 		}
 
-		$playerData = Utils::readArray($data["playerData"]);
-		$constantData = Utils::readArray($data["constantData"]);
-		$externalData = Utils::readArray($playerData["externalData"]);
+		$playerData = Utils::readArray($data["playerData"] ?? null);
+		$constantData = Utils::readArray($data["constantData"] ?? null);
+		$externalData = Utils::readArray($playerData["externalData"] ?? null);
 
-		if ($playerData["isRecentlyEnderPearled"]) {
+		if (Utils::readBool($playerData["isRecentlyEnderPearled"] ?? false)) {
 			return self::buildResult(false); // Prevent flag with ender pearls teleportation.
 		}
+		if (Utils::readBool($playerData["isRecentlyCancelledEvent"] ?? false)) {
+			return self::buildResult(false);
+		}
+		if (!Utils::readBool($playerData["isCurrentChunkLoaded"] ?? true)) {
+			return self::buildResult(false);
+		}
 
-		$movement = Utils::readArray($playerData["movement"]);
+		$movement = Utils::readArray($playerData["movement"] ?? null);
+		if (!isset($movement["from"], $movement["to"])) {
+			return self::buildResult(false);
+		}
 		$from = Utils::arrayToVector3($movement["from"]); // @phpstan-ignore argument.type
 		$to = Utils::arrayToVector3($movement["to"]); // @phpstan-ignore argument.type
 
 		// Calculate distance (Old Y and New Y)
 		// Delta Y is used to determine if the player is moving up or down, which affects the speed limit.
-		$distance = abs($to->getX() - $from->getX());
+		$distance = abs($to->getY() - $from->getY());
 		$deltaY = $to->getY() - $from->getY();
 		$isMovingUp = $deltaY > 0.0001;
 		$isMovingDown = $deltaY < -0.0001;
 
 		$limit = 0.0;
-		if (Utils::readBool($playerData["isOnStairs"])) {
+		if (Utils::readBool($playerData["isOnStairs"] ?? false)) {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_UP]);
 			}
 			if ($isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_DOWN]);
 			}
-		} elseif (Utils::readBool($playerData["isOnClimbable"])) {
+		} elseif (Utils::readBool($playerData["isOnClimbable"] ?? ($playerData["isClimbing"] ?? false))) {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_UP]);
 			}
 			if ($isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_DOWN]);
 			}
-		} elseif (Utils::readBool($playerData["isInMagmaBubble"])) {
+		} elseif (Utils::readBool($playerData["isInMagmaBubble"] ?? false)) {
 			if ($isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_MAGMA_BUBBLE_DOWN]);
 			}
-		} elseif (Utils::readBool($playerData["isInSoulSandBubble"])) {
+		} elseif (Utils::readBool($playerData["isInSoulSandBubble"] ?? false)) {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SOUL_SAND_BUBBLE_UP]);
 			}
-		} elseif (Utils::readBool($playerData["isInLavafall"])) {
+		} elseif (Utils::readBool($playerData["isInLavafall"] ?? false)) {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_LAVAFALL_FIRE_RESISTANCE]);
 			}
-		} elseif (Utils::readBool($playerData["isLevitating"])) {
+		} elseif (Utils::readBool($playerData["isLevitating"] ?? false)) {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_LEVITATION]);
 			}
-		} elseif ((Utils::readBool($playerData["isCreative"]) || Utils::readBool($playerData["isSpectator"])) && Utils::readBool($playerData["isFlying"])) {
+		} elseif ((Utils::readBool($playerData["isCreative"] ?? false) || Utils::readBool($playerData["isSpectator"] ?? false)) && Utils::readBool($playerData["isFlying"] ?? false)) {
 			if ($isMovingUp || $isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]);
 			}
-		} elseif (!Utils::readBool($playerData["isOnGround"]) && $isMovingDown && !Utils::readBool($playerData["isOnLiquid"]) && !Utils::readBool($playerData["isOnClimbable"]) && !Utils::readBool($playerData["isGliding"])) { // @phpstan-ignore booleanNot.alwaysTrue
+		} elseif (!Utils::readBool($playerData["isOnGround"] ?? false) && $isMovingDown && !Utils::readBool($playerData["isOnLiquid"] ?? ($playerData["isInLiquid"] ?? false)) && !Utils::readBool($playerData["isOnClimbable"] ?? ($playerData["isClimbing"] ?? false)) && !Utils::readBool($playerData["isGliding"] ?? false)) { // @phpstan-ignore booleanNot.alwaysTrue
 			// Calculations from https://minecraft.fandom.com/wiki/Transportation
 			// Falling terminal calculation player logic
 			$fallTicks = Utils::readInt($playerData["getFallTicks"] ?? 0);
 
 			// fetch the initial vertical motion when the player left the ground
-			$vt0 = Utils::arraytoVector3(Utils::readArray($playerData["getMotion"]))->getY(); // @phpstan-ignore argument.type
+			$vt0 = Utils::arrayToVector3(Utils::readArray($playerData["getMotion"] ?? ($playerData["motion"] ?? null)))->getY(); // @phpstan-ignore argument.type
 
 			// Apply exact displacement formula with initial conditions
 			// Shift N by +1 to account for the formula's internal 1-tick latency offset
@@ -165,7 +177,7 @@ class SpeedB extends Check {
 			if ($limit < 0.08) {
 				$limit = 0.08;
 			}
-		} elseif (Utils::readBool($playerData["isOnScaffold"])) {
+		} elseif (Utils::readBool($playerData["isOnScaffold"] ?? false)) {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SCAFFOLDING_UP]);
 			}
@@ -173,17 +185,17 @@ class SpeedB extends Check {
 			if ($isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SCAFFOLDING_DOWN]);
 			}
-		} elseif (Utils::readBool($playerData["isSwimming"])) {
+		} elseif (Utils::readBool($playerData["isSwimming"] ?? false)) {
 			$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_UNDERWATER]);
 		} else {
-			if (Utils::readBool($playerData["isJumping"])) {
+			if (Utils::readBool($playerData["isJumping"] ?? false)) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING]); // Base limit for jumping.
 			}
 
 			// Todo: Add additional vertical movement checks for other scenarios if needed.
 		}
 
-		$limit += $limit * Utils::readFloat($constantData[ConstantPath::THRESHOLD_PERCENTAGE]); // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
+		$limit += $limit * Utils::readFloat($constantData[ConstantPath::THRESHOLD_PERCENTAGE] ?? null); // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
 		$result = $distance > $limit;
 
 		return self::buildResult($result, [

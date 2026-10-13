@@ -35,7 +35,9 @@ use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\Utils;
 use function abs;
+use function is_string;
 use function sqrt;
+use function str_ends_with;
 
 
 /**
@@ -84,19 +86,28 @@ class SpeedA extends Check {
 	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>} Result array with `failed` and `debug` keys.
 	 */
 	public static function check(array $data) : array {
-		if ((Utils::readString($data["type"] ?? "")) !== "PlayerMoveEvent") {
+		$type = $data["type"] ?? null;
+		if ($type !== "PlayerMoveEvent" && !(is_string($type) && str_ends_with($type, "\\PlayerMoveEvent"))) {
 			return self::buildResult(false);
 		}
 
-		$playerData = Utils::readArray($data["playerData"]);
-		$constantData = Utils::readArray($data["constantData"]);
-		$externalData = Utils::readArray($playerData["externalData"]);
+		$playerData = Utils::readArray($data["playerData"] ?? null);
+		$constantData = Utils::readArray($data["constantData"] ?? null);
 
-		if ($playerData["isRecentlyEnderPearled"] && $playerData["hasNoClientPredictions"]) {
+		if (Utils::readBool($playerData["isRecentlyEnderPearled"] ?? false) && Utils::readBool($playerData["hasNoClientPredictions"] ?? false)) {
 			return self::buildResult(false); // Prevent flag with ender pearls teleportation and frozen/no client prediction movements.
 		}
+		if (Utils::readBool($playerData["isRecentlyCancelledEvent"] ?? false)) {
+			return self::buildResult(false);
+		}
+		if (!Utils::readBool($playerData["isCurrentChunkLoaded"] ?? true)) {
+			return self::buildResult(false);
+		}
 
-		$movement = Utils::readArray($playerData["movement"]);
+		$movement = Utils::readArray($playerData["movement"] ?? null);
+		if (!isset($movement["from"], $movement["to"])) {
+			return self::buildResult(false);
+		}
 		$from = Utils::arrayToVector3($movement["from"]); // @phpstan-ignore argument.type
 		$to = Utils::arrayToVector3($movement["to"]); // @phpstan-ignore argument.type
 
@@ -106,42 +117,42 @@ class SpeedA extends Check {
 		$distance = sqrt(($dx * $dx) + ($dz * $dz));
 
 		$limit = 0.0;
-		if (Utils::readBool($playerData["isSprinting"])) { // Sprinting
-			$baseLimit = Utils::readBool($playerData["isRecentlyJumped"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT]); // Sprinting threshold
+		if (Utils::readBool($playerData["isSprinting"] ?? false)) { // Sprinting
+			$baseLimit = Utils::readBool($playerData["isRecentlyJumped"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT]); // Sprinting threshold
 
-			if (Utils::readBool($playerData["isElevated"])) {
+			if (Utils::readBool($playerData["isElevated"] ?? false)) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_ELEVATION]) - $baseLimit;
 			}
 
-			if (Utils::readBool($playerData["hasTwoBlockPassage"])) {
+			if (Utils::readBool($playerData["hasTwoBlockPassage"] ?? false)) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_2_BLOCK_PASSAGE])
 				- $baseLimit;
 			}
-		} elseif (Utils::readBool($playerData["isSneaking"])) { // Sneaking
+		} elseif (Utils::readBool($playerData["isSneaking"] ?? false)) { // Sneaking
 			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_FLAT]);
 
 			if (abs($dx) !== 0 || abs($dz) !== 0) {
 				$limit += $limit - Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_DIAGONAL]);
 			}
 
-			if (Utils::readBool($playerData["isOnSoulSurface"])) {
+			if (Utils::readBool($playerData["isOnSoulSurface"] ?? false)) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SOUL]) - $baseLimit;
 			}
 
-			if (Utils::readBool($playerData["hasSwiftSneak"])) {
+			if (Utils::readBool($playerData["hasSwiftSneak"] ?? false)) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SWIFT]) - $baseLimit;
 			}
-		} elseif (Utils::readBool($playerData["isSwimming"])) { // Swimming
+		} elseif (Utils::readBool($playerData["isSwimming"] ?? false)) { // Swimming
 			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_SURFACE]);
 
 
-			if (Utils::readBool($playerData["isDiving"])) {
+			if (Utils::readBool($playerData["isDiving"] ?? false)) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_DIVING]);
 			}
-		} elseif (Utils::readBool($playerData["isCreative"]) && Utils::readBool($playerData["isFlying"])) { // Creative flight
-			$baseLimit = Utils::readBool($playerData["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]); // @phpstan-ignore ternary.alwaysFalse
-		} elseif (Utils::readBool($playerData["isSpectator"]) && Utils::readBool($playerData["isFlying"])) { // Spectator flight
-			$baseLimit = Utils::readBool($playerData["isSprinting"]) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]); // @phpstan-ignore ternary.alwaysFalse
+		} elseif (Utils::readBool($playerData["isCreative"] ?? false) && Utils::readBool($playerData["isFlying"] ?? false)) { // Creative flight
+			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]); // @phpstan-ignore ternary.alwaysFalse
+		} elseif (Utils::readBool($playerData["isSpectator"] ?? false) && Utils::readBool($playerData["isFlying"] ?? false)) { // Spectator flight
+			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]); // @phpstan-ignore ternary.alwaysFalse
 		}
 
 		// For Walking

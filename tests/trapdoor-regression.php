@@ -49,6 +49,7 @@ if ($buildPath !== null) {
 	}, true, true);
 }
 
+use pocketmine\block\Block;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\entity\Location;
 use pocketmine\event\EventPriority;
@@ -63,6 +64,7 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\plugin\PluginDescription;
 use pocketmine\plugin\PluginManager;
 use pocketmine\utils\Config;
+use pocketmine\world\Position;
 use pocketmine\world\World;
 use ReinfyTeam\Zuri\check\CheckRegistry;
 use ReinfyTeam\Zuri\check\moving\speed\SpeedA;
@@ -70,7 +72,6 @@ use ReinfyTeam\Zuri\check\moving\speed\SpeedB;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConstantValues;
 use ReinfyTeam\Zuri\EventListener;
-use ReinfyTeam\Zuri\player\ExternalData;
 use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\player\PlayerZuri;
 use ReinfyTeam\Zuri\thread\CheckJob;
@@ -112,6 +113,18 @@ $world = new class extends World {
 	public function isInLoadedTerrain(Vector3 $pos) : bool {
 		return $this->terrainLoaded;
 	}
+
+	public function getMinY() : int {
+		return 0;
+	}
+
+	public function getMaxY() : int {
+		return 256;
+	}
+
+	public function getBlockAt(int $x, int $y, int $z, bool $cached = true, bool $addToCache = true) : Block {
+		return VanillaBlocks::AIR();
+	}
 };
 $player = new class($world) extends Player {
 	public int $teleports = 0;
@@ -132,6 +145,10 @@ $player = new class($world) extends Player {
 
 	public function getLocation() : Location {
 		return new Location(8.5, 64.0, 24.5, $this->testWorld, 0, 0);
+	}
+
+	public function getPosition() : Position {
+		return $this->getLocation();
 	}
 
 	public function isConnected() : bool {
@@ -176,32 +193,26 @@ $pluginManager = (new ReflectionClass(PluginManager::class))->newInstanceWithout
 $constants = (new ReflectionClass(ConstantValues::class))->newInstanceWithoutConstructor();
 (new ReflectionProperty(ConfigManager::class, "config"))->setValue($constants, new Config(dirname(__DIR__) . "/resources/constants.yml", Config::YAML));
 $queue = new CheckQueue();
-$externalData = new ExternalData();
-foreach (["checkRegistry" => CheckRegistry::loadChecks(), "checkQueue" => $queue, "constants" => $constants, "externalData" => $externalData] as $name => $value) {
+foreach (["checkRegistry" => CheckRegistry::loadChecks(), "checkQueue" => $queue, "constants" => $constants] as $name => $value) {
 	(new ReflectionProperty(ZuriAC::class, $name))->setValue(null, $value);
 }
 $tracking = PlayerManager::get($player);
 $from = new Location(8.5, 64.0, 24.5, $world, 0, 0);
 $to = new Location(8.5, 63.9, 24.5, $world, 0, 0);
-$reset = static function() use ($tracking, $externalData, $from, $to, $world, $player) : void {
+$reset = static function() use ($tracking, $from, $to, $world, $player) : void {
 	$tracking->setRecentlyCancelledEvent(0.0);
 	$tracking->setJoinedAtTheTime(microtime(true) - 10.0);
 	$tracking->setTeleportTicks(microtime(true) - 10.0);
 	$world->terrainLoaded = true;
 	PlayerManager::get($player);
-	$tracking->synchronizePositions($from);
 	$tracking->setMovement($from, $to);
-	$externalData->setExternalData($tracking, "Speed", "speedBBuffer", 3.9);
-	$externalData->setExternalData($tracking, "Speed", "speedBVerticalBuffer", 3.9);
 };
 $runChecks = static function() use ($tracking, $constants) : array {
 	$results = new CheckResults();
 	$worker = new CheckWorker($results, 2);
 	$playerData = $tracking->jsonSerialize();
 	$playerData["movement"]["to"]["x"] += 5.0;
-	$playerData["verticalState"] = PlayerZuri::VERTICAL_FALLING;
-	$playerData["verticalError"] = 5.0;
-	foreach ([SpeedA::class => "PlayerAuthInputPacket", SpeedB::class => "PlayerMoveEvent"] as $check => $type) {
+	foreach ([SpeedA::class => "PlayerMoveEvent", SpeedB::class => "PlayerMoveEvent"] as $check => $type) {
 		$worker->enqueue((new CheckJob($check, ["type" => $type, "playerData" => $playerData, "constantData" => $constants->exportNumbers()]))->serialize());
 	}
 	$output = [];
@@ -215,11 +226,11 @@ $runChecks = static function() use ($tracking, $constants) : array {
 foreach ([false, true, false, true] as $loaded) {
 	$reset();
 	$world->terrainLoaded = $loaded;
-	$tracking->setMovement($from, new Location($from->x + 5.0, $from->y, $from->z, $world, 0, 0));
+	$tracking->setMovement($from, new Location($from->x + 5.0, $from->y + 5.0, $from->z, $world, 0, 0));
 	$results = new CheckResults();
 	$worker = new CheckWorker($results, 2);
 	foreach ([new SpeedA(), new SpeedB()] as $check) {
-		$queue->addCheck(["player" => $player, "type" => $check instanceof SpeedA ? "PlayerAuthInputPacket" : "PlayerMoveEvent"], $check);
+		$queue->addCheck(["player" => $player, "type" => "PlayerMoveEvent"], $check);
 		$serialized = $queue->getNextCheck();
 		$expect($serialized !== null, "Terrain regression must use the production snapshot queue");
 		$job = CheckJob::unserialize($serialized);
@@ -229,10 +240,8 @@ foreach ([false, true, false, true] as $loaded) {
 	$world->terrainLoaded = !$loaded;
 	while ($worker->processNext()) {
 		$result = $results->getNextResult();
+		$expect(isset($result["result"]["failed"]), "Speed check worker error: " . json_encode($result, JSON_THROW_ON_ERROR));
 		$expect($result["result"]["failed"] === $loaded, "Speed checks must detect excessive movement only in the snapshot's loaded terrain");
-		if (!$loaded && $result["check"] === SpeedB::class) {
-			$expect($result["result"]["externalData"]["speedBBuffer"] === 0.0, "Unloaded terrain must reset speed accumulation");
-		}
 	}
 }
 
@@ -255,7 +264,6 @@ foreach ([67, 164] as $roofY) {
 			$event->call();
 			$denied = $mode !== "allowed";
 			$expect($tracking->isRecentlyCancelledEvent() === $denied, "Issue #76: final interaction denial must be observed at " . $mode);
-			$expect(($tracking->getCurrentState() === PlayerZuri::STATE_GRACE) === $denied, "Issue #76: denial must grant movement grace without exempting allowed trapdoor use");
 			$expect($event->isCancelled() === str_starts_with($mode, "cancel-"), "Zuri must preserve the protection plugin's cancellation decision");
 			$expect($event->useBlock() === ($mode !== "deny-block-use"), "Zuri must preserve the protection plugin's block-use decision");
 			$expect($player->teleports === 0 && $world->highestBlockQueries === 0, "Issue #76: denied trapdoor use must never teleport onto a roof");
@@ -266,7 +274,6 @@ foreach ([67, 164] as $roofY) {
 			$expect($results[SpeedA::class]["failed"] === !$denied, "SpeedA must respect denied interaction grace and retain detection afterwards");
 			$expect($results[SpeedB::class]["failed"] === !$denied, "SpeedB must respect denied interaction grace and retain detection afterwards");
 			if ($denied) {
-				$expect($results[SpeedB::class]["externalData"]["speedBBuffer"] === 0.0 && $results[SpeedB::class]["externalData"]["speedBVerticalBuffer"] === 0.0, "Denied interactions must reset accumulated speed buffers");
 				$tracking->setRecentlyCancelledEvent(microtime(true) - 3.0);
 				$expect($runChecks()[SpeedB::class]["failed"] === true, "Interaction grace must expire and restore detection");
 			}
@@ -280,11 +287,11 @@ $pluginManager->registerEvent(PlayerMoveEvent::class, static function(PlayerMove
 	$event->cancel();
 }, EventPriority::HIGHEST, $plugin);
 $reset();
-$tracking->synchronizePositions($from);
+$tracking->setMovement($from, $from);
 $move = new PlayerMoveEvent($player, $from, $to);
 $move->call();
 $expect($move->isCancelled() && $tracking->isRecentlyCancelledEvent(), "Late movement cancellation must grant grace");
-$expect($tracking->getCurrentPosition()->equals($from), "Cancelled movement must preserve the accepted position");
+$expect($tracking->getMovement()["to"]->equals($from), "Cancelled movement must preserve the accepted movement snapshot");
 $expect($queue->isEmpty() && $player->teleports === 0, "Cancelled movement must not queue checks or teleport the player");
 HandlerListManager::global()->unregisterAll();
 PlayerManager::remove($player);
