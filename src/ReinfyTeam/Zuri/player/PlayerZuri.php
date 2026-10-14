@@ -928,6 +928,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isSneaking" => $this->isSneaking(),
 			"isRawSneaking" => $this->isRawSneaking(),
 			"isGliding" => $this->isGliding(),
+			"isSwimming" => $this->isSwimming(),
 			"isOnScaffold" => $this->isOnScaffold(),
 			"isOnSoul" => $this->isOnSoul(),
 			"isOnUnderwater" => $this->isOnUnderwater(),

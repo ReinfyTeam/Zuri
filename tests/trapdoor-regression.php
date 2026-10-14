@@ -202,6 +202,10 @@ foreach (["checkRegistry" => CheckRegistry::loadChecks(), "checkQueue" => $queue
 	(new ReflectionProperty(ZuriAC::class, $name))->setValue(null, $value);
 }
 $tracking = PlayerManager::get($player);
+$tracking->setSwimming(true);
+$serializedTracking = $tracking->jsonSerialize();
+$expect(($serializedTracking["isSwimming"] ?? null) === true, "Player snapshots must serialize swimming state for movement checks");
+$tracking->setSwimming(false);
 $from = new Location(8.5, 64.0, 24.5, $world, 0, 0);
 $to = new Location(8.5, 63.9, 24.5, $world, 0, 0);
 $reset = static function() use ($tracking, $from, $to, $world, $player) : void {
