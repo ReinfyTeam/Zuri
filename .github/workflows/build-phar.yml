@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build and validate plugin
+    name: Build and validate Zuri plugin
     runs-on: ubuntu-latest
 
     steps:
