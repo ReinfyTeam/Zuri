@@ -138,7 +138,7 @@ class SpeedB extends Check {
 			if ($isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_DOWN]);
 			}
-		} elseif (Utils::readBool($playerData["isOnClimbable"] ?? ($playerData["isClimbing"] ?? false))) {
+		} elseif (Utils::readBool($playerData["isClimbing"] ?? false)) {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_UP]);
 			}
@@ -157,7 +157,7 @@ class SpeedB extends Check {
 			if ($isMovingUp || $isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]);
 			}
-		} elseif (!Utils::readBool($playerData["isOnGround"] ?? false) && !Utils::readBool($playerData["isInLiquid"] ?? false) && !Utils::readBool($playerData["isClimbing"] ?? false)) {
+		} elseif (!Utils::readBool($playerData["isOnGround"] ?? false) && !Utils::readBool($playerData["isInLiquid"] ?? false)) {
 			// Calculations from https://minecraft.fandom.com/wiki/Transportation
 			// Falling terminal calculation player logic
 			$fallTicks = Utils::readInt($playerData["airTicks"] ?? ($playerData["getFallTicks"] ?? 0));

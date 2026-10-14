@@ -227,6 +227,10 @@ $fallingPayload = [
 $expect(SpeedB::check($fallingPayload)["failed"] === false, "SpeedB must allow the first falling tick within its safety floor");
 $fallingPayload["playerData"]["movement"]["to"]["y"] = 9.91;
 $expect(SpeedB::check($fallingPayload)["failed"] === true, "SpeedB must reject excessive first-tick falling distance");
+$legacyClimbableAliasPayload = $fallingPayload;
+$legacyClimbableAliasPayload["playerData"]["isOnClimbable"] = true;
+$legacyClimbableAliasPayload["playerData"]["isClimbing"] = false;
+$expect(SpeedB::check($legacyClimbableAliasPayload)["failed"] === true, "SpeedB must ignore the legacy isOnClimbable alias and use serialized isClimbing state");
 $fallingPayload["playerData"]["airTicks"] = 2;
 $fallingPayload["playerData"]["movement"]["to"]["y"] = 9.85;
 $expect(SpeedB::check($fallingPayload)["failed"] === false, "SpeedB must allow displacement predicted after multiple falling ticks");
