@@ -52,6 +52,7 @@ if ($buildPath !== null) {
 use pocketmine\block\Block;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\entity\Location;
+use pocketmine\entity\effect\EffectManager;
 use pocketmine\event\EventPriority;
 use pocketmine\event\HandlerListManager;
 use pocketmine\event\player\PlayerInteractEvent;
@@ -177,6 +178,10 @@ $player = new class($world) extends Player {
 
 	public function getAllowFlight() : bool {
 		return false;
+	}
+
+	public function getEffects() : EffectManager {
+		return new EffectManager($this);
 	}
 
 	public function teleport(Vector3 $pos, ?float $yaw = null, ?float $pitch = null) : bool {

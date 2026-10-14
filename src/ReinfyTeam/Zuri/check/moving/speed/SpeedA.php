@@ -125,7 +125,13 @@ class SpeedA extends Check {
 		$limit = 0.0;
 		$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]);
 		$isWalking = true;
-		if (Utils::readBool($playerData["isSprinting"] ?? false)) { // Sprinting
+		if (Utils::readBool($playerData["isCreative"] ?? false) && Utils::readBool($playerData["isFlying"] ?? false)) { // Creative flight
+			$isWalking = false;
+			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]);
+		} elseif (Utils::readBool($playerData["isSpectator"] ?? false) && Utils::readBool($playerData["isFlying"] ?? false)) { // Spectator flight
+			$isWalking = false;
+			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]);
+		} elseif (Utils::readBool($playerData["isSprinting"] ?? false)) { // Sprinting
 			$isWalking = false;
 			$baseLimit = Utils::readBool($playerData["isRecentlyJumped"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT]); // Sprinting threshold
 
@@ -156,12 +162,6 @@ class SpeedA extends Check {
 			if (Utils::readBool($playerData["isDiving"] ?? false)) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_DIVING]) - $baseLimit;
 			}
-		} elseif (Utils::readBool($playerData["isCreative"] ?? false) && Utils::readBool($playerData["isFlying"] ?? false)) { // Creative flight
-			$isWalking = false;
-			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]); // @phpstan-ignore ternary.alwaysFalse
-		} elseif (Utils::readBool($playerData["isSpectator"] ?? false) && Utils::readBool($playerData["isFlying"] ?? false)) { // Spectator flight
-			$isWalking = false;
-			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]); // @phpstan-ignore ternary.alwaysFalse
 		}
 
 		$limit += $baseLimit;

@@ -177,6 +177,19 @@ $sprintPayload = $speedPayload;
 $sprintPayload["playerData"]["movement"]["to"]["x"] = 5.0;
 $sprintPayload["playerData"]["isSprinting"] = true;
 $expect(SpeedA::check($sprintPayload)["failed"] === false, "SpeedA must use the sprint movement limit");
+$creativeFlightPayload = $speedPayload;
+$creativeFlightPayload["playerData"]["movement"]["to"]["x"] = 10.0;
+$creativeFlightPayload["playerData"]["isCreative"] = true;
+$creativeFlightPayload["playerData"]["isFlying"] = true;
+$expect(SpeedA::check($creativeFlightPayload)["failed"] === false, "SpeedA must use the creative flight movement limit");
+$creativeFlightPayload["playerData"]["isSprinting"] = true;
+$creativeFlightPayload["playerData"]["movement"]["to"]["x"] = 20.0;
+$expect(SpeedA::check($creativeFlightPayload)["failed"] === false, "SpeedA must use the creative sprint flight movement limit");
+$spectatorFlightPayload = $creativeFlightPayload;
+$spectatorFlightPayload["playerData"]["isCreative"] = false;
+$spectatorFlightPayload["playerData"]["isSpectator"] = true;
+$spectatorFlightPayload["playerData"]["movement"]["to"]["x"] = 80.0;
+$expect(SpeedA::check($spectatorFlightPayload)["failed"] === false, "SpeedA must use the spectator sprint flight movement limit");
 $expect(SpeedB::check(["type" => "PlayerMoveEvent", "playerData" => []])["failed"] === false, "SpeedB must handle an empty movement snapshot");
 $speedBPayload = [
 	"type" => "PlayerMoveEvent",
