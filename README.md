@@ -17,6 +17,8 @@ Player movement and terrain state are captured on the main thread. Serialized sn
 
 Checks skip movement in terrain that has not loaded and resume after it loads. Cancelled movement and denied block interactions receive a short movement grace period. The legacy Phase trapdoor correction from [issue #76](https://github.com/ReinfyTeam/Zuri/issues/76) is absent from this rewrite; Zuri does not teleport players onto the highest block in a column.
 
+SpeedB currently leaves Elytra/gliding movement unclassified because the rewrite does not yet include an Elytra physics model. This is intentional fail-open behavior, not a claim that gliding is protected by the current vertical check.
+
 Server metrics are initialized when the plugin enables and refreshed periodically. TPS, ping and player load feed the punishment threshold calculation. The metrics delay is measured in seconds, with a minimum of one second.
 
 **Legacy features:** combat, fly, reach, scaffold, inventory, chat, proxy/VPN, IP limits, cross-check correlation, tuning presets, and the `/zuri` commands/UI are not implemented in the current rewrite. The old list of 40+ checks and wiki examples do not describe its current capabilities. Configuration entries that mention another module do not register that module.

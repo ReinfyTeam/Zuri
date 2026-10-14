@@ -232,6 +232,17 @@ $fallingPayload["playerData"]["movement"]["to"]["y"] = 9.85;
 $expect(SpeedB::check($fallingPayload)["failed"] === false, "SpeedB must allow displacement predicted after multiple falling ticks");
 $fallingPayload["playerData"]["movement"]["to"]["y"] = 9.82;
 $expect(SpeedB::check($fallingPayload)["failed"] === true, "SpeedB must reject displacement above the multi-tick falling limit");
+$glidingPayload = [
+	"type" => "PlayerMoveEvent",
+	"playerData" => [
+		"movement" => ["from" => ["x" => 0.0, "y" => 10.0, "z" => 0.0], "to" => ["x" => 0.0, "y" => 10.5, "z" => 0.0]],
+		"isCurrentChunkLoaded" => true,
+		"isOnGround" => false,
+		"isGliding" => true
+	],
+	"constantData" => $constants->exportNumbers()
+];
+$expect(SpeedB::check($glidingPayload)["failed"] === false, "SpeedB must leave gliding movement to a future Elytra physics model");
 $expect(count(CheckRegistry::loadChecks()->getChecksByType(Check::TYPE_PLAYER)) === 2, "Player movement checks must retain their registration");
 $metrics = new MetricsData();
 $expect($metrics->getMaxPlayerCount() === 0, "Metrics must initialize maximum player count");
