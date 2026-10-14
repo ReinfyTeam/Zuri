@@ -51,8 +51,8 @@ if ($buildPath !== null) {
 
 use pocketmine\block\Block;
 use pocketmine\block\VanillaBlocks;
-use pocketmine\entity\Location;
 use pocketmine\entity\effect\EffectManager;
+use pocketmine\entity\Location;
 use pocketmine\event\EventPriority;
 use pocketmine\event\HandlerListManager;
 use pocketmine\event\player\PlayerInteractEvent;
