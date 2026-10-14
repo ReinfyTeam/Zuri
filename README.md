@@ -21,6 +21,8 @@ Server metrics are initialized when the plugin enables and refreshed periodicall
 
 **Legacy features:** combat, fly, reach, scaffold, inventory, chat, proxy/VPN, IP limits, cross-check correlation, tuning presets, and the `/zuri` commands/UI are not implemented in the current rewrite. The old list of 40+ checks and wiki examples do not describe its current capabilities. Configuration entries that mention another module do not register that module.
 
+Historical reports such as [issue #38](https://github.com/ReinfyTeam/Zuri/issues/38) and [issue #75](https://github.com/ReinfyTeam/Zuri/issues/75) concern checks from the older implementation, including Omnisprint, Reach and Fly. They are not validation results for the current `1.4.1-BETA` rewrite, which must be evaluated against the checks and behavior documented here.
+
 ## Requirements and installation
 
 - Axolotl-PM 5.49.1 is the current Composer and CI test baseline, with PHP 8.2 or newer. This is the verified campaign runtime, not a claim that every API 5 patch or fork has been tested.
