@@ -38,8 +38,6 @@ zuri:
       stairs_down: 3.600 # Descending
       climbable_up: 2.350 # Ascending ladders, vines, etc.
       climbable_down: 3.000 # Descending ladders, vines, etc.
-      magma_bubble_down: 4.900 # Descending in water
-      soul_sand_bubble_up: 11.000 # Ascending in water
       lavafall_fire_resistance: 0.800
       levitation: 0.900 # Approximate levitation upward
       creative_spectator_vertical: 7.490 # Creative / spectator flight

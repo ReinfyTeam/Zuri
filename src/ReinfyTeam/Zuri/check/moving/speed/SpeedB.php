@@ -141,14 +141,6 @@ class SpeedB extends Check {
 			if ($isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_DOWN]);
 			}
-		} elseif (Utils::readBool($playerData["isInMagmaBubble"] ?? false)) {
-			if ($isMovingDown) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_MAGMA_BUBBLE_DOWN]);
-			}
-		} elseif (Utils::readBool($playerData["isInSoulBubble"] ?? false)) {
-			if ($isMovingUp) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SOUL_SAND_BUBBLE_UP]);
-			}
 		} elseif (Utils::readBool($playerData["isInLavafall"] ?? false)) {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_LAVAFALL_FIRE_RESISTANCE]);
