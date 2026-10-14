@@ -198,7 +198,15 @@ class EventListener implements Listener {
 
 		$playerZuri->setMovement($event->getFrom(), $event->getTo());
 		$playerZuri->setLastMoveTick(microtime(true));
-		$playerZuri->setOnGround(BlockUtil::isOnGround($event->getTo(), 0) || BlockUtil::isOnGround($event->getTo(), 1));
+		$isOnGround = BlockUtil::isOnGround($event->getTo(), 0) || BlockUtil::isOnGround($event->getTo(), 1);
+		$playerZuri->setOnGround($isOnGround);
+		if ($isOnGround) {
+			$playerZuri->setAirTicks(0);
+			$playerZuri->setGroundTicks($playerZuri->getGroundTicks() + 1);
+		} else {
+			$playerZuri->setAirTicks($playerZuri->getAirTicks() + 1);
+			$playerZuri->setGroundTicks(0);
+		}
 
 		$playerZuri->isOnGround()
 			? $playerZuri->setLastGroundY($player->getPosition()->getY())

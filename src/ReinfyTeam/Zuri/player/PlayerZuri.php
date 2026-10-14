@@ -454,8 +454,16 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		return $this->airTicks;
 	}
 
+	public function setAirTicks(int $airTicks) : void {
+		$this->airTicks = $airTicks;
+	}
+
 	public function getGroundTicks() : int {
 		return $this->groundTicks;
+	}
+
+	public function setGroundTicks(int $groundTicks) : void {
+		$this->groundTicks = $groundTicks;
 	}
 
 	public function isOnSoul() : bool {

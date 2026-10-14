@@ -206,15 +206,15 @@ $fallingPayload = [
 		"movement" => ["from" => ["x" => 0.0, "y" => 10.0, "z" => 0.0], "to" => ["x" => 0.0, "y" => 9.95, "z" => 0.0]],
 		"isCurrentChunkLoaded" => true,
 		"isOnGround" => false,
-		"getFallTicks" => 0,
-		"getMotion" => ["x" => 0.0, "y" => 0.0, "z" => 0.0]
+		"airTicks" => 0,
+		"motion" => ["x" => 0.0, "y" => 0.0, "z" => 0.0]
 	],
 	"constantData" => $constants->exportNumbers()
 ];
 $expect(SpeedB::check($fallingPayload)["failed"] === false, "SpeedB must allow the first falling tick within its safety floor");
 $fallingPayload["playerData"]["movement"]["to"]["y"] = 9.91;
 $expect(SpeedB::check($fallingPayload)["failed"] === true, "SpeedB must reject excessive first-tick falling distance");
-$fallingPayload["playerData"]["getFallTicks"] = 2;
+$fallingPayload["playerData"]["airTicks"] = 2;
 $fallingPayload["playerData"]["movement"]["to"]["y"] = 9.85;
 $expect(SpeedB::check($fallingPayload)["failed"] === false, "SpeedB must allow displacement predicted after multiple falling ticks");
 $fallingPayload["playerData"]["movement"]["to"]["y"] = 9.82;

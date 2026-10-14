@@ -164,10 +164,10 @@ class SpeedB extends Check {
 		} elseif (!Utils::readBool($playerData["isOnGround"] ?? false) && $isMovingDown && !Utils::readBool($playerData["isOnLiquid"] ?? ($playerData["isInLiquid"] ?? false)) && !Utils::readBool($playerData["isOnClimbable"] ?? ($playerData["isClimbing"] ?? false)) && !Utils::readBool($playerData["isGliding"] ?? false)) { // @phpstan-ignore booleanNot.alwaysTrue
 			// Calculations from https://minecraft.fandom.com/wiki/Transportation
 			// Falling terminal calculation player logic
-			$fallTicks = Utils::readInt($playerData["getFallTicks"] ?? 0);
+			$fallTicks = Utils::readInt($playerData["airTicks"] ?? ($playerData["getFallTicks"] ?? 0));
 
 			// fetch the initial vertical motion when the player left the ground
-			$vt0 = Utils::arrayToVector3(Utils::readArray($playerData["getMotion"] ?? ($playerData["motion"] ?? null)))->getY(); // @phpstan-ignore argument.type
+			$vt0 = Utils::arrayToVector3(Utils::readArray($playerData["motion"] ?? ($playerData["getMotion"] ?? null)))->getY(); // @phpstan-ignore argument.type
 
 			// Apply exact displacement formula with initial conditions
 			// Shift N by +1 to account for the formula's internal 1-tick latency offset
