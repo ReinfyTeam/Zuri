@@ -27,7 +27,7 @@ Historical reports such as [issue #38](https://github.com/ReinfyTeam/Zuri/issues
 
 ## Requirements and installation
 
-- Axolotl-PM 5.49.1 is the current Composer and CI test baseline, with PHP 8.2 or newer. This is the verified campaign runtime, not a claim that every API 5 patch or fork has been tested.
+- An Axolotl-PM/PocketMine-MP API 5-compatible server, with PHP 8.2 or newer. The repository's workflow pins a reviewed runtime revision for reproducible CI; that check does not claim that every API 5 patch or fork has been tested.
 - A compiled `Zuri.phar`. Virion dependencies are bundled by the build; Composer is required to build from source.
 - Other PocketMine-MP forks and versions outside the tested baseline are not covered by this compatibility claim.
 
