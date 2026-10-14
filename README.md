@@ -10,8 +10,8 @@ The rewrite is intended for a **pre-release**. Test it on a staging server with 
 
 | Check | Input | Behavior |
 | --- | --- | --- |
-| SpeedA | `PlayerAuthInputPacket` | Compares horizontal movement with the expected movement allowance. |
-| SpeedB | `PlayerMoveEvent` | Tracks horizontal and vertical movement with accumulating detection buffers and movement-state allowances. |
+| SpeedA | `PlayerMoveEvent` | Compares horizontal movement with the expected movement allowance. |
+| SpeedB | `PlayerMoveEvent` | Compares vertical movement with the expected movement allowance and movement-state allowances. |
 
 Player movement and terrain state are captured on the main thread. Serialized snapshots are processed by check workers within one background coordinator thread, and results return to the main thread for violation handling. `zuri.threads.max_worker` controls the number of check workers within that coordinator.
 
