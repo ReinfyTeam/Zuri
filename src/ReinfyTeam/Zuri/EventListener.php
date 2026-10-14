@@ -234,8 +234,8 @@ class EventListener implements Listener {
 		$playerZuri->setOnSoul(BlockUtil::isOnSoul($event->getTo(), 0));
 		$playerZuri->setOnSnow(BlockUtil::isOnSnow($event->getTo(), 0));
 		$playerZuri->setLastMoveTick((float) Server::getInstance()->getTick());
-		$playerZuri->setBlockAbove(BlockUtil::getBlockAbove($player)->isSolid());
-		$playerZuri->setGroundSolid(BlockUtil::isGroundSolid($player));
+		$playerZuri->setBlockAbove(BlockUtil::isSolid(BlockUtil::getBlockAbove($event->getTo())));
+		$playerZuri->setGroundSolid(BlockUtil::isGroundSolid($player->getLocation()));
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player

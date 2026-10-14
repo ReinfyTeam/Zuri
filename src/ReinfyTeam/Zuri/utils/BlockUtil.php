@@ -35,9 +35,7 @@ use pocketmine\block\Block;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Location;
 use pocketmine\math\Vector3;
-use pocketmine\player\Player;
 use pocketmine\world\Position;
-use pocketmine\world\World;
 use function abs;
 use function array_flip;
 use function count;
@@ -55,6 +53,14 @@ final class BlockUtil {
 
 	public static function isOnSoul(Location $location, int $depth = 1) : bool {
 		return self::isUnderblock($location, [BlockTypeIds::SOUL_SAND, BlockTypeIds::SOUL_SOIL], $depth);
+	}
+
+	public static function isSolid(Block $block) : bool {
+		if (!$block->canBeFlowedInto() || count($block->getCollisionBoxes()) > 0 || !$block->isTransparent()) {
+    		return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -182,10 +188,8 @@ final class BlockUtil {
 	 *
 	 * @return int[]
 	 */
-	public static function getSurroundingBlocks(Player $player) : array {
-		$world = $player->getWorld();
-		$loc = $player->getLocation();
-
+	public static function getSurroundingBlocks(Location $loc) : array {
+		$world = $loc->getWorld();
 		$x = (int) $loc->getX();
 		$y = (int) $loc->getY();
 		$z = (int) $loc->getZ();
@@ -214,9 +218,8 @@ final class BlockUtil {
 	/**
 	 * Determines whether the ground in a 5x5 area beneath the player is solid.
 	 */
-	public static function isGroundSolid(Player $player) : bool {
-		$world = $player->getWorld();
-		$pos = $player->getPosition();
+	public static function isGroundSolid(Location $pos) : bool {
+		$world = $pos->getWorld();
 
 		$baseX = (int) $pos->x;
 		$baseY = (int) $pos->y - 1;
@@ -228,7 +231,7 @@ final class BlockUtil {
 			for ($z = -2; $z <= 2; $z++) {
 				$bz = $baseZ + $z;
 
-				if (!$world->getBlockAt($bx, $baseY, $bz)->isSolid()) {
+				if (!self::isSolid($world->getBlockAt($bx, $baseY, $bz))) {
 					return false;
 				}
 			}
@@ -240,14 +243,16 @@ final class BlockUtil {
 	/**
 	 * Returns the block directly above the player's position.
 	 */
-	public static function getBlockAbove(Player $player) : Block {
-		$pos = $player->getPosition();
-		$world = $player->getWorld();
+	public static function getBlockAbove(Location $loc) : Block {
+		$world = $loc->getWorld();
+		$x = (int) $loc->getX();
+		$y = (int) $loc->getY();
+		$z = (int) $loc->getZ();
 
 		return $world->getBlockAt(
-			(int) $pos->x,
-			(int) $pos->y + 1,
-			(int) $pos->z
+			(int) $x,
+			(int) $y + 1,
+			(int) $z
 		);
 	}
 
@@ -329,8 +334,8 @@ final class BlockUtil {
 		$y = (int) floor($location->getY());
 		$z = (int) floor($location->getZ());
 
-		return !$world->getBlockAt($x, $y + 1, $z)->isSolid() &&
-			!$world->getBlockAt($x, $y + 2, $z)->isSolid();
+		return !self::isSolid($world->getBlockAt($x, $y + 1, $z)) &&
+			!self::isSolid($world->getBlockAt($x, $y + 2, $z));
 	}
 
 	/**
@@ -498,9 +503,9 @@ final class BlockUtil {
 				// 2. Torso position must be passable (Air, etc.)
 				// 3. Ground position must be solid to stand on, and NOT dangerous (Lava/Fire)
 				if (
-					$feetBlock->isSolid() &&
-					$torsoBlock->isSolid() &&
-					$groundBlock->isSolid() &&
+					self::isSolid($feetBlock) &&
+					self::isSolid($torsoBlock) &&
+					self::isSolid($groundBlock) &&
 					$groundBlock->getTypeId() !== BlockTypeIds::LAVA &&
 					$groundBlock->getTypeId() !== BlockTypeIds::FIRE
 				) {
