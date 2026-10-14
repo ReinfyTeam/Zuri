@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\utils;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\data\bedrock\EnchantmentIdMap;
 use pocketmine\data\bedrock\EnchantmentIds;
+use pocketmine\entity\effect\EffectManager;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\item\enchantment\VanillaEnchantments;
 use pocketmine\math\Vector2;
@@ -70,6 +71,25 @@ final class Utils {
 
 	public static function readString(mixed $value, string $default = "") : string {
 		return is_string($value) ? $value : $default;
+	}
+
+	/**
+	 * Extracts the effects from an EffectManager instance and returns them as an array.
+	 * @return list<array{name: string, amplifier: int, duration: int}> Array of effects with name, amplifier, and duration.
+	 */
+	public static function effectsToArray(EffectManager $instance) : array {
+		$effects = [];
+		foreach ($instance->all() as $effect) {
+			$effectType = $effect->getType(); // Returns the generic Effect type
+
+			$name = Utils::readString($effectType->getName()); // e.g., "potion.moveSpeed"
+			$amplifier = $effect->getAmplifier(); // e.g., 0 for Speed I, 1 for Speed II
+			$duration = $effect->getDuration(); // Duration remaining in server ticks
+
+			$effects[] = ["name" => $name, "amplifier" => $amplifier, "duration" => $duration];
+		}
+
+		return $effects;
 	}
 
 	/**

@@ -135,6 +135,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private array $movement;
 	/** @var list<float> */
 	private array $cpsData = [];
+	/** @var list<array{name: string, amplifier: int, duration: int}> */
+	private array $effects = [];
 
 	private float $pitch = 0.0;
 	private float $yaw = 0.0;
@@ -172,7 +174,25 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->setCurrentChunkLoaded(WorldUtil::isCurrentChunkIsLoaded($player));
 		$this->setNoClientPredictions($player->hasNoClientPredictions());
 		$this->setSafePosition(BlockUtil::findSafePosition($player->getPosition()));
+		$this->setEffects(Utils::effectsToArray($player->getEffects()));
 		return $this;
+	}
+
+	/**
+	 * Returns the array of effects.
+	 * @return list<array{name: string, amplifier: int, duration: int}> Array of effects with name, amplifier, and duration.
+	 */
+	public function getEffects() : array {
+		return $this->effects;
+	}
+
+	/**
+	 * Sets the array of effects.
+	 * Use {@link Utils::effectsToArray()} to convert a player's active effects manager into the structurally compliant format required here.
+	 * @param list<array{name: string, amplifier: int, duration: int}> $effects Array of effects with name, amplifier, and duration.
+	 */
+	public function setEffects(array $effects) : void {
+		$this->effects = $effects;
 	}
 
 	public function getMoveVecX() : float {

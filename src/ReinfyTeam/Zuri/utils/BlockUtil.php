@@ -55,9 +55,13 @@ final class BlockUtil {
 		return self::isUnderblock($location, [BlockTypeIds::SOUL_SAND, BlockTypeIds::SOUL_SOIL], $depth);
 	}
 
+	public static function isInLava(Location $location, int $depth = 1) : bool {
+		return self::isUnderBlock($location, [BlockTypeIds::LAVA], $depth);
+	}
+
 	public static function isSolid(Block $block) : bool {
 		if (!$block->canBeFlowedInto() || count($block->getCollisionBoxes()) > 0 || !$block->isTransparent()) {
-    		return true;
+			return true;
 		}
 
 		return false;

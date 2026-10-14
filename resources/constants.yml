@@ -13,7 +13,6 @@ zuri:
       walk_diagonal: 4.405 # Diagonal movement (no jumping)
       sprint: 5.612 # Base speed for Flat terrain (no jump)
       sprint_jump: 7.127 # Base speed for Flat terrain (jumping + sprint)
-      sprint_jump_elevation: 7.508 # Sprint-jumping with + 1 block elevation momentum
       sprint_jump_2_block_passage: 9.732 # Sprint-jumping 2 block-high passage
       sneaking_flat: 1.300 # Base speed for Flat terrain (no jump)
       sneaking_diagonal: 1.830 # Approximately 45-degree angle

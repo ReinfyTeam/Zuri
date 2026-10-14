@@ -236,6 +236,7 @@ class EventListener implements Listener {
 		$playerZuri->setLastMoveTick((float) Server::getInstance()->getTick());
 		$playerZuri->setBlockAbove(BlockUtil::isSolid(BlockUtil::getBlockAbove($event->getTo())));
 		$playerZuri->setGroundSolid(BlockUtil::isGroundSolid($player->getLocation()));
+		$playerZuri->setInLava(BlockUtil::isInLava($player->getLocation()));
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player

@@ -145,7 +145,7 @@ class SpeedB extends Check {
 			if ($isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_MAGMA_BUBBLE_DOWN]);
 			}
-		} elseif (Utils::readBool($playerData["isInSoulSandBubble"] ?? false)) {
+		} elseif (Utils::readBool($playerData["isInSoulBubble"] ?? false)) {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SOUL_SAND_BUBBLE_UP]);
 			}
@@ -161,7 +161,7 @@ class SpeedB extends Check {
 			if ($isMovingUp || $isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]);
 			}
-		} elseif (!Utils::readBool($playerData["isOnGround"] ?? false) && $isMovingDown && !Utils::readBool($playerData["isOnLiquid"] ?? ($playerData["isInLiquid"] ?? false)) && !Utils::readBool($playerData["isOnClimbable"] ?? ($playerData["isClimbing"] ?? false)) && !Utils::readBool($playerData["isGliding"] ?? false)) { // @phpstan-ignore booleanNot.alwaysTrue
+		} elseif (!Utils::readBool($playerData["isOnGround"] ?? false) && !Utils::readBool($playerData["isInLiquid"] ?? ($playerData["isInLiquid"] ?? false)) && !Utils::readBool($playerData["isOnClimbable"] ?? ($playerData["isClimbing"] ?? false)) && !Utils::readBool($playerData["isGliding"] ?? false)) { // @phpstan-ignore booleanNot.alwaysTrue
 			// Calculations from https://minecraft.fandom.com/wiki/Transportation
 			// Falling terminal calculation player logic
 			$fallTicks = Utils::readInt($playerData["airTicks"] ?? ($playerData["getFallTicks"] ?? 0));

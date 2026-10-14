@@ -129,10 +129,6 @@ class SpeedA extends Check {
 			$isWalking = false;
 			$baseLimit = Utils::readBool($playerData["isRecentlyJumped"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT]); // Sprinting threshold
 
-			if (Utils::readBool($playerData["isElevated"] ?? false)) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_ELEVATION]) - $baseLimit;
-			}
-
 			if (Utils::readBool($playerData["hasTwoBlockPassage"] ?? false)) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_2_BLOCK_PASSAGE])
 				- $baseLimit;
@@ -145,7 +141,7 @@ class SpeedA extends Check {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_DIAGONAL]) - $baseLimit;
 			}
 
-			if (Utils::readBool($playerData["isOnSoulSurface"] ?? false)) {
+			if (Utils::readBool($playerData["isOnSoul"] ?? false)) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SOUL]) - $baseLimit;
 			}
 
