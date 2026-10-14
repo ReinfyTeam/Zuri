@@ -60,7 +60,7 @@ A runtime smoke test starts the compiled plugin on a real PocketMine server, ver
 composer test:runtime -- /path/to/PocketMine-MP.phar
 ```
 
-The build workflow runs this test on the pinned Axolotl-PM **5.49.1** baseline. Runtime smoke tests and synthetic movement regressions do not replace gameplay testing with actual Bedrock clients.
+The build workflow runs this test on its pinned Axolotl-PM compatibility baseline. Runtime smoke tests and synthetic movement regressions do not replace gameplay testing with actual Bedrock clients.
 
 ## Releases
 
