@@ -202,12 +202,27 @@ foreach (["checkRegistry" => CheckRegistry::loadChecks(), "checkQueue" => $queue
 	(new ReflectionProperty(ZuriAC::class, $name))->setValue(null, $value);
 }
 $tracking = PlayerManager::get($player);
+$from = new Location(8.5, 64.0, 24.5, $world, 0, 0);
+$to = new Location(8.5, 63.8, 24.5, $world, 0, 0);
 $tracking->setSwimming(true);
+$tracking->setInLiquid(true);
+$tracking->setOnGround(false);
+$tracking->setMovement($from, new Location($from->x + 1.0, $to->y, $from->z, $world, 0, 0));
 $serializedTracking = $tracking->jsonSerialize();
 $expect(($serializedTracking["isSwimming"] ?? null) === true, "Player snapshots must serialize swimming state for movement checks");
+$results = new CheckResults();
+$worker = new CheckWorker($results, 2);
+foreach ([new SpeedA(), new SpeedB()] as $check) {
+	$queue->addCheck(["player" => $player, "type" => "PlayerMoveEvent"], $check);
+	$serialized = $queue->getNextCheck();
+	$expect($serialized !== null, "Swimming regression must use the production snapshot queue");
+	$worker->enqueue($serialized);
+}
+while ($worker->processNext()) {
+	$result = $results->getNextResult();
+	$expect($result["result"]["failed"] === false, "Serialized swimming state must apply the configured movement allowance to " . $result["check"]);
+}
 $tracking->setSwimming(false);
-$from = new Location(8.5, 64.0, 24.5, $world, 0, 0);
-$to = new Location(8.5, 63.9, 24.5, $world, 0, 0);
 $reset = static function() use ($tracking, $from, $to, $world, $player) : void {
 	$tracking->setRecentlyCancelledEvent(0.0);
 	$tracking->setJoinedAtTheTime(microtime(true) - 10.0);
