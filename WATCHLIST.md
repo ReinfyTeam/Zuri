@@ -1,6 +1,6 @@
 # Watchlist / Development Phase
 
-The current `main` branch is the `1.4.1-BETA` rewrite and currently implements only the `SpeedA` and `SpeedB` movement checks. The entries below were inherited from the pre-rewrite roadmap; unchecked entries are legacy follow-up ideas, not claims that those modules exist in the current branch. Current movement issues and compatibility limits are tracked in the README and the repository issues.
+The current `main` branch is the `1.4.2-BETA` rewrite and currently implements only the `SpeedA` and `SpeedB` movement checks. The entries below were inherited from the pre-rewrite roadmap; unchecked entries are legacy follow-up ideas, not claims that those modules exist in the current branch. Current movement issues and compatibility limits are tracked in the README and the repository issues.
 
 - [x] AirJump Module
 - [ ] OmniSprint fix

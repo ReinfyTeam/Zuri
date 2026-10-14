@@ -2,7 +2,7 @@
 
 [![](https://poggit.pmmp.io/shield.state/Zuri)](https://poggit.pmmp.io/p/Zuri) [![](https://poggit.pmmp.io/shield.api/Zuri)](https://poggit.pmmp.io/p/Zuri) [![](https://poggit.pmmp.io/shield.dl.total/Zuri)](https://poggit.pmmp.io/p/Zuri)
 
-Zuri is a movement anticheat for PocketMine-MP. The current `main` branch is the **1.4.1-BETA rewrite** and registers two checks: **SpeedA** and **SpeedB**. This document describes that branch; older releases have a different feature set.
+Zuri is a movement anticheat for PocketMine-MP. The current `main` branch is the **1.4.2-BETA rewrite** and registers two checks: **SpeedA** and **SpeedB**. This document describes that branch; older releases have a different feature set.
 
 The rewrite is intended for a **pre-release**. Test it on a staging server with your protection plugins and normal player movement before enabling kick or ban punishments.
 
@@ -23,7 +23,7 @@ Server metrics are initialized when the plugin enables and refreshed periodicall
 
 **Legacy features:** combat, fly, reach, scaffold, inventory, chat, proxy/VPN, IP limits, cross-check correlation, tuning presets, and the `/zuri` commands/UI are not implemented in the current rewrite. The old list of 40+ checks and wiki examples do not describe its current capabilities. Configuration entries that mention another module do not register that module.
 
-Historical reports such as [issue #38](https://github.com/ReinfyTeam/Zuri/issues/38) and [issue #75](https://github.com/ReinfyTeam/Zuri/issues/75) concern checks from the older implementation, including Omnisprint, Reach and Fly. They are not validation results for the current `1.4.1-BETA` rewrite, which must be evaluated against the checks and behavior documented here.
+Historical reports such as [issue #38](https://github.com/ReinfyTeam/Zuri/issues/38) and [issue #75](https://github.com/ReinfyTeam/Zuri/issues/75) concern checks from the older implementation, including Omnisprint, Reach and Fly. They are not validation results for the current `1.4.2-BETA` rewrite, which must be evaluated against the checks and behavior documented here.
 
 ## Requirements and installation
 
@@ -64,15 +64,15 @@ The build workflow runs this test on its pinned Axolotl-PM compatibility baselin
 
 ## Releases
 
-The release workflow accepts a version through manual dispatch or a commit subject such as `release: v1.4.1-BETA`. It marks versions with a suffix as **Pre-release** and sets `make_latest=false`. A plain version such as `1.4.0` is treated as stable and may become Latest.
+The release workflow accepts a version through manual dispatch or a commit subject such as `release: v1.4.2-BETA`. It marks versions with a suffix as **Pre-release** and sets `make_latest=false`. A plain version such as `1.4.0` is treated as stable and may become Latest.
 
-Use `v1.4.1-BETA` for the current rewrite. A stable release requires further gameplay and compatibility validation for the supported checks.
+Use `v1.4.2-BETA` for the current rewrite. A stable release requires further gameplay and compatibility validation for the supported checks.
 
 ## Feedback and contributions
 
 Report bugs at [ReinfyTeam/Zuri issues](https://github.com/ReinfyTeam/Zuri/issues). Include the Zuri version, PocketMine-MP version, relevant check, configuration, other plugins and the steps needed to reproduce the behavior. You can also join the [community Discord](https://discord.com/invite/7u7qKsvSxg).
 
-The [wiki](https://github.com/ReinfyTeam/Zuri/wiki) contains historical documentation; verify its API examples against the current source before using them with 1.4.1-BETA.
+The [wiki](https://github.com/ReinfyTeam/Zuri/wiki) contains historical documentation; verify its API examples against the current source before using them with 1.4.2-BETA.
 
 The project originated as a continuation and rewrite of [ReallyCheat](https://github.com/hachkingtohach1/ReallyCheat/) by [hachkingtohach1](https://github.com/hachkingtohach1/). Current bundled dependencies are listed in [composer.json](composer.json) and pinned in [composer.lock](composer.lock).
 
