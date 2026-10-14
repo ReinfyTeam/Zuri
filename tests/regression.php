@@ -76,6 +76,9 @@ $expect((Utils::arrayToVector2(["x" => 1.5, "z" => -2.0])) == new Vector2(1.5, -
 $expect(Utils::arrayToVector3(Utils::vector3ToArray(new Vector3(1, 2, 3)))->equals(new Vector3(1, 2, 3)), "Vector3 must round-trip");
 $expect(Utils::readFloat("invalid", 2.0) === 2.0, "Invalid numeric data must use the fallback");
 $expect(Utils::readFloat(3) === 3.0, "Integer movement data must be accepted");
+$expect(Utils::getEffectMovementMultiplier([["name" => "potion.moveSpeed", "amplifier" => 0, "duration" => 100]]) === 1.2, "Speed I must increase the movement multiplier");
+$expect(Utils::getEffectMovementMultiplier([["name" => "potion.moveSlowdown", "amplifier" => 1, "duration" => 100]]) === 0.7, "Slowness II must reduce the movement multiplier");
+$expect(Utils::getEffectMovementMultiplier([["name" => "potion.moveSpeed", "amplifier" => 0, "duration" => 0]]) === 1.0, "Expired movement effects must not change the multiplier");
 $expect(MathUtil::horizontalVelocity(0, 0, 0.25, 0, 1) === ["x" => 5.0, "z" => 0.0], "Velocity must convert blocks per tick to blocks per second");
 
 $violations = new Violation();
@@ -166,6 +169,14 @@ $expect(isset(SpeedA::check($speedPayload)["debug"]["distance"]), "SpeedA must a
 $speedPayload["playerData"]["isRecentlyCancelledEvent"] = true;
 $expect(SpeedA::check($speedPayload)["failed"] === false, "Cancelled movement must receive its grace period");
 $speedPayload["playerData"]["isRecentlyCancelledEvent"] = false;
+$speedEffectPayload = $speedPayload;
+$speedEffectPayload["playerData"]["movement"]["to"]["x"] = 5.0;
+$speedEffectPayload["playerData"]["effects"] = [["name" => "potion.moveSpeed", "amplifier" => 0, "duration" => 100]];
+$expect(SpeedA::check($speedEffectPayload)["failed"] === false, "SpeedA must allow movement increased by Speed I");
+$slowEffectPayload = $speedPayload;
+$slowEffectPayload["playerData"]["movement"]["to"]["x"] = 4.2;
+$slowEffectPayload["playerData"]["effects"] = [["name" => "potion.moveSlowdown", "amplifier" => 0, "duration" => 100]];
+$expect(SpeedA::check($slowEffectPayload)["failed"] === true, "SpeedA must apply Slowness I to the movement limit");
 $speedPayload["playerData"]["teleportTicks"] = 0.0;
 $speedPayload["playerData"]["teleportCommandTicks"] = 100.0;
 $expect(SpeedA::check($speedPayload)["failed"] === false, "SpeedA must ignore movement immediately after a teleport");

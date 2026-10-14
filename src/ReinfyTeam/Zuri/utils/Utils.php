@@ -93,6 +93,38 @@ final class Utils {
 	}
 
 	/**
+	 * Calculates the horizontal movement multiplier contributed by Speed and Slowness effects.
+	 *
+	 * The effect snapshot stores the raw amplifier, where 0 represents level I.
+	 *
+	 * @param array<array-key,mixed> $effects
+	 */
+	public static function getEffectMovementMultiplier(array $effects) : float {
+		$speedLevel = 0;
+		$slownessLevel = 0;
+		foreach ($effects as $effect) {
+			$data = self::readArray($effect);
+			$name = self::readString($data["name"] ?? "");
+			$duration = self::readInt($data["duration"] ?? 1, 1);
+			if ($duration <= 0) {
+				continue;
+			}
+
+			$level = self::readInt($data["amplifier"] ?? -1, -1) + 1;
+			if ($level <= 0) {
+				continue;
+			}
+			if ($name === "potion.moveSpeed" || $name === "speed") {
+				$speedLevel = max($speedLevel, $level);
+			} elseif ($name === "potion.moveSlowdown" || $name === "slowness") {
+				$slownessLevel = max($slownessLevel, $level);
+			}
+		}
+
+		return (1.0 + (0.2 * $speedLevel)) * max(0.0, 1.0 - (0.15 * $slownessLevel));
+	}
+
+	/**
 	 * Converts a Vector3 to an associative array.
 	 *
 	 * @return array{x: float, y: float, z: float}
