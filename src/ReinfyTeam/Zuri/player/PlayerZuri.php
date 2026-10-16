@@ -37,9 +37,11 @@ use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
+use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use ReinfyTeam\Zuri\utils\WorldUtil;
+use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
 use function count;
@@ -99,6 +101,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $underwater = false;
 	private bool $twoBlockPassage = false;
 	private bool $dead = false;
+	private bool $bypassPermission = false;
+
 	private int $airTicks = 0;
 	private int $groundTicks = 0;
 
@@ -175,7 +179,16 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->setNoClientPredictions($player->hasNoClientPredictions());
 		$this->setSafePosition(BlockUtil::findSafePosition($player->getPosition()));
 		$this->setEffects(Utils::effectsToArray($player->getEffects()));
+		$this->setBypassPermission($player->hasPermission(ZuriAC::getConfigManager()->getString(ConfigPath::ZURI_BYPASS_PERMISSION)));
 		return $this;
+	}
+
+	public function setBypassPermission(bool $data) : void {
+		$this->bypassPermission = $data;
+	}
+
+	public function hasBypassPermission() : bool {
+		return $this->bypassPermission;
 	}
 
 	/**

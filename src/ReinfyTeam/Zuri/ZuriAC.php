@@ -33,7 +33,6 @@ namespace ReinfyTeam\Zuri;
 
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\utils\SingletonTrait;
-use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\check\CheckRegistry;
 use ReinfyTeam\Zuri\check\MetricsData;
 use ReinfyTeam\Zuri\check\ResultsHandler;
@@ -42,10 +41,12 @@ use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\config\ConstantValues;
 use ReinfyTeam\Zuri\config\language\LanguageManager;
 use ReinfyTeam\Zuri\player\ExternalData;
+use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\task\MetricsTask;
 use ReinfyTeam\Zuri\thread\CheckQueue;
 use ReinfyTeam\Zuri\thread\CheckResults;
 use ReinfyTeam\Zuri\thread\CheckThread;
+use ReinfyTeam\Zuri\utils\PermissionManager;
 use function max;
 
 /**
@@ -65,6 +66,8 @@ class ZuriAC extends Loader {
 	private static LanguageManager $languageManager;
 	private static MetricsData $metricsData;
 	private static ExternalData $externalData;
+	private static PermissionManager $permissionManager;
+	private static PlayerManager $playerManager;
 
 	/**
 	 * Called when the plugin is loaded.
@@ -89,6 +92,8 @@ class ZuriAC extends Loader {
 
 		self::$checkQueue = new CheckQueue();
 		self::$checkResults = new CheckResults();
+		self::$playerManager = new PlayerManager();
+		self::$permissionManager = new PermissionManager();
 		self::$checkRegistry = CheckRegistry::loadChecks();
 
 		self::$checkThread = new CheckThread(self::$checkQueue, self::$checkResults, $workerCount, $workerCapacity);
@@ -103,6 +108,7 @@ class ZuriAC extends Loader {
 			}
 		}), 1);
 		self::registerEvents();
+		self::loadCommands();
 	}
 
 	protected function onDisable() : void {
@@ -167,5 +173,19 @@ class ZuriAC extends Loader {
 	 */
 	public static function getCheckThread() : CheckThread {
 		return self::$checkThread;
+	}
+
+	/**
+	 * Returns the PermissionManager instance.
+	 */
+	public static function getPermissionManager() : PermissionManager {
+		return self::$permissionManager;
+	}
+
+	/**
+	 * Returns the PlayerManager instance.
+	 */
+	public static function getPlayerManager() : PlayerManager {
+		return self::$playerManager;
 	}
 }

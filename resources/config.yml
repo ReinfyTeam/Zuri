@@ -69,8 +69,13 @@ zuri:
       type: command
       # To customize kick messages, please see language files to edit manually.
       command: "kick {player} Unfair Advantage"
-  commands:
-    permission: zuri.command
+  permissions:
+    command: zuri.command
+    bypass: zuri.bypass
+    alerts: zuri.alerts
+  world_bypass:
+    mode: blacklist
+    list: ["world", "hub", "lobby"]
 
 
 

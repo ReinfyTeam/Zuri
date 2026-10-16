@@ -36,7 +36,6 @@ use pocketmine\player\Player;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\config\language\LanguagePath;
-use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\TextUtil;
 use ReinfyTeam\Zuri\utils\Utils;
@@ -78,11 +77,7 @@ final class ResultsHandler {
 		if ($playerName === null || ($player = Server::getInstance()->getPlayerExact($playerName)) === null || !is_subclass_of($checkClass, Check::class)) {
 			return; // if the player is not online or the check class is invalid, we cannot handle the result
 		}
-		$playerZuri = PlayerManager::get($player);
-
-		if (($result["failed"] ?? false) === true) {
-			self::handlePunishment($player, $checkClass, $subType);
-		}
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		$externalData = Utils::readArray($result["externalData"] ?? null);
 		foreach ($externalData as $parameter => $value) {
@@ -99,13 +94,21 @@ final class ResultsHandler {
 				"{debug_data}" => TextUtil::prettyPrintArray($debugData)
 			]));
 		}
+
+		if ($playerZuri->hasBypassPermission()) {
+			return; // if the player has bypass permission, we do not apply any violations or punishments
+		}
+
+		if (($result["failed"] ?? false) === true) {
+			self::handlePunishment($player, $checkClass, $subType);
+		}
 	}
 
 	public static function handlePunishment(Player $player, string $check, string $subType) : void {
 		/** @var Check $checkClass */
 		$checkClass = ZuriAC::getCheckRegistry()->getCheckByName($check, $subType);
 		$threshold = self::adjustThreshold($player, $checkClass);
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 		$playerZuri->addPreViolation($checkClass);
 		if ($playerZuri->getPreViolations($checkClass) < max(1, $checkClass->getMaxPreViolation()) * $threshold) {
 			return;

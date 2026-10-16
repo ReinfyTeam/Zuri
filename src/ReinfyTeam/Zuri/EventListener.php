@@ -73,7 +73,6 @@ use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\Utils as PMMPUtils;
 use ReinfyTeam\Zuri\check\Check;
-use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function microtime;
@@ -96,7 +95,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 		$playerZuri->setSprinting($player->isSprinting());
 		$playerZuri->setSneaking($player->isSneakPressed());
 		$playerZuri->setGliding($player->isGliding());
@@ -192,7 +191,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 			return;
@@ -256,7 +255,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -275,7 +274,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -301,7 +300,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -325,7 +324,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		$playerZuri->setInventoryOpen(false);
 
@@ -345,7 +344,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -375,7 +374,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		$playerZuri->setJumpTicks(microtime(true));
 
@@ -395,7 +394,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		$playerZuri->setJoinedAtTheTime(microtime(true));
 		$playerZuri->setTeleportTicks(microtime(true));
@@ -436,7 +435,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -477,7 +476,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -490,7 +489,7 @@ class EventListener implements Listener {
 		}
 
 		if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK) {
-			$damagerZuri = PlayerManager::get($damager);
+			$damagerZuri = ZuriAC::getPlayerManager()->get($damager);
 
 			$playerZuri->setAttackTicks(microtime(true));
 			$damagerZuri->setAttackTicks(microtime(true));
@@ -520,7 +519,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		$playerZuri->setProjectileAttackTicks(microtime(true));
 
@@ -545,7 +544,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		$playerZuri->setDeathTicks(microtime(true));
 		$playerZuri->setTeleportTicks(microtime(true));
@@ -561,7 +560,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -583,7 +582,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -605,7 +604,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -631,7 +630,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($sender);
+		$playerZuri = ZuriAC::getPlayerManager()->get($sender);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -658,7 +657,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -682,7 +681,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -704,7 +703,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
@@ -732,7 +731,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		if ($projectile instanceof EnderPearl) {
 			$playerZuri->setTeleportTicks(microtime(true));
@@ -758,7 +757,7 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 		if ($event->isCancelled() || !$event->useBlock()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 			return;
@@ -780,7 +779,7 @@ class EventListener implements Listener {
 		$z = $block->getPosition()->getZ();
 		$player = $event->getPlayer();
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
@@ -798,7 +797,7 @@ class EventListener implements Listener {
 	public function onPlayerPlace(BlockPlaceEvent $event) : void {
 		$player = $event->getPlayer();
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
@@ -818,7 +817,7 @@ class EventListener implements Listener {
 	public function onPlayerItemUse(PlayerItemUseEvent $event) : void {
 		$player = $event->getPlayer();
 
-		$playerZuri = PlayerManager::get($player);
+		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}

@@ -3,8 +3,10 @@
 
 **Zuri** attempts to enforce "vanilla Minecraft" mechanics, as well as preventing players from abusing weaknesses in Minecraft or its protocol, making your server more safe. Organized in different sections, various checks are performed to test players doing, covering a wide range including flying and speeding, combat hacks, fast block breaking and nukers, inventory hacks, chat spam and other types of malicious behaviour.
 
-> PocketMine-MP has reached its end of support, and development has shifted to community-driven forks like Axolotl-PM. 
+> PocketMine-MP has reached its end of support, and development has shifted to community-driven forks like Axolotl-PM.
+> 
 > While this software was originally tested on the final version of PocketMine-MP, we advise caution when using alternative platforms. 
+>
 > ⚠️ However, as we continue testing features across different forks, we will now accept and support issue reports for them.
 
 😁 If you are interested with our projects, you may help us by:

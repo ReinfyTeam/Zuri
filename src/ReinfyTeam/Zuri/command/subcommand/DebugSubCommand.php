@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri\command\subcommand;
 
 use CortexPE\Commando\BaseSubCommand;
 use pocketmine\command\CommandSender;
+use pocketmine\player\Player;
 use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\config\language\LanguagePath;
 use ReinfyTeam\Zuri\utils\Utils;
@@ -44,9 +45,21 @@ class DebugSubCommand extends BaseSubCommand {
 		$this->setDescription(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_SUBCOMMAND_DESCRIPTION));
 	}
 
+	public function __construct() {
+		parent::__construct(ZuriAC::getInstance(), "debug", ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_SUBCOMMAND_DESCRIPTION), ["debugmode"]);
+	}
+
 	/**
 	 * @param array<string> $args
 	 */
 	public function onRun(CommandSender $sender, string $aliasUsed, array $args) : void {
+		if ($sender instanceof Player) {
+			$playerZuri = ZuriAC::getPlayerManager()->get($sender);
+
+			$playerZuri->setDebug(!$playerZuri->isDebug());
+			$sender->sendMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_COMMAND_TOGGLE, [
+				"{toggle}" => $playerZuri->isDebug() ? ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_COMMAND_ENABLED_ON) : ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_COMMAND_ENABLED_OFF)
+			]));
+		}
 	}
 }

@@ -44,7 +44,7 @@ class PlayerManager {
 	/**
 	 * Returns the PlayerZuri for a given Player, creating it if necessary.
 	 */
-	public static function get(Player $player) : PlayerZuri {
+	public function get(Player $player) : PlayerZuri {
 		$playerZuri = self::$players[$player->getName()] ??= PlayerZuri::create($player);
 		$playerZuri->updateData($player);
 
@@ -54,14 +54,14 @@ class PlayerManager {
 	/**
 	 * Adds a new PlayerZuri for a player.
 	 */
-	public static function add(Player $player) : void {
+	public function add(Player $player) : void {
 		self::$players[$player->getName()] = PlayerZuri::create($player);
 	}
 
 	/**
 	 * Removes a PlayerZuri for a player.
 	 */
-	public static function remove(Player $player) : void {
+	public function remove(Player $player) : void {
 		unset(self::$players[$player->getName()]);
 	}
 }

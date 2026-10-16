@@ -31,10 +31,12 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri;
 
+use CortexPE\Commando\PacketHooker;
 use Phar;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
 use ReinfyTeam\Zuri\config\language\LanguagePath;
+use ReinfyTeam\Zuri\command\ZuriCommand;
 use function version_compare;
 
 
@@ -72,5 +74,10 @@ abstract class Loader extends PluginBase {
 			Server::getInstance()->getLogger()->error("Error PHP version is " . PHP_VERSION . " but " . self::MINIMUM_PHP_VERSION . " is required.");
 			Server::getInstance()->shutdown();
 		}
+	}
+
+	protected static function loadCommands() : void {
+		PacketHooker::register(ZuriAC::getInstance());
+		Server::getInstance()->getCommandMap()->register(ZuriAC::getInstance()->getName(), new ZuriCommand());
 	}
 }

@@ -40,4 +40,7 @@ interface LanguagePath {
 	public const RUNNING_PHAR_WARNING = "console.phar_warning_source";
 	public const ZURI_COMMAND_DESCRIPTION = "commands.description.zuri";
 	public const DEBUG_SUBCOMMAND_DESCRIPTION = "commands.description.debug";
+	public const DEBUG_COMMAND_TOGGLE = "commands.messages.debug_toggle";
+	public const DEBUG_COMMAND_ENABLED_ON = "commands.messages.debug_enabled_on";
+	public const DEBUG_COMMAND_ENABLED_OFF = "commands.messages.debug_enabled_off";
 }

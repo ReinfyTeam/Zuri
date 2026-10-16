@@ -16,3 +16,8 @@ console:
 commands:
   description:
     zuri: "Setup or manage Zuri anticheat to your server."
+    debug: "Toggle debug mode for Zuri anticheat."
+  messages:
+    debug_toggle: "&7Debug mode has been {toggle}."
+    debug_enabled_on: "&a&lON"
+    debug_enabled_off: "&c&lOFF"

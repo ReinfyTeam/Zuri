@@ -57,6 +57,10 @@ interface ConfigPath {
 	public const PUNISHMENT_BAN_COMMAND = "zuri.punishments.ban.command";
 	public const PUNISHMENT_KICK_TYPE = "zuri.punishments.kick.type";
 	public const PUNISHMENT_KICK_COMMAND = "zuri.punishments.kick.command";
+	public const WORLD_BYPASS_MODE = "zuri.world_bypass.mode";
+	public const WORLD_BYPASS_LIST = "zuri.world_bypass.list";
 
-	public const ZURI_COMMAND_PERMISSION = "zuri.commands.permission";
+	public const ZURI_COMMAND_PERMISSION = "zuri.permissions.command";
+	public const ZURI_BYPASS_PERMISSION = "zuri.permissions.bypass";
+	public const ZURI_ALERTS_PERMISSION = "zuri.permissions.alerts";
 }
