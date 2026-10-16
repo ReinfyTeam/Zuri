@@ -33,11 +33,11 @@ namespace ReinfyTeam\Zuri\command;
 
 use CortexPE\Commando\BaseCommand;
 use pocketmine\command\CommandSender;
+use ReinfyTeam\Zuri\command\subcommand\DebugSubCommand;
 use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\config\language\LanguagePath;
 use ReinfyTeam\Zuri\utils\Utils;
 use ReinfyTeam\Zuri\ZuriAC;
-use ReinfyTeam\Zuri\command\subcommand\DebugSubCommand;
 
 class ZuriCommand extends BaseCommand {
 	public function prepare() : void {

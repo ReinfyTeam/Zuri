@@ -35,8 +35,8 @@ use CortexPE\Commando\PacketHooker;
 use Phar;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
-use ReinfyTeam\Zuri\config\language\LanguagePath;
 use ReinfyTeam\Zuri\command\ZuriCommand;
+use ReinfyTeam\Zuri\config\language\LanguagePath;
 use function version_compare;
 
 
