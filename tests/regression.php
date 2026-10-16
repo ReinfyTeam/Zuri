@@ -76,6 +76,9 @@ $expect((Utils::arrayToVector2(["x" => 1.5, "z" => -2.0])) == new Vector2(1.5, -
 $expect(Utils::arrayToVector3(Utils::vector3ToArray(new Vector3(1, 2, 3)))->equals(new Vector3(1, 2, 3)), "Vector3 must round-trip");
 $expect(Utils::readFloat("invalid", 2.0) === 2.0, "Invalid numeric data must use the fallback");
 $expect(Utils::readFloat(3) === 3.0, "Integer movement data must be accepted");
+$expect(Utils::getEffectMovementMultiplier([["name" => "potion.moveSpeed", "amplifier" => 0, "duration" => 100]]) === 1.2, "Speed I must increase the movement multiplier");
+$expect(Utils::getEffectMovementMultiplier([["name" => "potion.moveSlowdown", "amplifier" => 1, "duration" => 100]]) === 0.7, "Slowness II must reduce the movement multiplier");
+$expect(Utils::getEffectMovementMultiplier([["name" => "potion.moveSpeed", "amplifier" => 0, "duration" => 0]]) === 1.0, "Expired movement effects must not change the multiplier");
 $expect(MathUtil::horizontalVelocity(0, 0, 0.25, 0, 1) === ["x" => 5.0, "z" => 0.0], "Velocity must convert blocks per tick to blocks per second");
 
 $violations = new Violation();
@@ -166,6 +169,14 @@ $expect(isset(SpeedA::check($speedPayload)["debug"]["distance"]), "SpeedA must a
 $speedPayload["playerData"]["isRecentlyCancelledEvent"] = true;
 $expect(SpeedA::check($speedPayload)["failed"] === false, "Cancelled movement must receive its grace period");
 $speedPayload["playerData"]["isRecentlyCancelledEvent"] = false;
+$speedEffectPayload = $speedPayload;
+$speedEffectPayload["playerData"]["movement"]["to"]["x"] = 5.0;
+$speedEffectPayload["playerData"]["effects"] = [["name" => "potion.moveSpeed", "amplifier" => 0, "duration" => 100]];
+$expect(SpeedA::check($speedEffectPayload)["failed"] === false, "SpeedA must allow movement increased by Speed I");
+$slowEffectPayload = $speedPayload;
+$slowEffectPayload["playerData"]["movement"]["to"]["x"] = 4.2;
+$slowEffectPayload["playerData"]["effects"] = [["name" => "potion.moveSlowdown", "amplifier" => 0, "duration" => 100]];
+$expect(SpeedA::check($slowEffectPayload)["failed"] === true, "SpeedA must apply Slowness I to the movement limit");
 $speedPayload["playerData"]["teleportTicks"] = 0.0;
 $speedPayload["playerData"]["teleportCommandTicks"] = 100.0;
 $expect(SpeedA::check($speedPayload)["failed"] === false, "SpeedA must ignore movement immediately after a teleport");
@@ -177,6 +188,19 @@ $sprintPayload = $speedPayload;
 $sprintPayload["playerData"]["movement"]["to"]["x"] = 5.0;
 $sprintPayload["playerData"]["isSprinting"] = true;
 $expect(SpeedA::check($sprintPayload)["failed"] === false, "SpeedA must use the sprint movement limit");
+$creativeFlightPayload = $speedPayload;
+$creativeFlightPayload["playerData"]["movement"]["to"]["x"] = 10.0;
+$creativeFlightPayload["playerData"]["isCreative"] = true;
+$creativeFlightPayload["playerData"]["isFlying"] = true;
+$expect(SpeedA::check($creativeFlightPayload)["failed"] === false, "SpeedA must use the creative flight movement limit");
+$creativeFlightPayload["playerData"]["isSprinting"] = true;
+$creativeFlightPayload["playerData"]["movement"]["to"]["x"] = 20.0;
+$expect(SpeedA::check($creativeFlightPayload)["failed"] === false, "SpeedA must use the creative sprint flight movement limit");
+$spectatorFlightPayload = $creativeFlightPayload;
+$spectatorFlightPayload["playerData"]["isCreative"] = false;
+$spectatorFlightPayload["playerData"]["isSpectator"] = true;
+$spectatorFlightPayload["playerData"]["movement"]["to"]["x"] = 80.0;
+$expect(SpeedA::check($spectatorFlightPayload)["failed"] === false, "SpeedA must use the spectator sprint flight movement limit");
 $expect(SpeedB::check(["type" => "PlayerMoveEvent", "playerData" => []])["failed"] === false, "SpeedB must handle an empty movement snapshot");
 $speedBPayload = [
 	"type" => "PlayerMoveEvent",
@@ -214,11 +238,26 @@ $fallingPayload = [
 $expect(SpeedB::check($fallingPayload)["failed"] === false, "SpeedB must allow the first falling tick within its safety floor");
 $fallingPayload["playerData"]["movement"]["to"]["y"] = 9.91;
 $expect(SpeedB::check($fallingPayload)["failed"] === true, "SpeedB must reject excessive first-tick falling distance");
+$legacyClimbableAliasPayload = $fallingPayload;
+$legacyClimbableAliasPayload["playerData"]["isOnClimbable"] = true;
+$legacyClimbableAliasPayload["playerData"]["isClimbing"] = false;
+$expect(SpeedB::check($legacyClimbableAliasPayload)["failed"] === true, "SpeedB must ignore the legacy isOnClimbable alias and use serialized isClimbing state");
 $fallingPayload["playerData"]["airTicks"] = 2;
 $fallingPayload["playerData"]["movement"]["to"]["y"] = 9.85;
 $expect(SpeedB::check($fallingPayload)["failed"] === false, "SpeedB must allow displacement predicted after multiple falling ticks");
 $fallingPayload["playerData"]["movement"]["to"]["y"] = 9.82;
 $expect(SpeedB::check($fallingPayload)["failed"] === true, "SpeedB must reject displacement above the multi-tick falling limit");
+$glidingPayload = [
+	"type" => "PlayerMoveEvent",
+	"playerData" => [
+		"movement" => ["from" => ["x" => 0.0, "y" => 10.0, "z" => 0.0], "to" => ["x" => 0.0, "y" => 10.5, "z" => 0.0]],
+		"isCurrentChunkLoaded" => true,
+		"isOnGround" => false,
+		"isGliding" => true
+	],
+	"constantData" => $constants->exportNumbers()
+];
+$expect(SpeedB::check($glidingPayload)["failed"] === false, "SpeedB must leave gliding movement to a future Elytra physics model");
 $expect(count(CheckRegistry::loadChecks()->getChecksByType(Check::TYPE_PLAYER)) === 2, "Player movement checks must retain their registration");
 $metrics = new MetricsData();
 $expect($metrics->getMaxPlayerCount() === 0, "Metrics must initialize maximum player count");

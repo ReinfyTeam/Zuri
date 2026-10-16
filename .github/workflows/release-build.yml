@@ -28,11 +28,11 @@ jobs:
       startsWith(github.event.head_commit.message, 'release ') ||
       startsWith(github.event.head_commit.message, 'Release:') ||
       startsWith(github.event.head_commit.message, 'Release ')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a
 
       - name: Download verified build artifact
         env:
