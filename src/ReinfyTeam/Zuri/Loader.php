@@ -34,9 +34,14 @@ namespace ReinfyTeam\Zuri;
 use CortexPE\Commando\PacketHooker;
 use Phar;
 use pocketmine\plugin\PluginBase;
+use pocketmine\scheduler\ClosureTask;
 use pocketmine\Server;
+use ReinfyTeam\Zuri\check\ResultsHandler;
 use ReinfyTeam\Zuri\command\ZuriCommand;
+use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\config\language\LanguagePath;
+use ReinfyTeam\Zuri\task\MetricsTask;
+use function max;
 use function version_compare;
 
 
@@ -79,5 +84,14 @@ abstract class Loader extends PluginBase {
 	protected static function loadCommands() : void {
 		PacketHooker::register(ZuriAC::getInstance());
 		Server::getInstance()->getCommandMap()->register(ZuriAC::getInstance()->getName(), new ZuriCommand());
+	}
+
+	protected static function loadTasks() : void {
+		ZuriAC::getInstance()->getScheduler()->scheduleRepeatingTask(new MetricsTask(), max(1, ZuriAC::getConfigManager()->getInt(ConfigPath::METRICS_DELAY)) * 20);
+		ZuriAC::getInstance()->getScheduler()->scheduleRepeatingTask(new ClosureTask(function() : void {
+			while (($result = ZuriAC::getCheckResults()->getNextResult()) !== null) {
+				ResultsHandler::handle($result);
+			}
+		}), ZuriAC::getConfigManager()->getInt(ConfigPath::RESULTS_HANDLER_DELAY) * 20);
 	}
 }

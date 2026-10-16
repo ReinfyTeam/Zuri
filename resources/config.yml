@@ -21,6 +21,9 @@ zuri:
   metrics:
     # Delay between metrics updates in seconds (minimum 1). Default: 3.
     delay: 3
+  results_handler:
+    # Delay between results handling task in seconds (minimum 0.1). Default: 0.5.
+    delay: 0.5
   # Punishment thresholds: Responsible for handling considerations of the player conditions.
   # This involves the ping, server tps, server load that affects modules.
   thresholds:

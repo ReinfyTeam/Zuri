@@ -31,18 +31,15 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri;
 
-use pocketmine\scheduler\ClosureTask;
 use pocketmine\utils\SingletonTrait;
 use ReinfyTeam\Zuri\check\CheckRegistry;
 use ReinfyTeam\Zuri\check\MetricsData;
-use ReinfyTeam\Zuri\check\ResultsHandler;
 use ReinfyTeam\Zuri\config\ConfigManager;
 use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\config\ConstantValues;
 use ReinfyTeam\Zuri\config\language\LanguageManager;
 use ReinfyTeam\Zuri\player\ExternalData;
 use ReinfyTeam\Zuri\player\PlayerManager;
-use ReinfyTeam\Zuri\task\MetricsTask;
 use ReinfyTeam\Zuri\thread\CheckQueue;
 use ReinfyTeam\Zuri\thread\CheckResults;
 use ReinfyTeam\Zuri\thread\CheckThread;
@@ -75,11 +72,12 @@ class ZuriAC extends Loader {
 	protected function onLoad() : void {
 		self::$instance = $this;
 
-		self::checkPHP();
-		self::checkRunningSource();
-
+		self::$languageManager = LanguageManager::loadLanguage();
 		self::$config = new ConfigManager(ZuriAC::getInstance()->getDataFolder() . "config.yml");
 		self::$constants = new ConstantValues(ZuriAC::getInstance()->getDataFolder() . "constants.yml");
+
+		self::checkPHP();
+		self::checkRunningSource();
 	}
 
 	/**
@@ -93,20 +91,15 @@ class ZuriAC extends Loader {
 		self::$checkQueue = new CheckQueue();
 		self::$checkResults = new CheckResults();
 		self::$playerManager = new PlayerManager();
+		self::$metricsData = new MetricsData();
 		self::$permissionManager = new PermissionManager();
-		self::$checkRegistry = CheckRegistry::loadChecks();
+		self::$externalData = new ExternalData();
 
 		self::$checkThread = new CheckThread(self::$checkQueue, self::$checkResults, $workerCount, $workerCapacity);
-		self::$metricsData = new MetricsData();
+
 		self::$metricsData->update();
-		$this->getScheduler()->scheduleRepeatingTask(new MetricsTask(), max(1, self::$config->getInt(ConfigPath::METRICS_DELAY)) * 20);
-		self::$externalData = new ExternalData();
-		self::$languageManager = LanguageManager::loadLanguage();
-		$this->getScheduler()->scheduleRepeatingTask(new ClosureTask(function() : void {
-			while (($result = self::$checkResults->getNextResult()) !== null) {
-				ResultsHandler::handle($result);
-			}
-		}), 1);
+		self::$checkRegistry = CheckRegistry::loadChecks();
+
 		self::registerEvents();
 		self::loadCommands();
 	}
