@@ -31,10 +31,10 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri;
 
-use ReinfyTeam\Zuri\config\language\LanguagePath;
 use Phar;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
+use ReinfyTeam\Zuri\config\language\LanguagePath;
 use function version_compare;
 
 

@@ -1,79 +1,46 @@
-# Zuri PocketMine-MP Anticheat 🛡️
+# Zuri Pocketmine-MP Anticheat 🛡️
+**Zuri** is an anticheat made to protect the server from any may unfair advantages from the players. A powerful anticheat made to destroy hackers from your server for PocketMine-MP.
 
-[![](https://poggit.pmmp.io/shield.state/Zuri)](https://poggit.pmmp.io/p/Zuri) [![](https://poggit.pmmp.io/shield.api/Zuri)](https://poggit.pmmp.io/p/Zuri) [![](https://poggit.pmmp.io/shield.dl.total/Zuri)](https://poggit.pmmp.io/p/Zuri)
+**Zuri** attempts to enforce "vanilla Minecraft" mechanics, as well as preventing players from abusing weaknesses in Minecraft or its protocol, making your server more safe. Organized in different sections, various checks are performed to test players doing, covering a wide range including flying and speeding, combat hacks, fast block breaking and nukers, inventory hacks, chat spam and other types of malicious behaviour.
 
-Zuri is a movement anticheat for PocketMine-MP. The current `main` branch is the **1.4.2-BETA rewrite** and registers two checks: **SpeedA** and **SpeedB**. This document describes that branch; older releases have a different feature set.
+> PocketMine-MP has reached its end of support, and development has shifted to community-driven forks like Axolotl-PM. 
+> While this software was originally tested on the final version of PocketMine-MP, we advise caution when using alternative platforms. 
+> ⚠️ However, as we continue testing features across different forks, we will now accept and support issue reports for them.
 
-The rewrite is intended for a **pre-release**. Test it on a staging server with your protection plugins and normal player movement before enabling kick or ban punishments.
+😁 If you are interested with our projects, you may help us by:
+- [Donate via Ko-Fi](https://ko-fi.com/xqwtxon)
+- [Become a Patreon](https://patreon.com/xwertxy)
 
-## Current checks and behavior
+Also, adding :star: a **Star** is also appreciated. ✨
 
-| Check | Input | Behavior |
-| --- | --- | --- |
-| SpeedA | `PlayerMoveEvent` | Compares horizontal movement with the expected movement allowance. |
-| SpeedB | `PlayerMoveEvent` | Compares vertical movement with the expected movement allowance and movement-state allowances. |
+🤔 Do you struggling with **bugs and issues?** Don't hesitate to tell us about it by [creating an issue](https://github.com/ReinfyTeam/Zuri/issues) or you may join us on our official [discord server](https://discord.com/invite/7u7qKsvSxg)!
 
-Player movement and terrain state are captured on the main thread. Serialized snapshots are processed by check workers within one background coordinator thread, and results return to the main thread for violation handling. `zuri.threads.max_worker` controls the number of check workers within that coordinator.
+> ![Zuri Anticheat Meme](https://raw.githubusercontent.com/ReinfyTeam/Zuri/main/meme.jpg)
+>
+> Zuri can catch hacker efficiently using native-threads built by PocketMine-MP to handle heavy CPU tasks. Unlike other **$100 Anticheat**, it is more systematic, lightweight, and easy to configure. It's too good right? 🤦
 
-Checks skip movement in terrain that has not loaded and resume after it loads. Cancelled movement and denied block interactions receive a short movement grace period. The legacy Phase trapdoor correction from [issue #76](https://github.com/ReinfyTeam/Zuri/issues/76) is absent from this rewrite; Zuri does not teleport players onto the highest block in a column.
+# Features
+- You can easily configure everything in the config. ✅
+  - Configure easily the max violations and checks and more! ⚙️
+- It is more **lightweight** compared to paid anticheat. You don't have to struggle about the performance, with this anticheat, it can possible block them all easily! 💰
+- Multi-threading supported, all calculations and heavy mathematical checks are handled through multiple workers. ⚙️
 
-SpeedB currently leaves Elytra/gliding movement unclassified because the rewrite does not yet include an Elytra physics model. This is intentional fail-open behavior, not a claim that gliding is protected by the current vertical check.
+# Forks / Dependencies
+Here are the **dependencies** were used in the plugin:
 
-Server metrics are initialized when the plugin enables and refreshed periodically. TPS, ping and player load feed the punishment threshold calculation. The metrics delay is measured in seconds, with a minimum of one second.
+- [FormAPI Fix by DavyCraft648](https://github.com/DavyCraft648/FormAPI-PM)
+- [DiscordWebhookAPI by ReinfyTeam](https://github.com/ReinfyTeam/DiscordWebhookAPI/)
+- [Commando by Paroxity](https://github.com/ReinfyTeam/DiscordWebhookAPI/)
 
-**Legacy features:** combat, fly, reach, scaffold, inventory, chat, proxy/VPN, IP limits, cross-check correlation, tuning presets, and the `/zuri` commands/UI are not implemented in the current rewrite. The old list of 40+ checks and wiki examples do not describe its current capabilities. Configuration entries that mention another module do not register that module.
+Some are for fixes and some are modified for compability.
 
-Historical reports such as [issue #38](https://github.com/ReinfyTeam/Zuri/issues/38) and [issue #75](https://github.com/ReinfyTeam/Zuri/issues/75) concern checks from the older implementation, including Omnisprint, Reach and Fly. They are not validation results for the current `1.4.2-BETA` rewrite, which must be evaluated against the checks and behavior documented here.
+# Current Modules
+Currently, the plugin is on rewrite process to move its previous modules in other versions.
+- **Speed**
+    - **(A)**: Check for horizontal speed.
+    - **(B)**: Check for vertical speed.
 
-## Requirements and installation
-
-- An Axolotl-PM/PocketMine-MP API 5-compatible server, with PHP 8.2 or newer. The repository's workflow pins a reviewed runtime revision for reproducible CI; that check does not claim that every API 5 patch or fork has been tested.
-- A compiled `Zuri.phar`. Virion dependencies are bundled by the build; Composer is required to build from source.
-- Other PocketMine-MP forks and versions outside the tested baseline are not covered by this compatibility claim.
-
-1. Back up the existing Zuri PHAR and its data folder, especially when upgrading from 1.3.x.
-2. Stop the server, place `Zuri.phar` in `plugins/`, and restart.
-3. Review the generated files in `plugin_data/Zuri/`, then restart after making configuration changes.
-4. Test regular movement, chunk loading, teleports and interactions with protection plugins on a staging server.
-
-Configuration files include `config.yml`, `constants.yml` and language files. An older configuration version can be copied to a `-old.yml` backup and replaced with the bundled defaults. Review and reapply relevant custom settings after upgrading; the 1.3.x configuration and plugin API are not a drop-in match for this rewrite.
-
-`config.yml` controls check worker capacity, metrics collection and punishment thresholds. Per-check options are read under `zuri.checks.speed`, including `pre-vl.a`, `pre-vl.b`, `maxvl`, `a.punishment` and `b.punishment`. Punishments default to an internal flag; `kick` and `ban` use the configured native or command action. Adjust movement constants in `constants.yml` only after reproducing a detection issue.
-
-## Build and validation
-
-Use the PHP runtime supplied for PocketMine-MP, including its required extensions, and Composer:
-
-```sh
-composer install --prefer-dist
-composer test
-composer analyze
-composer format:check
-composer build
-```
-
-The build produces `build/Zuri.phar`, verifies required resources and PHP syntax inside the archive, and runs movement regressions against the packaged classes. Source tests cover queued terrain snapshots, interaction cancellation, detection grace, violations and release metadata.
-
-A runtime smoke test starts the compiled plugin on a real PocketMine server, verifies metrics at startup and after two scheduled refreshes, and checks clean shutdown. It covers the default metrics delay and zero/negative delays. Supply a compatible PocketMine-MP PHAR:
-
-```sh
-composer test:runtime -- /path/to/PocketMine-MP.phar
-```
-
-The build workflow runs this test on its pinned Axolotl-PM compatibility baseline. Runtime smoke tests and synthetic movement regressions do not replace gameplay testing with actual Bedrock clients.
-
-## Releases
-
-The release workflow accepts a version through manual dispatch or a commit subject such as `release: v1.4.2-BETA`. It marks versions with a suffix as **Pre-release** and sets `make_latest=false`. A plain version such as `1.4.0` is treated as stable and may become Latest.
-
-Use `v1.4.2-BETA` for the current rewrite. A stable release requires further gameplay and compatibility validation for the supported checks.
-
-## Feedback and contributions
-
-Report bugs at [ReinfyTeam/Zuri issues](https://github.com/ReinfyTeam/Zuri/issues). Include the Zuri version, PocketMine-MP version, relevant check, configuration, other plugins and the steps needed to reproduce the behavior. You can also join the [community Discord](https://discord.com/invite/7u7qKsvSxg).
-
-The [wiki](https://github.com/ReinfyTeam/Zuri/wiki) contains historical documentation; verify its API examples against the current source before using them with 1.4.2-BETA.
-
-The project originated as a continuation and rewrite of [ReallyCheat](https://github.com/hachkingtohach1/ReallyCheat/) by [hachkingtohach1](https://github.com/hachkingtohach1/). Current bundled dependencies are listed in [composer.json](composer.json) and pinned in [composer.lock](composer.lock).
-
-Support the maintainers through [Ko-Fi](https://ko-fi.com/xqwtxon) or [Patreon](https://patreon.com/xwertxy). Stars and reproducible bug reports are also appreciated.
+# Feedbacks and Issue's
+- 😁 Your feedback and reviews are highly appriciated, if you ever find a bug or false-positive in certain modules, you can create an issue in our [github repository](https://github.com/ReinfyTeam/Zuri/issues)!
+- 👍 You can also view [Frequently asked questions article](https://github.com/ReinfyTeam/Zuri/wiki/Well-Known-Issues) about common encountered issues to our plugin, be sure to read that before creating an issue!
+> Please wait for the developer response to the issue since we have high amount of task and issue that we to do fix also ;)

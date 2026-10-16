@@ -33,14 +33,12 @@ namespace ReinfyTeam\Zuri\utils;
 
 use pocketmine\utils\TextFormat;
 use function array_flip;
-use function array_keys;
-use function array_values;
 use function get_debug_type;
 use function implode;
 use function is_array;
 use function is_scalar;
 use function is_string;
-use function str_replace;
+use function strtr;
 
 /**
  * Utility functions for text parsing and replacements.
@@ -99,14 +97,14 @@ final class TextUtil {
 	}
 
 	/**
-     * Replaces keys in the text with provided replacements.
-     *
-     * @param array<string,mixed> $replacements
-     */
-    public static function replaceText(string $text, array $replacements) : string {
-        // strtr natively accepts an associative array map and avoids list/array mismatch issues
-        return strtr($text, $replacements);
-    }
+	 * Replaces keys in the text with provided replacements.
+	 *
+	 * @param array<string,mixed> $replacements
+	 */
+	public static function replaceText(string $text, array $replacements) : string {
+		// strtr natively accepts an associative array map and avoids list/array mismatch issues
+		return strtr($text, $replacements);
+	}
 
 	/**
 	 * Pretty prints a nested array into a compact string representation.

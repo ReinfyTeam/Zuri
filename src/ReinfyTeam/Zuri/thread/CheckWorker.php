@@ -105,7 +105,7 @@ final class CheckWorker {
 			$data = $job->getData();
 			$result = $check::check($data);
 			$player = self::getPlayerName($data);
-			$this->results->addResult($result, $check, $job->getSubType(), $player); 
+			$this->results->addResult($result, $check, $job->getSubType(), $player);
 		} catch(Throwable $e) {
 			$data = isset($data) ? $data : [];
 			$this->results->addResult([

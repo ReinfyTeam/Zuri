@@ -56,7 +56,6 @@ use function strtolower;
  * server conditions such as ping, TPS and player load.
  */
 final class ResultsHandler {
-
 	/**
 	 * @param array{
 	 *     result: array<array-key, mixed>,

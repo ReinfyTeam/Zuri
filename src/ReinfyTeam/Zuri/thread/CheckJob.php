@@ -76,7 +76,6 @@ final class CheckJob {
 		return $this->check;
 	}
 
-	/** @return string */
 	public function getSubType() : string {
 		return $this->subType;
 	}

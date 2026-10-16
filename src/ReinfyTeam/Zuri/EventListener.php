@@ -77,6 +77,7 @@ use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function microtime;
+use function var_dump;
 
 /**
  * Central event listener for ZuriAC.

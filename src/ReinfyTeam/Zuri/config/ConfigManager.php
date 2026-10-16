@@ -37,12 +37,16 @@ use ReinfyTeam\Zuri\utils\Utils;
 use ReinfyTeam\Zuri\ZuriAC;
 use function basename;
 use function copy;
+use function fclose;
+use function fopen;
+use function is_array;
 use function is_bool;
 use function is_float;
 use function is_int;
 use function is_string;
 use function pathinfo;
 use function str_replace;
+use function stream_get_contents;
 use function unlink;
 use function version_compare;
 use function yaml_parse;
@@ -81,7 +85,7 @@ class ConfigManager implements ConfigPath {
 			@fclose($stream);
 			// Parse the YAML content
 			$parsed = @yaml_parse($content ?: '');
-			
+
 			// Verify the output is actually an array
 			if (is_array($parsed)) {
 				/** @var array<string, mixed> $parsed */

@@ -41,7 +41,9 @@ use function count;
 use function is_array;
 use function is_string;
 
-/** @disregard this class were not on made in php */
+/**
+ * @disregard this class were not on made in php
+ */
 final class CheckQueue extends ThreadSafe {
 	/** @disregard this array were not on made in php */
 	private ThreadSafeArray $queue;

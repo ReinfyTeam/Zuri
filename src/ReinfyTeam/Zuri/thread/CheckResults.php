@@ -39,7 +39,9 @@ use function is_string;
 use function serialize;
 use function unserialize;
 
-/** @disregard this class were not on made in php */
+/**
+ * @disregard this class were not on made in php
+ */
 final class CheckResults extends ThreadSafe {
 	/** @disregard this class were not on made in php */
 	private ThreadSafeArray $queue;
@@ -74,9 +76,9 @@ final class CheckResults extends ThreadSafe {
 		$player = $result["player"] ?? null;
 		$subType = $result["subtype"] ?? null;
 		return [
-			"result" => $result["result"], 
-			"subtype" => is_string($subType) ? $subType : null, 
-			"check" => $result["check"], 
+			"result" => $result["result"],
+			"subtype" => is_string($subType) ? $subType : null,
+			"check" => $result["check"],
 			"player" => is_string($player) ? $player : null
 		];
 	}

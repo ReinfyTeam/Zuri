@@ -48,7 +48,7 @@ class ConstantValues extends ConfigManager implements ConstantPath {
 		return $this->getFloat("zuri." . $key);
 	}
 
-	/** @return array<string,float> */	
+	/** @return array<string,float> */
 	public function exportNumbers() : array {
 		$numbers = [];
 		foreach ((new \ReflectionClass(ConstantPath::class))->getConstants() as $key) {
