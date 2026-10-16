@@ -36,6 +36,10 @@ interface ConfigPath {
 
 	public const CURRENT_CONFIG_VERSION = "zuri.config_version";
 
+	public const LANGUAGE_PREFIX = "zuri.language.prefix";
+	public const SELECTED_LANGUAGE = "zuri.language.selected";
+	public const FALLBACK_LANGUAGE = "zuri.language.fallback";
+
 	public const ASYNC_BATCH_SIZE = "zuri.async.batch_size";
 	public const THREAD_MAX_WORKER = "zuri.threads.max_worker";
 	public const THREAD_WORKER_CAPACITY = "zuri.threads.worker_capacity";
@@ -53,4 +57,6 @@ interface ConfigPath {
 	public const PUNISHMENT_BAN_COMMAND = "zuri.punishments.ban.command";
 	public const PUNISHMENT_KICK_TYPE = "zuri.punishments.kick.type";
 	public const PUNISHMENT_KICK_COMMAND = "zuri.punishments.kick.command";
+
+	public const ZURI_COMMAND_PERMISSION = "zuri.commands.permission";
 }

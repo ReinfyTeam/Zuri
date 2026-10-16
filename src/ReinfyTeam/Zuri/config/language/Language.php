@@ -49,7 +49,13 @@ class Language implements LanguagePath {
 		return $this->code;
 	}
 
-	/** @param array<string,string> $replacements */
+	/**
+	 * Translates a key into its corresponding value, replacing placeholders with the provided values.
+	 *
+	 * @param string $key The key to translate.
+	 * @param array<string, mixed> $replacements The values to replace placeholders with.
+	 * @return string The translated string.
+	 */
 	public function translate(string $key, array $replacements = []) : string {
 		$value = $this->languageData->getNested($key, $key);
 		return TextUtil::parseColors(TextUtil::replaceText(is_string($value) ? $value : $key, $replacements));

@@ -62,7 +62,7 @@ abstract class Check {
 	 *
 	 * @return string Human-readable check name used as a config key.
 	 */
-	abstract public function getName() : string;
+	abstract public static function getName() : string;
 
 	/**
 	 * Returns the subtype of the check.
@@ -70,14 +70,14 @@ abstract class Check {
 	 * Subtypes are used to group related checks (for example, different
 	 * variations of a speed check) under a single check name in config.
 	 */
-	abstract public function getSubType() : string;
+	abstract public static function getSubType() : string;
 
 	/**
 	 * Returns the type of the check (see TYPE_* constants).
 	 *
 	 * @return int One of `TYPE_PACKET`, `TYPE_PLAYER` or `TYPE_EVENT`.
 	 */
-	abstract public function getType() : int;
+	abstract public static function getType() : int;
 
 	/**
 	 * Runs the check logic on the provided data.
@@ -98,10 +98,12 @@ abstract class Check {
 	 * @param bool $failed Whether the check failed.
 	 * @param array<array-key,mixed> $debug Optional debug data.
 	 * @param array<string,mixed> $externalData Optional external data to be set.
-	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>}
+	 * @return array{name:string,subType:string,failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>}
 	 */
 	public static function buildResult(bool $failed, array $debug = [], array $externalData = []) : array {
 		return [
+			"name" => static::getName(),
+			"subType" => static::getSubType(),
 			"failed" => $failed,
 			"debug" => $debug,
 			"externalData" => $externalData
@@ -116,7 +118,7 @@ abstract class Check {
 	 * `checks.{checkName}.{subType}.maxvl`.
 	 */
 	public function getPunishment() : string {
-		return ZuriAC::getConfigManager()->getString(ConfigPath::CHECKS . "." . strtolower($this->getName()) . "." . strtolower($this->getSubType()) . ".punishment", "flag");
+		return ZuriAC::getConfigManager()->getString(ConfigPath::CHECKS . "." . strtolower($this->getName()) . "." . strtolower($this->getSubType()) . ".punishment");
 	}
 
 
@@ -126,7 +128,7 @@ abstract class Check {
 	 * Reads from `checks.{checkName}.enable` and defaults to false.
 	 */
 	public function isEnabled() : bool {
-		return ZuriAC::getConfigManager()->getBool(ConfigPath::CHECKS . "." . strtolower($this->getName()) . ".enable", false);
+		return ZuriAC::getConfigManager()->getBool(ConfigPath::CHECKS . "." . strtolower($this->getName()) . ".enable");
 	}
 
 
@@ -136,7 +138,7 @@ abstract class Check {
 	 * Read from `checks.{checkName}.pre-vl.{subType}` with a default of 1.
 	 */
 	public function getMaxPreViolation() : int {
-		return ZuriAC::getConfigManager()->getInt(ConfigPath::CHECKS . "." . strtolower($this->getName()) . ".pre-vl." . strtolower($this->getSubType()), 1);
+		return ZuriAC::getConfigManager()->getInt(ConfigPath::CHECKS . "." . strtolower($this->getName()) . ".pre-vl." . strtolower($this->getSubType()));
 	}
 
 
@@ -146,6 +148,6 @@ abstract class Check {
 	 * Read from `checks.{checkName}.maxvl` with a default of 1.
 	 */
 	public function getMaxViolation() : int {
-		return ZuriAC::getConfigManager()->getInt(ConfigPath::CHECKS . "." . strtolower($this->getName()) . ".maxvl", 1);
+		return ZuriAC::getConfigManager()->getInt(ConfigPath::CHECKS . "." . strtolower($this->getName()) . ".maxvl");
 	}
 }

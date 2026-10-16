@@ -116,4 +116,20 @@ class CheckRegistry {
 			new SpeedB()
 		]);
 	}
+
+	/**
+	 * Retrieves a check by its name and subtype.
+	 *
+	 * @param string $name The name of the check.
+	 * @param string $subType The subtype of the check.
+	 * @return Check|null The check if found, null otherwise.
+	 */
+	public function getCheckByName(string $name, string $subType) : ?Check {
+		foreach ($this->checks as $check) {
+			if ($check->getName() === $name && $check->getSubType() === $subType) {
+				return $check;
+			}
+		}
+		return null;
+	}
 }

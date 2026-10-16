@@ -41,10 +41,13 @@ use function count;
 use function is_array;
 use function is_string;
 
+/** @disregard this class were not on made in php */
 final class CheckQueue extends ThreadSafe {
+	/** @disregard this array were not on made in php */
 	private ThreadSafeArray $queue;
 
 	public function __construct() {
+		/** @disregard this array were not on made in php */
 		$this->queue = new ThreadSafeArray();
 	}
 
@@ -53,7 +56,8 @@ final class CheckQueue extends ThreadSafe {
 		$player = $data["player"] ?? null;
 		$playerData = $player instanceof Player ? PlayerManager::get($player)->jsonSerialize() : null;
 
-		$this->queue[] = (new CheckJob($check::class, [
+		/** @disregard idk why this */
+		$this->queue[] = (new CheckJob($check::class, $check->getSubType(), [
 			'type' => $data["type"] ?? null,
 			'data' => $this->snapshot($data["data"] ?? null),
 			'playerData' => $playerData,
@@ -67,6 +71,7 @@ final class CheckQueue extends ThreadSafe {
 	}
 
 	public function isEmpty() : bool {
+		/** @disregard idk why this */
 		return count($this->queue) === 0;
 	}
 

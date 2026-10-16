@@ -99,13 +99,14 @@ final class TextUtil {
 	}
 
 	/**
-	 * Replaces keys in the text with provided replacements.
-	 *
-	 * @param array<string,string> $replacements
-	 */
-	public static function replaceText(string $text, array $replacements) : string {
-		return str_replace(array_keys($replacements), array_values($replacements), $text);
-	}
+     * Replaces keys in the text with provided replacements.
+     *
+     * @param array<string,mixed> $replacements
+     */
+    public static function replaceText(string $text, array $replacements) : string {
+        // strtr natively accepts an associative array map and avoids list/array mismatch issues
+        return strtr($text, $replacements);
+    }
 
 	/**
 	 * Pretty prints a nested array into a compact string representation.

@@ -40,15 +40,15 @@ class ConstantValues extends ConfigManager implements ConstantPath {
 		$this->checkVersion(self::CONSTANT_VERSION, "zuri.config-version");
 	}
 
-	public function getConstant(string $key, mixed $default = null) : mixed {
-		return parent::getData("zuri." . $key, $default);
+	public function getConstant(string $key) : mixed {
+		return parent::getData("zuri." . $key);
 	}
 
-	public function getNumber(string $key, float $default = 0.0) : float {
-		return $this->getFloat("zuri." . $key, $default);
+	public function getNumber(string $key) : float {
+		return $this->getFloat("zuri." . $key);
 	}
 
-	/** @return array<string,float> */
+	/** @return array<string,float> */	
 	public function exportNumbers() : array {
 		$numbers = [];
 		foreach ((new \ReflectionClass(ConstantPath::class))->getConstants() as $key) {

@@ -3,3 +3,16 @@
 punishments:
   ban_message: "You have been banned for Unfair Advantage."
   kick_message: "You have been kicked for Unfair Advantage."
+
+results:
+  check_error: "Error in check {check}: {message}"
+  unknown_error: "Unknown error returned."
+  debug_message: "&7&l[&8DEBUG: &r&c{check} &8&l(&c{subType}&8&l)] &8>&r{debug_data}"
+
+console:
+  phar_warning_source: "&cYou are running source-code of the plugin, this might degrade checking performance. We recommended you to download phar plugin from Poggit builds or Github releases. Instead of using source-code from Github."
+  php_version_older: "&c⚠️ You're running &ePHP {current_php_version} &cwhich is older than &e{minimum_php_version}&c. Please upgrade your PHP Installion to &e{minimum_php_version}&c or later! You may find &ePHP {minimum_php_version} &cbuilds at https://github.com/pmmp/PHP-Binaries/releases"
+
+commands:
+  description:
+    zuri: "Setup or manage Zuri anticheat to your server."

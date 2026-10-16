@@ -116,6 +116,7 @@ class EventListener implements Listener {
 			) {
 				$playerZuri->addCPS();
 			}
+			var_dump($packet->sound);
 		}
 
 		if ($packet instanceof InventoryTransactionPacket) {

@@ -38,12 +38,14 @@ use function is_array;
 use function is_string;
 
 final class CheckWorker {
+	/** @disregard this array were not on made in php */
 	private ThreadSafeArray $jobs;
 
 	public function __construct(
 		private CheckResults $results,
 		private int $capacity
 	) {
+		/** @disregard this array were not on made in php */
 		$this->jobs = new ThreadSafeArray();
 	}
 
@@ -51,15 +53,18 @@ final class CheckWorker {
 		if (!$this->canAccept()) {
 			return false;
 		}
+		/** @disregard this array were not on made in php */
 		$this->jobs[] = $serializedJob;
 		return true;
 	}
 
 	public function canAccept() : bool {
+		/** @disregard this array were not on made in php */
 		return count($this->jobs) < $this->capacity;
 	}
 
 	public function getQueueSize() : int {
+		/** @disregard this array were not on made in php */
 		return count($this->jobs);
 	}
 
@@ -79,7 +84,7 @@ final class CheckWorker {
 					"line" => $e->getLine(),
 					"trace" => $e->getTraceAsString()
 				]
-			], CheckJob::class, null);
+			], CheckJob::class, null, null);
 			return true;
 		}
 
@@ -100,7 +105,7 @@ final class CheckWorker {
 			$data = $job->getData();
 			$result = $check::check($data);
 			$player = self::getPlayerName($data);
-			$this->results->addResult($result, $check, $player);
+			$this->results->addResult($result, $check, $job->getSubType(), $player); 
 		} catch(Throwable $e) {
 			$data = isset($data) ? $data : [];
 			$this->results->addResult([
@@ -110,7 +115,7 @@ final class CheckWorker {
 					"line" => $e->getLine(),
 					"trace" => $e->getTraceAsString()
 				]
-			], $job->getCheck(), self::getPlayerName($data));
+			], $job->getCheck(), $job->getSubType(), self::getPlayerName($data));
 		}
 	}
 }

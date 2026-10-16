@@ -39,19 +39,34 @@ use function serialize;
 use function unserialize;
 
 final class CheckJob {
+	private string $subType;
+
+	/** @var array<string,mixed> */
+	private array $data;
+
 	/**
 	 * @param class-string<Check> $check
+	 * @param string|array<string,mixed> $subType
 	 * @param array<string,mixed> $data
 	 */
 	public function __construct(
 		private string $check,
-		private array $data
+		string|array $subType,
+		array $data = []
 	) {
+		if (is_array($subType)) {
+			$this->data = $subType;
+			$this->subType = $check::getSubType();
+		} else {
+			$this->subType = $subType;
+			$this->data = $data;
+		}
 	}
 
 	public function serialize() : string {
 		return serialize([
 			"check" => $this->check,
+			"subtype" => $this->subType,
 			"data" => $this->data
 		]);
 	}
@@ -60,6 +75,12 @@ final class CheckJob {
 	public function getCheck() : string {
 		return $this->check;
 	}
+
+	/** @return string */
+	public function getSubType() : string {
+		return $this->subType;
+	}
+
 
 	/** @return array<string,mixed> */
 	public function getData() : array {
@@ -77,6 +98,7 @@ final class CheckJob {
 		) {
 			throw new \UnexpectedValueException("Invalid serialized check job");
 		}
+		$subtype = isset($job["subtype"]) && is_string($job["subtype"]) ? $job["subtype"] : $job["check"]::getSubType();
 		$data = [];
 		foreach ($job["data"] as $key => $value) {
 			if (!is_string($key)) {
@@ -84,6 +106,6 @@ final class CheckJob {
 			}
 			$data[$key] = $value;
 		}
-		return new self($job["check"], $data);
+		return new self($job["check"], $subtype, $data);
 	}
 }

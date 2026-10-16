@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri\config;
 
 use pocketmine\utils\Config;
 use ReinfyTeam\Zuri\utils\TextUtil;
+use ReinfyTeam\Zuri\utils\Utils;
 use ReinfyTeam\Zuri\ZuriAC;
 use function basename;
 use function copy;
@@ -44,6 +45,7 @@ use function pathinfo;
 use function str_replace;
 use function unlink;
 use function version_compare;
+use function yaml_parse;
 
 /**
  * Helper for managing plugin configuration files.
@@ -51,6 +53,8 @@ use function version_compare;
 class ConfigManager implements ConfigPath {
 	private Config $config;
 	private string $path;
+	/** @var array<string, mixed> */
+	private array $defaultValues = [];
 
 	/**
 	 * @param string $path Path to the YAML config resource.
@@ -66,6 +70,27 @@ class ConfigManager implements ConfigPath {
 		);
 
 		$this->checkVersion(self::CONFIG_VERSION);
+
+		// Set default values natively (without relying on the Config class) to ensure they are available even if the config file is missing or incomplete.
+		// what a stupid idea i think btw, just to make sure the server won't crash for config things wtf
+		$defaultPath = ZuriAC::getInstance()->getResourcePath(basename($path));
+		$stream = @fopen($defaultPath, "r");
+
+		if ($stream !== false) {
+			$content = @stream_get_contents($stream);
+			@fclose($stream);
+			// Parse the YAML content
+			$parsed = @yaml_parse($content ?: '');
+			
+			// Verify the output is actually an array
+			if (is_array($parsed)) {
+				/** @var array<string, mixed> $parsed */
+				$this->defaultValues = $parsed;
+			} else {
+				$this->defaultValues = []; // Fallback if YAML is empty, invalid, or not an array mapping
+				// but i don't thing this not be happen because the config file is always valid and not empty.
+			}
+		}
 	}
 
 	/**
@@ -73,29 +98,29 @@ class ConfigManager implements ConfigPath {
 	 * @param array<string,string> $replacements
 	 */
 	public function getData(string $key, mixed $default = null, array $replacements = []) : mixed {
-		$value = $this->config->getNested($key, $default ?? $key);
+		$value = $this->config->getNested($key, ($this->getDefaultValue($key) ?? $default) ?? $key);
 		return is_string($value) ? TextUtil::replaceText($value, $replacements) : $value;
 	}
 
 	/** @param array<string,string> $replacements */
-	public function getString(string $key, string $default = "", array $replacements = []) : string {
-		$value = $this->getData($key, $default, $replacements);
-		return is_string($value) ? $value : $default;
+	public function getString(string $key, array $replacements = []) : string {
+		$value = $this->getData($key, $this->getDefaultValue($key), $replacements);
+		return is_string($value) ? $value : Utils::readString($this->getDefaultValue($key));
 	}
 
-	public function getInt(string $key, int $default = 0) : int {
-		$value = $this->getData($key, $default);
-		return is_int($value) ? $value : $default;
+	public function getInt(string $key) : int {
+		$value = $this->getData($key, $this->getDefaultValue($key));
+		return is_int($value) ? $value : Utils::readInt($this->getDefaultValue($key));
 	}
 
-	public function getFloat(string $key, float $default = 0.0) : float {
-		$value = $this->getData($key, $default);
-		return is_int($value) || is_float($value) ? (float) $value : $default;
+	public function getFloat(string $key) : float {
+		$value = $this->getData($key, $this->getDefaultValue($key));
+		return is_int($value) || is_float($value) ? (float) $value : Utils::readFloat($this->getDefaultValue($key));
 	}
 
-	public function getBool(string $key, bool $default = false) : bool {
-		$value = $this->getData($key, $default);
-		return is_bool($value) ? $value : $default;
+	public function getBool(string $key) : bool {
+		$value = $this->getData($key, $this->getDefaultValue($key));
+		return is_bool($value) ? $value : Utils::readBool($this->getDefaultValue($key));
 	}
 
 	/**
@@ -130,5 +155,9 @@ class ConfigManager implements ConfigPath {
 	 */
 	public function export() : array {
 		return $this->config->getAll();
+	}
+
+	public function getDefaultValue(string $key) : mixed {
+		return $this->defaultValues[$key] ?? null;
 	}
 }

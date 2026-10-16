@@ -39,23 +39,28 @@ use function is_string;
 use function serialize;
 use function unserialize;
 
+/** @disregard this class were not on made in php */
 final class CheckResults extends ThreadSafe {
+	/** @disregard this class were not on made in php */
 	private ThreadSafeArray $queue;
 
 	public function __construct() {
+		/** @disregard this array were not on made in php */
 		$this->queue = new ThreadSafeArray();
 	}
 
 	/** @param array<array-key,mixed> $result */
-	public function addResult(array $result, string $check, ?string $player) : void {
+	public function addResult(array $result, string $check, ?string $subType, ?string $player) : void {
+		/** @disregard this array were not on made in php */
 		$this->queue[] = serialize([
 			'result' => $result,
 			'check' => $check,
+			'subtype' => $subType,
 			'player' => $player
 		]);
 	}
 
-	/** @return array{result:array<array-key,mixed>,check:string,player:?string}|null */
+	/** @return array{result:array<array-key,mixed>,check:string,subtype:?string,player:?string}|null */
 	public function getNextResult() : ?array {
 		$result = $this->queue->shift();
 		if (!is_string($result)) {
@@ -67,10 +72,17 @@ final class CheckResults extends ThreadSafe {
 			return null;
 		}
 		$player = $result["player"] ?? null;
-		return ["result" => $result["result"], "check" => $result["check"], "player" => is_string($player) ? $player : null];
+		$subType = $result["subtype"] ?? null;
+		return [
+			"result" => $result["result"], 
+			"subtype" => is_string($subType) ? $subType : null, 
+			"check" => $result["check"], 
+			"player" => is_string($player) ? $player : null
+		];
 	}
 
 	public function isEmpty() : bool {
+		/** @disregard this array were not on made in php */
 		return count($this->queue) === 0;
 	}
 }

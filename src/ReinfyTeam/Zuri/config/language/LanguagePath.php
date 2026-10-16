@@ -34,4 +34,10 @@ namespace ReinfyTeam\Zuri\config\language;
 interface LanguagePath {
 	public const PUNISHMENT_BAN_MESSAGE = "punishments.ban_message";
 	public const KICK_MESSAGE = "punishments.kick_message";
+	public const CHECK_ERROR = "results.check_error";
+	public const CHECK_UNKNOWN_ERROR = "results.unknown_error";
+	public const CHECK_DEBUG_MESSAGE = "results.debug_message";
+	public const RUNNING_PHAR_WARNING = "console.phar_warning_source";
+	public const ZURI_COMMAND_DESCRIPTION = "commands.description.zuri";
+	public const DEBUG_SUBCOMMAND_DESCRIPTION = "commands.description.debug";
 }

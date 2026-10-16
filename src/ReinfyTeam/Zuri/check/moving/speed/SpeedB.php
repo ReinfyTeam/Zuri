@@ -50,7 +50,7 @@ class SpeedB extends Check {
 	 *
 	 * @return string Human-readable name used in config keys (e.g., 'Speed').
 	 */
-	public function getName() : string {
+	public static function getName() : string {
 		return "Speed";
 	}
 
@@ -62,7 +62,7 @@ class SpeedB extends Check {
 	 *
 	 * @return string Short subtype identifier (e.g., 'A').
 	 */
-	public function getSubType() : string {
+	public static function getSubType() : string {
 		return "B";
 	}
 
@@ -72,7 +72,7 @@ class SpeedB extends Check {
 	 *
 	 * @return int One of self::TYPE_PACKET, self::TYPE_PLAYER or self::TYPE_EVENT.
 	 */
-	public function getType() : int {
+	public static function getType() : int {
 		return self::TYPE_PLAYER;
 	}
 

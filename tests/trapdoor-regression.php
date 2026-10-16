@@ -51,6 +51,7 @@ if ($buildPath !== null) {
 
 use pocketmine\block\Block;
 use pocketmine\block\VanillaBlocks;
+use pocketmine\entity\effect\EffectManager;
 use pocketmine\entity\Location;
 use pocketmine\event\EventPriority;
 use pocketmine\event\HandlerListManager;
@@ -182,6 +183,9 @@ $player = new class($world) extends Player {
 	public function teleport(Vector3 $pos, ?float $yaw = null, ?float $pitch = null) : bool {
 		++$this->teleports;
 		return true;
+	}
+	public function getEffects() : EffectManager {
+		return new EffectManager($this);
 	}
 };
 $plugin = (new ReflectionClass(ZuriAC::class))->newInstanceWithoutConstructor();

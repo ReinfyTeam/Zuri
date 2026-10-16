@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\config\language;
 
 use ReinfyTeam\Zuri\ZuriAC;
+use ReinfyTeam\Zuri\config\ConfigPath;
 use function array_key_first;
 use function str_ends_with;
 use function str_replace;
@@ -41,6 +42,16 @@ class LanguageManager {
 	/** @var array<string,Language> */
 	private array $registeredLocale = [];
 	private Language $currentLanguage;
+
+	private string $prefix = "";
+
+	public function setPrefix(string $prefix) : void {
+		$this->prefix = $prefix;
+	}
+
+	public function getPrefix() : string {
+		return $this->prefix;
+	}
 
 	public function registerLanguage(Language $language) : void {
 		if ($this->isRegisteredLocale($language->getCode())) {
@@ -74,6 +85,7 @@ class LanguageManager {
 		$instance = new LanguageManager();
 		$plugin = ZuriAC::getInstance();
 		foreach ($plugin->getResources() as $path => $resource) {
+			/** @disregard idk why this wtf intelephense */
 			$path = str_replace("\\", "/", $path);
 			if (str_starts_with($path, "lang/") && str_ends_with($path, ".yml")) {
 				$plugin->saveResource($path);
@@ -82,6 +94,8 @@ class LanguageManager {
 			}
 		}
 
+		$instance->setPrefix(ZuriAC::getConfigManager()->getString(ConfigPath::LANGUAGE_PREFIX));
+		
 		if (isset($instance->registeredLocale["en_US"])) {
 			$instance->setCurrentLanguage($instance->registeredLocale["en_US"]);
 		} elseif ($instance->registeredLocale !== []) {

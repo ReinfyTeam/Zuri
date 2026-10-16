@@ -3,6 +3,12 @@
 
 zuri:
   config_version: 0.4.0
+  # Language of the Plugin for messages
+  # You can customize messages on plugin_data/Zuri/lang/*.yml for language
+  language:
+    prefix: "&7(&e&lZuri&r&7) &8>&r"
+    selected: en_US
+    fallback: en_US
   # Threaded processing settings
   # Adjust these values based on your server's performance and workload.
   threads:
@@ -63,6 +69,8 @@ zuri:
       type: command
       # To customize kick messages, please see language files to edit manually.
       command: "kick {player} Unfair Advantage"
+  commands:
+    permission: zuri.command
 
 
 

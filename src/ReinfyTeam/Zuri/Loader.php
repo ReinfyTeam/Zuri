@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri;
 
+use ReinfyTeam\Zuri\config\language\LanguagePath;
 use Phar;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
@@ -40,7 +41,7 @@ use function version_compare;
 /**
  * Base loader for the plugin, providing common lifecycle helpers.
  */
-class Loader extends PluginBase {
+abstract class Loader extends PluginBase {
 	/**
 	 * Minimum supported PHP version.
 	 */
@@ -59,7 +60,7 @@ class Loader extends PluginBase {
 	 */
 	protected static function checkRunningSource() : void {
 		if (!Phar::running()) {
-			Server::getInstance()->getLogger()->warning("This plugin must be run as a phar file.");
+			Server::getInstance()->getLogger()->warning(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::RUNNING_PHAR_WARNING));
 		}
 	}
 
