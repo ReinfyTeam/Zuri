@@ -132,33 +132,35 @@ final class ResultsHandler {
 		$preVL = round($playerZuri->getPreViolations($check), 2);
 		$maxPreVL = round($check->getMaxPreViolation() * $threshold, 2);
 		$playerZuri->addPreViolation($check);
-		self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PREVIOLATION_DETECTION_MESSAGE, [
-			"{player_name}" => $player->getName(),
-			"{module}" => $check->getName(),
-			"{subtype}" => $check->getSubType(),
-			"{violation}" => $preVL,
-			"{threshold}" => $maxPreVL
-		]));
+		if (ZuriAC::getConfigManager()->getBool(ConfigPath::ALERTS_PRE_VIOLATION)) {
+			self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PREVIOLATION_DETECTION_MESSAGE, [
+				"{player_name}" => $player->getName(),
+				"{module}" => $check->getName(),
+				"{subtype}" => $check->getSubType(),
+				"{violation}" => $preVL,
+				"{threshold}" => $maxPreVL
+			]));
+		}
 
 		$violation = round($playerZuri->getViolations($check));
 		$maxViolation = round($check->getMaxViolation() * $threshold);
 
 		if ($preVL >= $maxPreVL) {
+			if (ZuriAC::getConfigManager()->getBool(ConfigPath::ALERTS_VIOLATION)) {
+				self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::VIOLATION_DETECTION_MESSAGE, [
+					"{player_name}" => $player->getName(),
+					"{module}" => $check->getName(),
+					"{subtype}" => $check->getSubType(),
+					"{realViolation}" => $violation,
+					"{threshold}" => $maxViolation
+				]));
+			}
 			$playerZuri->addViolation($check);
-			self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::VIOLATION_DETECTION_MESSAGE, [
-				"{player_name}" => $player->getName(),
-				"{module}" => $check->getName(),
-				"{subtype}" => $check->getSubType(),
-				"{realViolation}" => $violation,
-				"{threshold}" => $maxViolation
-			]));
 			$playerZuri->resetPreViolation($check);
 		}
 
 		if ($violation >= $maxViolation) {
 			$config = ZuriAC::getConfigManager();
-			$playerZuri->resetViolation($check);
-			$playerZuri->resetPreViolation($check);
 			switch (strtolower($check->getPunishment())) {
 				case "kick":
 					if (strtolower($config->getString(ConfigPath::PUNISHMENT_KICK_TYPE)) === "native") {
@@ -177,6 +179,8 @@ final class ResultsHandler {
 				default:
 					$playerZuri->setFlagged(true);
 			}
+			$playerZuri->resetViolation($check);
+			$playerZuri->resetPreViolation($check);
 		}
 	}
 

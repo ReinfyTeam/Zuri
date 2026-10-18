@@ -66,4 +66,7 @@ interface ConfigPath {
 	public const ZURI_COMMAND_PERMISSION = "zuri.permissions.command";
 	public const ZURI_BYPASS_PERMISSION = "zuri.permissions.bypass";
 	public const ZURI_ALERTS_PERMISSION = "zuri.permissions.alerts";
+
+	public const ALERTS_VIOLATION = "zuri.alerts.violation";
+	public const ALERTS_PRE_VIOLATION = "zuri.alerts.pre_violation";
 }
