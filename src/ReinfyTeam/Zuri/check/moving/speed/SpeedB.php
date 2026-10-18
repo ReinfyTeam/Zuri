@@ -200,6 +200,10 @@ class SpeedB extends Check {
 		$limit += $limit * Utils::readFloat($constantData[ConstantPath::TOLERANCE_PERCENTAGE] ?? 0.0); // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
 		$result = round($blocksPerSeconds, 2) > round($limit, 2);
 
+		if ($limit === 0.0) { // prevent false positive, idk why this ... 
+			return self::buildResult(false);
+		}
+
 		return self::buildResult($result, [
 			"limit" => round($limit, 2),
 			"blocksPerSeconds" => round($blocksPerSeconds, 2),
