@@ -108,9 +108,9 @@ class Violation {
 	 * @param array<int, array{time: float, amount: float}> $entries
 	 */
 	private function getAmount(array $entries) : float {
-		$now = microtime(true);
+		$now = abs(microtime(true) * 20);
 		$total = 0.0;
-		$decayTime = ZuriAC::getConfigManager()->getFloat(ConfigPath::VIOLATION_DECAY_TIME);
+		$decayTime = ZuriAC::getConfigManager()->getFloat(ConfigPath::VIOLATION_DECAY_TIME) * 20;
 
 		foreach ($entries as $entry) {
 			$elapsed = $now - $entry["time"];
@@ -138,8 +138,8 @@ class Violation {
 
 		$name = $check->getName();
 		$subType = $check->getSubType();
-		$now = microtime(true);
-		$decayTime = ZuriAC::getConfigManager()->getFloat(ConfigPath::VIOLATION_DECAY_TIME);
+		$now = microtime(true) * 20;
+		$decayTime = ZuriAC::getConfigManager()->getFloat(ConfigPath::VIOLATION_DECAY_TIME) * 20;
 
 		foreach ($storage[$name][$subType] ?? [] as $index => $entry) {
 			if ($now - $entry["time"] >= $decayTime) {

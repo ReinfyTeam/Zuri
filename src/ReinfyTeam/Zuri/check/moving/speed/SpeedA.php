@@ -180,12 +180,12 @@ class SpeedA extends Check {
 		if ($applyEffectMultiplier) {
 			$limit *= Utils::getEffectMovementMultiplier(Utils::readArray($playerData["effects"] ?? null));
 		}
-		$result = $blocksPerSeconds > $limit;
+		$result = round($blocksPerSeconds, 2) > round($limit, 2);
 
 		return self::buildResult($result, [
-			"limit" => $limit,
-			"blocksPerSeconds" => $blocksPerSeconds,
-			"distance" => $distance
+			"limit" => round($limit, 2),
+			"blocksPerSeconds" => round($blocksPerSeconds, 2),
+			"distance" => round($distance, 2)
 		]);
 	}
 }

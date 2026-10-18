@@ -88,6 +88,6 @@ zuri:
     # Enable or disable specific checks. You can also configure their sensitivity and punishment settings.
     speed:
       enabled: true
-      pre_vl: 5
-      max_vl: 10
+      pre_vl: 2
+      max_vl: 2
       punishment: kick

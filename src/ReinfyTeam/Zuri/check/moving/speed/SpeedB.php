@@ -163,7 +163,7 @@ class SpeedB extends Check {
 			if ($isMovingUp || $isMovingDown) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL] ?? 0.0);
 			}
-		} elseif (!Utils::readBool($playerData["isOnGround"] ?? false) && !Utils::readBool($playerData["isInLiquid"] ?? false)) {
+		} elseif (!Utils::readBool($playerData["isOnGround"] ?? false) && !Utils::readBool($playerData["isInLiquid"] ?? false) && Utils::readFloat($playerData["airTicks"]) > 20) {
 			// Calculations from https://minecraft.fandom.com/wiki/Transportation
 			// Falling terminal calculation player logic
 			$fallTicks = Utils::readInt($playerData["airTicks"] ?? ($playerData["fallTicks"] ?? 0));
@@ -201,12 +201,12 @@ class SpeedB extends Check {
 		}
 
 		$limit += $limit * Utils::readFloat($constantData[ConstantPath::TOLERANCE_PERCENTAGE] ?? 0.0); // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
-		$result = $blocksPerSeconds > $limit;
+		$result = round($blocksPerSeconds, 2) > round($limit, 2);
 
 		return self::buildResult($result, [
-			"limit" => $limit,
-			"blocksPerSeconds" => $blocksPerSeconds,
-			"distance" => $distance,
+			"limit" => round($limit, 2),
+			"blocksPerSeconds" => round($blocksPerSeconds, 2),
+			"distance" => round($distance, 2),
 			"direction" => ($isMovingUp ? "up" : ($isMovingDown ? "down" : "none"))
 		]);
 	}
