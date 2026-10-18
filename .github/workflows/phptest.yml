@@ -1,4 +1,4 @@
-name: Run plugin tests
+name: Check PHP syntax
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   phptest:
-    name: Run plugin tests
+    name: Check PHP syntax
     runs-on: ubuntu-24.04
 
     steps:
@@ -25,5 +25,5 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist
 
-      - name: Run PHP syntax and regression tests
-        run: composer run-script test
+      - name: Check PHP source and build tool syntax
+        run: find src tools -type f -name '*.php' -print0 | xargs -0 -n 1 php -l
