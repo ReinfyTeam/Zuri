@@ -32,91 +32,124 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\player;
 
 use ReinfyTeam\Zuri\check\Check;
-use function abs;
-use function count;
+use ReinfyTeam\Zuri\config\ConfigPath;
+use ReinfyTeam\Zuri\ZuriAC;
 use function microtime;
 
 /**
- * Tracks pre-violations and violations per check and subtype for a player.
+ * Tracks time-decaying pre-violations and violations per check and subtype.
  */
 class Violation {
-	/** @var array<string,array<string,array<int,float>>> */
+	/** @var array<string, array<string, array<int, array{time: float, amount: float}>>> */
 	public array $preViolation = [];
-	/** @var array<string,array<string,array<int,float>>> */
+
+	/** @var array<string, array<string, array<int, array{time: float, amount: float}>>> */
 	public array $violation = [];
 
 	/**
-	 * Returns the number of pre-violations recorded for the given check.
-	 *
-	 * @param Check $check The check instance to query.
-	 * @return int Number of pre-violation timestamps stored.
+	 * Returns the current time-decayed pre-violation amount.
 	 */
-	public function getPreViolations(Check $check) : int {
-		return count($this->preViolation[$check->getName()][$check->getSubType()] ?? []);
+	public function getPreViolations(Check $check) : float {
+		return $this->getAmount(
+			$this->preViolation[$check->getName()][$check->getSubType()] ?? []
+		);
 	}
 
 	/**
-	 * Adds a pre-violation timestamp for the given check.
-	 *
-	 * The implementation keeps timestamped entries and prunes old ones
-	 * based on a time window when adding a new entry.
-	 *
-	 * @param Check $check The check to add a pre-violation for.
-	 * @param int|float $amount Optional amount (unused numeric marker for future use).
+	 * Adds a weighted pre-violation amount.
 	 */
 	public function addPreViolation(Check $check, int|float $amount = 1) : void {
-		if (isset($this->preViolation[$check->getName()][$check->getSubType()])) {
-			foreach ($this->preViolation[$check->getName()][$check->getSubType()] as $index => $time) {
-				if (abs($time - microtime(true)) * 20 > 40) {
-					unset($this->preViolation[$check->getName()][$check->getSubType()][$index]);
-				}
-			}
-		}
-
-		$this->preViolation[$check->getName()][$check->getSubType()][] = microtime(true);
+		$this->addAmount(
+			$this->preViolation,
+			$check,
+			(float) $amount
+		);
 	}
 
 	/**
-	 * Resets pre-violation entries for a given check.
+	 * Resets pre-violations for a check.
 	 */
 	public function resetPreViolation(Check $check) : void {
-		if (isset($this->preViolation[$check->getName()][$check->getSubType()])) {
-			unset($this->preViolation[$check->getName()][$check->getSubType()]);
-		}
+		unset($this->preViolation[$check->getName()][$check->getSubType()]);
 	}
 
 	/**
-	 * Returns the number of violations recorded for the given check.
+	 * Returns the current time-decayed violation amount.
 	 */
-	public function getViolations(Check $check) : int {
-		return count($this->violation[$check->getName()][$check->getSubType()] ?? []);
+	public function getViolations(Check $check) : float {
+		return $this->getAmount(
+			$this->violation[$check->getName()][$check->getSubType()] ?? []
+		);
 	}
 
 	/**
-	 * Adds a violation timestamp for the given check.
-	 *
-	 * Old violation timestamps are pruned during insertion.
-	 *
-	 * @param int|float $amount Optional numeric marker for future use.
+	 * Adds a weighted violation amount.
 	 */
 	public function addViolation(Check $check, int|float $amount = 1) : void {
-		if (isset($this->violation[$check->getName()][$check->getSubType()])) {
-			foreach ($this->violation[$check->getName()][$check->getSubType()] as $index => $time) {
-				if (abs($time - microtime(true)) * 20 > 40) {
-					unset($this->violation[$check->getName()][$check->getSubType()][$index]);
-				}
+		$this->addAmount(
+			$this->violation,
+			$check,
+			(float) $amount
+		);
+	}
+
+	/**
+	 * Resets violations for a check.
+	 */
+	public function resetViolation(Check $check) : void {
+		unset($this->violation[$check->getName()][$check->getSubType()]);
+	}
+
+	/**
+	 * Calculates the remaining amount after linear time decay.
+	 *
+	 * Each entry reaches zero after DECAY_TIME seconds.
+	 *
+	 * @param array<int, array{time: float, amount: float}> $entries
+	 */
+	private function getAmount(array $entries) : float {
+		$now = microtime(true);
+		$total = 0.0;
+		$decayTime = ZuriAC::getConfigManager()->getFloat(ConfigPath::VIOLATION_DECAY_TIME);
+
+		foreach ($entries as $entry) {
+			$elapsed = $now - $entry["time"];
+
+			if ($elapsed >= $decayTime || $elapsed < 0.0) {
+				continue;
+			}
+
+			$remaining = 1.0 - ($elapsed / $decayTime);
+			$total += $entry["amount"] * $remaining;
+		}
+
+		return $total;
+	}
+
+	/**
+	 * Adds one weighted entry and removes expired entries.
+	 *
+	 * @param array<string, array<string, array<int, array{time: float, amount: float}>>> $storage
+	 */
+	private function addAmount(array &$storage, Check $check, float $amount) : void {
+		if ($amount <= 0.0) {
+			return;
+		}
+
+		$name = $check->getName();
+		$subType = $check->getSubType();
+		$now = microtime(true);
+		$decayTime = ZuriAC::getConfigManager()->getFloat(ConfigPath::VIOLATION_DECAY_TIME);
+
+		foreach ($storage[$name][$subType] ?? [] as $index => $entry) {
+			if ($now - $entry["time"] >= $decayTime) {
+				unset($storage[$name][$subType][$index]);
 			}
 		}
 
-		$this->violation[$check->getName()][$check->getSubType()][] = microtime(true);
-	}
-
-	/**
-	 * Resets violation entries for a given check.
-	 */
-	public function resetViolation(Check $check) : void {
-		if (isset($this->violation[$check->getName()][$check->getSubType()])) {
-			unset($this->violation[$check->getName()][$check->getSubType()]);
-		}
+		$storage[$name][$subType][] = [
+			"time" => $now,
+			"amount" => $amount
+		];
 	}
 }

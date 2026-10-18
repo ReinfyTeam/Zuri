@@ -203,7 +203,7 @@ class EventListener implements Listener {
 		} else {
 			$playerZuri->setAirTicks(microtime(true));
 		}
-		
+
 
 		$playerZuri->isOnGround()
 			? $playerZuri->setLastGroundY($player->getPosition()->getY())

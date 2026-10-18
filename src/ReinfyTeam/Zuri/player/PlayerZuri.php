@@ -106,7 +106,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	private float $airTicks = 0;
 	private float $groundTicks = 0;
-	
+
 	private int $lastMoveTicks = 0;
 
 	// Input related things
