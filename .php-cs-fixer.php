@@ -6,7 +6,6 @@ use PhpCsFixer\Finder;
 $finder = PhpCsFixer\Finder::create()
 	->in(__DIR__ . "/src")
 	->in(__DIR__ . "/tools")
-	->in(__DIR__ . "/tests")
 	->notPath(__DIR__ . "/vendor");
 
 return (new Config)
