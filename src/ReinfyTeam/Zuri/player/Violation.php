@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\player;
 use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\ZuriAC;
+use function abs;
 use function microtime;
 
 /**

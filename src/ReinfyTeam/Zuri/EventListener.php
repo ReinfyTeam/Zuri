@@ -162,6 +162,12 @@ class EventListener implements Listener {
 			} elseif ($inputFlags->get(PlayerAuthInputFlags::STOP_SWIMMING)) {
 				$playerZuri->setSwimming(false);
 			}
+
+			$playerZuri->setJumping($inputFlags->get(PlayerAuthInputFlags::JUMPING));
+
+			if ($inputFlags->get(PlayerAuthInputFlags::MISSED_SWING)) {
+				$playerZuri->addCPS();
+			}
 		}
 
 		ZuriAC::getCheckRegistry()->spawnCheck([

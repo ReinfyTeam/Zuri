@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function abs;
 use function is_a;
+use function round;
 
 
 /**
@@ -119,7 +120,12 @@ class SpeedA extends Check {
 
 		// Calculate distance (X, Y)
 		$distance = MathUtil::horizontalDistance($from, $to);
-		$blocksPerSeconds = MathUtil::calculateBPS(abs($distance), Utils::readFloat($playerData["lastMoveTicks"]));
+		$elapsedTicks = Utils::readFloat($playerData["lastMoveTicks"] ?? 0.0);
+		$blocksPerSeconds = MathUtil::calculateBPS(abs($distance), $elapsedTicks);
+
+		if ($elapsedTicks <= 0.0) { // ignore for grace period
+			return self::buildResult(false);
+		}
 
 		if ($blocksPerSeconds === 0.0) { // ignore to prevent spam on 0 BPS
 			return self::buildResult(false);
