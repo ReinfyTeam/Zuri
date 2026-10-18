@@ -496,9 +496,9 @@ class EventListener implements Listener {
 
 			ZuriAC::getCheckRegistry()->spawnCheck([
 				"type" => PMMPUtils::getNiceClassName($event),
-				"player" => $damagerZuri, // damager instead of player, because the check is for the attacker
+				"player" => $damager, // damager instead of player, because the check is for the attacker
 				"data" => [
-					"enemy" => $playerZuri
+					"enemy" => $player
 				]
 			], Check::TYPE_PLAYER);
 		}

@@ -31,10 +31,12 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\thread;
 
+use JsonSerializable;
 use pmmp\thread\ThreadSafe;
 use pmmp\thread\ThreadSafeArray;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\check\Check;
+use ReinfyTeam\Zuri\player\PlayerZuri;
 use ReinfyTeam\Zuri\ZuriAC;
 use function count;
 use function is_array;
@@ -55,7 +57,13 @@ final class CheckQueue extends ThreadSafe {
 	/** @param array<string,mixed> $data */
 	public function addCheck(array $data, Check $check) : void {
 		$player = $data["player"] ?? null;
-		$playerData = $player instanceof Player ? ZuriAC::getPlayerManager()->get($player)->jsonSerialize() : null;
+		if ($player instanceof Player) {
+			$playerData = ZuriAC::getPlayerManager()->get($player)->jsonSerialize();
+		} elseif ($player instanceof PlayerZuri) {
+			$playerData = $player->jsonSerialize();
+		} else {
+			$playerData = null;
+		}
 
 		/** @disregard idk why this */
 		$this->queue[] = (new CheckJob($check::class, $check->getSubType(), [
@@ -84,6 +92,12 @@ final class CheckQueue extends ThreadSafe {
 	private function snapshot(mixed $value) : mixed {
 		if ($value instanceof Player) {
 			return ZuriAC::getPlayerManager()->get($value)->jsonSerialize();
+		}
+		if ($value instanceof PlayerZuri) {
+			return $value->jsonSerialize();
+		}
+		if ($value instanceof JsonSerializable) {
+			return $this->snapshot($value->jsonSerialize());
 		}
 		if (is_array($value)) {
 			foreach ($value as $key => $item) {
