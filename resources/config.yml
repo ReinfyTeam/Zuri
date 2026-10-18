@@ -2,7 +2,7 @@
 # Copyright (c) 2024-2026 ReinfyTeam
 
 zuri:
-  config_version: 0.4.0
+  config_version: 0.4.1
   # Language of the Plugin for messages
   # You can customize messages on plugin_data/Zuri/lang/*.yml for language
   language:
@@ -79,6 +79,10 @@ zuri:
   world_bypass:
     mode: blacklist
     list: ["world", "hub", "lobby"]
-
-
-
+  checks:
+    # Enable or disable specific checks. You can also configure their sensitivity and punishment settings.
+    speed:
+      enabled: true
+      pre_vl: 5
+      max_vl: 10
+      punishment: kick
