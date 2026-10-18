@@ -41,6 +41,7 @@ interface ConfigPath {
 	public const FALLBACK_LANGUAGE = "zuri.language.fallback";
 
 	public const ASYNC_BATCH_SIZE = "zuri.async.batch_size";
+	public const THREAD_COUNT = "zuri.threads.count";
 	public const THREAD_MAX_WORKER = "zuri.threads.max_worker";
 	public const THREAD_WORKER_CAPACITY = "zuri.threads.worker_capacity";
 	public const METRICS_DELAY = "zuri.metrics.delay";

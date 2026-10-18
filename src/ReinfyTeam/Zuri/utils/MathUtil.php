@@ -34,10 +34,7 @@ namespace ReinfyTeam\Zuri\utils;
 use DateTime;
 use pocketmine\math\Vector3;
 use pocketmine\world\Position;
-use function abs;
-use function floor;
-use function max;
-use function min;
+use function is_finite;
 use function preg_match_all;
 use function sqrt;
 use function strtolower;
@@ -138,14 +135,14 @@ final class MathUtil {
 		$pos2X = $pos2->x;
 		$pos2Z = $pos2->z;
 
-		if(
-            !is_finite($pos1X) ||
-            !is_finite($pos1Z) ||
-            !is_finite($pos2X) ||
-            !is_finite($pos2Z)
-        ){
-            return 0.0;
-        }
+		if (
+			!is_finite($pos1X) ||
+			!is_finite($pos1Z) ||
+			!is_finite($pos2X) ||
+			!is_finite($pos2Z)
+		) {
+			return 0.0;
+		}
 
 		$dx = $pos2X - $pos1X;
 		$dz = $pos2Z - $pos1Z;

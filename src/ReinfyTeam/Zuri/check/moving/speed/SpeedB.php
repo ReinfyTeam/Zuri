@@ -36,10 +36,8 @@ use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
-use function abs;
 use function is_a;
 use function max;
-use function pow;
 use function round;
 
 
@@ -128,7 +126,7 @@ class SpeedB extends Check {
 		// Calculate vertical effects (jump boost, levitation, slow falling)
 		$effectMultiplier = Utils::getEffectMovementVerticalMultiplier($playerEffects, $movementUp, $movementDown);
 		$limit *= $effectMultiplier;
-		
+
 		$threshold = round($limit * (1.0 + max(0.0, Utils::readFloat($constantData[ConstantPath::TOLERANCE_PERCENTAGE] ?? 0.0))), 3);
 		$failed = $blocksPerSeconds > $threshold;
 

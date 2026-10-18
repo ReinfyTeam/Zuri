@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\thread;
 use pmmp\thread\ThreadSafeArray;
 use Throwable;
 use function count;
+use function hrtime;
 use function is_array;
 use function is_string;
 
@@ -43,7 +44,8 @@ final class CheckWorker {
 
 	public function __construct(
 		private CheckResults $results,
-		private int $capacity
+		private int $capacity,
+		private CheckThreadStats $stats
 	) {
 		/** @disregard this array were not on made in php */
 		$this->jobs = new ThreadSafeArray();
@@ -77,6 +79,7 @@ final class CheckWorker {
 		try {
 			$job = CheckJob::unserialize($serializedJob);
 		} catch (Throwable $e) {
+			$this->stats->recordFailure();
 			$this->results->addResult([
 				"error" => [
 					"message" => $e->getMessage(),
@@ -100,13 +103,20 @@ final class CheckWorker {
 	}
 
 	private function runJob(CheckJob $job) : void {
+		$startNs = hrtime(true);
 		try {
 			$check = $job->getCheck();
 			$data = $job->getData();
 			$result = $check::check($data);
 			$player = self::getPlayerName($data);
 			$this->results->addResult($result, $check, $job->getSubType(), $player);
+
+			$elapsedUs = (int) ((hrtime(true) - $startNs) / 1000);
+			$this->stats->recordSuccess($elapsedUs);
 		} catch(Throwable $e) {
+			$elapsedUs = (int) ((hrtime(true) - $startNs) / 1000);
+			$this->stats->recordFailure();
+
 			$data = isset($data) ? $data : [];
 			$this->results->addResult([
 				"error" => [

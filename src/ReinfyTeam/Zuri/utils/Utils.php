@@ -34,8 +34,8 @@ namespace ReinfyTeam\Zuri\utils;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\data\bedrock\EnchantmentIdMap;
 use pocketmine\data\bedrock\EnchantmentIds;
-use pocketmine\entity\effect\EffectManager;
 use pocketmine\entity\effect\Effect;
+use pocketmine\entity\effect\EffectManager;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\item\enchantment\VanillaEnchantments;
 use pocketmine\math\Vector2;
@@ -48,6 +48,7 @@ use function is_int;
 use function is_string;
 use function max;
 use function min;
+use function strtolower;
 
 /**
  * General utilities for vector conversion and movement calculations.
@@ -91,7 +92,6 @@ final class Utils {
 		}
 
 		return $effects;
-	
 	}
 
 
@@ -99,7 +99,6 @@ final class Utils {
 	 * Checks if a specific effect is present in the provided effects array.
 	 * @param array{name: string, amplifier: int, duration: int}[] $effects Array of effects with name, amplifier, and duration.
 	 * @param string $effectName The name of the effect to check for (e.g., "potion.moveSpeed").
-	 * @return bool
 	 */
 	public static function checkEffect(array $effects, string $effectName) : bool {
 		foreach ($effects as $effect) {

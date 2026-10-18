@@ -12,7 +12,9 @@ zuri:
   # Threaded processing settings
   # Adjust these values based on your server's performance and workload.
   threads:
-    # Number of check workers managed by the coordinator thread.
+    # Number of threads to spawn for check processing. Default: 2.
+    count: 2
+    # Number of check workers managed by each thread.
     max_worker: 4
     # Maximum queued checks accepted by each worker.
     worker_capacity: 64

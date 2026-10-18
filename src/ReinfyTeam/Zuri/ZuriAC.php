@@ -42,7 +42,7 @@ use ReinfyTeam\Zuri\player\ExternalData;
 use ReinfyTeam\Zuri\player\PlayerManager;
 use ReinfyTeam\Zuri\thread\CheckQueue;
 use ReinfyTeam\Zuri\thread\CheckResults;
-use ReinfyTeam\Zuri\thread\CheckThread;
+use ReinfyTeam\Zuri\thread\CheckThreadPool;
 use ReinfyTeam\Zuri\utils\PermissionManager;
 use function max;
 
@@ -56,7 +56,7 @@ class ZuriAC extends Loader {
 
 	private static CheckQueue $checkQueue;
 	private static CheckResults $checkResults;
-	private static CheckThread $checkThread;
+	private static CheckThreadPool $checkThreadPool;
 	private static CheckRegistry $checkRegistry;
 	private static ConfigManager $config;
 	private static ConstantValues $constants;
@@ -86,6 +86,7 @@ class ZuriAC extends Loader {
 	 * Initializes worker and check registry.
 	 */
 	protected function onEnable() : void {
+		$threadCount = max(1, self::$config->getInt(ConfigPath::THREAD_COUNT));
 		$workerCount = max(1, self::$config->getInt(ConfigPath::THREAD_MAX_WORKER));
 		$workerCapacity = max(1, self::$config->getInt(ConfigPath::THREAD_WORKER_CAPACITY));
 
@@ -96,7 +97,13 @@ class ZuriAC extends Loader {
 		self::$permissionManager = new PermissionManager();
 		self::$externalData = new ExternalData();
 
-		self::$checkThread = new CheckThread(self::$checkQueue, self::$checkResults, $workerCount, $workerCapacity);
+		self::$checkThreadPool = new CheckThreadPool(
+			self::$checkQueue,
+			self::$checkResults,
+			$threadCount,
+			$workerCount,
+			$workerCapacity
+		);
 
 		self::$metricsData->update();
 		self::$checkRegistry = CheckRegistry::loadChecks();
@@ -107,7 +114,7 @@ class ZuriAC extends Loader {
 	}
 
 	protected function onDisable() : void {
-		self::$checkThread->quit();
+		self::$checkThreadPool->quit();
 	}
 
 	/**
@@ -164,10 +171,10 @@ class ZuriAC extends Loader {
 	}
 
 	/**
-	 * Returns the CheckThread instance.
+	 * Returns the CheckThreadPool managing all threads.
 	 */
-	public static function getCheckThread() : CheckThread {
-		return self::$checkThread;
+	public static function getCheckThreadPool() : CheckThreadPool {
+		return self::$checkThreadPool;
 	}
 
 	/**

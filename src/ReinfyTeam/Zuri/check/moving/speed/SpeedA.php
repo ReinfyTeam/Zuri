@@ -36,8 +36,8 @@ use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
-use function abs;
 use function is_a;
+use function max;
 use function round;
 
 
@@ -104,9 +104,9 @@ class SpeedA extends Check {
 		$blocksPerSeconds = round(MathUtil::calculateHorizontalBPS($from, $to, $moveElapsedTicks), 3);
 
 		$isSprinting = Utils::readBool($playerData["isSprinting"] ?? false);
-        $isSneaking = Utils::readBool($playerData["isSneaking"] ?? false);
-        $isCrawling = Utils::readBool($playerData["isCrawling"] ?? false);
-        $isSwimming = Utils::readBool($playerData["isSwimming"] ?? false);
+		$isSneaking = Utils::readBool($playerData["isSneaking"] ?? false);
+		$isCrawling = Utils::readBool($playerData["isCrawling"] ?? false);
+		$isSwimming = Utils::readBool($playerData["isSwimming"] ?? false);
 		$isCreative = Utils::readBool($playerData["isCreative"] ?? false);
 		$isSpectator = Utils::readBool($playerData["isSpectator"] ?? false);
 		$isFlying = Utils::readBool($playerData["isFlying"] ?? false);
@@ -118,7 +118,7 @@ class SpeedA extends Check {
 			$isCreative && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]),
 			$isSpectator && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]),
 			default => Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]),
-		}; 
+		};
 
 		if ($isSprinting) {
 			$limit = match (true) {
