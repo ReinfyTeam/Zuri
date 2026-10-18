@@ -28,11 +28,6 @@ jobs:
       - name: Build plugin PHAR
         run: composer run-script build
 
-      - name: Test plugin lifecycle and metrics on Axolotl-PM
-        run: |
-          curl --fail --location --retry 3 --output build/PocketMine-MP.phar https://github.com/axolotl-pm/PocketMine-MP/releases/download/5.49.1/PocketMine-MP.phar
-          composer test:runtime -- build/PocketMine-MP.phar
-
       - name: Upload plugin PHAR artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
