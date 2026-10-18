@@ -36,8 +36,6 @@ use function is_string;
 class ConstantValues extends ConfigManager implements ConstantPath {
 	public function __construct(string $path) {
 		parent::__construct($path);
-
-		$this->checkVersion(self::CONSTANT_VERSION, "zuri.config-version");
 	}
 
 	public function getConstant(string $key) : mixed {
@@ -52,7 +50,7 @@ class ConstantValues extends ConfigManager implements ConstantPath {
 	public function exportNumbers() : array {
 		$numbers = [];
 		foreach ((new \ReflectionClass(ConstantPath::class))->getConstants() as $key) {
-			if (is_string($key) && $key !== self::CONSTANT_VERSION) {
+			if (is_string($key) && $key !== self::CURRENT_CONFIG_VERSION) {
 				$numbers[$key] = $this->getNumber($key);
 			}
 		}

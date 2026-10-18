@@ -59,7 +59,7 @@ interface ConfigPath {
 	public const PUNISHMENT_KICK_TYPE = "zuri.punishments.kick.type";
 	public const PUNISHMENT_KICK_COMMAND = "zuri.punishments.kick.command";
 	public const VIOLATION_DECAY_TIME = "zuri.punishments.violation_decay_time";
-	
+
 	public const WORLD_BYPASS_MODE = "zuri.world_bypass.mode";
 	public const WORLD_BYPASS_LIST = "zuri.world_bypass.list";
 

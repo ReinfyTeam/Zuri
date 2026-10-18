@@ -73,8 +73,6 @@ class ConfigManager implements ConfigPath {
 			Config::YAML
 		);
 
-		$this->checkVersion(self::CONFIG_VERSION);
-
 		// Set default values natively (without relying on the Config class) to ensure they are available even if the config file is missing or incomplete.
 		// what a stupid idea i think btw, just to make sure the server won't crash for config things wtf
 		$defaultPath = ZuriAC::getInstance()->getResourcePath(basename($path));
@@ -95,6 +93,8 @@ class ConfigManager implements ConfigPath {
 				// but i don't thing this not be happen because the config file is always valid and not empty.
 			}
 		}
+
+		$this->checkVersion(Utils::readString($this->getDefaultValue(self::CONFIG_VERSION)));
 	}
 
 	/**

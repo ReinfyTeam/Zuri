@@ -126,6 +126,8 @@ class SpeedB extends Check {
 		// Calculate distance (Old Y and New Y)
 		// Delta Y is used to determine if the player is moving up or down, which affects the speed limit.
 		$distance = MathUtil::verticalDistance($from, $to);
+		// Calculate blocks per second (BPS) based on the distance and the time elapsed since the last movement.
+		// I almost have hard time to calculate this, but I think this is the best way to calculate BPS for vertical movement.
 		$blocksPerSeconds = MathUtil::calculateBPS(abs($distance), Utils::readFloat($playerData["lastMoveTicks"]));
 		$isMovingUp = $distance > 0.0001;
 		$isMovingDown = $distance < -0.0001;
@@ -180,11 +182,6 @@ class SpeedB extends Check {
 
 			// Calculate the delta step limit allowed for this single frame
 			$limit = abs($currentDisplacement - $previousDisplacement);
-
-			// Fallback floor boundary safety layer for the first tick frame
-			if ($limit < 0.08) {
-				$limit = 0.08;
-			}
 		} elseif (Utils::readBool($playerData["isOnScaffold"] ?? false)) {
 			if ($isMovingUp) {
 				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SCAFFOLDING_UP] ?? 0.0);
@@ -203,7 +200,7 @@ class SpeedB extends Check {
 			// Todo: Add additional vertical movement checks for other scenarios if needed.
 		}
 
-		$limit += $limit * Utils::readFloat($constantData[ConstantPath::THRESHOLD_PERCENTAGE] ?? 0.0); // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
+		$limit += $limit * Utils::readFloat($constantData[ConstantPath::TOLERANCE_PERCENTAGE] ?? 0.0); // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
 		$result = $blocksPerSeconds > $limit;
 
 		return self::buildResult($result, [

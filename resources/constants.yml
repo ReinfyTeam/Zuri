@@ -2,8 +2,8 @@
 
 zuri:
   # Constant Configuration: For constant updating the suitable performance variables based on development testing.
-  config-version: 0.4.1
-  threshold_percentage: 0.10 # 10% threshold for base limit add-up
+  config-version: 0.4.2
+  tolerance_percentage: 0.10 # 10% tolerance for base limit add-up
   speed:
     # Source Data from https://minecraft.fandom.com/wiki/Transportation
     # May update frequently as new data is discovered. The values are based on the player's movement speed, which is affected by the player's movement speed attribute and any status effects that may be applied.

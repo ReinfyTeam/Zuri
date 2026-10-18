@@ -8,7 +8,7 @@ punishments:
 results:
   check_error: "Error in check {check}: {message}"
   unknown_error: "Unknown error returned."
-  debug_message: "&7&l[&8DEBUG: &r&c{check} &8&l(&c{subType}&8&l)] &8>&r {debug_data}"
+  debug_message: "&7&l[&8DEBUG: &r&c{check} &8&l(&r&c{subType}&r&8&l)&7&l]&r &8>&r {debug_data}"
 
 console:
   phar_warning_source: "&cYou are running source-code of the plugin, this might degrade checking performance. We recommended you to download phar plugin from Poggit builds or Github releases. Instead of using source-code from Github."

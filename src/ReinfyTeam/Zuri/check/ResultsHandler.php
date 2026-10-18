@@ -45,6 +45,7 @@ use function is_string;
 use function is_subclass_of;
 use function max;
 use function min;
+use function round;
 use function strtolower;
 
 /**
@@ -143,6 +144,7 @@ final class ResultsHandler {
 		$maxViolation = round($check->getMaxViolation() * $threshold);
 
 		if ($preVL >= $maxPreVL) {
+			$playerZuri->addViolation($check);
 			self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::VIOLATION_DETECTION_MESSAGE, [
 				"{player_name}" => $player->getName(),
 				"{module}" => $check->getName(),
@@ -150,12 +152,13 @@ final class ResultsHandler {
 				"{realViolation}" => $violation,
 				"{threshold}" => $maxViolation
 			]));
-			$playerZuri->addViolation($check);
 			$playerZuri->resetPreViolation($check);
 		}
 
 		if ($violation >= $maxViolation) {
 			$config = ZuriAC::getConfigManager();
+			$playerZuri->resetViolation($check);
+			$playerZuri->resetPreViolation($check);
 			switch (strtolower($check->getPunishment())) {
 				case "kick":
 					if (strtolower($config->getString(ConfigPath::PUNISHMENT_KICK_TYPE)) === "native") {
@@ -174,7 +177,6 @@ final class ResultsHandler {
 				default:
 					$playerZuri->setFlagged(true);
 			}
-			$playerZuri->resetViolation($check);
 		}
 	}
 

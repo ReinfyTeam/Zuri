@@ -81,6 +81,9 @@ zuri:
   world_bypass:
     mode: blacklist
     list: ["world", "hub", "lobby"]
+  alerts:
+    pre_violations: true
+    violations: true
   checks:
     # Enable or disable specific checks. You can also configure their sensitivity and punishment settings.
     speed:

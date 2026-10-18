@@ -118,7 +118,7 @@ class SpeedA extends Check {
 		$to = Utils::arrayToVector3($movement["to"]); // @phpstan-ignore argument.type
 
 		// Calculate distance (X, Y)
-		$distance = MathUtil::verticalDistance($from, $to);
+		$distance = MathUtil::horizontalDistance($from, $to);
 		$blocksPerSeconds = MathUtil::calculateBPS(abs($distance), Utils::readFloat($playerData["lastMoveTicks"]));
 
 		if ($blocksPerSeconds === 0.0) { // ignore to prevent spam on 0 BPS
@@ -176,7 +176,7 @@ class SpeedA extends Check {
 		}
 
 		// this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
-		$limit += $baseLimit * Utils::readFloat($constantData[ConstantPath::THRESHOLD_PERCENTAGE] ?? 0.0);
+		$limit += $baseLimit * Utils::readFloat($constantData[ConstantPath::TOLERANCE_PERCENTAGE] ?? 0.0);
 		if ($applyEffectMultiplier) {
 			$limit *= Utils::getEffectMovementMultiplier(Utils::readArray($playerData["effects"] ?? null));
 		}

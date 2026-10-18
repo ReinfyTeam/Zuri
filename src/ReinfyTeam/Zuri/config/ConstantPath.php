@@ -32,9 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\config;
 
 interface ConstantPath {
-	public const CONSTANT_VERSION = "0.4.1";
-
-	public const THRESHOLD_PERCENTAGE = "threshold_percentage";
+	public const TOLERANCE_PERCENTAGE = "tolerance_percentage";
 
 	// Types of Speed (Vertical/Horizontal)
 	public const SPEED_HORIZONTAL = "speed.horizontal";

@@ -72,7 +72,7 @@ final class MathUtil {
 			return 0.0;
 		}
 
-		return ($distance / $elapsedTicks) * 20.0;
+		return $distance / $elapsedTicks * 20;
 	}
 
 	public static function isDiagonal(Vector3 $from, Vector3 $to) : bool {
@@ -108,7 +108,7 @@ final class MathUtil {
 			return 0.0;
 		}
 
-		return abs($distance) / $elapsedTime;
+		return abs($distance) / $elapsedTime * 20;
 	}
 
 	/** @return array{x:float,z:float} */
