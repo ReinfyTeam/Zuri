@@ -164,7 +164,7 @@ class SpeedB extends Check {
 		} elseif (!Utils::readBool($playerData["isOnGround"] ?? false) && !Utils::readBool($playerData["isInLiquid"] ?? false)) {
 			// Calculations from https://minecraft.fandom.com/wiki/Transportation
 			// Falling terminal calculation player logic
-			$fallTicks = Utils::readInt($playerData["airTicks"] ?? ($playerData["getFallTicks"] ?? 0));
+			$fallTicks = Utils::readInt($playerData["airTicks"] ?? ($playerData["fallTicks"] ?? 0));
 
 			// fetch the initial vertical motion when the player left the ground
 			/** @var array{x: float, y: float, z: float} $motionArray */
@@ -207,9 +207,10 @@ class SpeedB extends Check {
 		$result = $blocksPerSeconds > $limit;
 
 		return self::buildResult($result, [
+			"limit" => $limit,
 			"blocksPerSeconds" => $blocksPerSeconds,
 			"distance" => $distance,
-			"limit" => $limit
+			"direction" => ($isMovingUp ? "up" : ($isMovingDown ? "down" : "none"))
 		]);
 	}
 }

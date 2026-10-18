@@ -40,7 +40,7 @@
         "build-source": [
             "@php tools/prepare-build.php",
             "@php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -o=./build/"
-        ],
+        ]
     },
     "config": {
         "platform": {

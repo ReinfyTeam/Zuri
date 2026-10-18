@@ -104,8 +104,9 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $dead = false;
 	private bool $bypassPermission = false;
 
-	private int $airTicks = 0;
-	private int $groundTicks = 0;
+	private float $airTicks = 0;
+	private float $groundTicks = 0;
+	
 	private int $lastMoveTicks = 0;
 
 	// Input related things
@@ -120,6 +121,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $lastNoGroundY = 0.0;
 	private float $joinedAtTime = 0.0;
 	private float $jumpTicks = 0.0;
+	private float $fallTicks = 0.0;
 	private float $teleportTicks = 0.0;
 	private float $attackTicks = 0.0;
 	private float $slimeBlockTicks = 0.0;
@@ -207,6 +209,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	 */
 	public function setEffects(array $effects) : void {
 		$this->effects = $effects;
+	}
+
+	public function getFallTicks() : float {
+		return $this->fallTicks - microtime(true);
+	}
+
+	public function setFallTicks(float $data) : void {
+		$this->fallTicks = $data;
 	}
 
 	public function getMoveVecX() : float {
@@ -483,19 +493,19 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->dead = $data;
 	}
 
-	public function getAirTicks() : int {
-		return $this->airTicks;
+	public function getAirTicks() : float {
+		return ($this->airTicks - microtime(true)) * 20;
 	}
 
-	public function setAirTicks(int $airTicks) : void {
+	public function setAirTicks(float $airTicks) : void {
 		$this->airTicks = $airTicks;
 	}
 
-	public function getGroundTicks() : int {
-		return $this->groundTicks;
+	public function getGroundTicks() : float {
+		return ($this->groundTicks - microtime(true)) * 20;
 	}
 
-	public function setGroundTicks(int $groundTicks) : void {
+	public function setGroundTicks(float $groundTicks) : void {
 		$this->groundTicks = $groundTicks;
 	}
 
@@ -908,6 +918,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"attackTicks" => $this->getAttackTicks(),
 			"slimeBlockTicks" => $this->getSlimeBlockTicks(),
 			"deathTicks" => $this->getDeathTicks(),
+			"fallTicks" => $this->getFallTicks(),
 			"placingTicks" => $this->getPlacingTicks(),
 			"bowShotTicks" => $this->getBowShotTicks(),
 			"hurtTicks" => $this->getHurtTicks(),

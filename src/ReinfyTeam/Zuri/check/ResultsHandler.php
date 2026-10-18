@@ -106,7 +106,7 @@ final class ResultsHandler {
 			return; // if the player has bypass permission, we do not apply any violations or punishments
 		}
 
-		if (($result["failed"] ?? false) === true) {
+		if (Utils::readBool($result["failed"]) === true) {
 			self::handlePunishment($player, $checkInstance);
 		}
 	}
@@ -128,21 +128,18 @@ final class ResultsHandler {
 		$threshold = self::adjustThreshold($player, $check);
 		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
-		if (($preVL = $playerZuri->getPreViolations($check)) >= max(1, $check->getMaxPreViolation()) * $threshold) {
-			$playerZuri->addPreViolation($check);
-			self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PREVIOLATION_DETECTION_MESSAGE, [
-				"{player_name}" => $player->getName(),
-				"{module}" => $check->getName(),
-				"{subtype}" => $check->getSubType(),
-				"{violation}" => $preVL,
-				"{threshold}" => $threshold
-			]));
-			return;
-		}
-
-		if ($playerZuri->getViolations($check) >= max(1, $check->getMaxViolation()) * $threshold) {
-			$playerZuri->addViolation($check);
-			$playerZuri->addPreViolation($check);
+		$preVL = $playerZuri->getPreViolations($check);
+		$maxPreVL = max(1, $check->getMaxPreViolation()) * $threshold;
+		$playerZuri->addPreViolation($check);
+		self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PREVIOLATION_DETECTION_MESSAGE, [
+			"{player_name}" => $player->getName(),
+			"{module}" => $check->getName(),
+			"{subtype}" => $check->getSubType(),
+			"{violation}" => $preVL,
+			"{threshold}" => $threshold
+		]));
+		
+		if ($preVL >= $maxPreVL) {
 			self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::VIOLATION_DETECTION_MESSAGE, [
 				"{player_name}" => $player->getName(),
 				"{module}" => $check->getName(),
@@ -150,30 +147,35 @@ final class ResultsHandler {
 				"{realViolation}" => $preVL,
 				"{threshold}" => $threshold
 			]));
+			$playerZuri->addViolation($check);
 			$playerZuri->resetPreViolation($check);
-			return;
 		}
 
-		$config = ZuriAC::getConfigManager();
-		switch (strtolower($check->getPunishment())) {
-			case "kick":
-				if (strtolower($config->getString(ConfigPath::PUNISHMENT_KICK_TYPE)) === "native") {
-					self::nativeKick($player);
-				} else {
-					self::commandKick($player);
-				}
-				break;
-			case "ban":
-				if (strtolower($config->getString(ConfigPath::PUNISHMENT_BAN_TYPE)) === "native") {
-					self::nativeBan($player);
-				} else {
-					self::commandBan($player);
-				}
-				break;
-			default:
-				$playerZuri->setFlagged(true);
+		$violations = $playerZuri->getViolations($check);
+		$maxViolation = max(1, $check->getMaxViolation()) * $threshold;
+
+		if ($violations >= $maxViolation) {
+			$config = ZuriAC::getConfigManager();
+			switch (strtolower($check->getPunishment())) {
+				case "kick":
+					if (strtolower($config->getString(ConfigPath::PUNISHMENT_KICK_TYPE)) === "native") {
+						self::nativeKick($player);
+					} else {
+						self::commandKick($player);
+					}
+					break;
+				case "ban":
+					if (strtolower($config->getString(ConfigPath::PUNISHMENT_BAN_TYPE)) === "native") {
+						self::nativeBan($player);
+					} else {
+						self::commandBan($player);
+					}
+					break;
+				default:
+					$playerZuri->setFlagged(true);
+			}
+			$playerZuri->resetViolation($check);
 		}
-		$playerZuri->resetViolation($check);
 	}
 
 	private static function nativeKick(Player $player) : void {
