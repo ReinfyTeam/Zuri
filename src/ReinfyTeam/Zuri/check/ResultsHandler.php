@@ -73,26 +73,33 @@ final class ResultsHandler {
 
 		$playerName = $results["player"];
 		$checkClass = Utils::readString($results["check"]);
-		$subType = Utils::readString($results["subtype"]);
 		if ($playerName === null || ($player = Server::getInstance()->getPlayerExact($playerName)) === null || !is_subclass_of($checkClass, Check::class)) {
 			return; // if the player is not online or the check class is invalid, we cannot handle the result
 		}
+
+		$checkInstance = ZuriAC::getCheckRegistry()->getCheckByClass($checkClass);
+		if ($checkInstance === null) {
+			return; // check is not registered
+		}
+
 		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
 		$externalData = Utils::readArray($result["externalData"] ?? null);
 		foreach ($externalData as $parameter => $value) {
 			if (is_string($parameter)) { // only accept string
-				ZuriAC::getExternalData()->setExternalData($playerZuri, $results["check"], $parameter, $value);
+				ZuriAC::getExternalData()->setExternalData($playerZuri, $checkInstance->getName(), $parameter, $value);
 			}
 		}
 
 		if ($playerZuri->isDebug()) {
 			$debugData = Utils::readArray($result["debug"] ?? null);
-			$player->sendMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::CHECK_DEBUG_MESSAGE, [
-				"{check}" => $results["check"],
-				"{subType}" => $results["subtype"],
-				"{debug_data}" => TextUtil::prettyPrintArray($debugData)
-			]));
+			if ($debugData !== []) {
+				$player->sendMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::CHECK_DEBUG_MESSAGE, [
+					"{check}" => $checkInstance->getName(),
+					"{subType}" => $checkInstance->getSubType(),
+					"{debug_data}" => TextUtil::prettyPrintArray($debugData)
+				]));
+			}
 		}
 
 		if ($playerZuri->hasBypassPermission()) {
@@ -100,26 +107,55 @@ final class ResultsHandler {
 		}
 
 		if (($result["failed"] ?? false) === true) {
-			self::handlePunishment($player, $checkClass, $subType);
+			self::handlePunishment($player, $checkInstance);
 		}
 	}
 
-	public static function handlePunishment(Player $player, string $check, string $subType) : void {
-		/** @var Check $checkClass */
-		$checkClass = ZuriAC::getCheckRegistry()->getCheckByName($check, $subType);
-		$threshold = self::adjustThreshold($player, $checkClass);
+	/**
+	 * Broadcast Message to players with bypass permission and log to console.
+	 */
+	private static function broadcastMessage(string $message) : void {
+		Server::getInstance()->getLogger()->info($message);
+		foreach (Server::getInstance()->getOnlinePlayers() as $player) {
+			$playerZuri = ZuriAC::getPlayerManager()->get($player);
+			if ($playerZuri->hasBypassPermission()) {
+				$player->sendMessage($message);
+			}
+		}
+	}
+
+	private static function handlePunishment(Player $player, Check $check) : void {
+		$threshold = self::adjustThreshold($player, $check);
 		$playerZuri = ZuriAC::getPlayerManager()->get($player);
-		$playerZuri->addPreViolation($checkClass);
-		if ($playerZuri->getPreViolations($checkClass) < max(1, $checkClass->getMaxPreViolation()) * $threshold) {
+
+		if (($preVL = $playerZuri->getPreViolations($check)) >= max(1, $check->getMaxPreViolation()) * $threshold) {
+			$playerZuri->addPreViolation($check);
+			self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PREVIOLATION_DETECTION_MESSAGE, [
+				"{player_name}" => $player->getName(),
+				"{module}" => $check->getName(),
+				"{subtype}" => $check->getSubType(),
+				"{violation}" => $preVL,
+				"{threshold}" => $threshold
+			]));
 			return;
 		}
-		$playerZuri->addViolation($checkClass);
-		$playerZuri->resetPreViolation($checkClass);
-		if ($playerZuri->getViolations($checkClass) < max(1, $checkClass->getMaxViolation()) * $threshold) {
+
+		if ($playerZuri->getViolations($check) >= max(1, $check->getMaxViolation()) * $threshold) {
+			$playerZuri->addViolation($check);
+			$playerZuri->addPreViolation($check);
+			self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::VIOLATION_DETECTION_MESSAGE, [
+				"{player_name}" => $player->getName(),
+				"{module}" => $check->getName(),
+				"{subtype}" => $check->getSubType(),
+				"{realViolation}" => $preVL,
+				"{threshold}" => $threshold
+			]));
+			$playerZuri->resetPreViolation($check);
 			return;
 		}
+
 		$config = ZuriAC::getConfigManager();
-		switch (strtolower($checkClass->getPunishment())) {
+		switch (strtolower($check->getPunishment())) {
 			case "kick":
 				if (strtolower($config->getString(ConfigPath::PUNISHMENT_KICK_TYPE)) === "native") {
 					self::nativeKick($player);
@@ -137,18 +173,18 @@ final class ResultsHandler {
 			default:
 				$playerZuri->setFlagged(true);
 		}
-		$playerZuri->resetViolation($checkClass);
+		$playerZuri->resetViolation($check);
 	}
 
-	public static function nativeKick(Player $player) : void {
+	private static function nativeKick(Player $player) : void {
 		$player->kick(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::KICK_MESSAGE));
 	}
 
-	public static function commandKick(Player $player) : void {
+	private static function commandKick(Player $player) : void {
 		self::dispatchPunishment($player, ConfigPath::PUNISHMENT_KICK_COMMAND);
 	}
 
-	public static function commandBan(Player $player) : void {
+	private static function commandBan(Player $player) : void {
 		self::dispatchPunishment($player, ConfigPath::PUNISHMENT_BAN_COMMAND);
 	}
 
@@ -158,7 +194,7 @@ final class ResultsHandler {
 		$server->dispatchCommand(new ConsoleCommandSender($server, $server->getLanguage()), $command);
 	}
 
-	public static function nativeBan(Player $player) : void {
+	private static function nativeBan(Player $player) : void {
 		$message = ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PUNISHMENT_BAN_MESSAGE);
 		$duration = ZuriAC::getConfigManager()->getString(ConfigPath::PUNISHMENT_BAN_DURATION);
 		$expires = strtolower($duration) === "permanent" ? null : MathUtil::parseToDateTime($duration);
@@ -172,10 +208,8 @@ final class ResultsHandler {
 	 * The returned threshold should be >= base threshold; it accounts for ping,
 	 * TPS and server load to allow more tolerance during laggy conditions.
 	 */
-	public static function adjustThreshold(Player $player, Check $checkType) : float {
+	private static function adjustThreshold(Player $player, Check $checkType) : float {
 		$multiplier = 1.0;
-
-		$server = Server::getInstance();
 
 		// Apply ping adjustment
 		$ping = $player->getNetworkSession()->getPing() ?? 0;
@@ -204,7 +238,7 @@ final class ResultsHandler {
 	/**
 	 * Calculate a multiplier based on player ping.
 	 */
-	public static function getPingMultiplier(int $ping, Check $checkType) : float {
+	private static function getPingMultiplier(int $ping, Check $checkType) : float {
 		// Movement checks are more sensitive to ping
 		$sensitivity = Utils::readFloat(ZuriAC::getConfigManager()->getData(ConfigPath::THRESHOLDS_PING . "." . strtolower($checkType->getName()), ZuriAC::getConfigManager()->getFloat(ConfigPath::THRESHOLD_PING_DEFAULT_MULTIPLIER)));
 
@@ -224,7 +258,7 @@ final class ResultsHandler {
 	 *
 	 * @param float $loadFactor Value in [0,1] describing normalized server load.
 	 */
-	public static function getLoadMultiplier(float $loadFactor) : float {
+	private static function getLoadMultiplier(float $loadFactor) : float {
 		// Load affects all checks roughly equally
 		return match (true) {
 			$loadFactor < 0.3 => 1.0,
@@ -240,7 +274,7 @@ final class ResultsHandler {
 	 *
 	 * @param float $tps Current server ticks per second.
 	 */
-	public static function getTpsMultiplier(float $tps, Check $checkType) : float {
+	private static function getTpsMultiplier(float $tps, Check $checkType) : float {
 		// Timer checks are most sensitive to TPS fluctuation
 
 		$sensitivity = Utils::readFloat(ZuriAC::getConfigManager()->getData(ConfigPath::THRESHOLDS_TPS . "." . strtolower($checkType->getName()), ZuriAC::getConfigManager()->getFloat(ConfigPath::THRESHOLD_TPS_DEFAULT_MULTIPLIER)));

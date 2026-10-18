@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\config\language;
 
 use ReinfyTeam\Zuri\config\ConfigPath;
+use ReinfyTeam\Zuri\utils\TextUtil;
 use ReinfyTeam\Zuri\ZuriAC;
 use function array_key_first;
 use function str_ends_with;
@@ -94,7 +95,7 @@ class LanguageManager {
 			}
 		}
 
-		$instance->setPrefix(ZuriAC::getConfigManager()->getString(ConfigPath::LANGUAGE_PREFIX));
+		$instance->setPrefix(TextUtil::parseColors(ZuriAC::getConfigManager()->getString(ConfigPath::LANGUAGE_PREFIX)));
 
 		if (isset($instance->registeredLocale["en_US"])) {
 			$instance->setCurrentLanguage($instance->registeredLocale["en_US"]);

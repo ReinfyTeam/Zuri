@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri;
 
 use CortexPE\Commando\PacketHooker;
+use muqsit\simplepackethandler\SimplePacketHandler;
 use Phar;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
@@ -41,6 +42,7 @@ use ReinfyTeam\Zuri\command\ZuriCommand;
 use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\config\language\LanguagePath;
 use ReinfyTeam\Zuri\task\MetricsTask;
+use function class_exists;
 use function max;
 use function version_compare;
 
@@ -76,7 +78,7 @@ abstract class Loader extends PluginBase {
 	 */
 	protected static function checkPHP() : void {
 		if (version_compare(PHP_VERSION, self::MINIMUM_PHP_VERSION, '<')) {
-			Server::getInstance()->getLogger()->error("Error PHP version is " . PHP_VERSION . " but " . self::MINIMUM_PHP_VERSION . " is required.");
+			Server::getInstance()->getLogger()->error(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PHP_VERSION_OLDER, ["{minimum_version}" => self::MINIMUM_PHP_VERSION]));
 			Server::getInstance()->shutdown();
 		}
 	}
@@ -93,5 +95,17 @@ abstract class Loader extends PluginBase {
 				ResultsHandler::handle($result);
 			}
 		}), ZuriAC::getConfigManager()->getInt(ConfigPath::RESULTS_HANDLER_DELAY) * 20);
+	}
+
+	protected static function checkDependencies() : void {
+		foreach ([
+			PacketHooker::class => "Commando by Paroxity",
+			SimplePacketHandler::class => "SimplePacketHandler by Muqsit"
+		] as $dependencyClass => $dependencyName) {
+			if (!class_exists($dependencyClass)) {
+				Server::getInstance()->getLogger()->error(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEPENDENCY_MISSING, ["{dependency_class" => $dependencyClass, "{dependency_name}" => $dependencyName]));
+				Server::getInstance()->shutdown();
+			}
+		}
 	}
 }

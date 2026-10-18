@@ -3,15 +3,17 @@
 punishments:
   ban_message: "You have been banned for Unfair Advantage."
   kick_message: "You have been kicked for Unfair Advantage."
-
+  violation_detection_message: "&f{player_name} &7failed &f{module} &7(&c{subtype}&7) | &7VL: &2{realViolation}/{threshold}"
+  previolation_detection_message: "&f{player_name} &7suspected using &f{module} &7(&c{subtype}&7) | &7PRE-VL: &2{violation}/{threshold}"
 results:
   check_error: "Error in check {check}: {message}"
   unknown_error: "Unknown error returned."
-  debug_message: "&7&l[&8DEBUG: &r&c{check} &8&l(&c{subType}&8&l)] &8>&r{debug_data}"
+  debug_message: "&7&l[&8DEBUG: &r&c{check} &8&l(&c{subType}&8&l)] &8>&r {debug_data}"
 
 console:
   phar_warning_source: "&cYou are running source-code of the plugin, this might degrade checking performance. We recommended you to download phar plugin from Poggit builds or Github releases. Instead of using source-code from Github."
   php_version_older: "&c⚠️ You're running &ePHP {current_php_version} &cwhich is older than &e{minimum_php_version}&c. Please upgrade your PHP Installion to &e{minimum_php_version}&c or later! You may find &ePHP {minimum_php_version} &cbuilds at https://github.com/pmmp/PHP-Binaries/releases"
+  dependency_missing: "&c⚠️ Dependency &e{dependency_name} &cis missing and fails to load class: &e{dependency_class}&c. Please install it to avoid issues with Zuri anticheat."
 
 commands:
   description:
@@ -21,3 +23,11 @@ commands:
     debug_toggle: "&7Debug mode has been {toggle}."
     debug_enabled_on: "&a&lON"
     debug_enabled_off: "&c&lOFF"
+    help_messages: 
+      help_title: "&7----- &eZuri Anticheat &7-----"
+      help_commands: "&c/{command} &f{subCommand}/&f{aliases} &7- &7{description}"
+      help_bottom: "&7-----------------------------"
+      help_command_not_found: "&cCommand not found. Use &e/zuri help &cto see all commands and usage."
+      help_command_usage: "&cUsage: &e/{command} {subCommand} {parameters} &7- &7{description}"
+    only_players: "&cThis command can only be executed by players."
+    only_console: "&cThis command can only be executed by console."

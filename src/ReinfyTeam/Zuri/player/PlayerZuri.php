@@ -36,6 +36,7 @@ use pocketmine\entity\Location;
 use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
+use pocketmine\Server;
 use pocketmine\world\Position;
 use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\utils\BlockUtil;
@@ -105,6 +106,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	private int $airTicks = 0;
 	private int $groundTicks = 0;
+	private int $lastMoveTicks = 0;
 
 	// Input related things
 	private int $inputMode = 0;
@@ -126,7 +128,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $bowShotTicks = 0.0;
 	private float $hurtTicks = 0.0;
 	private float $projectileAttackTicks = 0.0;
-	private float $lastMoveTick = 0.0;
 	private float $teleportCommandTicks = 0.0;
 	private float $eventCancelled = 0.0;
 	private float $explosionTicks = 0.0;
@@ -362,15 +363,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->onPlant = $data;
 	}
 
-	public function setLastMoveTick(float $data) : void {
-		$this->lastMoveTick = $data;
-	}
-
-	public function getLastMoveTick() : float {
-		return (microtime(true) - $this->lastMoveTick) * 20;
-		;
-	}
-
 	public function setProjectileAttackTicks(float $data) : void {
 		$this->projectileAttackTicks = $data;
 	}
@@ -385,6 +377,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	public function getDropTicks() : float {
 		return (microtime(true) - $this->dropTicks) * 20;
+	}
+
+	public function setLastMoveTicks(int $data) : void {
+		$this->lastMoveTicks = $data;
+	}
+
+	public function getLastMoveTicks() : int {
+		return Server::getInstance()->getTick() - $this->lastMoveTicks;
 	}
 
 	public function setBowShotTicks(float $data) : void {
@@ -912,7 +912,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"bowShotTicks" => $this->getBowShotTicks(),
 			"hurtTicks" => $this->getHurtTicks(),
 			"projectileAttackTicks" => $this->getProjectileAttackTicks(),
-			"lastMoveTick" => $this->getLastMoveTick(),
 			"teleportCommandTicks" => $this->getTeleportCommandTicks(),
 			"cps" => $this->getCPS(),
 			"motion" => Utils::vector3ToArray($this->getMotion()),
@@ -944,6 +943,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isSwimming" => $this->isSwimming(),
 			"effects" => $this->getEffects(),
 			"isOnScaffold" => $this->isOnScaffold(),
+			"lastMoveTicks" => $this->getLastMoveTicks(),
 			"isOnSoul" => $this->isOnSoul(),
 			"isOnUnderwater" => $this->isOnUnderwater(),
 			"hasTwoBlockPassage" => $this->hasTwoBlockPassage(),

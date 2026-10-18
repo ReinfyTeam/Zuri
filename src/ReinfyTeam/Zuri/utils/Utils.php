@@ -143,7 +143,11 @@ final class Utils {
 	 * @param array{x: float, y: float, z: float} $array
 	 */
 	public static function arrayToVector3(array $array) : Vector3 {
-		return new Vector3($array["x"], $array["y"], $array["z"]);
+		return new Vector3(
+			self::readFloat($array["x"]),
+			self::readFloat($array["y"]),
+			self::readFloat($array["z"])
+		);
 	}
 
 	/**

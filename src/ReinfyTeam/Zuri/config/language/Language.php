@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri\config\language;
 
 use pocketmine\utils\Config;
 use ReinfyTeam\Zuri\utils\TextUtil;
+use ReinfyTeam\Zuri\ZuriAC;
 use function is_string;
 use function pathinfo;
 
@@ -56,9 +57,9 @@ class Language implements LanguagePath {
 	 * @param array<string, mixed> $replacements The values to replace placeholders with.
 	 * @return string The translated string.
 	 */
-	public function translate(string $key, array $replacements = []) : string {
+	public function translate(string $key, array $replacements = [], bool $prefix = true) : string {
 		$value = $this->languageData->getNested($key, $key);
-		return TextUtil::parseColors(TextUtil::replaceText(is_string($value) ? $value : $key, $replacements));
+		return TextUtil::parseColors(($prefix ? ZuriAC::getLanguageManager()->getPrefix() . " " : "") . TextUtil::replaceText(is_string($value) ? $value : $key, $replacements));
 	}
 
 	public function save() : void {

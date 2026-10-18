@@ -36,6 +36,8 @@ use ReinfyTeam\Zuri\check\moving\speed\SpeedA;
 use ReinfyTeam\Zuri\check\moving\speed\SpeedB;
 use ReinfyTeam\Zuri\ZuriAC;
 use function array_filter;
+use function class_exists;
+use function is_a;
 
 
 /**
@@ -118,15 +120,30 @@ class CheckRegistry {
 	}
 
 	/**
-	 * Retrieves a check by its name and subtype.
+	 * Retrieves a check by its name or class name, and subtype.
 	 *
-	 * @param string $name The name of the check.
+	 * @param string $name The name or class name of the check.
 	 * @param string $subType The subtype of the check.
 	 * @return Check|null The check if found, null otherwise.
 	 */
 	public function getCheckByName(string $name, string $subType) : ?Check {
 		foreach ($this->checks as $check) {
-			if ($check->getName() === $name && $check->getSubType() === $subType) {
+			if (($check->getName() === $name || $check::class === $name || (class_exists($name) && is_a($name, $check::class, true))) && $check->getSubType() === $subType) {
+				return $check;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Retrieves a check by its class name.
+	 *
+	 * @param string $class The class name of the check.
+	 * @return Check|null The check if found, null otherwise.
+	 */
+	public function getCheckByClass(string $class) : ?Check {
+		foreach ($this->checks as $check) {
+			if ($check instanceof $class || $check::class === $class) {
 				return $check;
 			}
 		}

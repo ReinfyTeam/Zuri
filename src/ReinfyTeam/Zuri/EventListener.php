@@ -63,11 +63,11 @@ use pocketmine\event\server\CommandEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\inventory\ArmorInventory;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
-use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\protocol\types\inventory\UseItemOnEntityTransactionData;
-use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
+use pocketmine\network\mcpe\protocol\types\inventory\UseItemTransactionData;
 use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
 use pocketmine\player\Player;
 use pocketmine\Server;
@@ -76,7 +76,6 @@ use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function microtime;
-use function var_dump;
 
 /**
  * Central event listener for ZuriAC.
@@ -105,22 +104,15 @@ class EventListener implements Listener {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
 
-		if ($packet instanceof LevelSoundEventPacket) {
-			if (
-				$packet->sound === LevelSoundEvent::ATTACK_NODAMAGE ||
-				$packet->sound === LevelSoundEvent::ATTACK_STRONG ||
-				$packet->sound === LevelSoundEvent::ATTACK ||
-				$packet->sound === LevelSoundEvent::ITEM_USE_ON ||
-				$packet->sound === LevelSoundEvent::BLOCK_CLICK ||
-				$packet->sound === LevelSoundEvent::BLOCK_CLICK_FAIL
-			) {
+		if ($packet instanceof InventoryTransactionPacket) { // interacting blocks
+			$trType = $packet->trData->getTypeId();
+			if ($trType === UseItemOnEntityTransactionData::ID || $trType === UseItemTransactionData::ID) {
 				$playerZuri->addCPS();
 			}
-			var_dump($packet->sound);
 		}
 
-		if ($packet instanceof InventoryTransactionPacket) {
-			if ($packet->trData instanceof UseItemOnEntityTransactionData) {
+		if ($packet instanceof AnimatePacket) {
+			if ($packet->action === AnimatePacket::ACTION_SWING_ARM) {
 				$playerZuri->addCPS();
 			}
 		}
@@ -197,8 +189,12 @@ class EventListener implements Listener {
 			return;
 		}
 
+		ZuriAC::getCheckRegistry()->spawnCheck([
+			"type" => PlayerMoveEvent::class,
+			"player" => $player
+		], Check::TYPE_PLAYER);
+
 		$playerZuri->setMovement($event->getFrom(), $event->getTo());
-		$playerZuri->setLastMoveTick(microtime(true));
 		$isOnGround = BlockUtil::isOnGround($event->getTo(), 0) || BlockUtil::isOnGround($event->getTo(), 1);
 		$playerZuri->setOnGround($isOnGround);
 		if ($isOnGround) {
@@ -216,7 +212,7 @@ class EventListener implements Listener {
 		if (BlockUtil::onSlimeBlock($event->getTo(), 0) || BlockUtil::onSlimeBlock($event->getTo(), 1)) {
 			$playerZuri->setSlimeBlockTicks(microtime(true));
 		}
-
+		$playerZuri->setLastMoveTicks(Server::getInstance()->getTick()); // Move tick counter here to prevent 0 on move ticks
 		// Block related checks
 		$playerZuri->setOnIce(BlockUtil::isOnIce($event->getTo(), 1) || BlockUtil::isOnIce($event->getTo(), 2));
 		$playerZuri->setOnStairs(BlockUtil::isOnStairs($event->getTo(), 0) || BlockUtil::isOnStairs($event->getTo(), 1));
@@ -234,15 +230,9 @@ class EventListener implements Listener {
 		$playerZuri->setOnPlate(BlockUtil::isOnPlate($event->getTo(), 0));
 		$playerZuri->setOnSoul(BlockUtil::isOnSoul($event->getTo(), 0));
 		$playerZuri->setOnSnow(BlockUtil::isOnSnow($event->getTo(), 0));
-		$playerZuri->setLastMoveTick((float) Server::getInstance()->getTick());
 		$playerZuri->setBlockAbove(BlockUtil::isSolid(BlockUtil::getBlockAbove($event->getTo())));
 		$playerZuri->setGroundSolid(BlockUtil::isGroundSolid($player->getLocation()));
 		$playerZuri->setInLava(BlockUtil::isInLava($player->getLocation()));
-		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => PMMPUtils::getNiceClassName($event),
-			"player" => $player
-		], Check::TYPE_PLAYER);
-		$playerZuri->setMotion(Vector3::zero());
 	}
 
 	/**

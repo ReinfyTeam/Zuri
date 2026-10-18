@@ -63,7 +63,7 @@ final class CheckWorker {
 		return count($this->jobs) < $this->capacity;
 	}
 
-	public function getQueueSize() : int {
+	public function getJobSize() : int {
 		/** @disregard this array were not on made in php */
 		return count($this->jobs);
 	}

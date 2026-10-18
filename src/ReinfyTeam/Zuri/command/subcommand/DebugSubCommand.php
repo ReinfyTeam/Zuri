@@ -46,7 +46,7 @@ class DebugSubCommand extends BaseSubCommand {
 	}
 
 	public function __construct() {
-		parent::__construct(ZuriAC::getInstance(), "debug", ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_SUBCOMMAND_DESCRIPTION), ["debugmode"]);
+		parent::__construct(ZuriAC::getInstance(), "debug", ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_SUBCOMMAND_DESCRIPTION, [], false), ["debugmode"]);
 	}
 
 	/**
@@ -58,7 +58,7 @@ class DebugSubCommand extends BaseSubCommand {
 
 			$playerZuri->setDebug(!$playerZuri->isDebug());
 			$sender->sendMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_COMMAND_TOGGLE, [
-				"{toggle}" => $playerZuri->isDebug() ? ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_COMMAND_ENABLED_ON) : ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_COMMAND_ENABLED_OFF)
+				"{toggle}" => $playerZuri->isDebug() ? ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_COMMAND_ENABLED_ON, [], false) : ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_COMMAND_ENABLED_OFF, [], false)
 			]));
 		}
 	}

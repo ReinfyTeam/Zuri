@@ -72,12 +72,13 @@ class ZuriAC extends Loader {
 	protected function onLoad() : void {
 		self::$instance = $this;
 
-		self::$languageManager = LanguageManager::loadLanguage();
 		self::$config = new ConfigManager(ZuriAC::getInstance()->getDataFolder() . "config.yml");
 		self::$constants = new ConstantValues(ZuriAC::getInstance()->getDataFolder() . "constants.yml");
+		self::$languageManager = LanguageManager::loadLanguage();
 
 		self::checkPHP();
 		self::checkRunningSource();
+		self::checkDependencies();
 	}
 
 	/**
@@ -102,6 +103,7 @@ class ZuriAC extends Loader {
 
 		self::registerEvents();
 		self::loadCommands();
+		self::loadTasks();
 	}
 
 	protected function onDisable() : void {

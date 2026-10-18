@@ -31,14 +31,15 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\check\moving\speed;
 
+use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function abs;
-use function is_string;
+use function is_a;
 use function max;
 use function pow;
-use function str_ends_with;
 
 
 /**
@@ -87,14 +88,13 @@ class SpeedB extends Check {
 	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>} Result array with `failed` and `debug` keys.
 	 */
 	public static function check(array $data) : array {
-		$type = $data["type"] ?? null;
-		if ($type !== "PlayerMoveEvent" && !(is_string($type) && str_ends_with($type, "\\PlayerMoveEvent"))) {
+		$type = Utils::readString($data["type"] ?? null);
+		if ($type !== PlayerMoveEvent::class && !is_a($type, PlayerMoveEvent::class, true)) {
 			return self::buildResult(false);
 		}
 
 		$playerData = Utils::readArray($data["playerData"] ?? null);
 		$constantData = Utils::readArray($data["constantData"] ?? null);
-		$externalData = Utils::readArray($playerData["externalData"] ?? null);
 
 		if (Utils::readBool($playerData["isRecentlyEnderPearled"] ?? false)) {
 			return self::buildResult(false); // Prevent flag with ender pearls teleportation.
@@ -125,37 +125,41 @@ class SpeedB extends Check {
 
 		// Calculate distance (Old Y and New Y)
 		// Delta Y is used to determine if the player is moving up or down, which affects the speed limit.
-		$distance = abs($to->getY() - $from->getY());
-		$deltaY = $to->getY() - $from->getY();
-		$isMovingUp = $deltaY > 0.0001;
-		$isMovingDown = $deltaY < -0.0001;
+		$distance = MathUtil::verticalDistance($from, $to);
+		$blocksPerSeconds = MathUtil::calculateBPS(abs($distance), Utils::readFloat($playerData["lastMoveTicks"]));
+		$isMovingUp = $distance > 0.0001;
+		$isMovingDown = $distance < -0.0001;
+
+		if ($blocksPerSeconds === 0.0) { // ignore to prevent spam on 0 BPS
+			return self::buildResult(false);
+		}
 
 		$limit = 0.0;
 		if (Utils::readBool($playerData["isOnStairs"] ?? false)) {
 			if ($isMovingUp) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_UP]);
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_UP] ?? 0.0);
 			}
 			if ($isMovingDown) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_DOWN]);
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_DOWN] ?? 0.0);
 			}
 		} elseif (Utils::readBool($playerData["isClimbing"] ?? false)) {
 			if ($isMovingUp) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_UP]);
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_UP] ?? 0.0);
 			}
 			if ($isMovingDown) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_DOWN]);
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_DOWN] ?? 0.0);
 			}
 		} elseif (Utils::readBool($playerData["isInLavafall"] ?? false)) {
 			if ($isMovingUp) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_LAVAFALL_FIRE_RESISTANCE]);
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_LAVAFALL_FIRE_RESISTANCE] ?? 0.0);
 			}
 		} elseif (Utils::readBool($playerData["isLevitating"] ?? false)) {
 			if ($isMovingUp) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_LEVITATION]);
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_LEVITATION] ?? 0.0);
 			}
 		} elseif ((Utils::readBool($playerData["isCreative"] ?? false) || Utils::readBool($playerData["isSpectator"] ?? false)) && Utils::readBool($playerData["isFlying"] ?? false)) {
 			if ($isMovingUp || $isMovingDown) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]);
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL] ?? 0.0);
 			}
 		} elseif (!Utils::readBool($playerData["isOnGround"] ?? false) && !Utils::readBool($playerData["isInLiquid"] ?? false)) {
 			// Calculations from https://minecraft.fandom.com/wiki/Transportation
@@ -163,7 +167,9 @@ class SpeedB extends Check {
 			$fallTicks = Utils::readInt($playerData["airTicks"] ?? ($playerData["getFallTicks"] ?? 0));
 
 			// fetch the initial vertical motion when the player left the ground
-			$vt0 = Utils::arrayToVector3(Utils::readArray($playerData["motion"] ?? ($playerData["getMotion"] ?? null)))->getY(); // @phpstan-ignore argument.type
+			/** @var array{x: float, y: float, z: float} $motionArray */
+			$motionArray = Utils::readArray($playerData["motion"] ?? ($playerData["getMotion"] ?? null));
+			$vt0 = Utils::arrayToVector3($motionArray)->getY();
 
 			// Apply exact displacement formula with initial conditions
 			// Shift N by +1 to account for the formula's internal 1-tick latency offset
@@ -181,26 +187,27 @@ class SpeedB extends Check {
 			}
 		} elseif (Utils::readBool($playerData["isOnScaffold"] ?? false)) {
 			if ($isMovingUp) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SCAFFOLDING_UP]);
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SCAFFOLDING_UP] ?? 0.0);
 			}
 
 			if ($isMovingDown) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SCAFFOLDING_DOWN]);
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SCAFFOLDING_DOWN] ?? 0.0);
 			}
 		} elseif (Utils::readBool($playerData["isSwimming"] ?? false)) {
-			$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_UNDERWATER]);
+			$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_UNDERWATER] ?? 0.0);
 		} else {
 			if (Utils::readBool($playerData["isJumping"] ?? false)) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING]); // Base limit for jumping.
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING] ?? 0.0); // Base limit for jumping.
 			}
 
 			// Todo: Add additional vertical movement checks for other scenarios if needed.
 		}
 
-		$limit += $limit * Utils::readFloat($constantData[ConstantPath::THRESHOLD_PERCENTAGE] ?? null); // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
-		$result = $distance > $limit;
+		$limit += $limit * Utils::readFloat($constantData[ConstantPath::THRESHOLD_PERCENTAGE] ?? 0.0); // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
+		$result = $blocksPerSeconds > $limit;
 
 		return self::buildResult($result, [
+			"blocksPerSeconds" => $blocksPerSeconds,
 			"distance" => $distance,
 			"limit" => $limit
 		]);

@@ -32,14 +32,26 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\config\language;
 
 interface LanguagePath {
+	/** Punishment messages */
 	public const PUNISHMENT_BAN_MESSAGE = "punishments.ban_message";
 	public const KICK_MESSAGE = "punishments.kick_message";
+	public const PREVIOLATION_DETECTION_MESSAGE = "punishments.previolation_detection_message";
+	public const VIOLATION_DETECTION_MESSAGE = "punishments.violation_detection_message";
+
+	/** Results Handler */
 	public const CHECK_ERROR = "results.check_error";
 	public const CHECK_UNKNOWN_ERROR = "results.unknown_error";
 	public const CHECK_DEBUG_MESSAGE = "results.debug_message";
+
+	/** Console Messages */
 	public const RUNNING_PHAR_WARNING = "console.phar_warning_source";
+	public const PHP_VERSION_OLDER = "console.php_version_older";
+	public const DEPENDENCY_MISSING = "console.dependency_missing";
+
+	/** Command-related text */
 	public const ZURI_COMMAND_DESCRIPTION = "commands.description.zuri";
 	public const DEBUG_SUBCOMMAND_DESCRIPTION = "commands.description.debug";
+
 	public const DEBUG_COMMAND_TOGGLE = "commands.messages.debug_toggle";
 	public const DEBUG_COMMAND_ENABLED_ON = "commands.messages.debug_enabled_on";
 	public const DEBUG_COMMAND_ENABLED_OFF = "commands.messages.debug_enabled_off";

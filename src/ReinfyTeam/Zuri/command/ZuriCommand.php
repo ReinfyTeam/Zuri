@@ -42,13 +42,13 @@ use ReinfyTeam\Zuri\ZuriAC;
 class ZuriCommand extends BaseCommand {
 	public function prepare() : void {
 		$this->setPermission(Utils::readString(ZuriAC::getConfigManager()->getData(ConfigPath::ZURI_COMMAND_PERMISSION)));
-		$this->setDescription(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::ZURI_COMMAND_DESCRIPTION));
+		$this->setDescription(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::ZURI_COMMAND_DESCRIPTION, [], false));
 
 		$this->registerSubCommand(new DebugSubCommand());
 	}
 
 	public function __construct() {
-		parent::__construct(ZuriAC::getInstance(), "zuri", ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::ZURI_COMMAND_DESCRIPTION), ["anticheat", "ac", "zuriac"]);
+		parent::__construct(ZuriAC::getInstance(), "zuri", ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::ZURI_COMMAND_DESCRIPTION, [], false), ["anticheat", "ac", "zuriac"]);
 	}
 
 	/**

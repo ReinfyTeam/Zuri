@@ -31,13 +31,13 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\check\moving\speed;
 
+use pocketmine\event\player\PlayerMoveEvent;
 use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function abs;
-use function is_string;
-use function sqrt;
-use function str_ends_with;
+use function is_a;
 
 
 /**
@@ -86,8 +86,8 @@ class SpeedA extends Check {
 	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>} Result array with `failed` and `debug` keys.
 	 */
 	public static function check(array $data) : array {
-		$type = $data["type"] ?? null;
-		if ($type !== "PlayerMoveEvent" && !(is_string($type) && str_ends_with($type, "\\PlayerMoveEvent"))) {
+		$type = Utils::readString($data["type"] ?? null);
+		if ($type !== PlayerMoveEvent::class && !is_a($type, PlayerMoveEvent::class, true)) {
 			return self::buildResult(false);
 		}
 
@@ -118,69 +118,73 @@ class SpeedA extends Check {
 		$to = Utils::arrayToVector3($movement["to"]); // @phpstan-ignore argument.type
 
 		// Calculate distance (X, Y)
-		$dx = $to->getX() - $from->getX();
-		$dz = $to->getZ() - $from->getZ();
-		$distance = sqrt(($dx * $dx) + ($dz * $dz));
+		$distance = MathUtil::verticalDistance($from, $to);
+		$blocksPerSeconds = MathUtil::calculateBPS(abs($distance), Utils::readFloat($playerData["lastMoveTicks"]));
+
+		if ($blocksPerSeconds === 0.0) { // ignore to prevent spam on 0 BPS
+			return self::buildResult(false);
+		}
 
 		$limit = 0.0;
-		$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]);
+		$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_WALKING] ?? 0.0);
 		$isWalking = true;
 		$applyEffectMultiplier = true;
 		if (Utils::readBool($playerData["isCreative"] ?? false) && Utils::readBool($playerData["isFlying"] ?? false)) { // Creative flight
 			$isWalking = false;
 			$applyEffectMultiplier = false;
-			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]);
+			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT] ?? 0.0) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT] ?? 0.0);
 		} elseif (Utils::readBool($playerData["isSpectator"] ?? false) && Utils::readBool($playerData["isFlying"] ?? false)) { // Spectator flight
 			$isWalking = false;
 			$applyEffectMultiplier = false;
-			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]);
+			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT] ?? 0.0) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT] ?? 0.0);
 		} elseif (Utils::readBool($playerData["isSprinting"] ?? false)) { // Sprinting
 			$isWalking = false;
-			$baseLimit = Utils::readBool($playerData["isRecentlyJumped"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP]) : Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT]); // Sprinting threshold
+			$baseLimit = Utils::readBool($playerData["isRecentlyJumped"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP] ?? 0.0) : Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT] ?? 0.0); // Sprinting and jumping
 
 			if (Utils::readBool($playerData["hasTwoBlockPassage"] ?? false)) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_2_BLOCK_PASSAGE])
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_2_BLOCK_PASSAGE] ?? 0.0)
 				- $baseLimit;
 			}
 		} elseif (Utils::readBool($playerData["isSneaking"] ?? false)) { // Sneaking
 			$isWalking = false;
-			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_FLAT]);
+			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_FLAT] ?? 0.0);
 
-			if (abs($dx) !== 0 && abs($dz) !== 0) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_DIAGONAL]) - $baseLimit;
+			if (MathUtil::isDiagonal($from, $to)) {
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_DIAGONAL] ?? 0.0) - $baseLimit;
 			}
 
 			if (Utils::readBool($playerData["isOnSoul"] ?? false)) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SOUL]) - $baseLimit;
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SOUL] ?? 0.0) - $baseLimit;
 			}
 
 			if (Utils::readBool($playerData["hasSwiftSneak"] ?? false)) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SWIFT]) - $baseLimit;
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SWIFT] ?? 0.0) - $baseLimit;
 			}
 		} elseif (Utils::readBool($playerData["isSwimming"] ?? false)) { // Swimming
 			$isWalking = false;
-			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_SURFACE]);
+			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_SURFACE] ?? 0.0);
 
 
 			if (Utils::readBool($playerData["isDiving"] ?? false)) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_DIVING]) - $baseLimit;
+				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_DIVING] ?? 0.0) - $baseLimit;
 			}
 		}
 
 		$limit += $baseLimit;
-		if ($isWalking && abs($dx) !== 0 && abs($dz) !== 0) {
-			$limit = Utils::readFloat($constantData[ConstantPath::SPEED_WALK_DIAGONAL]);
+		if ($isWalking && MathUtil::isDiagonal($from, $to)) {
+			$limit = Utils::readFloat($constantData[ConstantPath::SPEED_WALK_DIAGONAL] ?? 0.0);
 		}
 
 		// this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
-		$limit += $baseLimit * Utils::readFloat($constantData[ConstantPath::THRESHOLD_PERCENTAGE]);
+		$limit += $baseLimit * Utils::readFloat($constantData[ConstantPath::THRESHOLD_PERCENTAGE] ?? 0.0);
 		if ($applyEffectMultiplier) {
 			$limit *= Utils::getEffectMovementMultiplier(Utils::readArray($playerData["effects"] ?? null));
 		}
-		$result = $distance > $limit;
+		$result = $blocksPerSeconds > $limit;
 
 		return self::buildResult($result, [
 			"limit" => $limit,
+			"blocksPerSeconds" => $blocksPerSeconds,
 			"distance" => $distance
 		]);
 	}

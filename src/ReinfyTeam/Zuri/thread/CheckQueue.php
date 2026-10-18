@@ -66,6 +66,11 @@ final class CheckQueue extends ThreadSafe {
 		]))->serialize();
 	}
 
+	public function getQueueCount() : int {
+		/** @disregard idk why this */
+		return count($this->queue);
+	}
+
 	public function getNextCheck() : ?string {
 		$job = $this->queue->shift();
 		return is_string($job) ? $job : null;

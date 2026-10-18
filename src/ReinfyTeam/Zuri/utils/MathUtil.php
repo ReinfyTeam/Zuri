@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\utils;
 
 use DateTime;
+use pocketmine\math\Vector3;
 use pocketmine\world\Position;
 use function abs;
 use function floor;
@@ -49,7 +50,11 @@ final class MathUtil {
 	 * Calculates Euclidean distance between two positions.
 	 */
 	public static function distance(Position $a, Position $b) : float {
-		return sqrt((($a->getX() - $b->getX()) ** 2) + (($a->getY() - $b->getY()) ** 2) + (($a->getZ() - $b->getZ()) ** 2));
+		return sqrt(
+			(($a->getX() - $b->getX()) ** 2) +
+			(($a->getY() - $b->getY()) ** 2) +
+			(($a->getZ() - $b->getZ()) ** 2)
+		);
 	}
 
 	/**
@@ -57,6 +62,24 @@ final class MathUtil {
 	 */
 	public static function getMomentum(float $lastDistance, float $friction) : float {
 		return $lastDistance * $friction * 0.91;
+	}
+
+	/**
+	 * Calculates blocks per second from distance and elapsed server ticks.
+	 */
+	public static function calculateBPS(float $distance, float $elapsedTicks) : float {
+		if ($elapsedTicks <= 0) {
+			return 0.0;
+		}
+
+		return ($distance / $elapsedTicks) * 20.0;
+	}
+
+	public static function isDiagonal(Vector3 $from, Vector3 $to) : bool {
+		$dx = abs($to->getX() - $from->getX());
+		$dz = abs($to->getZ() - $from->getZ());
+
+		return abs($dx) !== 0 && abs($dz) !== 0;
 	}
 
 	/**
@@ -70,10 +93,22 @@ final class MathUtil {
 		return 0.1 * $movement * $effectMultiplier * ((0.6 / $friction) ** 3);
 	}
 
-	public static function horizontalDistance(float $fromX, float $fromZ, float $toX, float $toZ) : float {
-		$dx = $toX - $fromX;
-		$dz = $toZ - $fromZ;
+	public static function horizontalDistance(Vector3 $from, Vector3 $to) : float {
+		$dx = $to->getX() - $from->getX();
+		$dz = $to->getZ() - $from->getZ();
 		return sqrt(($dx * $dx) + ($dz * $dz));
+	}
+
+	public static function verticalDistance(Vector3 $from, Vector3 $to) : float {
+		return $to->getY() - $from->getY();
+	}
+
+	public static function verticalBPS(float $distance, float $elapsedTime) : float {
+		if ($elapsedTime <= 0.0) {
+			return 0.0;
+		}
+
+		return abs($distance) / $elapsedTime;
 	}
 
 	/** @return array{x:float,z:float} */
