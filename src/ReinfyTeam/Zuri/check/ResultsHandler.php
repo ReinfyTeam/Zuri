@@ -128,33 +128,33 @@ final class ResultsHandler {
 		$threshold = self::adjustThreshold($player, $check);
 		$playerZuri = ZuriAC::getPlayerManager()->get($player);
 
-		$preVL = $playerZuri->getPreViolations($check);
-		$maxPreVL = $check->getMaxPreViolation() * $threshold;
+		$preVL = round($playerZuri->getPreViolations($check), 2);
+		$maxPreVL = round($check->getMaxPreViolation() * $threshold, 2);
 		$playerZuri->addPreViolation($check);
 		self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PREVIOLATION_DETECTION_MESSAGE, [
 			"{player_name}" => $player->getName(),
 			"{module}" => $check->getName(),
 			"{subtype}" => $check->getSubType(),
 			"{violation}" => $preVL,
-			"{threshold}" => $threshold
+			"{threshold}" => $maxPreVL
 		]));
+
+		$violation = round($playerZuri->getViolations($check));
+		$maxViolation = round($check->getMaxViolation() * $threshold);
 
 		if ($preVL >= $maxPreVL) {
 			self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::VIOLATION_DETECTION_MESSAGE, [
 				"{player_name}" => $player->getName(),
 				"{module}" => $check->getName(),
 				"{subtype}" => $check->getSubType(),
-				"{realViolation}" => $preVL,
-				"{threshold}" => $threshold
+				"{realViolation}" => $violation,
+				"{threshold}" => $maxViolation
 			]));
 			$playerZuri->addViolation($check);
 			$playerZuri->resetPreViolation($check);
 		}
 
-		$violations = $playerZuri->getViolations($check);
-		$maxViolation = $check->getMaxViolation() * $threshold;
-
-		if ($violations >= $maxViolation) {
+		if ($violation >= $maxViolation) {
 			$config = ZuriAC::getConfigManager();
 			switch (strtolower($check->getPunishment())) {
 				case "kick":
