@@ -445,6 +445,10 @@ class EventListener implements Listener {
 			$playerZuri->setExplosionTicks(microtime(true));
 		}
 
+		if ($event->getCause() === EntityDamageEvent::CAUSE_ENTITY_ATTACK) {
+			return; // we don't want to double-count this event, as it will be handled in onEntityDamageByEntity
+		}
+
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player,
@@ -492,11 +496,9 @@ class EventListener implements Listener {
 
 			ZuriAC::getCheckRegistry()->spawnCheck([
 				"type" => PMMPUtils::getNiceClassName($event),
-				"player" => $damager,
+				"player" => $damagerZuri, // damager instead of player, because the check is for the attacker
 				"data" => [
-					"position" => Utils::vector3ToArray($player->getPosition()->asVector3()),
-					"pitch" => $player->getLocation()->getPitch(),
-					"yaw" => $player->getLocation()->getYaw()
+					"enemy" => $playerZuri
 				]
 			], Check::TYPE_PLAYER);
 		}

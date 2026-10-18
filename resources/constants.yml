@@ -38,3 +38,6 @@ zuri:
       scaffolding_up: 1.200 # Ascending scaffolding
       scaffolding_down: 2.940 # Descending scaffolding
       swim_underwater: 0.390 # Upstream, underwater
+  reach:
+    creative_reach: 6.000 # Creative mode reach distance
+    survival_reach: 3.000 # Survival mode reach distance

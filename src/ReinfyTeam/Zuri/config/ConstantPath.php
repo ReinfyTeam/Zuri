@@ -74,4 +74,8 @@ interface ConstantPath {
 	public const SPEED_SCAFFOLDING_UP = self::SPEED_VERTICAL . ".scaffolding_up";
 	public const SPEED_SCAFFOLDING_DOWN = self::SPEED_VERTICAL . ".scaffolding_down";
 	public const SPEED_SWIM_UNDERWATER = self::SPEED_VERTICAL . ".swim_underwater";
+
+	// Reach distances
+	public const REACH_CREATIVE = "reach.creative_reach";
+	public const REACH_SURVIVAL = "reach.survival_reach";
 }

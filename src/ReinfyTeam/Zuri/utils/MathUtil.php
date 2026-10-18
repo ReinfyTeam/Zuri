@@ -149,4 +149,21 @@ final class MathUtil {
 
 		return sqrt(($dx * $dx) + ($dz * $dz));
 	}
+
+
+	/**
+	 * Calculates the 3D distance between two positions, taking into account the player's eye height.
+	 *
+	 * @param Vector3 $from The starting position.
+	 * @param Vector3 $to The ending position.
+	 * @param float $eyeHeight The player's eye height.
+	 * @return float The calculated 3D distance.
+	 */
+	public static function distanceReach(Vector3 $from, Vector3 $to, float $eyeHeight) : float {
+		return sqrt(
+			(($from->getX() - $to->getX()) ** 2) +
+			(($from->getY() + $eyeHeight - $to->getY()) ** 2) +
+			(($from->getZ() - $to->getZ()) ** 2)
+		);
+	}
 }

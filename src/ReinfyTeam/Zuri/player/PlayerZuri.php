@@ -147,6 +147,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $pitch = 0.0;
 	private float $yaw = 0.0;
 	private float $headYaw = 0.0;
+	private float $eyeHeight = 0.0;
 	private float $moveVecX = 0.0;
 	private float $moveVecZ = 0.0;
 
@@ -182,6 +183,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->setSafePosition(BlockUtil::findSafePosition($player->getPosition()));
 		$this->setEffects(Utils::effectsToArray($player->getEffects()));
 		$this->setBypassPermission($player->hasPermission(ZuriAC::getConfigManager()->getString(ConfigPath::ZURI_BYPASS_PERMISSION)));
+		$this->setEyeHeight($player->getEyeHeight());
 		return $this;
 	}
 
@@ -720,6 +722,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	public function setHeadYaw(float $headYaw) : void {
 		$this->headYaw = $headYaw;
+	}
+
+	public function getEyeHeight() : float {
+		return $this->eyeHeight;
+	}
+
+	public function setEyeHeight(float $eyeHeight) : void {
+		$this->eyeHeight = $eyeHeight;
 	}
 
 	public function getPlayer() : Player {

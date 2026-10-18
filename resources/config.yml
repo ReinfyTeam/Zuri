@@ -2,7 +2,7 @@
 # Copyright (c) 2024-2026 ReinfyTeam
 
 zuri:
-  config_version: 0.4.2
+  config_version: 0.4.3
   # Language of the Plugin for messages
   # You can customize messages on plugin_data/Zuri/lang/*.yml for language
   language:
