@@ -35,6 +35,7 @@ use pocketmine\block\BlockTypeIds;
 use pocketmine\data\bedrock\EnchantmentIdMap;
 use pocketmine\data\bedrock\EnchantmentIds;
 use pocketmine\entity\effect\EffectManager;
+use pocketmine\entity\effect\Effect;
 use pocketmine\entity\effect\VanillaEffects;
 use pocketmine\item\enchantment\VanillaEnchantments;
 use pocketmine\math\Vector2;
@@ -82,7 +83,7 @@ final class Utils {
 		foreach ($instance->all() as $effect) {
 			$effectType = $effect->getType(); // Returns the generic Effect type
 
-			$name = Utils::readString($effectType->getName()); // e.g., "potion.moveSpeed"
+			$name = self::getEffectName($effectType); // e.g., "potion.moveSpeed"
 			$amplifier = $effect->getAmplifier(); // e.g., 0 for Speed I, 1 for Speed II
 			$duration = $effect->getDuration(); // Duration remaining in server ticks
 
@@ -90,6 +91,40 @@ final class Utils {
 		}
 
 		return $effects;
+	
+	}
+
+
+	/**
+	 * Checks if a specific effect is present in the provided effects array.
+	 * @param array{name: string, amplifier: int, duration: int}[] $effects Array of effects with name, amplifier, and duration.
+	 * @param string $effectName The name of the effect to check for (e.g., "potion.moveSpeed").
+	 * @return bool
+	 */
+	public static function checkEffect(array $effects, string $effectName) : bool {
+		foreach ($effects as $effect) {
+			$effect = self::readArray($effect);
+			if (self::readString($effect["name"]) === $effectName) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns the lowercase name of the effect type.
+	 *
+	 * @param Effect $effectType The effect type to get the name for.
+	 * @return string The lowercase name of the effect type, or "unknown" if not found.
+	 */
+	public static function getEffectName(Effect $effectType) : string {
+		foreach (VanillaEffects::getAll() as $name => $registeredEffect) {
+			if ($effectType === $registeredEffect) {
+				return strtolower((string) $name);
+			}
+		}
+
+		return "unknown";
 	}
 
 	/**
@@ -97,9 +132,9 @@ final class Utils {
 	 *
 	 * The effect snapshot stores the raw amplifier, where 0 represents level I.
 	 *
-	 * @param array<array-key,mixed> $effects
+	 * @param array{name: string, amplifier: int, duration: int}[] $effects Array of effects with name, amplifier, and duration.
 	 */
-	public static function getEffectMovementMultiplier(array $effects) : float {
+	public static function getEffectMovementHorizontalMultiplier(array $effects) : float {
 		$speedLevel = 0;
 		$slownessLevel = 0;
 		foreach ($effects as $effect) {
@@ -114,14 +149,75 @@ final class Utils {
 			if ($level <= 0) {
 				continue;
 			}
-			if ($name === "potion.moveSpeed" || $name === "speed") {
+			if ($name === "speed") {
 				$speedLevel = max($speedLevel, $level);
-			} elseif ($name === "potion.moveSlowdown" || $name === "slowness") {
+			} elseif ($name === "slowness") {
 				$slownessLevel = max($slownessLevel, $level);
 			}
 		}
 
 		return (1.0 + (0.2 * $speedLevel)) * max(0.0, 1.0 - (0.15 * $slownessLevel));
+	}
+
+	/**
+	 * Calculates the vertical movement multiplier contributed by Jump Boost, Levitation, and Slow Falling effects.
+	 *
+	 * The effect snapshot stores the raw amplifier, where 0 represents level I.
+	 *
+	 * @param array{name: string, amplifier: int, duration: int}[] $effects Array of effects with name, amplifier, and duration.
+	 * @param bool $isMovingUp Whether the player is moving upwards.
+	 * @param bool $isMovingDown Whether the player is moving downwards.
+	 * @return float The calculated vertical movement multiplier.
+	 */
+	public static function getEffectMovementVerticalMultiplier(array $effects, bool $isMovingUp, bool $isMovingDown) : float {
+		$jumpBoostLevel = 0;
+		$levitationLevel = 0;
+		$hasSlowFalling = false;
+
+		foreach ($effects as $effect) {
+			$data = self::readArray($effect);
+			$name = self::readString($data["name"] ?? "");
+			$duration = self::readInt($data["duration"] ?? 1, 1);
+
+			if ($duration <= 0) {
+				continue;
+			}
+
+			$level = self::readInt($data["amplifier"] ?? -1, -1) + 1;
+			if ($level <= 0) {
+				continue;
+			}
+
+			switch ($name) {
+				case "jump_boost":
+					$jumpBoostLevel = max($jumpBoostLevel, $level);
+					break;
+
+				case "levitation":
+					$levitationLevel = max($levitationLevel, $level);
+					break;
+
+				case "slow_falling":
+					$hasSlowFalling = true;
+					break;
+			}
+		}
+
+		$multiplier = 1.0;
+
+		if ($isMovingUp && $jumpBoostLevel > 0) {
+			$multiplier = max($multiplier, 1.0 + (0.1 * $jumpBoostLevel));
+		}
+
+		if ($levitationLevel > 0) {
+			$multiplier = max($multiplier, 1.0 + (0.2 * $levitationLevel));
+		}
+
+		if ($isMovingDown && $hasSlowFalling) {
+			$multiplier = max($multiplier, 1.25);
+		}
+
+		return $multiplier;
 	}
 
 	/**

@@ -106,8 +106,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	private float $airTicks = 0;
 	private float $groundTicks = 0;
-
-	private int $lastMoveTicks = 0;
+	private int $moveElapsedTicks = 0;
 
 	// Input related things
 	private int $inputMode = 0;
@@ -217,6 +216,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	public function setFallTicks(float $data) : void {
 		$this->fallTicks = $data;
+	}
+
+	public function getMoveElapsedTicks() : int {
+		return Server::getInstance()->getTick() - $this->moveElapsedTicks;
+	}
+
+	public function setMoveElapsedTicks(int $data) : void {
+		$this->moveElapsedTicks = $data;
 	}
 
 	public function getMoveVecX() : float {
@@ -387,14 +394,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	public function getDropTicks() : float {
 		return (microtime(true) - $this->dropTicks) * 20;
-	}
-
-	public function setLastMoveTicks(int $data) : void {
-		$this->lastMoveTicks = $data;
-	}
-
-	public function getLastMoveTicks() : int {
-		return Server::getInstance()->getTick() - $this->lastMoveTicks;
 	}
 
 	public function setBowShotTicks(float $data) : void {
@@ -954,7 +953,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isSwimming" => $this->isSwimming(),
 			"effects" => $this->getEffects(),
 			"isOnScaffold" => $this->isOnScaffold(),
-			"lastMoveTicks" => $this->getLastMoveTicks(),
+			"moveElapsedTicks" => $this->getMoveElapsedTicks(),
 			"isOnSoul" => $this->isOnSoul(),
 			"isOnUnderwater" => $this->isOnUnderwater(),
 			"hasTwoBlockPassage" => $this->hasTwoBlockPassage(),

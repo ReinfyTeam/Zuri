@@ -95,103 +95,51 @@ class SpeedA extends Check {
 		$playerData = Utils::readArray($data["playerData"] ?? null);
 		$constantData = Utils::readArray($data["constantData"] ?? null);
 
-		if (Utils::readBool($playerData["isRecentlyEnderPearled"] ?? false) && Utils::readBool($playerData["hasNoClientPredictions"] ?? false)) {
-			return self::buildResult(false); // Prevent flag with ender pearls teleportation and frozen/no client prediction movements.
-		}
-		if (Utils::readBool($playerData["isRecentlyCancelledEvent"] ?? false)) {
-			return self::buildResult(false);
-		}
-		if (
-			Utils::readFloat($playerData["teleportTicks"] ?? 100.0) < 60.0 ||
-			Utils::readFloat($playerData["teleportCommandTicks"] ?? 100.0) < 40.0
-		) {
-			return self::buildResult(false);
-		}
-		if (!Utils::readBool($playerData["isCurrentChunkLoaded"] ?? true)) {
-			return self::buildResult(false);
-		}
+		/** @var array{from: array{x: float, y: float, z: float}, to: array{x: float, y: float, z: float}} $movement */
+		$movement = Utils::readArray($playerData["movement"]);
+		$from = Utils::arrayToVector3($movement["from"]);
+		$to = Utils::arrayToVector3($movement["to"]);
 
-		$movement = Utils::readArray($playerData["movement"] ?? null);
-		if (!isset($movement["from"], $movement["to"])) {
-			return self::buildResult(false);
-		}
-		$from = Utils::arrayToVector3($movement["from"]); // @phpstan-ignore argument.type
-		$to = Utils::arrayToVector3($movement["to"]); // @phpstan-ignore argument.type
+		$moveElapsedTicks = Utils::readInt($playerData["moveElapsedTicks"] ?? -1);
+		$blocksPerSeconds = round(MathUtil::calculateHorizontalBPS($from, $to, $moveElapsedTicks), 3);
 
-		// Calculate distance (X, Y)
-		$distance = MathUtil::horizontalDistance($from, $to);
-		$elapsedTicks = Utils::readFloat($playerData["lastMoveTicks"] ?? 0.0);
-		$blocksPerSeconds = MathUtil::calculateBPS(abs($distance), $elapsedTicks);
+		$isSprinting = Utils::readBool($playerData["isSprinting"] ?? false);
+        $isSneaking = Utils::readBool($playerData["isSneaking"] ?? false);
+        $isCrawling = Utils::readBool($playerData["isCrawling"] ?? false);
+        $isSwimming = Utils::readBool($playerData["isSwimming"] ?? false);
+		$isCreative = Utils::readBool($playerData["isCreative"] ?? false);
+		$isSpectator = Utils::readBool($playerData["isSpectator"] ?? false);
+		$isFlying = Utils::readBool($playerData["isFlying"] ?? false);
 
-		if ($elapsedTicks <= 0.0) { // ignore for grace period
-			return self::buildResult(false);
-		}
+		$limit = match (true) {
+			$isSwimming => Utils::readFloat($constantData[ConstantPath::SPEED_SWIMMING]),
+			$isSneaking => Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING]),
+			$isCrawling => Utils::readFloat($constantData[ConstantPath::SPEED_CRAWLING]),
+			$isCreative && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]),
+			$isSpectator && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]),
+			default => Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]),
+		}; 
 
-		if ($blocksPerSeconds === 0.0) { // ignore to prevent spam on 0 BPS
-			return self::buildResult(false);
+		if ($isSprinting) {
+			$limit = match (true) {
+				$isSpectator && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]),
+				$isCreative && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]),
+				default => Utils::readFloat($constantData[ConstantPath::SPEED_SPRINTING]),
+			};
 		}
 
-		$limit = 0.0;
-		$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_WALKING] ?? 0.0);
-		$isWalking = true;
-		$applyEffectMultiplier = true;
-		if (Utils::readBool($playerData["isCreative"] ?? false) && Utils::readBool($playerData["isFlying"] ?? false)) { // Creative flight
-			$isWalking = false;
-			$applyEffectMultiplier = false;
-			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT] ?? 0.0) : Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT] ?? 0.0);
-		} elseif (Utils::readBool($playerData["isSpectator"] ?? false) && Utils::readBool($playerData["isFlying"] ?? false)) { // Spectator flight
-			$isWalking = false;
-			$applyEffectMultiplier = false;
-			$baseLimit = Utils::readBool($playerData["isSprinting"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT] ?? 0.0) : Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT] ?? 0.0);
-		} elseif (Utils::readBool($playerData["isSprinting"] ?? false)) { // Sprinting
-			$isWalking = false;
-			$baseLimit = Utils::readBool($playerData["isRecentlyJumped"] ?? false) ? Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP] ?? 0.0) : Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT] ?? 0.0); // Sprinting and jumping
+		// Calculate Effects
+		/** @var array{name: string, amplifier: int, duration: int}[] $playerEffects */
+		$playerEffects = Utils::readArray($playerData["effects"]);
+		$effectMultiplier = Utils::getEffectMovementHorizontalMultiplier($playerEffects);
+		$limit *= $effectMultiplier;
 
-			if (Utils::readBool($playerData["hasTwoBlockPassage"] ?? false)) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SPRINT_JUMP_2_BLOCK_PASSAGE] ?? 0.0)
-				- $baseLimit;
-			}
-		} elseif (Utils::readBool($playerData["isSneaking"] ?? false)) { // Sneaking
-			$isWalking = false;
-			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_FLAT] ?? 0.0);
+		$threshold = round($limit * (1.0 + max(0.0, Utils::readFloat($constantData[ConstantPath::TOLERANCE_PERCENTAGE] ?? 0.0))), 3);
+		$failed = $blocksPerSeconds > $threshold;
 
-			if (MathUtil::isDiagonal($from, $to)) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_DIAGONAL] ?? 0.0) - $baseLimit;
-			}
-
-			if (Utils::readBool($playerData["isOnSoul"] ?? false)) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SOUL] ?? 0.0) - $baseLimit;
-			}
-
-			if (Utils::readBool($playerData["hasSwiftSneak"] ?? false)) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING_SWIFT] ?? 0.0) - $baseLimit;
-			}
-		} elseif (Utils::readBool($playerData["isSwimming"] ?? false)) { // Swimming
-			$isWalking = false;
-			$baseLimit = Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_SURFACE] ?? 0.0);
-
-
-			if (Utils::readBool($playerData["isDiving"] ?? false)) {
-				$limit += Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_DIVING] ?? 0.0) - $baseLimit;
-			}
-		}
-
-		$limit += $baseLimit;
-		if ($isWalking && MathUtil::isDiagonal($from, $to)) {
-			$limit = Utils::readFloat($constantData[ConstantPath::SPEED_WALK_DIAGONAL] ?? 0.0);
-		}
-
-		// this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
-		$limit += $baseLimit * Utils::readFloat($constantData[ConstantPath::TOLERANCE_PERCENTAGE] ?? 0.0);
-		if ($applyEffectMultiplier) {
-			$limit *= Utils::getEffectMovementMultiplier(Utils::readArray($playerData["effects"] ?? null));
-		}
-		$result = round($blocksPerSeconds, 2) > round($limit, 2);
-
-		return self::buildResult($result, [
-			"limit" => round($limit, 2),
-			"blocksPerSeconds" => round($blocksPerSeconds, 2),
-			"distance" => round($distance, 2)
+		return self::buildResult($failed, [
+			"bps" => $blocksPerSeconds,
+			"threshold" => $threshold
 		]);
 	}
 }

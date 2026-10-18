@@ -97,119 +97,44 @@ class SpeedB extends Check {
 		$playerData = Utils::readArray($data["playerData"] ?? null);
 		$constantData = Utils::readArray($data["constantData"] ?? null);
 
-		if (Utils::readBool($playerData["isRecentlyEnderPearled"] ?? false)) {
-			return self::buildResult(false); // Prevent flag with ender pearls teleportation.
-		}
-		if (Utils::readBool($playerData["isRecentlyCancelledEvent"] ?? false)) {
-			return self::buildResult(false);
-		}
-		if (
-			Utils::readFloat($playerData["teleportTicks"] ?? 100.0) < 60.0 ||
-			Utils::readFloat($playerData["teleportCommandTicks"] ?? 100.0) < 40.0
-		) {
-			return self::buildResult(false);
-		}
-		if (!Utils::readBool($playerData["isCurrentChunkLoaded"] ?? true)) {
-			return self::buildResult(false);
-		}
-		if (Utils::readBool($playerData["isGliding"] ?? false)) {
-			// Elytra vertical physics are not modelled by this rewrite yet.
-			return self::buildResult(false);
-		}
+		/** @var array{from: array{x: float, y: float, z: float}, to: array{x: float, y: float, z: float}} $movement */
+		$movement = Utils::readArray($playerData["movement"]);
+		$from = Utils::arrayToVector3($movement["from"]);
+		$to = Utils::arrayToVector3($movement["to"]);
 
-		$movement = Utils::readArray($playerData["movement"] ?? null);
-		if (!isset($movement["from"], $movement["to"])) {
-			return self::buildResult(false);
-		}
-		$from = Utils::arrayToVector3($movement["from"]); // @phpstan-ignore argument.type
-		$to = Utils::arrayToVector3($movement["to"]); // @phpstan-ignore argument.type
+		$moveElapsedTicks = Utils::readInt($playerData["moveElapsedTicks"] ?? -1);
+		$blocksPerSeconds = round(MathUtil::calculateVerticalBPS($from, $to, $moveElapsedTicks), 3);
 
-		// Calculate distance (Old Y and New Y)
-		// Delta Y is used to determine if the player is moving up or down, which affects the speed limit.
-		$distance = MathUtil::verticalDistance($from, $to);
-		// Calculate blocks per second (BPS) based on the distance and the time elapsed since the last movement.
-		// I almost have hard time to calculate this, but I think this is the best way to calculate BPS for vertical movement.
-		$elapsedTicks = Utils::readFloat($playerData["lastMoveTicks"]);
-		$blocksPerSeconds = MathUtil::calculateBPS(abs($distance), $elapsedTicks);
-		$isMovingUp = $distance > 0.0001;
-		$isMovingDown = $distance < -0.0001;
+		$isFlying = Utils::readBool($playerData["isFlying"] ?? false);
+		$isOnStairs = Utils::readBool($playerData["isOnStairs"] ?? false);
+		$isClimbing = Utils::readBool($playerData["isClimbing"] ?? false);
+		$isOnAir = Utils::readBool($playerData["airTicks"] ?? 0.0) > 20;
 
-		if ($elapsedTicks <= 0.0) { // ignore for grace period
-			return self::buildResult(false);
-		}
+		$movementUp = $blocksPerSeconds > 0.0;
+		$movementDown = $blocksPerSeconds < 0.0;
 
-		if ($blocksPerSeconds === 0.0) { // ignore to prevent spam on 0 BPS
-			return self::buildResult(false);
-		}
+		$limit = match (true) {
+			$isOnStairs && $movementUp => Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_UP]),
+			$isOnStairs && $movementDown => Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_DOWN]),
+			$isClimbing && $movementUp => Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_UP]),
+			$isClimbing && $movementDown => Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_DOWN]),
+			$isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]),
+			$isOnAir => Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]),
+			default => Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING]),
+		};
 
-		$limit = 0.0;
-		if (Utils::readBool($playerData["isOnStairs"] ?? false)) {
-			if ($isMovingUp) {
-				$limit = Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_UP] ?? 0.0);
-			} elseif ($isMovingDown) {
-				$limit = Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_DOWN] ?? 0.0);
-			}
-		} elseif (Utils::readBool($playerData["isClimbing"] ?? false)) {
-			if ($isMovingUp) {
-				$limit = Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_UP] ?? 0.0);
-			} elseif ($isMovingDown) {
-				$limit = Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_DOWN] ?? 0.0);
-			}
-		} elseif (Utils::readBool($playerData["isInLavafall"] ?? false)) {
-			if ($isMovingUp) {
-				$limit = Utils::readFloat($constantData[ConstantPath::SPEED_LAVAFALL_FIRE_RESISTANCE] ?? 0.0);
-			}
-		} elseif (Utils::readBool($playerData["isLevitating"] ?? false)) {
-			if ($isMovingUp) {
-				$limit = Utils::readFloat($constantData[ConstantPath::SPEED_LEVITATION] ?? 0.0);
-			}
-		} elseif (
-			(Utils::readBool($playerData["isCreative"] ?? false) || Utils::readBool($playerData["isSpectator"] ?? false)) &&
-			Utils::readBool($playerData["isFlying"] ?? false)
-		) {
-			if ($isMovingUp || $isMovingDown) {
-				$limit = Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL] ?? 0.0);
-			}
-		} elseif (
-			!Utils::readBool($playerData["isOnGround"] ?? false) &&
-			Utils::readInt($playerData["airTicks"] ?? 0) > 20
-		) {
-			$fallTicks = Utils::readInt($playerData["airTicks"] ?? ($playerData["fallTicks"] ?? 0));
+		/** @var array{name: string, amplifier: int, duration: int}[] $playerEffects */
+		$playerEffects = Utils::readArray($playerData["effects"]);
+		// Calculate vertical effects (jump boost, levitation, slow falling)
+		$effectMultiplier = Utils::getEffectMovementVerticalMultiplier($playerEffects, $movementUp, $movementDown);
+		$limit *= $effectMultiplier;
+		
+		$threshold = round($limit * (1.0 + max(0.0, Utils::readFloat($constantData[ConstantPath::TOLERANCE_PERCENTAGE] ?? 0.0))), 3);
+		$failed = $blocksPerSeconds > $threshold;
 
-			/** @var array{x: float, y: float, z: float} $motionArray */
-			$motionArray = Utils::readArray($playerData["motion"] ?? ($playerData["getMotion"] ?? null));
-			$vt0 = Utils::arrayToVector3($motionArray)->getY();
-
-			$N = $fallTicks + 1;
-
-			$currentDisplacement = 50 * ($vt0 + 3.92) * (1 - pow(0.98, $N)) - (3.92 * $N);
-			$previousDisplacement = 50 * ($vt0 + 3.92) * (1 - pow(0.98, max(0, $N - 1))) - (3.92 * max(0, $N - 1));
-
-			$limit = abs($currentDisplacement - $previousDisplacement) * 20;
-		} elseif (Utils::readBool($playerData["isOnScaffold"] ?? false)) {
-			if ($isMovingUp) {
-				$limit = Utils::readFloat($constantData[ConstantPath::SPEED_SCAFFOLDING_UP] ?? 0.0);
-			} elseif ($isMovingDown) {
-				$limit = Utils::readFloat($constantData[ConstantPath::SPEED_SCAFFOLDING_DOWN] ?? 0.0);
-			}
-		} elseif (Utils::readBool($playerData["isSwimming"] ?? false)) {
-			$limit = Utils::readFloat($constantData[ConstantPath::SPEED_SWIM_UNDERWATER] ?? 0.0);
-		} elseif (Utils::readBool($playerData["isJumping"] ?? false)) {
-			$limit = Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING] ?? 0.0);
-		}
-		$limit += $limit * Utils::readFloat($constantData[ConstantPath::TOLERANCE_PERCENTAGE] ?? 0.0); // this ensure will be higher on limit so this certain percentage will be accurate as limits according to approximate values and prevent false-flagging.
-		$result = round($blocksPerSeconds, 2) > round($limit, 2);
-
-		if ($limit === 0.0) { // prevent false positive, idk why this ... 
-			return self::buildResult(false);
-		}
-
-		return self::buildResult($result, [
-			"limit" => round($limit, 2),
-			"blocksPerSeconds" => round($blocksPerSeconds, 2),
-			"distance" => round($distance, 2),
-			"elapsedTicks" => $elapsedTicks,
-			"direction" => ($isMovingUp ? "up" : ($isMovingDown ? "down" : "none"))
+		return self::buildResult($failed, [
+			"bps" => $blocksPerSeconds,
+			"threshold" => $threshold,
 		]);
 	}
 }

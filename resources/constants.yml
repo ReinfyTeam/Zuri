@@ -10,27 +10,20 @@ zuri:
     # Horizontal Calculations for Speed (A)
     horizontal:
       walking: 4.317 # Base speed for Flat terrain (no sprint or jump)
-      walk_diagonal: 4.405 # Diagonal movement (no jumping)
-      sprint: 5.612 # Base speed for Flat terrain (no jump)
-      sprint_jump: 7.127 # Base speed for Flat terrain (jumping + sprint)
-      sprint_jump_2_block_passage: 9.732 # Sprint-jumping 2 block-high passage
-      sneaking_flat: 1.300 # Base speed for Flat terrain (no jump)
-      sneaking_diagonal: 1.830 # Approximately 45-degree angle
+      sprinting: 5.612 # Base speed for Flat terrain (no jump)
+      jumping: 7.127 # Base speed for Flat terrain (jumping + sprint)
+      sneaking: 1.300 # Base speed for Flat terrain (no jump)
       sneaking_swift: 1.940 # Sneaking with Swift Sneak effect
       sneaking_soul: 1.819 # Sneeking on Soul Sand / Soul Soil
+      crawling: 1.295 # Crawling on all fours
       # Swimming speeds are based on the player's movement speed, which is affected by the player's swim speed attribute and any status effects that may be applied.
-      swim_surface: 2.200 # Still water surface / skimming
-      swim_underwater_still: 1.970 # Still water, underwater
-      swim_surface: 2.200 # Still water, underwater (downward)
-      swim_diving: 0.390
-      swim_downstream_standing: 1.370 # Downstream, standing
+      swimming: 5.612
       # Game modes and projectiles
       creative_flight: 11.000
       creative_sprint_flight: 22.000
       spectator_flight: 43.556
       spectator_sprint_flight: 87.111
-      ender_pearl: 23.000 # Thrown 15 degrees above horizontal (approximately)
-      speed_percentage_per_level: 1.20 # Speed increase per level of the Speed effect (Walk + 20% per level)
+      speed_effect: 1.20 # Speed increase per level of the Speed effect (Walk + 20% per level)
     # Vertical Calculations on Speed (B)
     vertical:
       jumping: 2.000 # Pillar jumping / climbing a slope without stairs
@@ -38,7 +31,7 @@ zuri:
       stairs_down: 3.600 # Descending
       climbable_up: 2.350 # Ascending ladders, vines, etc.
       climbable_down: 3.000 # Descending ladders, vines, etc.
-      lavafall_fire_resistance: 0.800
+      lava_liquid: 0.800
       levitation: 0.900 # Approximate levitation upward
       creative_spectator_vertical: 7.490 # Creative / spectator flight
       falling_player_terminal: 78.400 # Terminal velocity for a falling player (no feather falling)

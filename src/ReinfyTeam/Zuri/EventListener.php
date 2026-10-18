@@ -218,7 +218,7 @@ class EventListener implements Listener {
 		if (BlockUtil::onSlimeBlock($event->getTo(), 0) || BlockUtil::onSlimeBlock($event->getTo(), 1)) {
 			$playerZuri->setSlimeBlockTicks(microtime(true));
 		}
-		$playerZuri->setLastMoveTicks(Server::getInstance()->getTick()); // Move tick counter here to prevent 0 on move ticks
+		$playerZuri->setMoveElapsedTicks(Server::getInstance()->getTick());
 		// Block related checks
 		$playerZuri->setOnIce(BlockUtil::isOnIce($event->getTo(), 1) || BlockUtil::isOnIce($event->getTo(), 2));
 		$playerZuri->setOnStairs(BlockUtil::isOnStairs($event->getTo(), 0) || BlockUtil::isOnStairs($event->getTo(), 1));

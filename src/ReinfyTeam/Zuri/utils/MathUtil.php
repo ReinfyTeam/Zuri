@@ -47,163 +47,6 @@ use function strtolower;
  */
 final class MathUtil {
 	/**
-	 * Calculates Euclidean distance between two positions.
-	 */
-	public static function distance(Position $a, Position $b) : float {
-		return sqrt(
-			(($a->getX() - $b->getX()) ** 2) +
-			(($a->getY() - $b->getY()) ** 2) +
-			(($a->getZ() - $b->getZ()) ** 2)
-		);
-	}
-
-	/**
-	 * Calculates momentum based on last distance and friction.
-	 */
-	public static function getMomentum(float $lastDistance, float $friction) : float {
-		return $lastDistance * $friction * 0.91;
-	}
-
-	/**
-	 * Calculates blocks per second from distance and elapsed server ticks.
-	 */
-	public static function calculateBPS(float $distance, float $elapsedTicks) : float {
-		if ($elapsedTicks <= 0) {
-			return 0.0;
-		}
-
-		return $distance / $elapsedTicks * 20;
-	}
-
-	public static function isDiagonal(Vector3 $from, Vector3 $to) : bool {
-		$dx = abs($to->getX() - $from->getX());
-		$dz = abs($to->getZ() - $from->getZ());
-
-		return abs($dx) !== 0 && abs($dz) !== 0;
-	}
-
-	/**
-	 * Calculates expected acceleration based on movement and friction.
-	 */
-	public static function getAcceleration(float $movement, float $effectMultiplier, float $friction, bool $onGround) : float {
-		if (!$onGround) {
-			return 0.02 * $movement;
-		}
-
-		return 0.1 * $movement * $effectMultiplier * ((0.6 / $friction) ** 3);
-	}
-
-	public static function horizontalDistance(Vector3 $from, Vector3 $to) : float {
-		$dx = $to->getX() - $from->getX();
-		$dz = $to->getZ() - $from->getZ();
-		return sqrt(($dx * $dx) + ($dz * $dz));
-	}
-
-	public static function verticalDistance(Vector3 $from, Vector3 $to) : float {
-		return $to->getY() - $from->getY();
-	}
-
-	public static function verticalBPS(float $distance, float $elapsedTime) : float {
-		if ($elapsedTime <= 0.0) {
-			return 0.0;
-		}
-
-		return abs($distance) / $elapsedTime * 20;
-	}
-
-	/** @return array{x:float,z:float} */
-	public static function horizontalVelocity(float $fromX, float $fromZ, float $toX, float $toZ, float $deltaTicks) : array {
-		$scale = 20.0 / max(1.0, $deltaTicks);
-		return [
-			"x" => ($toX - $fromX) * $scale,
-			"z" => ($toZ - $fromZ) * $scale
-		];
-	}
-
-	public static function horizontalSpeed(float $velocityX, float $velocityZ) : float {
-		return sqrt(($velocityX ** 2) + ($velocityZ ** 2));
-	}
-
-	public static function horizontalAcceleration(
-		float $velocityX,
-		float $velocityZ,
-		float $previousVelocityX,
-		float $previousVelocityZ
-	) : float {
-		return self::horizontalSpeed(
-			$velocityX - $previousVelocityX,
-			$velocityZ - $previousVelocityZ
-		);
-	}
-
-	public static function directionChange(
-		float $velocityX,
-		float $velocityZ,
-		float $previousVelocityX,
-		float $previousVelocityZ
-	) : float {
-		$currentSpeed = self::horizontalSpeed($velocityX, $velocityZ);
-		$previousSpeed = self::horizontalSpeed($previousVelocityX, $previousVelocityZ);
-		if ($currentSpeed <= 0.0001 || $previousSpeed <= 0.0001) {
-			return 0.0;
-		}
-
-		$cosine = (($velocityX * $previousVelocityX) + ($velocityZ * $previousVelocityZ)) / ($currentSpeed * $previousSpeed);
-		return 1.0 - max(-1.0, min(1.0, $cosine));
-	}
-
-	public static function verticalVelocityAfterTicks(float $initialVelocity, int $ticks) : float {
-		if ($ticks <= 0) {
-			return $initialVelocity;
-		}
-
-		return (0.98 ** ($ticks - 1)) * ($initialVelocity + 3.92) - 3.92;
-	}
-
-	public static function verticalDisplacement(float $initialVelocity, int $ticks) : float {
-		if ($ticks <= 0) {
-			return 0.0;
-		}
-
-		return 50.0 * ($initialVelocity + 3.92) * (1.0 - (0.98 ** $ticks)) - (3.92 * $ticks);
-	}
-
-	public static function verticalVelocityAtSeconds(float $initialVelocity, float $seconds) : float {
-		$ticks = max(0, (int) floor(20.0 * $seconds));
-		return self::verticalVelocityAfterTicks($initialVelocity, $ticks);
-	}
-
-	public static function verticalDisplacementAtSeconds(float $initialVelocity, float $seconds) : float {
-		$ticks = max(0, (int) floor(20.0 * $seconds));
-		return self::verticalDisplacement($initialVelocity, $ticks);
-	}
-
-	public static function speed3D(float $velocityX, float $velocityY, float $velocityZ) : float {
-		return sqrt(($velocityX ** 2) + ($velocityY ** 2) + ($velocityZ ** 2));
-	}
-
-	public static function nextVerticalVelocity(float $velocity) : float {
-		return ($velocity - 0.08) * 0.98;
-	}
-
-	public static function applyExternalVelocity(float $speed, float $velocityX, float $velocityZ) : float {
-		return $speed + self::horizontalSpeed($velocityX, $velocityZ);
-	}
-
-	public static function iceSpeed(float $baseSpeed, float $previousSpeed, bool $onIce, bool $wasOnIce) : float {
-		if (!$onIce && !$wasOnIce) {
-			return $baseSpeed;
-		}
-		$momentum = ($previousSpeed * 0.98) + ($baseSpeed * 0.10);
-		return min(40.0, max($baseSpeed, $momentum));
-	}
-
-	public static function glideSpeed(float $pitch) : float {
-		$downward = max(0.0, min(90.0, abs($pitch)));
-		return 30.0 + (($downward / 90.0) * (78.4 - 30.0));
-	}
-
-	/**
 	 * Parses a time string (e.g. "1h30m") into a DateTime object representing that duration from now.
 	 *
 	 * Supported units: years (y), months (mo), weeks (w), days (d), hours (h), minutes (m), seconds (s).
@@ -259,5 +102,54 @@ final class MathUtil {
 		}
 
 		return $date;
+	}
+
+	/**
+	 * Calculates the horizontal blocks per second (BPS) between two positions over a given number of ticks.
+	 *
+	 * @param Vector3 $oldPosition The previous position of the player.
+	 * @param Vector3 $newPosition The current position of the player.
+	 * @param int $elapsedTicks The number of ticks that have elapsed between the two positions.
+	 * @return float The calculated horizontal BPS. Returns 0.0 if elapsedTicks is less than or equal to 0.
+	 */
+	public static function calculateHorizontalBPS(Vector3 $oldPosition, Vector3 $newPosition, int $elapsedTicks) : float {
+		if ($elapsedTicks <= 0) {
+			return 0.0;
+		}
+
+		$distance = self::distance2D($oldPosition, $newPosition);
+
+		return ($distance / $elapsedTicks) * 20.0;
+	}
+
+	public static function calculateVerticalBPS(Vector3 $oldPosition, Vector3 $newPosition, int $elapsedTicks) : float {
+		if ($elapsedTicks <= 0) {
+			return 0.0;
+		}
+
+		$deltaY = $newPosition->y - $oldPosition->y;
+
+		return ($deltaY / $elapsedTicks) * 20.0;
+	}
+
+	public static function distance2D(Vector3 $pos1, Vector3 $pos2) : float {
+		$pos1X = $pos1->x;
+		$pos1Z = $pos1->z;
+		$pos2X = $pos2->x;
+		$pos2Z = $pos2->z;
+
+		if(
+            !is_finite($pos1X) ||
+            !is_finite($pos1Z) ||
+            !is_finite($pos2X) ||
+            !is_finite($pos2Z)
+        ){
+            return 0.0;
+        }
+
+		$dx = $pos2X - $pos1X;
+		$dz = $pos2Z - $pos1Z;
+
+		return sqrt(($dx * $dx) + ($dz * $dz));
 	}
 }
