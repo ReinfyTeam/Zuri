@@ -36,7 +36,6 @@ use pocketmine\entity\Location;
 use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
-use pocketmine\Server;
 use pocketmine\world\Position;
 use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\utils\BlockUtil;
@@ -46,6 +45,7 @@ use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
 use function count;
+use function max;
 use function microtime;
 
 class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath {
@@ -106,7 +106,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	private float $airTicks = 0;
 	private float $groundTicks = 0;
-	private int $moveElapsedTicks = 0;
+	private int $lastMoveTick = 0;
+	private int $moveElapsedTicks = 1;
 
 	// Input related things
 	private int $inputMode = 0;
@@ -221,11 +222,16 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	}
 
 	public function getMoveElapsedTicks() : int {
-		return Server::getInstance()->getTick() - $this->moveElapsedTicks;
+		return $this->moveElapsedTicks;
 	}
 
 	public function setMoveElapsedTicks(int $data) : void {
-		$this->moveElapsedTicks = $data;
+		$this->moveElapsedTicks = $this->lastMoveTick > 0 ? max(1, $data - $this->lastMoveTick) : 1;
+		$this->lastMoveTick = $data;
+	}
+
+	public function getLastMoveTick() : int {
+		return $this->lastMoveTick;
 	}
 
 	public function getMoveVecX() : float {

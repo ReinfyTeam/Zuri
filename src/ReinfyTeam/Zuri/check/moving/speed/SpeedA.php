@@ -103,7 +103,7 @@ class SpeedA extends Check {
 		$moveElapsedTicks = Utils::readInt($playerData["moveElapsedTicks"] ?? -1);
 		$blocksPerSeconds = round(MathUtil::calculateHorizontalBPS($from, $to, $moveElapsedTicks), 3);
 
-		if ($blocksPerSeconds === 0.0) {
+		if ($blocksPerSeconds === 0.0) { // prevent false-flagging
 			return self::buildResult(false);
 		}
 

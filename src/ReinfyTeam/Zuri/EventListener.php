@@ -196,18 +196,14 @@ class EventListener implements Listener {
 			return;
 		}
 
-		if ($playerZuri->getMoveElapsedTicks() === 0) { // per tick only check, to maximize performance and accuracy for larger playerbase
+		$currentTick = Server::getInstance()->getTick();
+		if ($playerZuri->getLastMoveTick() === $currentTick) { // per tick only check, to maximize performance and accuracy for larger playerbase
 			return;
 		}
 
-		$playerZuri->setMoveElapsedTicks(Server::getInstance()->getTick());
-
-		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => PlayerMoveEvent::class,
-			"player" => $player
-		], Check::TYPE_PLAYER);
-
+		$playerZuri->setMoveElapsedTicks($currentTick);
 		$playerZuri->setMovement($event->getFrom(), $event->getTo());
+
 		$isOnGround = BlockUtil::isOnGround($event->getTo(), 0) || BlockUtil::isOnGround($event->getTo(), 1);
 		$playerZuri->setOnGround($isOnGround);
 		if ($isOnGround) {
@@ -216,6 +212,11 @@ class EventListener implements Listener {
 		} else {
 			$playerZuri->setAirTicks(microtime(true));
 		}
+
+		ZuriAC::getCheckRegistry()->spawnCheck([
+			"type" => PlayerMoveEvent::class,
+			"player" => $player
+		], Check::TYPE_PLAYER);
 
 
 		$playerZuri->isOnGround()

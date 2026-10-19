@@ -37,6 +37,7 @@ use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function is_a;
+use function round;
 
 
 /**
@@ -97,16 +98,16 @@ class ReachA extends Check {
 		$enemyZuri = Utils::readArray($dataCheck["enemy"] ?? null);
 
 		$enemyZuriMovement = Utils::readArray($enemyZuri["movement"] ?? null);
-		$playerMovement = Utils::readArray($playerData["playerMovement"] ?? null);
+		$playerMovement = Utils::readArray($playerData["movement"] ?? null);
 
 		/** @var array{x:float,y:float,z:float} $enemeyMovementPos */
 		$enemeyMovementPos = $enemyZuriMovement["to"];
 		/** @var array{x:float,y:float,z:float} $playerMovementPos */
 		$playerMovementPos = $playerMovement["to"];
 
-		$distance = MathUtil::distanceReach(Utils::arrayToVector3($enemeyMovementPos), Utils::arrayToVector3($playerMovementPos), Utils::readFloat($playerData["eyeHeight"] ?? 0.0));
+		$distance = round(MathUtil::distanceReach(Utils::arrayToVector3($enemeyMovementPos), Utils::arrayToVector3($playerMovementPos), Utils::readFloat($playerData["eyeHeight"] ?? 0.0)), 3);
 		$isCreative = Utils::readBool($playerData["isCreative"] ?? false) && !Utils::readBool($playerData["isSpectator"] ?? false);
-		$reachLimit = $isCreative ? Utils::readFloat($constantData[ConstantPath::REACH_CREATIVE]) :      Utils::readFloat($constantData[ConstantPath::REACH_SURVIVAL]);
+		$reachLimit = round($isCreative ? Utils::readFloat($constantData[ConstantPath::REACH_CREATIVE]) :      Utils::readFloat($constantData[ConstantPath::REACH_SURVIVAL]), 3);
 
 		return self::buildResult($distance > $reachLimit, [
 			"distance" => $distance,

@@ -36,8 +36,11 @@ use function array_flip;
 use function get_debug_type;
 use function implode;
 use function is_array;
+use function is_object;
 use function is_scalar;
 use function is_string;
+use function json_encode;
+use function method_exists;
 use function strtr;
 
 /**
@@ -99,11 +102,21 @@ final class TextUtil {
 	/**
 	 * Replaces keys in the text with provided replacements.
 	 *
+	 * @param string $text The text to replace keys in.
 	 * @param array<string,mixed> $replacements
 	 */
 	public static function replaceText(string $text, array $replacements) : string {
-		// strtr natively accepts an associative array map and avoids list/array mismatch issues
-		return strtr($text, $replacements);
+		$sanitized = [];
+		foreach ($replacements as $key => $value) {
+			if (is_array($value)) {
+				$sanitized[Utils::readString($key)] = json_encode($value);
+			} elseif (is_object($value)) {
+				$sanitized[Utils::readString($key)] = method_exists($value, '__toString') ? Utils::readString($value) : $value::class;
+			} else {
+				$sanitized[Utils::readString($key)] = Utils::readString($value);
+			}
+		}
+		return strtr($text, $sanitized);
 	}
 
 	/**

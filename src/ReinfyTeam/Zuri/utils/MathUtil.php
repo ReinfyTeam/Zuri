@@ -111,7 +111,7 @@ final class MathUtil {
 	 */
 	public static function calculateHorizontalBPS(Vector3 $oldPosition, Vector3 $newPosition, int $elapsedTicks) : float {
 		if ($elapsedTicks <= 0) {
-			return 0.0;
+			$elapsedTicks = 1;
 		}
 
 		$distance = self::distance2D($oldPosition, $newPosition);
@@ -121,7 +121,7 @@ final class MathUtil {
 
 	public static function calculateVerticalBPS(Vector3 $oldPosition, Vector3 $newPosition, int $elapsedTicks) : float {
 		if ($elapsedTicks <= 0) {
-			return 0.0;
+			$elapsedTicks = 1;
 		}
 
 		$deltaY = $newPosition->y - $oldPosition->y;

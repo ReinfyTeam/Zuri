@@ -6,7 +6,7 @@ punishments:
   violation_detection_message: "&f{player_name} &7failed &f{module} &7(&c{subtype}&7) | &7VL: &2{realViolation}/{threshold}"
   previolation_detection_message: "&f{player_name} &7suspected using &f{module} &7(&c{subtype}&7) | &7PRE-VL: &2{violation}/{threshold}"
 results:
-  check_error: "&cError in check {file} ({line}): {message} | &7Stack trace: {trace}"
+  check_error: "&cError in check {file} (L{line}): {message} | &7Stack trace: {trace}"
   unknown_error: "Unknown error returned."
   debug_message: "&7&l[&8DEBUG: &r&c{check} &8&l(&r&c{subType}&r&8&l)&7&l]&r &8>&r {debug_data}"
 

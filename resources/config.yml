@@ -2,7 +2,7 @@
 # Copyright (c) 2024-2026 ReinfyTeam
 
 zuri:
-  config_version: 0.4.3
+  config_version: 0.4.4
   # Language of the Plugin for messages
   # You can customize messages on plugin_data/Zuri/lang/*.yml for language
   language:
@@ -89,6 +89,11 @@ zuri:
   checks:
     # Enable or disable specific checks. You can also configure their sensitivity and punishment settings.
     speed:
+      enabled: true
+      pre_vl: 2
+      max_vl: 2
+      punishment: kick
+    reach:
       enabled: true
       pre_vl: 2
       max_vl: 2
