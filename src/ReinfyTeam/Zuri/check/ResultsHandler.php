@@ -68,7 +68,10 @@ final class ResultsHandler {
 		$result = $results["result"];
 		if (isset($result["error"]) && is_array($result["error"])) {
 			$message = Utils::readString($result["error"]["message"] ?? null, ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::CHECK_UNKNOWN_ERROR));
-			Server::getInstance()->getLogger()->error(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::CHECK_ERROR, ["{check}" => $results["check"], "{message}" => $message]));
+			$stackTrace = Utils::readString($result["error"]["trace"] ?? null, "No stack trace available.");
+			$line = Utils::readArray($result["error"]["line"] ?? null);
+			$file = Utils::readString($result["error"]["file"]);
+			Server::getInstance()->getLogger()->error(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::CHECK_ERROR, ["{check}" => $file, "{message}" => $message, "{stackTrace}" => $stackTrace, "{line}" => $line]));
 			return;
 		}
 

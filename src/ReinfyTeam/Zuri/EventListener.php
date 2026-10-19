@@ -190,10 +190,17 @@ class EventListener implements Listener {
 		}
 
 		$playerZuri = ZuriAC::getPlayerManager()->get($player);
+
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 			return;
 		}
+
+		if ($playerZuri->getMoveElapsedTicks() === 0) { // per tick only check, to maximize performance and accuracy for larger playerbase
+			return;
+		}
+
+		$playerZuri->setMoveElapsedTicks(Server::getInstance()->getTick());
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PlayerMoveEvent::class,
@@ -218,7 +225,6 @@ class EventListener implements Listener {
 		if (BlockUtil::onSlimeBlock($event->getTo(), 0) || BlockUtil::onSlimeBlock($event->getTo(), 1)) {
 			$playerZuri->setSlimeBlockTicks(microtime(true));
 		}
-		$playerZuri->setMoveElapsedTicks(Server::getInstance()->getTick());
 		// Block related checks
 		$playerZuri->setOnIce(BlockUtil::isOnIce($event->getTo(), 1) || BlockUtil::isOnIce($event->getTo(), 2));
 		$playerZuri->setOnStairs(BlockUtil::isOnStairs($event->getTo(), 0) || BlockUtil::isOnStairs($event->getTo(), 1));

@@ -29,7 +29,7 @@
 
 declare(strict_types=1);
 
-namespace ReinfyTeam\Zuri\check\moving\speed;
+namespace ReinfyTeam\Zuri\check\combat\reach;
 
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use ReinfyTeam\Zuri\check\Check;

@@ -103,6 +103,10 @@ class SpeedB extends Check {
 		$moveElapsedTicks = Utils::readInt($playerData["moveElapsedTicks"] ?? -1);
 		$blocksPerSeconds = round(MathUtil::calculateVerticalBPS($from, $to, $moveElapsedTicks), 3);
 
+		if ($blocksPerSeconds === 0.0) {
+			return self::buildResult(false);
+		}
+
 		$isFlying = Utils::readBool($playerData["isFlying"] ?? false);
 		$isOnStairs = Utils::readBool($playerData["isOnStairs"] ?? false);
 		$isClimbing = Utils::readBool($playerData["isClimbing"] ?? false);

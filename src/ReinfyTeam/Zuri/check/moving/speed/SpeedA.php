@@ -103,6 +103,10 @@ class SpeedA extends Check {
 		$moveElapsedTicks = Utils::readInt($playerData["moveElapsedTicks"] ?? -1);
 		$blocksPerSeconds = round(MathUtil::calculateHorizontalBPS($from, $to, $moveElapsedTicks), 3);
 
+		if ($blocksPerSeconds === 0.0) {
+			return self::buildResult(false);
+		}
+
 		$isSprinting = Utils::readBool($playerData["isSprinting"] ?? false);
 		$isSneaking = Utils::readBool($playerData["isSneaking"] ?? false);
 		$isCrawling = Utils::readBool($playerData["isCrawling"] ?? false);
@@ -111,20 +115,20 @@ class SpeedA extends Check {
 		$isSpectator = Utils::readBool($playerData["isSpectator"] ?? false);
 		$isFlying = Utils::readBool($playerData["isFlying"] ?? false);
 
-		$limit = match (true) {
-			$isSwimming => Utils::readFloat($constantData[ConstantPath::SPEED_SWIMMING]),
-			$isSneaking => Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING]),
-			$isCrawling => Utils::readFloat($constantData[ConstantPath::SPEED_CRAWLING]),
-			$isCreative && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]),
-			$isSpectator && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]),
-			default => Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]),
-		};
-
 		if ($isSprinting) {
 			$limit = match (true) {
 				$isSpectator && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]),
 				$isCreative && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]),
 				default => Utils::readFloat($constantData[ConstantPath::SPEED_SPRINTING]),
+			};
+		} else {
+			$limit = match (true) {
+				$isSwimming => Utils::readFloat($constantData[ConstantPath::SPEED_SWIMMING]),
+				$isSneaking => Utils::readFloat($constantData[ConstantPath::SPEED_SNEAKING]),
+				$isCrawling => Utils::readFloat($constantData[ConstantPath::SPEED_CRAWLING]),
+				$isCreative && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]),
+				$isSpectator && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]),
+				default => Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]),
 			};
 		}
 
