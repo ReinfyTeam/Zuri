@@ -40,6 +40,7 @@ use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\TextUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use ReinfyTeam\Zuri\ZuriAC;
+use function implode;
 use function is_array;
 use function is_string;
 use function is_subclass_of;
@@ -68,10 +69,12 @@ final class ResultsHandler {
 		$result = $results["result"];
 		if (isset($result["error"]) && is_array($result["error"])) {
 			$message = Utils::readString($result["error"]["message"] ?? null, ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::CHECK_UNKNOWN_ERROR));
-			$stackTrace = Utils::readString($result["error"]["trace"] ?? null, "No stack trace available.");
+			/** @var array<string> $stackTrace */
+			$stackTrace = Utils::readArray($result["error"]["trace"] ?? "No stack trace available.");
+			$stackTraceMesssage = implode(PHP_EOL, $stackTrace);
 			$line = Utils::readArray($result["error"]["line"] ?? null);
 			$file = Utils::readString($result["error"]["file"]);
-			Server::getInstance()->getLogger()->error(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::CHECK_ERROR, ["{check}" => $file, "{message}" => $message, "{stackTrace}" => $stackTrace, "{line}" => $line]));
+			Server::getInstance()->getLogger()->error(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::CHECK_ERROR, ["{check}" => $file, "{message}" => $message, "{stackTrace}" => $stackTraceMesssage, "{line}" => $line]));
 			return;
 		}
 
