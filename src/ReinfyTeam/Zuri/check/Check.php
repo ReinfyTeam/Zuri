@@ -135,7 +135,7 @@ abstract class Check {
 	/**
 	 * Returns the maximum number of pre-violations allowed for this check.
 	 *
-	 * Read from `checks.{checkName}.pre-vl.{subType}` with a default of 1.
+	 * Read from `checks.{checkName}.pre-vl` with a default of 1.
 	 */
 	public function getMaxPreViolation() : int {
 		return ZuriAC::getConfigManager()->getInt(ConfigPath::CHECKS . "." . strtolower($this->getName()) . ".pre_vl");

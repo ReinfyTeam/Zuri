@@ -148,7 +148,9 @@ final class ResultsHandler {
 				"{module}" => $check->getName(),
 				"{subtype}" => $check->getSubType(),
 				"{violation}" => $preVL,
-				"{threshold}" => $maxPreVL
+				"{pre_violation}" => $preVL,
+				"{threshold}" => $maxPreVL,
+				"{max_violation}" => $maxPreVL
 			]));
 		}
 
@@ -161,8 +163,10 @@ final class ResultsHandler {
 					"{player_name}" => $player->getName(),
 					"{module}" => $check->getName(),
 					"{subtype}" => $check->getSubType(),
+					"{violation}" => $violation,
 					"{realViolation}" => $violation,
-					"{threshold}" => $maxViolation
+					"{threshold}" => $maxViolation,
+					"{max_violation}" => $maxViolation
 				]));
 			}
 			$playerZuri->addViolation($check);

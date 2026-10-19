@@ -33,15 +33,15 @@ namespace ReinfyTeam\Zuri\utils;
 
 use pocketmine\utils\TextFormat;
 use function array_flip;
+use function array_keys;
+use function array_map;
+use function array_values;
 use function get_debug_type;
 use function implode;
 use function is_array;
-use function is_object;
 use function is_scalar;
 use function is_string;
-use function json_encode;
-use function method_exists;
-use function strtr;
+use function str_replace;
 
 /**
  * Utility functions for text parsing and replacements.
@@ -103,20 +103,13 @@ final class TextUtil {
 	 * Replaces keys in the text with provided replacements.
 	 *
 	 * @param string $text The text to replace keys in.
-	 * @param array<string,mixed> $replacements
+	 * @param array<string, mixed> $replacements The values to replace placeholders with.
 	 */
 	public static function replaceText(string $text, array $replacements) : string {
-		$sanitized = [];
-		foreach ($replacements as $key => $value) {
-			if (is_array($value)) {
-				$sanitized[Utils::readString($key)] = json_encode($value);
-			} elseif (is_object($value)) {
-				$sanitized[Utils::readString($key)] = method_exists($value, '__toString') ? Utils::readString($value) : $value::class;
-			} else {
-				$sanitized[Utils::readString($key)] = Utils::readString($value);
-			}
-		}
-		return strtr($text, $sanitized);
+		// Convert all mixed values to strings so str_replace receives valid types
+		$safeValues = array_map(fn($val) => is_scalar($val) ? (string) $val : '', array_values($replacements));
+
+		return str_replace(array_keys($replacements), $safeValues, $text);
 	}
 
 	/**
