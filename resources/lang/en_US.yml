@@ -5,6 +5,7 @@ punishments:
   kick_message: "You have been kicked for Unfair Advantage."
   violation_detection_message: "&f{player_name} &7failed &f{module} &7(&c{subtype}&7) | &7VL: &2{realViolation}/{threshold}"
   previolation_detection_message: "&f{player_name} &7suspected using &f{module} &7(&c{subtype}&7) | &7PRE-VL: &2{violation}/{threshold}"
+  punishment_message: "&f{player_name} has been &c{punishment} &7for using &f{module} &7(&c{subtype}&7)"
 results:
   check_error: "&cError in check {file} (L{line}): {message} | &7Stack trace: {trace}"
   unknown_error: "Unknown error returned."

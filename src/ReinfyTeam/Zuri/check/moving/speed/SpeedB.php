@@ -111,7 +111,7 @@ class SpeedB extends Check {
 		$isFlying = Utils::readBool($playerData["isFlying"] ?? false);
 		$isOnStairs = Utils::readBool($playerData["isOnStairs"] ?? false);
 		$isClimbing = Utils::readBool($playerData["isClimbing"] ?? false);
-		$isOnAir = Utils::readBool($playerData["airTicks"] ?? 0.0) > 20;
+		$isOnAir = Utils::readFloat($playerData["airTicks"] ?? 0.0) > 10;
 
 		$movementUp = $blocksPerSeconds > 0.0;
 		$movementDown = $blocksPerSeconds < 0.0;
@@ -122,7 +122,7 @@ class SpeedB extends Check {
 			$isClimbing && $movementUp => Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_UP]),
 			$isClimbing && $movementDown => Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_DOWN]),
 			$isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]),
-			$isOnAir => Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]),
+			$movementDown && $isOnAir => Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]),
 			default => Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING]),
 		};
 
@@ -136,7 +136,7 @@ class SpeedB extends Check {
 		$failed = abs($blocksPerSeconds) > $threshold;
 
 		return self::buildResult($failed, [
-			"bps" => $blocksPerSeconds,
+			"bps" => abs($blocksPerSeconds),
 			"threshold" => $threshold,
 		]);
 	}

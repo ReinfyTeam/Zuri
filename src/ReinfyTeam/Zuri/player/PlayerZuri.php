@@ -501,7 +501,10 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	}
 
 	public function getAirTicks() : float {
-		return ($this->airTicks - microtime(true)) * 20;
+		if ($this->airTicks <= 0.0) {
+			return 0.0;
+		}
+		return (microtime(true) - $this->airTicks) * 20;
 	}
 
 	public function setAirTicks(float $airTicks) : void {
@@ -509,7 +512,10 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	}
 
 	public function getGroundTicks() : float {
-		return ($this->groundTicks - microtime(true)) * 20;
+		if ($this->groundTicks <= 0.0) {
+			return 0.0;
+		}
+		return (microtime(true) - $this->groundTicks) * 20;
 	}
 
 	public function setGroundTicks(float $groundTicks) : void {
@@ -675,11 +681,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	}
 
 	public function getJumpTicks() : float {
+		if ($this->jumpTicks <= 0.0) {
+			return 999.0;
+		}
 		return (microtime(true) - $this->jumpTicks) * 20;
 	}
 
 	public function isRecentlyJumped() : bool {
-		return $this->jumpTicks <= 5;
+		return $this->jumpTicks > 0.0 && $this->getJumpTicks() <= 15;
 	}
 
 	public function getPlacingTicks() : float {

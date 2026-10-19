@@ -26,7 +26,7 @@ zuri:
       speed_effect: 1.20 # Speed increase per level of the Speed effect (Walk + 20% per level)
     # Vertical Calculations on Speed (B)
     vertical:
-      jumping: 2.000 # Pillar jumping / climbing a slope without stairs
+      jumping: 8.500 # Initial vertical jump velocity (0.42 blocks/tick * 20 = 8.4 BPS)
       stairs_up: 3.200 # Ascending
       stairs_down: 3.600 # Descending
       climbable_up: 2.350 # Ascending ladders, vines, etc.

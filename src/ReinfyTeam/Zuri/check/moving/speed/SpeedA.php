@@ -115,11 +115,17 @@ class SpeedA extends Check {
 		$isCreative = Utils::readBool($playerData["isCreative"] ?? false);
 		$isSpectator = Utils::readBool($playerData["isSpectator"] ?? false);
 		$isFlying = Utils::readBool($playerData["isFlying"] ?? false);
+		$isOnGround = Utils::readBool($playerData["isOnGround"] ?? true);
+		$isJumping = Utils::readBool($playerData["isJumping"] ?? false)
+			|| Utils::readBool($playerData["isRecentlyJumped"] ?? false)
+			|| (Utils::readFloat($playerData["jumpTicks"] ?? 999.0) <= 15);
+		$isOnIce = Utils::readBool($playerData["isOnIce"] ?? false);
 
 		if ($isSprinting) {
 			$limit = match (true) {
 				$isSpectator && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_SPRINT_FLIGHT]),
 				$isCreative && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPRINT_FLIGHT]),
+				$isJumping || !$isOnGround => Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING_HORIZONTAL]),
 				default => Utils::readFloat($constantData[ConstantPath::SPEED_SPRINTING]),
 			};
 		} else {
@@ -129,8 +135,13 @@ class SpeedA extends Check {
 				$isCrawling => Utils::readFloat($constantData[ConstantPath::SPEED_CRAWLING]),
 				$isCreative && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]),
 				$isSpectator && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]),
+				$isJumping || !$isOnGround => Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]) * 1.25,
 				default => Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]),
 			};
+		}
+
+		if ($isOnIce) {
+			$limit *= 1.35;
 		}
 
 		// Calculate Effects
@@ -143,7 +154,7 @@ class SpeedA extends Check {
 		$failed = abs($blocksPerSeconds) > $threshold;
 
 		return self::buildResult($failed, [
-			"bps" => $blocksPerSeconds,
+			"bps" => abs($blocksPerSeconds),
 			"threshold" => $threshold
 		]);
 	}
