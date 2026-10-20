@@ -39,13 +39,13 @@ use pocketmine\player\Player;
 use pocketmine\world\Position;
 use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use ReinfyTeam\Zuri\utils\WorldUtil;
 use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
 use function count;
-use function max;
 use function microtime;
 
 class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath {
@@ -107,7 +107,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $airTicks = 0;
 	private float $groundTicks = 0;
 	private int $lastMoveTick = 0;
-	private int $moveElapsedTicks = 1;
 
 	// Input related things
 	private int $inputMode = 0;
@@ -138,7 +137,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private Location $location;
 	private Position $position;
 
-	/** @var array{from:Vector3,to:Vector3} */
+	/** @var array<array{from:Vector3,to:Vector3}> */
 	private array $movement;
 	/** @var list<float> */
 	private array $cpsData = [];
@@ -214,24 +213,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	}
 
 	public function getFallTicks() : float {
-		return $this->fallTicks - microtime(true);
+		if ($this->fallTicks <= 0.0) {
+			return 0.0;
+		}
+		return (microtime(true) - $this->fallTicks) * 20;
 	}
 
 	public function setFallTicks(float $data) : void {
 		$this->fallTicks = $data;
-	}
-
-	public function getMoveElapsedTicks() : int {
-		return $this->moveElapsedTicks;
-	}
-
-	public function setMoveElapsedTicks(int $data) : void {
-		$this->moveElapsedTicks = $this->lastMoveTick > 0 ? max(1, $data - $this->lastMoveTick) : 1;
-		$this->lastMoveTick = $data;
-	}
-
-	public function getLastMoveTick() : int {
-		return $this->lastMoveTick;
 	}
 
 	public function getMoveVecX() : float {
@@ -326,6 +315,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	 */
 	public function setMotion(Vector3 $motion) : void {
 		$this->motion = $motion;
+	}
+
+	public function getLastMoveTick() : int {
+		return $this->lastMoveTick;
+	}
+
+	public function setLastMoveTick(int $data) : void {
+		$this->lastMoveTick = $data;
 	}
 
 	public function isInventoryOpen() : bool {
@@ -792,13 +789,20 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	}
 
 	/**
-	 * Returns the player's last movement snapshot.
-	 *
-	 * @return array{from:Vector3,to:Vector3}
-	 */
-	public function getMovement() : array {
-		return $this->movement ??= ["from" => Vector3::zero(), "to" => Vector3::zero()];
-	}
+     * Returns the player's movement snapshots.
+     * 
+     * @param bool $single If true, returns only the latest movement snapshot; if false, returns all snapshots.
+     * @return array{from: Vector3, to: Vector3}|array<int, array{from: Vector3, to: Vector3}>
+     */
+    public function getMovement(bool $single = true) : array {
+        if ($single) {
+            /** @var array{from: Vector3, to: Vector3} */
+            return $this->movement[array_key_last($this->movement)];
+        }
+
+        /** @var array<int, array{from: Vector3, to: Vector3}> */
+        return $this->movement;
+    }
 
 	/**
 	 * Set the player's movement snapshot.
@@ -807,9 +811,12 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	 * @param Vector3 $to Next position vector.
 	 */
 	public function setMovement(Vector3 $from, Vector3 $to) : void {
-		$this->movement = ["from" => $from, "to" => $to];
-	}
+		$this->movement[] = ["from" => $from, "to" => $to];
 
+		if(count($this->movement) > MathUtil::WINDOW_TICKS){
+            array_shift($this->movement);
+    	}
+	}
 
 	public function getTick() : int {
 		return $this->tick;
@@ -919,7 +926,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isTransactionArmorInventory" => $this->isTransactionArmorInventory(),
 			"isUnderBlock" => $this->isUnderBlock(),
 			"isClimbing" => $this->isClimbing(),
-
 			"isOnPlant" => $this->isOnPlant(),
 			"isOnDoor" => $this->isOnDoor(),
 			"isOnCarpet" => $this->isOnCarpet(),
@@ -951,10 +957,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"cps" => $this->getCPS(),
 			"motion" => Utils::vector3ToArray($this->getMotion()),
 			"onlineTime" => $this->getOnlineTime(),
-			"movement" => [
-				"from" => Utils::vector3ToArray($this->getMovement()["from"]),
-				"to" => Utils::vector3ToArray($this->getMovement()["to"])
-			],
+			"movement" => Utils::vector3ToArrayRecursive($this->getMovement(true)),
+			"movementSamples" => Utils::vector3ToArrayRecursive($this->getMovement(false)),
 			"airTicks" => $this->getAirTicks(),
 			"groundTicks" => $this->getGroundTicks(),
 			"pitch" => $this->getPitch(),
@@ -978,11 +982,11 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isSwimming" => $this->isSwimming(),
 			"effects" => $this->getEffects(),
 			"isOnScaffold" => $this->isOnScaffold(),
-			"moveElapsedTicks" => $this->getMoveElapsedTicks(),
 			"isOnSoul" => $this->isOnSoul(),
 			"isOnUnderwater" => $this->isOnUnderwater(),
 			"hasTwoBlockPassage" => $this->hasTwoBlockPassage(),
 			"safePosition" => Utils::vector3ToArray($this->getSafePosition()),
+			"lastMoveTick" => $this->getLastMoveTick(),
 		];
 	}
 }

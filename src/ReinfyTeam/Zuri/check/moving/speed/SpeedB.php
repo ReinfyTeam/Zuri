@@ -36,6 +36,7 @@ use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
+use pocketmine\math\Vector3;
 use function abs;
 use function is_a;
 use function max;
@@ -96,22 +97,32 @@ class SpeedB extends Check {
 		$playerData = Utils::readArray($data["playerData"] ?? null);
 		$constantData = Utils::readArray($data["constantData"] ?? null);
 
-		/** @var array{from: array{x: float, y: float, z: float}, to: array{x: float, y: float, z: float}} $movement */
-		$movement = Utils::readArray($playerData["movement"]);
-		$from = Utils::arrayToVector3($movement["from"]);
-		$to = Utils::arrayToVector3($movement["to"]);
+		/** @var array<mixed> $movementSamples */
+		$movementSamples = Utils::readArray($playerData["movementSamples"] ?? []);
+		$movement = Utils::arrayToVector3Recursive($movementSamples);
+		/** @var array<int, array<mixed>|Vector3> $movement */
+		$distanceSamples = MathUtil::calculateDistanceYSamples($movement);
 
-		$moveElapsedTicks = Utils::readInt($playerData["moveElapsedTicks"] ?? -1);
-		$blocksPerSeconds = round(MathUtil::calculateVerticalBPS($from, $to, $moveElapsedTicks), 3);
+		$teleportTicks = Utils::readFloat($playerData["teleportTicks"] ?? 999.0);
+		$hurtTicks = Utils::readFloat($playerData["hurtTicks"] ?? 999.0);
+		if ($teleportTicks <= 20.0 || $hurtTicks <= 20.0) {
+			return self::buildResult(false);
+		}
+
+		$blocksPerSeconds = round(MathUtil::calculateAverageBps($distanceSamples), 3);
 
 		if ($blocksPerSeconds === 0.0) { // prevent false-flagging
+			return self::buildResult(false);
+		}
+
+		$isGliding = Utils::readBool($playerData["isGliding"] ?? false);
+		if ($isGliding) {
 			return self::buildResult(false);
 		}
 
 		$isFlying = Utils::readBool($playerData["isFlying"] ?? false);
 		$isOnStairs = Utils::readBool($playerData["isOnStairs"] ?? false);
 		$isClimbing = Utils::readBool($playerData["isClimbing"] ?? false);
-		$isOnAir = Utils::readFloat($playerData["airTicks"] ?? 0.0) > 10;
 
 		$movementUp = $blocksPerSeconds > 0.0;
 		$movementDown = $blocksPerSeconds < 0.0;
@@ -122,7 +133,7 @@ class SpeedB extends Check {
 			$isClimbing && $movementUp => Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_UP]),
 			$isClimbing && $movementDown => Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_DOWN]),
 			$isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]),
-			$movementDown && $isOnAir => Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]),
+			$movementDown => Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]),
 			default => Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING]),
 		};
 

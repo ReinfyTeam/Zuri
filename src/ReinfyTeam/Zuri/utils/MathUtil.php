@@ -43,6 +43,9 @@ use function strtolower;
  * Mathematical helpers used by movement checks.
  */
 final class MathUtil {
+
+	public const WINDOW_TICKS = 10;
+
 	/**
 	 * Parses a time string (e.g. "1h30m") into a DateTime object representing that duration from now.
 	 *
@@ -102,31 +105,89 @@ final class MathUtil {
 	}
 
 	/**
-	 * Calculates the horizontal blocks per second (BPS) between two positions over a given number of ticks.
-	 *
-	 * @param Vector3 $oldPosition The previous position of the player.
-	 * @param Vector3 $newPosition The current position of the player.
-	 * @param int $elapsedTicks The number of ticks that have elapsed between the two positions.
-	 * @return float The calculated horizontal BPS. Returns 0.0 if elapsedTicks is less than or equal to 0.
+	 * Calculates the average blocks per second (BPS) from a given array of movement samples.
+	 * @param array<int, float> $data An associative array containing movement samples.
+	 * @return float The calculated average BPS.
 	 */
-	public static function calculateHorizontalBPS(Vector3 $oldPosition, Vector3 $newPosition, int $elapsedTicks) : float {
-		if ($elapsedTicks <= 0) {
-			$elapsedTicks = 1;
-		}
-
-		$distance = self::distance2D($oldPosition, $newPosition);
-
-		return ($distance / $elapsedTicks) * 20.0;
+	public static function calculateAverageBps(array $data) : float {
+		return (
+			array_sum($data) * 20.0
+		) / self::WINDOW_TICKS;
 	}
 
-	public static function calculateVerticalBPS(Vector3 $oldPosition, Vector3 $newPosition, int $elapsedTicks) : float {
-		if ($elapsedTicks <= 0) {
-			$elapsedTicks = 1;
+	/**
+     * Calculates the 2D distances between consecutive positions in the provided array.
+     * 
+     * @param array<int, Vector3|array{from: Vector3, to: Vector3}|array<mixed>> $samples An array of Vector3 positions or movement snapshots.
+     * @return array<int, float> An array of 2D distances.
+     */
+    public static function calculateDistance2DSamples(array $samples) : array {
+        // Normalize samples into a flat array of Vector3 objects
+        $vectors = [];
+        foreach ($samples as $sample) {
+            if ($sample instanceof Vector3) {
+                $vectors[] = $sample;
+            } elseif (is_array($sample)) {
+                if (isset($sample['to']) && $sample['to'] instanceof Vector3) {
+                    $vectors[] = $sample['to'];
+                } elseif (isset($sample[1]) && $sample[1] instanceof Vector3) {
+                    $vectors[] = $sample[1];
+                }
+            }
+        }
+
+        $distances = [];
+        for ($i = 1, $count = count($vectors); $i < $count; $i++) {
+            $distances[] = self::distance2D($vectors[$i - 1], $vectors[$i]);
+        }
+        return $distances;
+    }
+
+    /**
+     * Calculates the vertical distances between consecutive positions in the provided array.
+     * 
+     * @param array<int, Vector3|array{from: Vector3, to: Vector3}|array<mixed>> $samples An array of Vector3 positions or movement snapshots.
+     * @return array<int, float> An array of vertical distances.
+     */
+    public static function calculateDistanceYSamples(array $samples) : array {
+        // Normalize samples into a flat array of Vector3 objects
+        $vectors = [];
+        foreach ($samples as $sample) {
+            if ($sample instanceof Vector3) {
+                $vectors[] = $sample;
+            } elseif (is_array($sample)) {
+                if (isset($sample['to']) && $sample['to'] instanceof Vector3) {
+                    $vectors[] = $sample['to'];
+                } elseif (isset($sample[1]) && $sample[1] instanceof Vector3) {
+                    $vectors[] = $sample[1];
+                }
+            }
+        }
+
+        $distances = [];
+        $count = count($vectors);
+        for ($i = 1; $i < $count; $i++) {
+            $yResult = self::distanceY($vectors[$i - 1], $vectors[$i]);
+            $distances[] = $yResult['distance'];
+        }
+        return $distances;
+    }
+
+	/**
+	 * Calculates the vertical distance between two Vector3 positions.
+	 * @param Vector3 $pos1 The first position.
+	 * @param Vector3 $pos2 The second position.
+	 * @return array{distance: float, direction: string} An array containing the distance and direction.
+	 */
+	public static function distanceY(Vector3 $pos1, Vector3 $pos2) : array {
+		$pos1Y = $pos1->y;
+		$pos2Y = $pos2->y;
+
+		if (!is_finite($pos1Y) || !is_finite($pos2Y)) {
+			return ["distance" => 0.0, "direction" => "none"];
 		}
 
-		$deltaY = $newPosition->y - $oldPosition->y;
-
-		return ($deltaY / $elapsedTicks) * 20.0;
+		return ["distance" => abs($pos2Y - $pos1Y), "direction" => ($pos2Y - $pos1Y) > 0 ? "up" : "down"];
 	}
 
 	public static function distance2D(Vector3 $pos1, Vector3 $pos2) : float {

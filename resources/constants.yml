@@ -11,7 +11,7 @@ zuri:
     horizontal:
       walking: 4.317 # Base speed for Flat terrain (no sprint or jump)
       sprinting: 5.612 # Base speed for Flat terrain (no jump)
-      jumping: 7.127 # Base speed for Flat terrain (jumping + sprint)
+      jumping: 10.500 # Instantaneous speed for Flat terrain (jumping + sprint, up to ~10.2 BPS)
       sneaking: 1.300 # Base speed for Flat terrain (no jump)
       sneaking_swift: 1.940 # Sneaking with Swift Sneak effect
       sneaking_soul: 1.819 # Sneeking on Soul Sand / Soul Soil

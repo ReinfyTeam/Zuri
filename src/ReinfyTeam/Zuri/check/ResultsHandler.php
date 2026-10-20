@@ -175,8 +175,14 @@ final class ResultsHandler {
 
 		if ($violation >= $maxViolation) {
 			$config = ZuriAC::getConfigManager();
-			switch (strtolower($check->getPunishment())) {
+			$punishment = $check->getPunishment();
+			switch (strtolower($punishment)) {
 				case "kick":
+					self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PUNISHMENT_KICKED_MESSAGE, [
+						"{player_name}" => $player->getName(),
+						"{module}" => $check->getName(),
+						"{subtype}" => $check->getSubType()
+					]));
 					if (strtolower($config->getString(ConfigPath::PUNISHMENT_KICK_TYPE)) === "native") {
 						self::nativeKick($player);
 					} else {
@@ -184,6 +190,11 @@ final class ResultsHandler {
 					}
 					break;
 				case "ban":
+					self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PUNISHMENT_BANNED_MESSAGE, [
+						"{player_name}" => $player->getName(),
+						"{module}" => $check->getName(),
+						"{subtype}" => $check->getSubType()
+					]));
 					if (strtolower($config->getString(ConfigPath::PUNISHMENT_BAN_TYPE)) === "native") {
 						self::nativeBan($player);
 					} else {
@@ -191,6 +202,11 @@ final class ResultsHandler {
 					}
 					break;
 				default:
+					self::broadcastMessage(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::PUNISHMENT_FLAGGED_MESSAGE, [
+						"{player_name}" => $player->getName(),
+						"{module}" => $check->getName(),
+						"{subtype}" => $check->getSubType()
+					]));
 					$playerZuri->setFlagged(true);
 			}
 			$playerZuri->resetViolation($check);

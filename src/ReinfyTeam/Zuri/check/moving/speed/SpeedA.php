@@ -36,6 +36,7 @@ use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
+use pocketmine\math\Vector3;
 use function abs;
 use function is_a;
 use function max;
@@ -96,15 +97,26 @@ class SpeedA extends Check {
 		$playerData = Utils::readArray($data["playerData"] ?? null);
 		$constantData = Utils::readArray($data["constantData"] ?? null);
 
-		/** @var array{from: array{x: float, y: float, z: float}, to: array{x: float, y: float, z: float}} $movement */
-		$movement = Utils::readArray($playerData["movement"]);
-		$from = Utils::arrayToVector3($movement["from"]);
-		$to = Utils::arrayToVector3($movement["to"]);
+		/** @var array<mixed> $movementSamples */
+		$movementSamples = Utils::readArray($playerData["movementSamples"] ?? []);
+		$movement = Utils::arrayToVector3Recursive($movementSamples);
+		/** @var array<int, array<mixed>|Vector3> $movement */
+		$distanceSamples = MathUtil::calculateDistance2DSamples($movement);
 
-		$moveElapsedTicks = Utils::readInt($playerData["moveElapsedTicks"] ?? -1);
-		$blocksPerSeconds = round(MathUtil::calculateHorizontalBPS($from, $to, $moveElapsedTicks), 3);
+		$teleportTicks = Utils::readFloat($playerData["teleportTicks"] ?? 999.0);
+		$hurtTicks = Utils::readFloat($playerData["hurtTicks"] ?? 999.0);
+		if ($teleportTicks <= 20.0 || $hurtTicks <= 20.0) {
+			return self::buildResult(false);
+		}
+
+		$blocksPerSeconds = round(MathUtil::calculateAverageBps($distanceSamples), 3);
 
 		if ($blocksPerSeconds === 0.0) { // prevent false-flagging
+			return self::buildResult(false);
+		}
+
+		$isGliding = Utils::readBool($playerData["isGliding"] ?? false);
+		if ($isGliding) {
 			return self::buildResult(false);
 		}
 
@@ -118,7 +130,7 @@ class SpeedA extends Check {
 		$isOnGround = Utils::readBool($playerData["isOnGround"] ?? true);
 		$isJumping = Utils::readBool($playerData["isJumping"] ?? false)
 			|| Utils::readBool($playerData["isRecentlyJumped"] ?? false)
-			|| (Utils::readFloat($playerData["jumpTicks"] ?? 999.0) <= 15);
+			|| (Utils::readFloat($playerData["jumpTicks"] ?? 999.0) <= 20);
 		$isOnIce = Utils::readBool($playerData["isOnIce"] ?? false);
 
 		if ($isSprinting) {
@@ -135,7 +147,7 @@ class SpeedA extends Check {
 				$isCrawling => Utils::readFloat($constantData[ConstantPath::SPEED_CRAWLING]),
 				$isCreative && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]),
 				$isSpectator && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]),
-				$isJumping || !$isOnGround => Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]) * 1.25,
+				$isJumping || !$isOnGround => Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING_HORIZONTAL]),
 				default => Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]),
 			};
 		}

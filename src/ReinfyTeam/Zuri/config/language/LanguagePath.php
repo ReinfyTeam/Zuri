@@ -37,6 +37,10 @@ interface LanguagePath {
 	public const KICK_MESSAGE = "punishments.kick_message";
 	public const PREVIOLATION_DETECTION_MESSAGE = "punishments.previolation_detection_message";
 	public const VIOLATION_DETECTION_MESSAGE = "punishments.violation_detection_message";
+	public const PUNISHMENT_BANNED_MESSAGE = "punishments.punishment_ban_message";
+	public const PUNISHMENT_FLAGGED_MESSAGE = "punishments.punishment_flagged_message";
+	public const PUNISHMENT_KICKED_MESSAGE = "punishments.punishment_kicked_message";
+
 
 	/** Results Handler */
 	public const CHECK_ERROR = "results.check_error";

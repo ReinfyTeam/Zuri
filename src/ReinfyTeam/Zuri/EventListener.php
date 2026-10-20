@@ -163,7 +163,12 @@ class EventListener implements Listener {
 				$playerZuri->setSwimming(false);
 			}
 
-			$playerZuri->setJumping($inputFlags->get(PlayerAuthInputFlags::JUMPING));
+			if ($inputFlags->get(PlayerAuthInputFlags::JUMPING)) {
+				$playerZuri->setJumping(true);
+				$playerZuri->setJumpTicks(microtime(true));
+			} else {
+				$playerZuri->setJumping(false);
+			}
 
 			if ($inputFlags->get(PlayerAuthInputFlags::MISSED_SWING)) {
 				$playerZuri->addCPS();
@@ -201,23 +206,34 @@ class EventListener implements Listener {
 			return;
 		}
 
-		$playerZuri->setMoveElapsedTicks($currentTick);
+		$playerZuri->setLastMoveTick($currentTick);
+
 		$playerZuri->setMovement($event->getFrom(), $event->getTo());
 
-		$isOnGround = BlockUtil::isOnGround($event->getTo(), 0) || BlockUtil::isOnGround($event->getTo(), 1);
+		$deltaY = $event->getTo()->getY() - $event->getFrom()->getY();
+		$isOnGround = ($deltaY <= 0.0001) && (BlockUtil::isOnGround($event->getTo(), 0) || BlockUtil::isOnGround($event->getTo(), 1));
 		$playerZuri->setOnGround($isOnGround);
 		if ($isOnGround) {
 			$playerZuri->setAirTicks(0.0);
-			$playerZuri->setGroundTicks(microtime(true));
+			$playerZuri->setFallTicks(0.0);
+			if ($playerZuri->getGroundTicks() <= 0.0) {
+				$playerZuri->setGroundTicks(microtime(true));
+			}
 		} else {
-			$playerZuri->setAirTicks(microtime(true));
+			$playerZuri->setGroundTicks(0.0);
+			if ($playerZuri->getAirTicks() <= 0.0) {
+				$playerZuri->setAirTicks(microtime(true));
+			}
+			if ($deltaY > 0.0001) {
+				$playerZuri->setJumping(true);
+				$playerZuri->setJumpTicks(microtime(true));
+				$playerZuri->setFallTicks(0.0);
+			} elseif ($deltaY < -0.0001) {
+				if ($playerZuri->getFallTicks() <= 0.0) {
+					$playerZuri->setFallTicks(microtime(true));
+				}
+			}
 		}
-
-		ZuriAC::getCheckRegistry()->spawnCheck([
-			"type" => PlayerMoveEvent::class,
-			"player" => $player
-		], Check::TYPE_PLAYER);
-
 
 		$playerZuri->isOnGround()
 			? $playerZuri->setLastGroundY($player->getPosition()->getY())
@@ -246,6 +262,11 @@ class EventListener implements Listener {
 		$playerZuri->setBlockAbove(BlockUtil::isSolid(BlockUtil::getBlockAbove($event->getTo())));
 		$playerZuri->setGroundSolid(BlockUtil::isGroundSolid($player->getLocation()));
 		$playerZuri->setInLava(BlockUtil::isInLava($player->getLocation()));
+
+		ZuriAC::getCheckRegistry()->spawnCheck([
+			"type" => PlayerMoveEvent::class,
+			"player" => $player
+		], Check::TYPE_PLAYER);
 	}
 
 	/**
