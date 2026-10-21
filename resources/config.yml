@@ -75,7 +75,7 @@ zuri:
       # To customize kick messages, please see language files to edit manually.
       command: "kick {player} Unfair Advantage"
     # Violation decay time in seconds. This determines how quickly violation points decrease over time.
-    violation_decay_time: 2
+    violation_decay_time: 5
   permissions:
     command: zuri.command
     bypass: zuri.bypass
