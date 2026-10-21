@@ -37,6 +37,7 @@ use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function is_a;
+use function is_array;
 use function round;
 
 

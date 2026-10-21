@@ -45,6 +45,7 @@ use ReinfyTeam\Zuri\utils\WorldUtil;
 use ReinfyTeam\Zuri\ZuriAC;
 use function abs;
 use function array_filter;
+use function array_shift;
 use function count;
 use function microtime;
 
@@ -791,13 +792,13 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	}
 
 	/**
-     * Returns the player's movement snapshots.
-     * @return array<int, array{from: Vector3, to: Vector3}>
-     */
-    public function getMovementSamples() : array {
-        /** @var array<int, array{from: Vector3, to: Vector3}> */
-        return $this->movementSamples;
-    }
+	 * Returns the player's movement snapshots.
+	 * @return array<int, array{from: Vector3, to: Vector3}>
+	 */
+	public function getMovementSamples() : array {
+		/** @var array<int, array{from: Vector3, to: Vector3}> */
+		return $this->movementSamples;
+	}
 
 	/**
 	 * Returns the player's movement snapshot.
@@ -825,9 +826,9 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function addMovementSample(Vector3 $from, Vector3 $to) : void {
 		$this->movementSamples[] = ["from" => $from, "to" => $to];
 
-		if(count($this->movementSamples) > MathUtil::WINDOW_TICKS){
-            array_shift($this->movementSamples);
-    	}
+		if (count($this->movementSamples) > MathUtil::WINDOW_TICKS) {
+			array_shift($this->movementSamples);
+		}
 	}
 
 	public function getTick() : int {

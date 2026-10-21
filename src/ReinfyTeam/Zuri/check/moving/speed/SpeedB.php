@@ -32,11 +32,11 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\check\moving\speed;
 
 use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\math\Vector3;
 use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
-use pocketmine\math\Vector3;
 use function abs;
 use function is_a;
 use function max;

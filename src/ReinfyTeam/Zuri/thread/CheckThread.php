@@ -109,7 +109,7 @@ final class CheckThread extends Thread {
 	public function getStats() : CheckThreadStats {
 		return $this->stats;
 	}
-	
+
 	/**
 	 * Returns the total number of jobs that have been submitted to workers in this thread.
 	 */

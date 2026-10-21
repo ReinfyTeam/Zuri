@@ -32,9 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\command\subcommand;
 
 use CortexPE\Commando\BaseSubCommand;
-use CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
-use pocketmine\player\Player;
 use ReinfyTeam\Zuri\config\ConfigPath;
 use ReinfyTeam\Zuri\config\language\LanguagePath;
 use ReinfyTeam\Zuri\utils\Utils;

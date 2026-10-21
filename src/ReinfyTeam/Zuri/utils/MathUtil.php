@@ -34,6 +34,10 @@ namespace ReinfyTeam\Zuri\utils;
 use DateTime;
 use pocketmine\math\Vector3;
 use pocketmine\world\Position;
+use function abs;
+use function array_sum;
+use function count;
+use function is_array;
 use function is_finite;
 use function preg_match_all;
 use function sqrt;
@@ -43,7 +47,6 @@ use function strtolower;
  * Mathematical helpers used by movement checks.
  */
 final class MathUtil {
-
 	public const WINDOW_TICKS = 10;
 
 	/**
@@ -117,62 +120,62 @@ final class MathUtil {
 	}
 
 	/**
-     * Calculates the 2D distances between consecutive positions in the provided array.
-     * 
-     * @param array<int, Vector3|array{from: Vector3, to: Vector3}|array<mixed>> $samples An array of Vector3 positions or movement snapshots.
-     * @return array<int, float> An array of 2D distances.
-     */
-    public static function calculateDistance2DSamples(array $samples) : array {
-        // Normalize samples into a flat array of Vector3 objects
-        $vectors = [];
-        foreach ($samples as $sample) {
-            if ($sample instanceof Vector3) {
-                $vectors[] = $sample;
-            } elseif (is_array($sample)) {
-                if (isset($sample['to']) && $sample['to'] instanceof Vector3) {
-                    $vectors[] = $sample['to'];
-                } elseif (isset($sample[1]) && $sample[1] instanceof Vector3) {
-                    $vectors[] = $sample[1];
-                }
-            }
-        }
+	 * Calculates the 2D distances between consecutive positions in the provided array.
+	 *
+	 * @param array<int, Vector3|array{from: Vector3, to: Vector3}|array<mixed>> $samples An array of Vector3 positions or movement snapshots.
+	 * @return array<int, float> An array of 2D distances.
+	 */
+	public static function calculateDistance2DSamples(array $samples) : array {
+		// Normalize samples into a flat array of Vector3 objects
+		$vectors = [];
+		foreach ($samples as $sample) {
+			if ($sample instanceof Vector3) {
+				$vectors[] = $sample;
+			} elseif (is_array($sample)) {
+				if (isset($sample['to']) && $sample['to'] instanceof Vector3) {
+					$vectors[] = $sample['to'];
+				} elseif (isset($sample[1]) && $sample[1] instanceof Vector3) {
+					$vectors[] = $sample[1];
+				}
+			}
+		}
 
-        $distances = [];
-        for ($i = 1, $count = count($vectors); $i < $count; $i++) {
-            $distances[] = self::distance2D($vectors[$i - 1], $vectors[$i]);
-        }
-        return $distances;
-    }
+		$distances = [];
+		for ($i = 1, $count = count($vectors); $i < $count; $i++) {
+			$distances[] = self::distance2D($vectors[$i - 1], $vectors[$i]);
+		}
+		return $distances;
+	}
 
-    /**
-     * Calculates the vertical distances between consecutive positions in the provided array.
-     * 
-     * @param array<int, Vector3|array{from: Vector3, to: Vector3}|array<mixed>> $samples An array of Vector3 positions or movement snapshots.
-     * @return array<int, float> An array of vertical distances.
-     */
-    public static function calculateDistanceYSamples(array $samples) : array {
-        // Normalize samples into a flat array of Vector3 objects
-        $vectors = [];
-        foreach ($samples as $sample) {
-            if ($sample instanceof Vector3) {
-                $vectors[] = $sample;
-            } elseif (is_array($sample)) {
-                if (isset($sample['to']) && $sample['to'] instanceof Vector3) {
-                    $vectors[] = $sample['to'];
-                } elseif (isset($sample[1]) && $sample[1] instanceof Vector3) {
-                    $vectors[] = $sample[1];
-                }
-            }
-        }
+	/**
+	 * Calculates the vertical distances between consecutive positions in the provided array.
+	 *
+	 * @param array<int, Vector3|array{from: Vector3, to: Vector3}|array<mixed>> $samples An array of Vector3 positions or movement snapshots.
+	 * @return array<int, float> An array of vertical distances.
+	 */
+	public static function calculateDistanceYSamples(array $samples) : array {
+		// Normalize samples into a flat array of Vector3 objects
+		$vectors = [];
+		foreach ($samples as $sample) {
+			if ($sample instanceof Vector3) {
+				$vectors[] = $sample;
+			} elseif (is_array($sample)) {
+				if (isset($sample['to']) && $sample['to'] instanceof Vector3) {
+					$vectors[] = $sample['to'];
+				} elseif (isset($sample[1]) && $sample[1] instanceof Vector3) {
+					$vectors[] = $sample[1];
+				}
+			}
+		}
 
-        $distances = [];
-        $count = count($vectors);
-        for ($i = 1; $i < $count; $i++) {
-            $yResult = self::distanceY($vectors[$i - 1], $vectors[$i]);
-            $distances[] = $yResult['distance'];
-        }
-        return $distances;
-    }
+		$distances = [];
+		$count = count($vectors);
+		for ($i = 1; $i < $count; $i++) {
+			$yResult = self::distanceY($vectors[$i - 1], $vectors[$i]);
+			$distances[] = $yResult['distance'];
+		}
+		return $distances;
+	}
 
 	/**
 	 * Calculates the vertical distance between two Vector3 positions.

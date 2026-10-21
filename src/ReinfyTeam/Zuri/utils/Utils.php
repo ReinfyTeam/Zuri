@@ -45,6 +45,7 @@ use function is_array;
 use function is_bool;
 use function is_float;
 use function is_int;
+use function is_numeric;
 use function is_string;
 use function max;
 use function min;
@@ -222,10 +223,9 @@ final class Utils {
 	/**
 	 * Converts a Vector3 or recursively nested arrays of Vector3 objects to arrays.
 	 *
-	 * @param Vector3 $vector3
 	 * @return array{ x: float, y: float, z: float }
 	 */
-	public static function vector3ToArray(Vector3 $vector3) : array{
+	public static function vector3ToArray(Vector3 $vector3) : array {
 		return [
 			"x" => $vector3->getX(),
 			"y" => $vector3->getY(),
@@ -237,9 +237,8 @@ final class Utils {
 	 * Converts an array or recursively nested arrays of Vector3 coordinates to Vector3 objects.
 	 *
 	 * @param array{x: float, y: float, z: float} $array
-	 * @return Vector3
 	 */
-	public static function arrayToVector3(array $array) : Vector3{
+	public static function arrayToVector3(array $array) : Vector3 {
 		return new Vector3(
 			self::readFloat($array["x"]),
 			self::readFloat($array["y"]),
@@ -248,72 +247,72 @@ final class Utils {
 	}
 
 	/**
-     * Recursively converts Vector3 objects in an array to arrays.
-     * 
-     * @param array<mixed>|Vector3 $array An array containing Vector3 objects or nested arrays.
-     * @return array<mixed>|array{x: float, y: float, z: float} An array representation.
-     */
-    public static function vector3ToArrayRecursive(mixed $array) : array {
-        if ($array instanceof Vector3) {
-            return self::vector3ToArray($array);
-        }
+	 * Recursively converts Vector3 objects in an array to arrays.
+	 *
+	 * @param array<mixed>|Vector3 $array An array containing Vector3 objects or nested arrays.
+	 * @return array<mixed>|array{x: float, y: float, z: float} An array representation.
+	 */
+	public static function vector3ToArrayRecursive(mixed $array) : array {
+		if ($array instanceof Vector3) {
+			return self::vector3ToArray($array);
+		}
 
-        $result = [];
-        foreach ($array as $key => $value) {
-            if ($value instanceof Vector3) {
-                $result[$key] = self::vector3ToArray($value);
-            } elseif (is_array($value)) {
-                $result[$key] = self::vector3ToArrayRecursive($value);
-            } else {
-                $result[$key] = $value;
-            }
-        }
-        return $result;
-    }
+		$result = [];
+		foreach ($array as $key => $value) {
+			if ($value instanceof Vector3) {
+				$result[$key] = self::vector3ToArray($value);
+			} elseif (is_array($value)) {
+				$result[$key] = self::vector3ToArrayRecursive($value);
+			} else {
+				$result[$key] = $value;
+			}
+		}
+		return $result;
+	}
 
-    /**
-     * Recursively converts arrays containing Vector3 coordinates back to Vector3 objects.
-     * 
-     * @param array<mixed>|Vector3 $array An array of coordinates or nested arrays.
-     * @return array<mixed>|Vector3 An array of Vector3 objects or a single Vector3.
-     */
-    public static function arrayToVector3Recursive(array|Vector3 $array) : mixed {
-        if ($array instanceof Vector3) {
-            return $array;
-        }
+	/**
+	 * Recursively converts arrays containing Vector3 coordinates back to Vector3 objects.
+	 *
+	 * @param array<mixed>|Vector3 $array An array of coordinates or nested arrays.
+	 * @return array<mixed>|Vector3 An array of Vector3 objects or a single Vector3.
+	 */
+	public static function arrayToVector3Recursive(array|Vector3 $array) : mixed {
+		if ($array instanceof Vector3) {
+			return $array;
+		}
 
-        // If it's already an associative coordinate array
-        if (isset($array['x'], $array['y'], $array['z'])) {
-            /** @var array{x: float, y: float, z: float} $array */
-            return self::arrayToVector3($array);
-        }
+		// If it's already an associative coordinate array
+		if (isset($array['x'], $array['y'], $array['z'])) {
+			/** @var array{x: float, y: float, z: float} $array */
+			return self::arrayToVector3($array);
+		}
 
-        // If it's a positional coordinate array [x, y, z], validate and normalize safely for PHPStan
-        if (isset($array[0], $array[1], $array[2]) && is_numeric($array[0]) && is_numeric($array[1]) && is_numeric($array[2])) {
-            /** @var float $x */
-            $x = (float) $array[0];
-            /** @var float $y */
-            $y = (float) $array[1];
-            /** @var float $z */
-            $z = (float) $array[2];
+		// If it's a positional coordinate array [x, y, z], validate and normalize safely for PHPStan
+		if (isset($array[0], $array[1], $array[2]) && is_numeric($array[0]) && is_numeric($array[1]) && is_numeric($array[2])) {
+			/** @var float $x */
+			$x = (float) $array[0];
+			/** @var float $y */
+			$y = (float) $array[1];
+			/** @var float $z */
+			$z = (float) $array[2];
 
-            return self::arrayToVector3([
-                'x' => $x,
-                'y' => $y,
-                'z' => $z,
-            ]);
-        }
+			return self::arrayToVector3([
+				'x' => $x,
+				'y' => $y,
+				'z' => $z,
+			]);
+		}
 
-        $result = [];
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $result[$key] = self::arrayToVector3Recursive($value);
-            } else {
-                $result[$key] = $value;
-            }
-        }
-        return $result;
-    }
+		$result = [];
+		foreach ($array as $key => $value) {
+			if (is_array($value)) {
+				$result[$key] = self::arrayToVector3Recursive($value);
+			} else {
+				$result[$key] = $value;
+			}
+		}
+		return $result;
+	}
 
 	/**
 	 * Converts a Vector2 to an associative array.
