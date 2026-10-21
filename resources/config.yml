@@ -98,3 +98,8 @@ zuri:
       pre_vl: 2
       max_vl: 2
       punishment: kick
+    hitbox:
+      enabled: true
+      pre_vl: 2
+      max_vl: 2
+      punishment: kick

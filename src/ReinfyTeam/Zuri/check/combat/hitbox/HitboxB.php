@@ -114,7 +114,6 @@ class HitboxB extends Check {
 		$directionVectorRaw = Utils::readArray($playerData["directionVector"]);
 		$directionVector = Utils::arrayToVector3($directionVectorRaw);
 
-		$rayEnd = MathUtil::calculateRayEnd($eyePos, $boundingBoxCenter, $directionVector);
 		$hasLineOfSightToAnyPoint = WorldUtil::hasLineOfSightToAnyPoint($blockCollisionBoxes, $eyePos, $aimBox);
 
 		return self::buildResult($hasLineOfSightToAnyPoint);

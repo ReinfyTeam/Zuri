@@ -31,8 +31,8 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\check\combat\reach;
 
-use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\block\BlockBreakEvent;
+use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
@@ -89,11 +89,11 @@ class ReachB extends Check {
 	 */
 	public static function check(array $data) : array {
 		$type = Utils::readString($data["type"] ?? null);
-        if (!($type === BlockPlaceEvent::class || is_a($type, BlockPlaceEvent::class, true)
-            || $type === BlockBreakEvent::class || is_a($type, BlockBreakEvent::class, true)
-            || $type === PlayerInteractEvent::class || is_a($type, PlayerInteractEvent::class, true))) {
-            return self::buildResult(false);
-        }
+		if (!($type === BlockPlaceEvent::class || is_a($type, BlockPlaceEvent::class, true)
+			|| $type === BlockBreakEvent::class || is_a($type, BlockBreakEvent::class, true)
+			|| $type === PlayerInteractEvent::class || is_a($type, PlayerInteractEvent::class, true))) {
+			return self::buildResult(false);
+		}
 
 		$playerData = Utils::readArray($data["playerData"] ?? null);
 		$constantData = Utils::readArray($data["constantData"] ?? null);
