@@ -102,6 +102,8 @@ class SpeedB extends Check {
 		$movement = Utils::arrayToVector3Recursive($movementSamples);
 		/** @var array<int, array<mixed>|Vector3> $movement */
 		$distanceSamples = MathUtil::calculateDistanceYSamples($movement);
+		$metrics = Utils::readArray($data["metricsData"] ?? null);
+		$serverTps = Utils::readFloat($metrics["serverTPS"] ?? 20.0);
 
 		$teleportTicks = Utils::readFloat($playerData["teleportTicks"] ?? 999.0);
 		$hurtTicks = Utils::readFloat($playerData["hurtTicks"] ?? 999.0);
@@ -109,7 +111,7 @@ class SpeedB extends Check {
 			return self::buildResult(false);
 		}
 
-		$blocksPerSeconds = round(MathUtil::calculateAverageBps($distanceSamples), 3);
+		$blocksPerSeconds = round(MathUtil::calculateAverageBps($distanceSamples, $serverTps), 3);
 
 		if ($blocksPerSeconds === 0.0) { // prevent false-flagging
 			return self::buildResult(false);

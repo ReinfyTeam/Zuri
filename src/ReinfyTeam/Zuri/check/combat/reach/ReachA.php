@@ -100,10 +100,16 @@ class ReachA extends Check {
 		$enemyZuriMovement = Utils::readArray($enemyZuri["movement"] ?? null);
 		$playerMovement = Utils::readArray($playerData["movement"] ?? null);
 
+		$enemyMovementPos = $enemyZuriMovement["to"] ?? null;
+		$playerMovementPos = $playerMovement["to"] ?? null;
+		if (!is_array($enemyMovementPos) || !is_array($playerMovementPos)) {
+			return self::buildResult(false);
+		}
+
 		/** @var array{x:float,y:float,z:float} $enemeyMovementPos */
-		$enemeyMovementPos = $enemyZuriMovement["to"];
+		$enemeyMovementPos = $enemyMovementPos;
 		/** @var array{x:float,y:float,z:float} $playerMovementPos */
-		$playerMovementPos = $playerMovement["to"];
+		$playerMovementPos = $playerMovementPos;
 
 		$distance = round(MathUtil::distanceReach(Utils::arrayToVector3($enemeyMovementPos), Utils::arrayToVector3($playerMovementPos), Utils::readFloat($playerData["eyeHeight"] ?? 0.0)), 3);
 		$isCreative = Utils::readBool($playerData["isCreative"] ?? false) && !Utils::readBool($playerData["isSpectator"] ?? false);

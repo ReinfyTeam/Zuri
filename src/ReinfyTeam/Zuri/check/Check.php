@@ -86,7 +86,7 @@ abstract class Check {
 	 * an associative array describing the result. Use `buildResult` to
 	 * build a consistent return shape.
 	 *
-	 * @param array<string,mixed> $data Worker payload (player data, packet, external data)
+	 * @param array<string,mixed> $data Worker payload (keys: 'type', 'data', 'playerData', 'constantData', 'metricsData')
 	 * @return array{failed:bool,debug:array<array-key,mixed>,externalData:array<string,mixed>}
 	 */
 	abstract public static function check(array $data) : array;

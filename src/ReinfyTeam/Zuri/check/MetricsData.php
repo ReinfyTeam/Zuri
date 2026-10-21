@@ -31,11 +31,12 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\check;
 
+use JsonSerializable;
 use pocketmine\Server;
 use pocketmine\utils\Process;
 use function count;
 
-class MetricsData {
+class MetricsData implements JsonSerializable {
 	private float $serverTPS = 0.0;
 	private int $playerCount = 0;
 	private int $maxPlayerCount = 0;
@@ -118,5 +119,23 @@ class MetricsData {
 		$this->setVirtualMemoryUsage(Process::getAdvancedMemoryUsage()[1]);
 		$this->setVirtualMemorySize(Process::getAdvancedMemoryUsage()[2]);
 		$this->setMaxPlayerCount(Server::getInstance()->getMaxPlayers());
+	}
+
+	/**
+	 * Serializes the stored server statistics for async checks.
+	 *
+	 * @return array<string, mixed> An associative array of server metrics for serialization.
+	 */
+	public function jsonSerialize() : array {
+		return [
+			"serverTPS" => $this->getServerTPS(),
+			"playerCount" => $this->getPlayerCount(),
+			"maxPlayerCount" => $this->getMaxPlayerCount(),
+			"threadCount" => $this->getThreadCount(),
+			"reservedMemoryUsage" => $this->getReservedMemoryUsage(),
+			"virtualMemoryUsage" => $this->getVirtualMemoryUsage(),
+			"memoryUsage" => $this->getMemoryUsage(),
+			"virtualMemorySize" => $this->getVirtualMemorySize()
+		];
 	}
 }

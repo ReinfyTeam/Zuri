@@ -209,6 +209,7 @@ class EventListener implements Listener {
 		$playerZuri->setLastMoveTick($currentTick);
 
 		$playerZuri->setMovement($event->getFrom(), $event->getTo());
+		$playerZuri->addMovementSample($event->getFrom(), $event->getTo());
 
 		$deltaY = $event->getTo()->getY() - $event->getFrom()->getY();
 		$isOnGround = ($deltaY <= 0.0001) && (BlockUtil::isOnGround($event->getTo(), 0) || BlockUtil::isOnGround($event->getTo(), 1));

@@ -138,6 +138,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private Position $position;
 
 	/** @var array<array{from:Vector3,to:Vector3}> */
+	private array $movementSamples = [];
+	/** @var array{from: Vector3, to: Vector3} */
 	private array $movement;
 	/** @var list<float> */
 	private array $cpsData = [];
@@ -790,31 +792,41 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	/**
      * Returns the player's movement snapshots.
-     * 
-     * @param bool $single If true, returns only the latest movement snapshot; if false, returns all snapshots.
-     * @return array{from: Vector3, to: Vector3}|array<int, array{from: Vector3, to: Vector3}>
+     * @return array<int, array{from: Vector3, to: Vector3}>
      */
-    public function getMovement(bool $single = true) : array {
-        if ($single) {
-            /** @var array{from: Vector3, to: Vector3} */
-            return $this->movement[array_key_last($this->movement)];
-        }
-
+    public function getMovementSamples() : array {
         /** @var array<int, array{from: Vector3, to: Vector3}> */
-        return $this->movement;
+        return $this->movementSamples;
     }
 
 	/**
+	 * Returns the player's movement snapshot.
+	 * @return array{from: Vector3, to: Vector3}
+	 */
+	public function getMovement() : array {
+		return $this->movement ?? ["from" => Vector3::zero(), "to" => Vector3::zero()];
+	}
+
+	/**
 	 * Set the player's movement snapshot.
-	 *
 	 * @param Vector3 $from Previous position vector.
 	 * @param Vector3 $to Next position vector.
 	 */
 	public function setMovement(Vector3 $from, Vector3 $to) : void {
-		$this->movement[] = ["from" => $from, "to" => $to];
+		$this->movement = ["from" => $from, "to" => $to];
+	}
 
-		if(count($this->movement) > MathUtil::WINDOW_TICKS){
-            array_shift($this->movement);
+	/**
+	 * Add a movement sample to the player's movement history.
+	 *
+	 * @param Vector3 $from Previous position vector.
+	 * @param Vector3 $to Next position vector.
+	 */
+	public function addMovementSample(Vector3 $from, Vector3 $to) : void {
+		$this->movementSamples[] = ["from" => $from, "to" => $to];
+
+		if(count($this->movementSamples) > MathUtil::WINDOW_TICKS){
+            array_shift($this->movementSamples);
     	}
 	}
 
@@ -957,8 +969,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"cps" => $this->getCPS(),
 			"motion" => Utils::vector3ToArray($this->getMotion()),
 			"onlineTime" => $this->getOnlineTime(),
-			"movement" => Utils::vector3ToArrayRecursive($this->getMovement(true)),
-			"movementSamples" => Utils::vector3ToArrayRecursive($this->getMovement(false)),
+			"movement" => Utils::vector3ToArrayRecursive($this->getMovement()),
+			"movementSamples" => Utils::vector3ToArrayRecursive($this->getMovementSamples()),
 			"airTicks" => $this->getAirTicks(),
 			"groundTicks" => $this->getGroundTicks(),
 			"pitch" => $this->getPitch(),

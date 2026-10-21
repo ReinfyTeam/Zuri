@@ -70,7 +70,8 @@ final class CheckQueue extends ThreadSafe {
 			'type' => $data["type"] ?? null,
 			'data' => $this->snapshot($data["data"] ?? null),
 			'playerData' => $playerData,
-			'constantData' => ZuriAC::getConstants()->exportNumbers()
+			'constantData' => ZuriAC::getConstants()->exportNumbers(),
+			'metricsData' => ZuriAC::getMetricsData()->jsonSerialize()
 		]))->serialize();
 	}
 

@@ -107,11 +107,12 @@ final class MathUtil {
 	/**
 	 * Calculates the average blocks per second (BPS) from a given array of movement samples.
 	 * @param array<int, float> $data An associative array containing movement samples.
+	 * @param float $currentTick The current tick rate.
 	 * @return float The calculated average BPS.
 	 */
-	public static function calculateAverageBps(array $data) : float {
+	public static function calculateAverageBps(array $data, float $currentTick = 20.0) : float {
 		return (
-			array_sum($data) * 20.0
+			array_sum($data) * $currentTick
 		) / self::WINDOW_TICKS;
 	}
 
