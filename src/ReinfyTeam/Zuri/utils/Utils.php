@@ -31,13 +31,10 @@ declare(strict_types=1);
 
 namespace ReinfyTeam\Zuri\utils;
 
-use pocketmine\block\BlockTypeIds;
-use pocketmine\data\bedrock\EnchantmentIdMap;
-use pocketmine\data\bedrock\EnchantmentIds;
 use pocketmine\entity\effect\Effect;
 use pocketmine\entity\effect\EffectManager;
 use pocketmine\entity\effect\VanillaEffects;
-use pocketmine\item\enchantment\VanillaEnchantments;
+use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
@@ -48,7 +45,6 @@ use function is_int;
 use function is_numeric;
 use function is_string;
 use function max;
-use function min;
 use function strtolower;
 
 /**
@@ -336,86 +332,104 @@ final class Utils {
 	}
 
 	/**
-	 * Calculates the movement multiplier for a player based on state and effects.
+	 * Converts an AxisAlignedBB to an associative array.
 	 *
-	 * @param Player $player The player to calculate the multiplier for.
-	 * @return float The calculated movement multiplier.
+	 * @return array{minX: float, minY: float, minZ: float, maxX: float, maxY: float, maxZ: float}
 	 */
-	public static function getMovementMultiplier(Player $player) : float {
-		$multiplier = 1.0;
-
-		if ($player->isUsingItem()) {
-			return 0.2;
-		}
-
-		if ($player->isSneaking()) {
-			$leggings = $player->getArmorInventory()->getLeggings();
-			$swift = $leggings->getEnchantmentLevel(VanillaEnchantments::SWIFT_SNEAK());
-
-			$multiplier *= self::getSneakMultiplier($swift);
-		}
-
-		if ($player->isSprinting()) {
-			$multiplier *= 1.3;
-		}
-
-		[$speedAmp, $slowAmp] = self::getSpeedEffects($player);
-
-		$multiplier *= 1.0 + (0.2 * $speedAmp);
-		$multiplier *= max(0.0, 1.0 - (0.15 * $slowAmp));
-
-		$multiplier *= self::getSoulSpeedMultiplier($player);
-
-		return $multiplier;
+	public static function axisAlignedBBToArray(AxisAlignedBB $box) : array {
+		return [
+			"minX" => $box->minX,
+			"minY" => $box->minY,
+			"minZ" => $box->minZ,
+			"maxX" => $box->maxX,
+			"maxY" => $box->maxY,
+			"maxZ" => $box->maxZ
+		];
 	}
 
 	/**
-	 * Returns the sneak movement multiplier for a given enchant level.
-	 */
-	public static function getSneakMultiplier(int $level) : float {
-		return min(1.0, max(0.3, 0.3 + ($level * 0.15)));
-	}
-
-	/**
-	 * Returns the strength of speed and slowness effects on the player.
+	 * Converts an associative array to an AxisAlignedBB.
 	 *
-	 * @return int[] [speedLevel, slownessLevel]
+	 * @param array{minX: float, minY: float, minZ: float, maxX: float, maxY: float, maxZ: float} $array
 	 */
-	public static function getSpeedEffects(Player $player) : array {
-		$effects = $player->getEffects();
-		$speed = $effects->get(VanillaEffects::SPEED());
-		$slowness = $effects->get(VanillaEffects::SLOWNESS());
-
-		$speed = $speed != null ? $speed->getEffectLevel() : 0;
-		$slowness = $slowness != null ? $slowness->getEffectLevel() : 0;
-
-		return [$speed, $slowness];
+	public static function arrayToAxisAlignedBB(array $array) : AxisAlignedBB {
+		return new AxisAlignedBB(
+			$array["minX"],
+			$array["minY"],
+			$array["minZ"],
+			$array["maxX"],
+			$array["maxY"],
+			$array["maxZ"]
+		);
 	}
 
 	/**
-	 * Calculates the soul speed multiplier based on boots enchant and ground block.
+	 * Recursively converts AxisAlignedBB objects in nested arrays to associative arrays.
+	 *
+	 * @param array<mixed> $array
+	 * @return array<mixed>
 	 */
-	public static function getSoulSpeedMultiplier(Player $player) : float {
-		$pos = $player->getPosition();
-		$world = $player->getWorld();
+	public static function axisAlignedBBToArrayRecursive(array $array) : array {
+		$result = [];
 
-		$blockId = $world->getBlockAt(
-			(int) $pos->x,
-			(int) $pos->y - 1,
-			(int) $pos->z
-		)->getTypeId();
-
-		if ($blockId !== BlockTypeIds::SOUL_SAND && $blockId !== BlockTypeIds::SOUL_SOIL) {
-			return 1.0;
+		foreach ($array as $key => $value) {
+			if ($value instanceof AxisAlignedBB) {
+				$result[$key] = self::axisAlignedBBToArray($value);
+			} elseif (is_array($value)) {
+				$result[$key] = self::axisAlignedBBToArrayRecursive($value);
+			} else {
+				$result[$key] = $value;
+			}
 		}
 
-		$boots = $player->getArmorInventory()->getBoots();
-		$level = ($enchantment = EnchantmentIdMap::getInstance()->fromId(EnchantmentIds::SOUL_SPEED)) !== null ? $boots->getEnchantmentLevel($enchantment) : 0;
+		return $result;
+	}
 
-		if ($level > 0) {
-			return 1.0 + (0.105 * $level);
+	/**
+	 * Recursively converts associative arrays containing AxisAlignedBB coordinates
+	 * into AxisAlignedBB objects, supporting arbitrarily nested arrays.
+	 *
+	 * @param array<mixed> $array
+	 * @return array<mixed>
+	 */
+	public static function arrayToAxisAlignedBBRecursive(array $array) : array {
+		$result = [];
+
+		foreach ($array as $key => $value) {
+			if (!is_array($value)) {
+				$result[$key] = $value;
+				continue;
+			}
+
+			if (
+				isset(
+					$value["minX"],
+					$value["minY"],
+					$value["minZ"],
+					$value["maxX"],
+					$value["maxY"],
+					$value["maxZ"]
+				) &&
+				is_numeric($value["minX"]) &&
+				is_numeric($value["minY"]) &&
+				is_numeric($value["minZ"]) &&
+				is_numeric($value["maxX"]) &&
+				is_numeric($value["maxY"]) &&
+				is_numeric($value["maxZ"])
+			) {
+				$result[$key] = self::arrayToAxisAlignedBB([
+					"minX" => (float) $value["minX"],
+					"minY" => (float) $value["minY"],
+					"minZ" => (float) $value["minZ"],
+					"maxX" => (float) $value["maxX"],
+					"maxY" => (float) $value["maxY"],
+					"maxZ" => (float) $value["maxZ"]
+				]);
+			} else {
+				$result[$key] = self::arrayToAxisAlignedBBRecursive($value);
+			}
 		}
 
-		return 0.4;
+		return $result;
 	}
 }

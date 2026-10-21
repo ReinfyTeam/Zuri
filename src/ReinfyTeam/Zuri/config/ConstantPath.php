@@ -78,4 +78,7 @@ interface ConstantPath {
 	// Reach distances
 	public const REACH_CREATIVE = "reach.creative_reach";
 	public const REACH_SURVIVAL = "reach.survival_reach";
+	public const REACH_SURVIVAL_BLOCK_REACH = "reach.survival_block_reach";
+	public const REACH_CREATIVE_BLOCK_REACH = "reach.creative_block_reach";
+	public const HITBOX_TOLERANCE = "hitbox.tolerance";
 }

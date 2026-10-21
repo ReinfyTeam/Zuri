@@ -33,6 +33,7 @@ namespace ReinfyTeam\Zuri\player;
 
 use JsonSerializable;
 use pocketmine\entity\Location;
+use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
@@ -80,7 +81,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $topBlock = false;
 	private bool $onWeb = false;
 	private bool $inBoxBlock = false;
-	private bool $inBoundingBox = false;
 	private bool $currentChunkLoaded = false;
 	private bool $survival = false;
 	private bool $creative = false;
@@ -104,6 +104,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $twoBlockPassage = false;
 	private bool $dead = false;
 	private bool $bypassPermission = false;
+	private bool $attackPathBlocked = false;
 
 	private float $airTicks = 0;
 	private float $groundTicks = 0;
@@ -137,9 +138,26 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	private Location $location;
 	private Position $position;
+	private Vector3 $directionVector;
+	private Vector3 $eyePos;
+	private AxisAlignedBB $boundingBox;
 
 	/** @var array<array{from:Vector3,to:Vector3}> */
 	private array $movementSamples = [];
+	/** @var AxisAlignedBB[] */
+	private array $blockCollisionBoxes = [];
+	/**
+	 * @var array{
+	 *     eye: Vector3,
+	 *     direction: Vector3,
+	 *     reach: float,
+	 *     colliders: list<array{
+	 *         target: bool,
+	 *         boxes: AxisAlignedBB[]
+	 *     }>
+	 * }|null $tracedBlockReach
+	 */
+	private ?array $tracedBlockReach = null;
 	/** @var array{from: Vector3, to: Vector3} */
 	private array $movement;
 	/** @var list<float> */
@@ -187,6 +205,8 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->setEffects(Utils::effectsToArray($player->getEffects()));
 		$this->setBypassPermission($player->hasPermission(ZuriAC::getConfigManager()->getString(ConfigPath::ZURI_BYPASS_PERMISSION)));
 		$this->setEyeHeight($player->getEyeHeight());
+		$this->setEyePos($player->getEyePos());
+		$this->setBoundingBox($player->getBoundingBox());
 		return $this;
 	}
 
@@ -220,6 +240,30 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			return 0.0;
 		}
 		return (microtime(true) - $this->fallTicks) * 20;
+	}
+
+	public function setAttackPathBlocked(bool $data) : void {
+		$this->attackPathBlocked = $data;
+	}
+
+	public function isAttackPathBlocked() : bool {
+		return $this->attackPathBlocked;
+	}
+
+	public function setDirectionVector(Vector3 $data) : void {
+		$this->directionVector = $data;
+	}
+
+	public function getDirectionVector() : Vector3 {
+		return $this->directionVector ?? Vector3::zero();
+	}
+
+	public function setEyePos(Vector3 $data) : void {
+		$this->eyePos = $data;
+	}
+
+	public function getEyePos() : Vector3 {
+		return $this->eyePos ?? Vector3::zero();
 	}
 
 	public function setFallTicks(float $data) : void {
@@ -283,6 +327,36 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 
 	public function getInputMode() : int {
 		return $this->inputMode;
+	}
+
+	/**
+	 * @param array{
+	 *     eye: Vector3,
+	 *     direction: Vector3,
+	 *     reach: float,
+	 *     colliders: list<array{
+	 *         target: bool,
+	 *         boxes: AxisAlignedBB[]
+	 *     }>
+	 * } $data
+	 */
+	public function setTracedBlockReach(array $data) : void {
+		$this->tracedBlockReach = $data;
+	}
+
+	/**
+	 * @return array{
+	 *     eye: Vector3,
+	 *     direction: Vector3,
+	 *     reach: float,
+	 *     colliders: list<array{
+	 *         target: bool,
+	 *         boxes: AxisAlignedBB[]
+	 *     }>
+	 * }|null
+	 */
+	public function getTracedBlockReach() : ?array {
+		return $this->tracedBlockReach ?? null;
 	}
 
 	public function setPlayMode(int $data) : void {
@@ -618,12 +692,27 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->inBoxBlock = $data;
 	}
 
-	public function isInBoundingBox() : bool {
-		return $this->inBoundingBox;
+	public function getBoundingBox() : AxisAlignedBB {
+		return $this->boundingBox;
 	}
 
-	public function setInBoundingBox(bool $data) : void {
-		$this->inBoundingBox = $data;
+	public function setBoundingBox(AxisAlignedBB $data) : void {
+		$this->boundingBox = $data;
+	}
+
+	/**
+	 * @param AxisAlignedBB[] $collisionBoxes
+	 */
+	public function setBlockCollisionBoxes(array $collisionBoxes) : void {
+		$this->blockCollisionBoxes = $collisionBoxes;
+	}
+
+	/**
+	 * Returns the array of block collision boxes.
+	 * @return AxisAlignedBB[]
+	 */
+	public function getBlockCollisionBoxes() : array {
+		return $this->blockCollisionBoxes;
 	}
 
 	public function getLastGroundY() : float {
@@ -1000,6 +1089,12 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"hasTwoBlockPassage" => $this->hasTwoBlockPassage(),
 			"safePosition" => Utils::vector3ToArray($this->getSafePosition()),
 			"lastMoveTick" => $this->getLastMoveTick(),
+			"eyeHeight" => $this->getEyeHeight(),
+			"eyePos" => $this->getEyePos(),
+			"boundingBox" => Utils::axisAlignedBBToArray($this->getBoundingBox()),
+			"directionVector" => Utils::vector3ToArray($this->getDirectionVector()),
+			"isAttackPathBlocked" => $this->isAttackPathBlocked(),
+			"blockCollisionBoxes" => Utils::axisAlignedBBToArrayRecursive($this->getBlockCollisionBoxes())
 		];
 	}
 }

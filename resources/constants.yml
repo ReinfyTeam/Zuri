@@ -41,3 +41,7 @@ zuri:
   reach:
     creative_reach: 6.000 # Creative mode reach distance
     survival_reach: 3.000 # Survival mode reach distance
+    creative_block_reach: 5.000 # Creative mode block reach distance
+    survival_block_reach: 12.000 # Survival mode block reach distance
+  hitbox:
+    tolerance: 0.08

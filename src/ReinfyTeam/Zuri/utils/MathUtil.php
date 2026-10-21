@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\utils;
 
 use DateTime;
+use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\world\Position;
 use function abs;
@@ -230,5 +231,26 @@ final class MathUtil {
 			(($from->getY() + $eyeHeight - $to->getY()) ** 2) +
 			(($from->getZ() - $to->getZ()) ** 2)
 		);
+	}
+
+	public static function getBoundingBoxCenter(AxisAlignedBB $targetBox) : Vector3 {
+		return new Vector3(
+			($targetBox->minX + $targetBox->maxX) / 2.0,
+			($targetBox->minY + $targetBox->maxY) / 2.0,
+			($targetBox->minZ + $targetBox->maxZ) / 2.0
+		);
+	}
+
+	public static function calculateRayEnd(Vector3 $eye, Vector3 $center, Vector3 $direction) : Vector3 {
+		$rayLength = sqrt($eye->distanceSquared($center)) + 2.0;
+		return new Vector3(
+			$eye->x + $direction->x * $rayLength,
+			$eye->y + $direction->y * $rayLength,
+			$eye->z + $direction->z * $rayLength
+		);
+	}
+
+	public static function expandedCopyAABB(AxisAlignedBB $boundingBox, float $amount) : AxisAlignedBB {
+		return $boundingBox->expandedCopy($amount, $amount, $amount);
 	}
 }

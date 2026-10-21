@@ -73,8 +73,10 @@ use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\Utils as PMMPUtils;
 use ReinfyTeam\Zuri\check\Check;
+use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\Utils;
+use ReinfyTeam\Zuri\utils\WorldUtil;
 use function microtime;
 
 /**
@@ -522,6 +524,8 @@ class EventListener implements Listener {
 
 			$playerZuri->setAttackTicks(microtime(true));
 			$damagerZuri->setAttackTicks(microtime(true));
+
+			$playerZuri->setBlockCollisionBoxes(WorldUtil::collectBlockCollisionBoxes($player->getWorld(), $player->getPosition()->asVector3(), $damager->getBoundingBox(), Utils::readFloat(ZuriAC::getConstants()->getConstant(ConstantPath::HITBOX_TOLERANCE))));
 
 			ZuriAC::getCheckRegistry()->spawnCheck([
 				"type" => PMMPUtils::getNiceClassName($event),
