@@ -64,7 +64,7 @@ class ReachB extends Check {
 	 * @return string Short subtype identifier (e.g., 'A').
 	 */
 	public static function getSubType() : string {
-		return "A";
+		return "B";
 	}
 
 
@@ -106,8 +106,9 @@ class ReachB extends Check {
 		/** @var array{x: float, y: float, z: float} $blockPosRaw */
 		$blockPosRaw = Utils::readArray($dataCheck["blockPos"]);
 		$blockPos = Utils::arrayToVector3($blockPosRaw);
+		$movement = Utils::readArray($playerData["movement"] ?? null);
 		/** @var array{x: float, y: float, z: float} $movementData */
-		$movementData = Utils::readArray($playerData["movement"]);
+		$movementData = Utils::readArray($movement["to"] ?? null);
 		$playerPos = Utils::arrayToVector3($movementData);
 
 		$eyeHeight = Utils::readFloat($playerData["eyeHeight"]);

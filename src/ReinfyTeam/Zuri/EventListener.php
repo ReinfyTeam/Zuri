@@ -798,7 +798,7 @@ class EventListener implements Listener {
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player,
 			"data" => [
-				"blockPos" => $event->getBlock()->getPosition()->asVector3(),
+				"blockPos" => Utils::vector3ToArray($event->getBlock()->getPosition()->asVector3()),
 				"blockType" => $event->getBlock()->getTypeId(),
 			]
 		], Check::TYPE_PLAYER);
@@ -819,7 +819,7 @@ class EventListener implements Listener {
 			"type" => PMMPUtils::getNiceClassName($event),
 			"player" => $player,
 			"data" => [
-				"blockPos" => $event->getBlock()->getPosition()->asVector3(),
+				"blockPos" => Utils::vector3ToArray($event->getBlock()->getPosition()->asVector3()),
 				"blockType" => $event->getBlock()->getTypeId(),
 			]
 		], Check::TYPE_PLAYER);
