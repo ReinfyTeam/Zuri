@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\command\subcommand;
 
 use CortexPE\Commando\BaseSubCommand;
+use CortexPE\Commando\constraint\InGameRequiredConstraint;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\config\ConfigPath;
@@ -43,6 +44,7 @@ class DebugSubCommand extends BaseSubCommand {
 	protected function prepare() : void {
 		$this->setPermission(Utils::readString(ZuriAC::getConfigManager()->getData(ConfigPath::ZURI_COMMAND_PERMISSION)));
 		$this->setDescription(ZuriAC::getLanguageManager()->getCurrentLanguage()->translate(LanguagePath::DEBUG_SUBCOMMAND_DESCRIPTION));
+		$this->addConstraint(new InGameRequiredConstraint($this));
 	}
 
 	public function __construct() {
