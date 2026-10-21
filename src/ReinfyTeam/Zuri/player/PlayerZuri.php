@@ -1090,7 +1090,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"safePosition" => Utils::vector3ToArray($this->getSafePosition()),
 			"lastMoveTick" => $this->getLastMoveTick(),
 			"eyeHeight" => $this->getEyeHeight(),
-			"eyePos" => $this->getEyePos(),
+			"eyePos" => Utils::vector3ToArray($this->getEyePos()),
 			"boundingBox" => Utils::axisAlignedBBToArray($this->getBoundingBox()),
 			"directionVector" => Utils::vector3ToArray($this->getDirectionVector()),
 			"isAttackPathBlocked" => $this->isAttackPathBlocked(),

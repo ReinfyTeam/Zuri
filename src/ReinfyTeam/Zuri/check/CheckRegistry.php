@@ -33,7 +33,9 @@ namespace ReinfyTeam\Zuri\check;
 
 use pocketmine\player\Player;
 use ReinfyTeam\Zuri\check\combat\hitbox\HitboxA;
+use ReinfyTeam\Zuri\check\combat\hitbox\HitboxB;
 use ReinfyTeam\Zuri\check\combat\reach\ReachA;
+use ReinfyTeam\Zuri\check\combat\reach\ReachB;
 use ReinfyTeam\Zuri\check\moving\speed\SpeedA;
 use ReinfyTeam\Zuri\check\moving\speed\SpeedB;
 use ReinfyTeam\Zuri\ZuriAC;
@@ -119,7 +121,9 @@ class CheckRegistry {
 			new SpeedA(),
 			new SpeedB(),
 			new HitboxA(),
+			new HitboxB(),
 			new ReachA(),
+			new ReachB(),
 		]);
 	}
 
