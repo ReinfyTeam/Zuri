@@ -108,13 +108,11 @@ class HitboxB extends Check {
 		/** @var AxisAlignedBB[] */
 		$blockCollisionBoxes = Utils::arrayToAxisAlignedBBRecursive(Utils::readArray($playerData["blockCollisionBoxes"]));
 		$aimBox = MathUtil::expandedCopyAABB($boundingBox, Utils::readFloat($constantData[ConstantPath::HITBOX_TOLERANCE] ?? 0.08));
-		$boundingBoxCenter = MathUtil::getBoundingBoxCenter($aimBox);
 
 		/** @var array{x: float, y: float, z: float} $directionVectorRaw */
 		$directionVectorRaw = Utils::readArray($playerData["directionVector"]);
 		$directionVector = Utils::arrayToVector3($directionVectorRaw);
-
-		$hasLineOfSightToAnyPoint = WorldUtil::hasLineOfSightToAnyPoint($blockCollisionBoxes, $eyePos, $aimBox);
+		$hasLineOfSightToAnyPoint = WorldUtil::hasLineOfSightToAnyPoint($blockCollisionBoxes, $directionVector, $aimBox);
 
 		return self::buildResult($hasLineOfSightToAnyPoint);
 	}

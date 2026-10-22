@@ -241,10 +241,8 @@ class EventListener implements Listener {
 		$playerZuri->isOnGround()
 			? $playerZuri->setLastGroundY($player->getPosition()->getY())
 			: $playerZuri->setLastNoGroundY($player->getPosition()->getY());
-
-		if (BlockUtil::onSlimeBlock($event->getTo(), 0) || BlockUtil::onSlimeBlock($event->getTo(), 1)) {
-			$playerZuri->setSlimeBlockTicks(microtime(true));
-		}
+		$playerZuri->setFlying($player->isFlying());
+		$playerZuri->setOnSlime(BlockUtil::hasSlimeWithinVerticalGap($player->getBoundingBox(), $event->getTo(), 0.05) || BlockUtil::onSlimeBlock($event->getTo(), 1) || BlockUtil::onSlimeBlock($event->getTo(), 2));
 		// Block related checks
 		$playerZuri->setOnIce(BlockUtil::isOnIce($event->getTo(), 1) || BlockUtil::isOnIce($event->getTo(), 2));
 		$playerZuri->setOnMagma(BlockUtil::isOnMagma($event->getTo(), 1) || BlockUtil::isOnMagma($event->getTo(), 2));

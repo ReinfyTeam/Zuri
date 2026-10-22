@@ -70,6 +70,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $onDoor = false;
 	private bool $onCarpet = false;
 	private bool $onPlate = false;
+	private bool $onSlime = false;
 	private bool $onSnow = false;
 	private bool $inLiquid = false;
 	private bool $inLava = false;
@@ -128,7 +129,6 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private float $fallTicks = 0.0;
 	private float $teleportTicks = 0.0;
 	private float $attackTicks = 0.0;
-	private float $slimeBlockTicks = 0.0;
 	private float $deathTicks = 0.0;
 	private float $placingTicks = 0.0;
 	private float $bowShotTicks = 0.0;
@@ -891,12 +891,12 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->attackTicks = $data;
 	}
 
-	public function getSlimeBlockTicks() : float {
-		return (microtime(true) - $this->slimeBlockTicks) * 20;
+	public function isOnSlime() : bool {
+		return $this->onSlime;
 	}
 
-	public function setSlimeBlockTicks(float $data) : void {
-		$this->slimeBlockTicks = $data;
+	public function setOnSlime(bool $onSlime) : void {
+		$this->onSlime = $onSlime;
 	}
 
 	public function getDeathTicks() : float {
@@ -1079,7 +1079,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isRecentlyJumped" => $this->isRecentlyJumped(),
 			"teleportTicks" => $this->getTeleportTicks(),
 			"attackTicks" => $this->getAttackTicks(),
-			"slimeBlockTicks" => $this->getSlimeBlockTicks(),
+			"isOnSlime" => $this->isOnSlime(),
 			"deathTicks" => $this->getDeathTicks(),
 			"fallTicks" => $this->getFallTicks(),
 			"placingTicks" => $this->getPlacingTicks(),

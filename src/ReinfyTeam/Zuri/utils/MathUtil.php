@@ -192,7 +192,7 @@ final class MathUtil {
 			return ["distance" => 0.0, "direction" => "none"];
 		}
 
-		return ["distance" => abs($pos2Y - $pos1Y), "direction" => ($pos2Y - $pos1Y) > 0 ? "up" : "down"];
+		return ["distance" => $pos2Y - $pos1Y, "direction" => ($pos2Y - $pos1Y) > 0 ? "up" : "down"];
 	}
 
 	public static function distance2D(Vector3 $pos1, Vector3 $pos2) : float {

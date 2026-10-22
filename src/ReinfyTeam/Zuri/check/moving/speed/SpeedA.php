@@ -138,16 +138,12 @@ class SpeedA extends Check {
 			|| (Utils::readFloat($playerData["jumpTicks"] ?? 999.0) <= 20);
 		$foodLevel = Utils::readFloat($playerData["foodLevel"] ?? 20.0);
 		$isOnPlant = Utils::readBool($playerData["isOnPlant"] ?? false);
-		
+
 		// Block-related speed
 		$isOnIce = Utils::readBool($playerData["isOnIce"] ?? false);
 		$isUnderBlock = Utils::readBool($playerData["isUnderBlock"] ?? false);
 		$isOnSoul = Utils::readBool($playerData["isOnSoul"] ?? false);
 		$isOnMagma = Utils::readBool($playerData["isOnMagma"] ?? false);
-		$isUsingItem = Utils::readBool($playerData["isUsingItem"] ?? false);
-
-		$isOnWeb = Utils::readBool($playerData["isOnWeb"] ?? false);
-		$slimeBlockTicks = Utils::readFloat($playerData["slimeBlockTicks"] ?? 999.0);
 
 		if ($isSprinting) {
 			$limit = match (true) {
@@ -164,6 +160,7 @@ class SpeedA extends Check {
 				$isCreative && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_FLIGHT]),
 				$isSpectator && $isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_SPECTATOR_FLIGHT]),
 				$isJumping || !$isOnGround => Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING_HORIZONTAL]),
+				$foodLevel < 6.0 => Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]), // the player can only walk (cannot sprint),
 				default => Utils::readFloat($constantData[ConstantPath::SPEED_WALKING]),
 			};
 		}

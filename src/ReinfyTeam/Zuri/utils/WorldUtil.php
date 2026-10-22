@@ -33,6 +33,7 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\utils;
 
 use pocketmine\math\AxisAlignedBB;
+use pocketmine\entity\Location;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\World;
@@ -149,5 +150,16 @@ final class WorldUtil {
 		}
 
 		return false;
+	}
+
+	public static function isBouncingSlime(bool $onSlime, float $dy, bool $sneaking) : bool {
+		// Positive dy means rising; negative dy means falling.
+		$wasFalling = $dy < -0.02;
+		$isRising = $dy > 0.02;
+
+		$directionReversed = $wasFalling && $isRising;
+		return !$sneaking
+			&& $directionReversed
+			&& $onSlime;
 	}
 }

@@ -37,6 +37,7 @@ use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
+use ReinfyTeam\Zuri\utils\WorldUtil;
 use function abs;
 use function is_a;
 use function max;
@@ -113,6 +114,9 @@ class SpeedB extends Check {
 
 		$blocksPerSeconds = round(MathUtil::calculateAverageBps($distanceSamples, $serverTps), 3);
 
+		$isOnSlime = Utils::readBool($playerData["isOnSlime"] ?? false);
+		$isBouncing = WorldUtil::isBouncingSlime($isOnSlime, $blocksPerSeconds, Utils::readBool($playerData["isSneaking"] ?? false));
+
 		if ($blocksPerSeconds === 0.0) { // prevent false-flagging
 			return self::buildResult(false);
 		}
@@ -129,15 +133,14 @@ class SpeedB extends Check {
 		$movementUp = $blocksPerSeconds > 0.0;
 		$movementDown = $blocksPerSeconds < 0.0;
 
-		$limit = match (true) {
-			$isOnStairs && $movementUp => Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_UP]),
-			$isOnStairs && $movementDown => Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_DOWN]),
-			$isClimbing && $movementUp => Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_UP]),
-			$isClimbing && $movementDown => Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_DOWN]),
-			$isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]),
-			$movementDown => Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]),
-			default => Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING]),
-		};
+		$limit = Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING]);
+		if ($isOnStairs && $movementUp) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_UP]);
+		if ($isOnStairs && $movementDown) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_DOWN]);
+		if ($isClimbing && $movementUp) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_UP]);
+		if ($isClimbing && $movementDown) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_DOWN]);
+		if ($isFlying) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]);
+		if ($movementDown) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]);
+		if ($isBouncing) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]); // subject as player can be flagged by bouncing on slime blocks, but we will allow it for now
 
 		/** @var array{name: string, amplifier: int, duration: int}[] $playerEffects */
 		$playerEffects = Utils::readArray($playerData["effects"]);
