@@ -34,11 +34,12 @@ namespace ReinfyTeam\Zuri\utils;
 use pocketmine\block\Block;
 use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Location;
-use pocketmine\math\Vector3;
 use pocketmine\math\AxisAlignedBB;
+use pocketmine\math\Vector3;
 use pocketmine\world\Position;
 use function abs;
 use function array_flip;
+use function ceil;
 use function count;
 use function floor;
 use function implode;
@@ -464,7 +465,7 @@ final class BlockUtil {
 		return self::isUnderBlock($location, [BlockTypeIds::SLIME], $down);
 	}
 
-	public static function hasSlimeWithinVerticalGap(AxisAlignedBB $box, Location $location, float $maxGap) : bool{
+	public static function hasSlimeWithinVerticalGap(AxisAlignedBB $box, Location $location, float $maxGap) : bool {
 		$world = $location->getWorld();
 		$feetY = $box->minY;
 
@@ -476,16 +477,16 @@ final class BlockUtil {
 		$minY = (int) ceil($feetY - 1.0 - $maxGap - 0.001);
 		$maxY = (int) floor($feetY - 1.0 + 0.001);
 
-		for($y = $minY; $y <= $maxY; ++$y){
+		for ($y = $minY; $y <= $maxY; ++$y) {
 			$gap = $feetY - ($y + 1.0);
 
-			if($gap < -0.02 || $gap > $maxGap + 0.02){
+			if ($gap < -0.02 || $gap > $maxGap + 0.02) {
 				continue;
 			}
 
-			for($x = $minX; $x <= $maxX; ++$x){
-				for($z = $minZ; $z <= $maxZ; ++$z){
-					if($world->getBlockAt($x, $y, $z)->getTypeId() === BlockTypeIds::SLIME){
+			for ($x = $minX; $x <= $maxX; ++$x) {
+				for ($z = $minZ; $z <= $maxZ; ++$z) {
+					if ($world->getBlockAt($x, $y, $z)->getTypeId() === BlockTypeIds::SLIME) {
 						return true;
 					}
 				}

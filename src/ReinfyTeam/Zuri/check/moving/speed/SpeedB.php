@@ -129,18 +129,22 @@ class SpeedB extends Check {
 		$isFlying = Utils::readBool($playerData["isFlying"] ?? false);
 		$isOnStairs = Utils::readBool($playerData["isOnStairs"] ?? false);
 		$isClimbing = Utils::readBool($playerData["isClimbing"] ?? false);
+		$isFalling = Utils::readFloat($playerData["fallTicks"] ?? 999.9) <= 5;
+		$airTicks = Utils::readFloat($playerData["airTicks"] ?? 999.9) <= 5;
 
 		$movementUp = $blocksPerSeconds > 0.0;
 		$movementDown = $blocksPerSeconds < 0.0;
 
-		$limit = Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING]);
-		if ($isOnStairs && $movementUp) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_UP]);
-		if ($isOnStairs && $movementDown) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_DOWN]);
-		if ($isClimbing && $movementUp) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_UP]);
-		if ($isClimbing && $movementDown) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_DOWN]);
-		if ($isFlying) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]);
-		if ($movementDown) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]);
-		if ($isBouncing) $limit = Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]); // subject as player can be flagged by bouncing on slime blocks, but we will allow it for now
+		$limit = match(true) {
+			$isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]),
+			$airTicks || $isFalling => Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]),
+			$isBouncing => Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]),
+			$isOnStairs && $movementUp => Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_UP]),
+			$isOnStairs && $movementDown => Utils::readFloat($constantData[ConstantPath::SPEED_STAIRS_DOWN]),
+			$isClimbing && $movementUp => Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_UP]),
+			$isClimbing && $movementDown => Utils::readFloat($constantData[ConstantPath::SPEED_CLIMBABLE_DOWN]),
+			default => Utils::readFloat($constantData[ConstantPath::SPEED_JUMPING]),
+		};
 
 		/** @var array{name: string, amplifier: int, duration: int}[] $playerEffects */
 		$playerEffects = Utils::readArray($playerData["effects"]);

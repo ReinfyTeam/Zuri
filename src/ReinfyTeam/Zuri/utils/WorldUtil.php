@@ -33,7 +33,6 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\utils;
 
 use pocketmine\math\AxisAlignedBB;
-use pocketmine\entity\Location;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\World;

@@ -41,8 +41,6 @@ use function abs;
 use function is_a;
 use function max;
 use function round;
-use function strpos;
-use function strtolower;
 
 
 /**
@@ -110,7 +108,7 @@ class SpeedA extends Check {
 
 		$teleportTicks = Utils::readFloat($playerData["teleportTicks"] ?? 999.0);
 		$hurtTicks = Utils::readFloat($playerData["hurtTicks"] ?? 999.0);
-		if ($teleportTicks <= 20.0 || $hurtTicks <= 20.0) {
+		if ($teleportTicks <= 40.0 || $hurtTicks <= 20.0) {
 			return self::buildResult(false);
 		}
 

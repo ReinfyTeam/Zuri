@@ -379,6 +379,7 @@ class EventListener implements Listener {
 		}
 
 		$playerZuri->setTeleportTicks(microtime(true));
+		$player->sendMessage("you teleported");
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),
@@ -513,29 +514,20 @@ class EventListener implements Listener {
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
+			
+		$damagerZuri = ZuriAC::getPlayerManager()->get($damager);
+		$playerZuri->setAttackTicks(microtime(true));
+		$damagerZuri->setAttackTicks(microtime(true));
 
-		$cause = $event->getCause();
+		$playerZuri->setBlockCollisionBoxes(WorldUtil::collectBlockCollisionBoxes($player->getWorld(), $player->getPosition()->asVector3(), $damager->getBoundingBox(), Utils::readFloat(ZuriAC::getConstants()->getConstant(ConstantPath::HITBOX_TOLERANCE))));
 
-		if ($cause === EntityDamageEvent::CAUSE_ENTITY_EXPLOSION || $cause === EntityDamageEvent::CAUSE_BLOCK_EXPLOSION) {
-			$playerZuri->setExplosionTicks(microtime(true));
-		}
-
-		if ($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK) {
-			$damagerZuri = ZuriAC::getPlayerManager()->get($damager);
-
-			$playerZuri->setAttackTicks(microtime(true));
-			$damagerZuri->setAttackTicks(microtime(true));
-
-			$playerZuri->setBlockCollisionBoxes(WorldUtil::collectBlockCollisionBoxes($player->getWorld(), $player->getPosition()->asVector3(), $damager->getBoundingBox(), Utils::readFloat(ZuriAC::getConstants()->getConstant(ConstantPath::HITBOX_TOLERANCE))));
-
-			ZuriAC::getCheckRegistry()->spawnCheck([
-				"type" => PMMPUtils::getNiceClassName($event),
-				"player" => $damager, // damager instead of player, because the check is for the attacker
-				"data" => [
-					"enemy" => $player
-				]
-			], Check::TYPE_PLAYER);
-		}
+		ZuriAC::getCheckRegistry()->spawnCheck([
+			"type" => PMMPUtils::getNiceClassName($event),
+			"player" => $damager, // damager instead of player, because the check is for the attacker
+			"data" => [
+				"enemy" => $player
+			]
+		], Check::TYPE_PLAYER);
 	}
 
 	/**
