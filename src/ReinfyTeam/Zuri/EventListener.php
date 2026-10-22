@@ -247,6 +247,9 @@ class EventListener implements Listener {
 		}
 		// Block related checks
 		$playerZuri->setOnIce(BlockUtil::isOnIce($event->getTo(), 1) || BlockUtil::isOnIce($event->getTo(), 2));
+		$playerZuri->setOnMagma(BlockUtil::isOnMagma($event->getTo(), 1) || BlockUtil::isOnMagma($event->getTo(), 2));
+		$playerZuri->setUsingItem($player->isUsingItem());
+		$playerZuri->setFoodLevel($player->getHungerManager()->getFood());
 		$playerZuri->setOnStairs(BlockUtil::isOnStairs($event->getTo(), 0) || BlockUtil::isOnStairs($event->getTo(), 1));
 		$playerZuri->setUnderBlock(BlockUtil::isOnGround($player->getLocation(), -2));
 		$playerZuri->setTopBlock(BlockUtil::isOnGround($player->getLocation(), 1));
@@ -260,7 +263,7 @@ class EventListener implements Listener {
 		$playerZuri->setOnDoor(BlockUtil::isOnDoor($event->getTo(), 0));
 		$playerZuri->setOnCarpet(BlockUtil::isOnCarpet($event->getTo(), 0));
 		$playerZuri->setOnPlate(BlockUtil::isOnPlate($event->getTo(), 0));
-		$playerZuri->setOnSoul(BlockUtil::isOnSoul($event->getTo(), 0));
+		$playerZuri->setOnSoul(BlockUtil::isOnSoul($event->getTo(), 1) || BlockUtil::isOnSoul($event->getTo(), 2));
 		$playerZuri->setOnSnow(BlockUtil::isOnSnow($event->getTo(), 0));
 		$playerZuri->setBlockAbove(BlockUtil::isSolid(BlockUtil::getBlockAbove($event->getTo())));
 		$playerZuri->setGroundSolid(BlockUtil::isGroundSolid($player->getLocation()));

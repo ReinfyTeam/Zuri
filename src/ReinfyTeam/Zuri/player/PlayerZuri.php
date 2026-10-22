@@ -75,6 +75,9 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $inLava = false;
 	private bool $onStairs = false;
 	private bool $onIce = false;
+	private bool $onMagma = false;
+	private bool $usingItem = false;
+	private float $foodLevel = 20.0;
 	private bool $debug = false;
 	private bool $flagged = false;
 	private bool $onGround = false;
@@ -676,6 +679,30 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		$this->onIce = $data;
 	}
 
+	public function isOnMagma() : bool {
+		return $this->onMagma;
+	}
+
+	public function setOnMagma(bool $data) : void {
+		$this->onMagma = $data;
+	}
+
+	public function isUsingItem() : bool {
+		return $this->usingItem;
+	}
+
+	public function setUsingItem(bool $data) : void {
+		$this->usingItem = $data;
+	}
+
+	public function getFoodLevel() : float {
+		return $this->foodLevel;
+	}
+
+	public function setFoodLevel(float $data) : void {
+		$this->foodLevel = $data;
+	}
+
 	public function isOnWeb() : bool {
 		return $this->onWeb;
 	}
@@ -1033,11 +1060,15 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"isOnCarpet" => $this->isOnCarpet(),
 			"isOnPlate" => $this->isOnPlate(),
 			"isOnSnow" => $this->isOnSnow(),
+			"isOnWeb" => $this->isOnWeb(),
 			"isSniffing" => $this->isSniffing(),
 			"isInLiquid" => $this->isInLiquid(),
 			"isOnLava" => $this->isOnLava(),
 			"isOnStairs" => $this->isOnStairs(),
 			"isOnIce" => $this->isOnIce(),
+			"isOnMagma" => $this->isOnMagma(),
+			"isUsingItem" => $this->isUsingItem(),
+			"foodLevel" => $this->getFoodLevel(),
 			"isOnGround" => $this->isOnGround(),
 			"isDebug" => $this->isDebug(),
 			"hasTopBlock" => $this->hasTopBlock(),

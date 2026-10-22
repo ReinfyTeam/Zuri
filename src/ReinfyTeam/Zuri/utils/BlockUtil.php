@@ -314,6 +314,13 @@ final class BlockUtil {
 	}
 
 	/**
+	 * Checks whether the given location is on a magma block.
+	 */
+	public static function isOnMagma(Location $location, int $down) : bool {
+		return self::isUnderBlock($location, [BlockTypeIds::MAGMA], $down);
+	}
+
+	/**
 	 * Checks whether the given location is over a liquid block.
 	 */
 	public static function isOnLiquid(Location $location, int $down) : bool {

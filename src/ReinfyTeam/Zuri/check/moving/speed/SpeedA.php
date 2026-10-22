@@ -41,6 +41,8 @@ use function abs;
 use function is_a;
 use function max;
 use function round;
+use function strpos;
+use function strtolower;
 
 
 /**
@@ -134,7 +136,18 @@ class SpeedA extends Check {
 		$isJumping = Utils::readBool($playerData["isJumping"] ?? false)
 			|| Utils::readBool($playerData["isRecentlyJumped"] ?? false)
 			|| (Utils::readFloat($playerData["jumpTicks"] ?? 999.0) <= 20);
+		$foodLevel = Utils::readFloat($playerData["foodLevel"] ?? 20.0);
+		$isOnPlant = Utils::readBool($playerData["isOnPlant"] ?? false);
+		
+		// Block-related speed
 		$isOnIce = Utils::readBool($playerData["isOnIce"] ?? false);
+		$isUnderBlock = Utils::readBool($playerData["isUnderBlock"] ?? false);
+		$isOnSoul = Utils::readBool($playerData["isOnSoul"] ?? false);
+		$isOnMagma = Utils::readBool($playerData["isOnMagma"] ?? false);
+		$isUsingItem = Utils::readBool($playerData["isUsingItem"] ?? false);
+
+		$isOnWeb = Utils::readBool($playerData["isOnWeb"] ?? false);
+		$slimeBlockTicks = Utils::readFloat($playerData["slimeBlockTicks"] ?? 999.0);
 
 		if ($isSprinting) {
 			$limit = match (true) {
@@ -155,9 +168,7 @@ class SpeedA extends Check {
 			};
 		}
 
-		if ($isOnIce) {
-			$limit *= 1.35;
-		}
+
 
 		// Calculate Effects
 		/** @var array{name: string, amplifier: int, duration: int}[] $playerEffects */

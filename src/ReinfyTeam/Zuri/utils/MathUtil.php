@@ -213,7 +213,7 @@ final class MathUtil {
 		$dx = $pos2X - $pos1X;
 		$dz = $pos2Z - $pos1Z;
 
-		return sqrt(($dx * $dx) + ($dz * $dz));
+		return hypot($dx, $dz); // more efficient
 	}
 
 
