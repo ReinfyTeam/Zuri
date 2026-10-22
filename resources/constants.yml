@@ -9,7 +9,7 @@ zuri:
     # May update frequently as new data is discovered. The values are based on the player's movement speed, which is affected by the player's movement speed attribute and any status effects that may be applied.
     # Horizontal Calculations for Speed (A)
     horizontal:
-      walking: 4.317 # Base speed for Flat terrain (no sprint or jump)
+      walking: 5.317 # Base speed for Flat terrain (no sprint or jump)
       sprinting: 5.612 # Base speed for Flat terrain (no jump)
       jumping: 10.500 # Instantaneous speed for Flat terrain (jumping + sprint, up to ~10.2 BPS)
       sneaking: 1.300 # Base speed for Flat terrain (no jump)
@@ -33,7 +33,7 @@ zuri:
       climbable_down: 3.000 # Descending ladders, vines, etc.
       lava_liquid: 0.800
       levitation: 0.900 # Approximate levitation upward
-      creative_spectator_vertical: 7.490 # Creative / spectator flight
+      creative_spectator_vertical: 9.490 # Creative / spectator flight
       falling_player_terminal: 78.400 # Terminal velocity for a falling player (no feather falling)
       scaffolding_up: 1.200 # Ascending scaffolding
       scaffolding_down: 2.940 # Descending scaffolding
@@ -41,7 +41,7 @@ zuri:
   reach:
     creative_reach: 6.000 # Creative mode reach distance
     survival_reach: 3.000 # Survival mode reach distance
-    creative_block_reach: 5.000 # Creative mode block reach distance
-    survival_block_reach: 12.000 # Survival mode block reach distance
+    creative_block_reach: 12.000 # Creative mode block reach distance
+    survival_block_reach: 6.000 # Survival mode block reach distance
   hitbox:
     tolerance: 0.08
