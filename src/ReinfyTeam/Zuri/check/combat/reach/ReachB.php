@@ -122,11 +122,14 @@ class ReachB extends Check {
 			$isSurvival => Utils::readFloat($constantData[ConstantPath::REACH_SURVIVAL_BLOCK_REACH]),
 			default => 0.0, // spectator? its ignored anyways :/
 		};
-		$result = round($distance, 3) > round($maxDistance, 3);
+		$threshold = round($maxDistance * (1.0 + max(0.0, Utils::readFloat($constantData[ConstantPath::TOLERANCE_PERCENTAGE] ?? 0.0))), 3); // allowance for if possible miscalculations to prevent false-flagging
+
+		$result = round($distance, 3) > round($threshold, 3); 
 
 		return self::buildResult($result, [
 			"distance" => round($distance, 3),
 			"maxDistance" => round($maxDistance, 3),
+			"threshold" => round($threshold, 3),
 		]);
 	}
 }

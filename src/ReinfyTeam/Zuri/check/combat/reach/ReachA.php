@@ -116,9 +116,12 @@ class ReachA extends Check {
 		$isCreative = Utils::readBool($playerData["isCreative"] ?? false) && !Utils::readBool($playerData["isSpectator"] ?? false);
 		$reachLimit = round($isCreative ? Utils::readFloat($constantData[ConstantPath::REACH_CREATIVE]) :      Utils::readFloat($constantData[ConstantPath::REACH_SURVIVAL]), 3);
 
-		return self::buildResult($distance > $reachLimit, [
+		$threshold = round($reachLimit * (1.0 + max(0.0, Utils::readFloat($constantData[ConstantPath::TOLERANCE_PERCENTAGE] ?? 0.0))), 3); // allowance for if possible miscalculations to prevent false-flagging
+
+		return self::buildResult($distance > $threshold, [
 			"distance" => $distance,
-			"reachLimit" => $reachLimit
+			"reachLimit" => $reachLimit,
+			"threshold" => $threshold
 		]);
 	}
 }
