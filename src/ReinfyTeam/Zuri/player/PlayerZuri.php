@@ -178,6 +178,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private int $tick = 0;
 
 	private Vector3 $motion;
+	private Vector3 $oldMotion;
 	private Vector3 $safePosition;
 
 
@@ -303,6 +304,13 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function getMotion() : Vector3 {
 		return $this->motion ??= Vector3::zero();
 	}
+	
+	/**
+	 * Returns the cached motion vector for the player.
+	 */
+	public function getOldMotion() : Vector3 {
+		return $this->oldMotion ??= Vector3::zero();
+	}
 
 	public function isInLava() : bool {
 		return $this->inLava;
@@ -395,6 +403,13 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	 */
 	public function setMotion(Vector3 $motion) : void {
 		$this->motion = $motion;
+	}
+
+	/**
+	 * Set the old motion vector for the player.
+	 */
+	public function setOldMotion(Vector3 $motion) : void {
+		$this->oldMotion = $motion;
 	}
 
 	public function getLastMoveTick() : int {
@@ -1089,6 +1104,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"teleportCommandTicks" => $this->getTeleportCommandTicks(),
 			"cps" => $this->getCPS(),
 			"motion" => Utils::vector3ToArray($this->getMotion()),
+			"oldMotion" => Utils::vector3ToArray($this->getOldMotion()),
 			"onlineTime" => $this->getOnlineTime(),
 			"movement" => Utils::vector3ToArrayRecursive($this->getMovement()),
 			"movementSamples" => Utils::vector3ToArrayRecursive($this->getMovementSamples()),

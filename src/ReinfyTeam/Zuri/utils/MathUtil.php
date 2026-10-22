@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\utils;
 use DateTime;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
+use pocketmine\math\Vector2;
 use pocketmine\world\Position;
 use function array_sum;
 use function count;
@@ -214,6 +215,10 @@ final class MathUtil {
 		$dz = $pos2Z - $pos1Z;
 
 		return hypot($dx, $dz); // more efficient
+	}
+
+	public static function hypoVector(Vector3 $vector) : float {
+		return hypot($vector->x, $vector->z);
 	}
 
 

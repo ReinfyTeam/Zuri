@@ -289,7 +289,13 @@ class EventListener implements Listener {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
 
+		$playerZuri->setOldMotion($player->getMotion());
 		$playerZuri->setMotion($event->getVector());
+
+		ZuriAC::getCheckRegistry()->spawnCheck([
+			"type" => EntityMotionEvent::class,
+			"player" => $player
+		], Check::TYPE_PLAYER);
 	}
 
 	/**
