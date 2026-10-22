@@ -520,7 +520,7 @@ class EventListener implements Listener {
 		if ($event->isCancelled()) {
 			$playerZuri->setRecentlyCancelledEvent(microtime(true));
 		}
-			
+
 		$damagerZuri = ZuriAC::getPlayerManager()->get($damager);
 		$playerZuri->setAttackTicks(microtime(true));
 		$damagerZuri->setAttackTicks(microtime(true));

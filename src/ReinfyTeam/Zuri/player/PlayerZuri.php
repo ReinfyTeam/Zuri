@@ -304,7 +304,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	public function getMotion() : Vector3 {
 		return $this->motion ??= Vector3::zero();
 	}
-	
+
 	/**
 	 * Returns the cached motion vector for the player.
 	 */

@@ -32,15 +32,10 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\check\moving\speed;
 
 use pocketmine\event\entity\EntityMotionEvent;
-use pocketmine\math\Vector3;
 use ReinfyTeam\Zuri\check\Check;
-use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
-use function abs;
 use function is_a;
-use function max;
-use function round;
 
 
 /**
@@ -107,10 +102,10 @@ class VelocityA extends Check {
 
 		$horizontalSpeed = MathUtil::hypoVector($newMotionVector);
 		$horizontalDelta = MathUtil::distance2D($oldMotionVector, $newMotionVector);
-		
+
 		$dirX = $newMotionVector->x / $horizontalSpeed;
 		$dirZ = $newMotionVector->z / $horizontalSpeed;
 
-        return self::buildResult(false);
+		return self::buildResult(false);
 	}
 }

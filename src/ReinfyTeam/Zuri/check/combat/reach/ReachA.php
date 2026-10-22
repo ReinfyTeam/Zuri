@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function is_a;
 use function is_array;
+use function max;
 use function round;
 
 

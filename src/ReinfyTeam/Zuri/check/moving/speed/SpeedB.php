@@ -135,7 +135,7 @@ class SpeedB extends Check {
 		$movementUp = $blocksPerSeconds > 0.0;
 		$movementDown = $blocksPerSeconds < 0.0;
 
-		$limit = match(true) {
+		$limit = match (true) {
 			$isFlying => Utils::readFloat($constantData[ConstantPath::SPEED_CREATIVE_SPECTATOR_VERTICAL]),
 			$airTicks || $isFalling => Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]),
 			$isBouncing => Utils::readFloat($constantData[ConstantPath::SPEED_FALLING_PLAYER_TERMINAL]),

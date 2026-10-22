@@ -39,6 +39,7 @@ use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use function is_a;
+use function max;
 use function round;
 
 
@@ -124,7 +125,7 @@ class ReachB extends Check {
 		};
 		$threshold = round($maxDistance * (1.0 + max(0.0, Utils::readFloat($constantData[ConstantPath::TOLERANCE_PERCENTAGE] ?? 0.0))), 3); // allowance for if possible miscalculations to prevent false-flagging
 
-		$result = round($distance, 3) > round($threshold, 3); 
+		$result = round($distance, 3) > round($threshold, 3);
 
 		return self::buildResult($result, [
 			"distance" => round($distance, 3),

@@ -32,15 +32,9 @@ declare(strict_types=1);
 namespace ReinfyTeam\Zuri\check\moving\speed;
 
 use pocketmine\event\player\PlayerMoveEvent;
-use pocketmine\math\Vector3;
 use ReinfyTeam\Zuri\check\Check;
-use ReinfyTeam\Zuri\config\ConstantPath;
-use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
-use function abs;
 use function is_a;
-use function max;
-use function round;
 
 
 /**
@@ -94,6 +88,6 @@ class VelocityB extends Check {
 			return self::buildResult(false);
 		}
 
-        return self::buildResult(false);
+		return self::buildResult(false);
 	}
 }

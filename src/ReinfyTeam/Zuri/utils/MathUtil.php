@@ -34,7 +34,6 @@ namespace ReinfyTeam\Zuri\utils;
 use DateTime;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
-use pocketmine\math\Vector2;
 use pocketmine\world\Position;
 use function array_sum;
 use function count;
