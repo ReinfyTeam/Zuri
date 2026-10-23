@@ -509,6 +509,9 @@ final class BlockUtil {
 	 * @return bool True if the player is blocked ahead, false otherwise.
 	 */
 	public static function isBlockedAhead(Location $location, AxisAlignedBB $bb, Vector3 $motion, float $horizontalSpeed) : bool{
+		if ($horizontalSpeed === 0.0) {
+			return false; // prevent early game crash when player is not moving
+		}
 		$dirX = $motion->x / $horizontalSpeed; 
 		$dirZ = $motion->z / $horizontalSpeed;
         $shifted = new AxisAlignedBB(
