@@ -508,33 +508,33 @@ final class BlockUtil {
 	 * @param float $horizontalSpeed The horizontal speed of the player.
 	 * @return bool True if the player is blocked ahead, false otherwise.
 	 */
-	public static function isBlockedAhead(Location $location, AxisAlignedBB $bb, Vector3 $motion, float $horizontalSpeed) : bool{
+	public static function isBlockedAhead(Location $location, AxisAlignedBB $bb, Vector3 $motion, float $horizontalSpeed) : bool {
 		if ($horizontalSpeed === 0.0) {
 			return false; // prevent early game crash when player is not moving
 		}
-		$dirX = $motion->x / $horizontalSpeed; 
+		$dirX = $motion->x / $horizontalSpeed;
 		$dirZ = $motion->z / $horizontalSpeed;
-        $shifted = new AxisAlignedBB(
-            $bb->minX + ($dirX * self::BLOCK_PROBE_DISTANCE),
-            $bb->minY,
-            $bb->minZ + ($dirZ * self::BLOCK_PROBE_DISTANCE),
-            $bb->maxX + ($dirX * self::BLOCK_PROBE_DISTANCE),
-            $bb->maxY,
-            $bb->maxZ + ($dirZ * self::BLOCK_PROBE_DISTANCE)
-        );
+		$shifted = new AxisAlignedBB(
+			$bb->minX + ($dirX * self::BLOCK_PROBE_DISTANCE),
+			$bb->minY,
+			$bb->minZ + ($dirZ * self::BLOCK_PROBE_DISTANCE),
+			$bb->maxX + ($dirX * self::BLOCK_PROBE_DISTANCE),
+			$bb->maxY,
+			$bb->maxZ + ($dirZ * self::BLOCK_PROBE_DISTANCE)
+		);
 
-        $world = $location->getWorld();
-        for($x = (int) floor($shifted->minX); $x <= (int) floor($shifted->maxX); ++$x){
-            for($y = (int) floor($shifted->minY); $y <= (int) floor($shifted->maxY); ++$y){
-                for($z = (int) floor($shifted->minZ); $z <= (int) floor($shifted->maxZ); ++$z){
-                    if($world->getBlockAt($x, $y, $z)->collidesWithBB($shifted)){
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
+		$world = $location->getWorld();
+		for ($x = (int) floor($shifted->minX); $x <= (int) floor($shifted->maxX); ++$x) {
+			for ($y = (int) floor($shifted->minY); $y <= (int) floor($shifted->maxY); ++$y) {
+				for ($z = (int) floor($shifted->minZ); $z <= (int) floor($shifted->maxZ); ++$z) {
+					if ($world->getBlockAt($x, $y, $z)->collidesWithBB($shifted)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Returns the block under the given location at the specified depth.

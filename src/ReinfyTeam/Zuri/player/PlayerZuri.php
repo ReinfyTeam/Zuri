@@ -933,7 +933,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	}
 
 	public function clearMovementSamples() : void {
-		$this->movementSamples = [["from" => Vector3::zero(), "to" => Vector3::zero()]]; 
+		$this->movementSamples = [["from" => Vector3::zero(), "to" => Vector3::zero()]];
 	}
 
 	/**

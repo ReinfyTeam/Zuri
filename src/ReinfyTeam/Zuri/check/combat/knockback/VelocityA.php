@@ -33,10 +33,12 @@ namespace ReinfyTeam\Zuri\check\moving\speed;
 
 use pocketmine\event\entity\EntityMotionEvent;
 use ReinfyTeam\Zuri\check\Check;
-use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\config\ConstantPath;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
+use function abs;
 use function is_a;
+use function max;
 
 
 /**
@@ -94,8 +96,8 @@ class VelocityA extends Check {
 		$constantData = Utils::readArray($data["constantData"] ?? null);
 
 		// Don't check a player who has a nearby collision surface in the impulse direction.
-        // A wall can legitimately prevent the client from moving despite receiving velocity.
-		if(Utils::readBool($playerData["isBlockedAhead"])) {
+		// A wall can legitimately prevent the client from moving despite receiving velocity.
+		if (Utils::readBool($playerData["isBlockedAhead"])) {
 			return self::buildResult(false);
 		}
 
@@ -129,10 +131,10 @@ class VelocityA extends Check {
 		$maxDistanceY = Utils::readFloat($constantData[ConstantPath::VELOCITY_MAX_DISTANCE_Y]);
 
 		// A vertical-only motion update must not discard a horizontal response sample.
-        // A substantial horizontal reset to near-zero, however, supersedes the sample.
-		if($horizontalSpeed > $minimumSpeed && $horizontalDelta >= $minimumDelta){
-            return self::buildResult(false);
-        }
+		// A substantial horizontal reset to near-zero, however, supersedes the sample.
+		if ($horizontalSpeed > $minimumSpeed && $horizontalDelta >= $minimumDelta) {
+			return self::buildResult(false);
+		}
 
 		if ($horizontalDelta >= $minimumDelta) {
 			return self::buildResult(false);
@@ -141,7 +143,7 @@ class VelocityA extends Check {
 		$dy = $movementToVector->y - $movementFromVector->y;
 
 		// Teleports, corrections, and large lag/backlog steps must not be scored as anti-velocity.
-		if($distance > $maxSingleMove || abs($dy) > $maxDistanceY){
+		if ($distance > $maxSingleMove || abs($dy) > $maxDistanceY) {
 			return self::buildResult(false);
 		}
 

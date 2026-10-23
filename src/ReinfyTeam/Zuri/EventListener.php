@@ -75,9 +75,9 @@ use pocketmine\utils\Utils as PMMPUtils;
 use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\BlockUtil;
+use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use ReinfyTeam\Zuri\utils\WorldUtil;
-use ReinfyTeam\Zuri\utils\MathUtil;
 use function microtime;
 
 /**
