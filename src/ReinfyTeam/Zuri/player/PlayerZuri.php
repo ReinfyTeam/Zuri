@@ -109,6 +109,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 	private bool $dead = false;
 	private bool $bypassPermission = false;
 	private bool $attackPathBlocked = false;
+	private bool $blockAhead = false;
 
 	private float $airTicks = 0;
 	private float $groundTicks = 0;
@@ -943,6 +944,14 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		return $this->movement ?? ["from" => Vector3::zero(), "to" => Vector3::zero()];
 	}
 
+	public function setBlockAhead(bool $blockAhead) : void {
+		$this->blockAhead = $blockAhead;
+	}
+
+	public function isBlockAhead() : bool {
+		return $this->blockAhead;
+	}
+
 	/**
 	 * Set the player's movement snapshot.
 	 * @param Vector3 $from Previous position vector.
@@ -1145,6 +1154,7 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 			"boundingBox" => Utils::axisAlignedBBToArray($this->getBoundingBox()),
 			"directionVector" => Utils::vector3ToArray($this->getDirectionVector()),
 			"isAttackPathBlocked" => $this->isAttackPathBlocked(),
+			"isBlockAhead" => $this->isBlockAhead(),
 			"blockCollisionBoxes" => Utils::axisAlignedBBToArrayRecursive($this->getBlockCollisionBoxes())
 		];
 	}

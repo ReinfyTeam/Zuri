@@ -52,4 +52,6 @@ zuri:
     required_displacement_ratio: 1.25
     min_horizontal_displacement: 0.40
     maximum_distance_y: 2.50
+    min_forward_projection: 0.20
     required_forward_ratio: 0.65
+    block_probe_distance: 0.45

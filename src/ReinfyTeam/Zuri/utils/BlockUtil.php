@@ -53,6 +53,9 @@ final class BlockUtil {
 	/** @var array<string,array<int,int>> */
 	private static array $blockMaps = [];
 
+	/** @var float */
+	public const BLOCK_PROBE_DISTANCE = 0.45;
+
 	public static function isOnSoul(Location $location, int $depth = 1) : bool {
 		return self::isUnderblock($location, [BlockTypeIds::SOUL_SAND, BlockTypeIds::SOUL_SOIL], $depth);
 	}
@@ -501,19 +504,20 @@ final class BlockUtil {
 	 *
 	 * @param Location $location The player's location.
 	 * @param AxisAlignedBB $bb The player's bounding box.
-	 * @param float $distance The distance to check.
-	 * @param float $dirX The X direction of the movement.
-	 * @param float $dirZ The Z direction of the movement.
+	 * @param Vector3 $motion The player's motion.
+	 * @param float $horizontalSpeed The horizontal speed of the player.
 	 * @return bool True if the player is blocked ahead, false otherwise.
 	 */
-	public static function isBlockedAhead(Location $location, AxisAlignedBB $bb, float $distance, float $dirX, float $dirZ) : bool{
+	public static function isBlockedAhead(Location $location, AxisAlignedBB $bb, Vector3 $motion, float $horizontalSpeed) : bool{
+		$dirX = $motion->x / $horizontalSpeed; 
+		$dirZ = $motion->z / $horizontalSpeed;
         $shifted = new AxisAlignedBB(
-            $bb->minX + ($dirX * $distance),
+            $bb->minX + ($dirX * self::BLOCK_PROBE_DISTANCE),
             $bb->minY,
-            $bb->minZ + ($dirZ * $distance),
-            $bb->maxX + ($dirX * $distance),
+            $bb->minZ + ($dirZ * self::BLOCK_PROBE_DISTANCE),
+            $bb->maxX + ($dirX * self::BLOCK_PROBE_DISTANCE),
             $bb->maxY,
-            $bb->maxZ + ($dirZ * $distance)
+            $bb->maxZ + ($dirZ * self::BLOCK_PROBE_DISTANCE)
         );
 
         $world = $location->getWorld();
