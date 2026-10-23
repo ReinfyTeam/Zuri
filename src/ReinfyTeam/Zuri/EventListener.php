@@ -267,7 +267,7 @@ class EventListener implements Listener {
 		$playerZuri->setBlockAbove(BlockUtil::isSolid(BlockUtil::getBlockAbove($event->getTo())));
 		$playerZuri->setGroundSolid(BlockUtil::isGroundSolid($player->getLocation()));
 		$playerZuri->setInLava(BlockUtil::isInLava($player->getLocation()));
-		$playerZuri->setBlockAhead(BlockUtil::isBlockedAhead($player->getLocation(), $player->getBoundingBox(), $player->getMotion(), MathUtil::distance2D($event->getFrom(), $event->getTo())));
+		$playerZuri->setBlockedAhead(BlockUtil::isBlockedAhead($player->getLocation(), $player->getBoundingBox(), $player->getMotion(), MathUtil::distance2D($event->getFrom(), $event->getTo())));
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PlayerMoveEvent::class,
