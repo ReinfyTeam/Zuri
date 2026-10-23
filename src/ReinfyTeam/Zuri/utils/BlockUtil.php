@@ -497,6 +497,39 @@ final class BlockUtil {
 	}
 
 	/**
+	 * Checks if the player is blocked ahead.
+	 *
+	 * @param Location $location The player's location.
+	 * @param AxisAlignedBB $bb The player's bounding box.
+	 * @param float $distance The distance to check.
+	 * @param float $dirX The X direction of the movement.
+	 * @param float $dirZ The Z direction of the movement.
+	 * @return bool True if the player is blocked ahead, false otherwise.
+	 */
+	public static function isBlockedAhead(Location $location, AxisAlignedBB $bb, float $distance, float $dirX, float $dirZ) : bool{
+        $shifted = new AxisAlignedBB(
+            $bb->minX + ($dirX * $distance),
+            $bb->minY,
+            $bb->minZ + ($dirZ * $distance),
+            $bb->maxX + ($dirX * $distance),
+            $bb->maxY,
+            $bb->maxZ + ($dirZ * $distance)
+        );
+
+        $world = $location->getWorld();
+        for($x = (int) floor($shifted->minX); $x <= (int) floor($shifted->maxX); ++$x){
+            for($y = (int) floor($shifted->minY); $y <= (int) floor($shifted->maxY); ++$y){
+                for($z = (int) floor($shifted->minZ); $z <= (int) floor($shifted->maxZ); ++$z){
+                    if($world->getBlockAt($x, $y, $z)->collidesWithBB($shifted)){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+	/**
 	 * Returns the block under the given location at the specified depth.
 	 *
 	 * @param int $deep Depth below the location.

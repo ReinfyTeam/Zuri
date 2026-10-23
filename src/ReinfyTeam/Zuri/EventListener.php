@@ -385,7 +385,7 @@ class EventListener implements Listener {
 		}
 
 		$playerZuri->setTeleportTicks(microtime(true));
-		$player->sendMessage("you teleported");
+		$playerZuri->clearMovementSamples();
 
 		ZuriAC::getCheckRegistry()->spawnCheck([
 			"type" => PMMPUtils::getNiceClassName($event),

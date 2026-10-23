@@ -931,6 +931,10 @@ class PlayerZuri extends Violation implements JsonSerializable, ExternalDataPath
 		return $this->movementSamples;
 	}
 
+	public function clearMovementSamples() : void {
+		$this->movementSamples = [["from" => Vector3::zero(), "to" => Vector3::zero()]]; 
+	}
+
 	/**
 	 * Returns the player's movement snapshot.
 	 * @return array{from: Vector3, to: Vector3}

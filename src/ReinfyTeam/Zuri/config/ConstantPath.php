@@ -81,4 +81,14 @@ interface ConstantPath {
 	public const REACH_SURVIVAL_BLOCK_REACH = "reach.survival_block_reach";
 	public const REACH_CREATIVE_BLOCK_REACH = "reach.creative_block_reach";
 	public const HITBOX_TOLERANCE = "hitbox.tolerance";
+
+	// Velocity checks
+	public const VELOCITY_MINIMUM_DELTA = "velocity.minimum_delta";
+	public const VELOCITY_MINIMUM_SPEED = "velocity.minimum_speed";
+	public const VELOCITY_MAX_SINGLE_MOVE = "velocity.maximum_single_move";
+	public const VELOCITY_MIN_HORIZONTAL_DISPLACEMENT = "velocity.min_horizontal_displacement";
+	public const VELOCITY_REQUIRED_DISPLACEMENT_RATIO = "velocity.required_displacement_ratio";
+	public const VELOCITY_MAX_DISTANCE_Y = "velocity.maximum_distance_y";
+	public const VELOCITY_MIN_FORWARD_PROJECTION = "velocity.min_forward_projection";
+	public const VELOCITY_REQUIRED_FORWARD_RATIO = "velocity.required_forward_ratio";
 }

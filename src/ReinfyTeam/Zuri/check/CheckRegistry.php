@@ -38,6 +38,7 @@ use ReinfyTeam\Zuri\check\combat\reach\ReachA;
 use ReinfyTeam\Zuri\check\combat\reach\ReachB;
 use ReinfyTeam\Zuri\check\moving\speed\SpeedA;
 use ReinfyTeam\Zuri\check\moving\speed\SpeedB;
+use ReinfyTeam\Zuri\check\moving\speed\VelocityA;
 use ReinfyTeam\Zuri\ZuriAC;
 use function array_filter;
 use function class_exists;
@@ -124,6 +125,7 @@ class CheckRegistry {
 			new HitboxB(),
 			new ReachA(),
 			new ReachB(),
+			new VelocityA(),
 		]);
 	}
 

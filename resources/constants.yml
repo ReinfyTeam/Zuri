@@ -45,3 +45,11 @@ zuri:
     survival_block_reach: 6.000 # Survival mode block reach distance
   hitbox:
     tolerance: 0.08
+  velocity:
+    minimum_delta: 0.07 # Minimum delta for velocity checks
+    minimum_speed: 0.18
+    maximum_single_move: 1.50
+    required_displacement_ratio: 1.25
+    min_horizontal_displacement: 0.40
+    maximum_distance_y: 2.50
+    required_forward_ratio: 0.65

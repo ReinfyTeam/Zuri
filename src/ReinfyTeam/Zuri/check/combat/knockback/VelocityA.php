@@ -34,6 +34,7 @@ namespace ReinfyTeam\Zuri\check\moving\speed;
 use pocketmine\event\entity\EntityMotionEvent;
 use ReinfyTeam\Zuri\check\Check;
 use ReinfyTeam\Zuri\utils\MathUtil;
+use ReinfyTeam\Zuri\config\ConstantPath;
 use ReinfyTeam\Zuri\utils\Utils;
 use function is_a;
 
@@ -106,6 +107,63 @@ class VelocityA extends Check {
 		$dirX = $newMotionVector->x / $horizontalSpeed;
 		$dirZ = $newMotionVector->z / $horizontalSpeed;
 
-		return self::buildResult(false);
+		$minimumDelta = Utils::readFloat($constantData[ConstantPath::VELOCITY_MINIMUM_DELTA]);
+		$minimumSpeed = Utils::readFloat($constantData[ConstantPath::VELOCITY_MINIMUM_SPEED]);
+
+		$movement = Utils::readArray($playerData["movement"] ?? null);
+		/** @var array{x: float, y: float, z: float} $from */
+		$from = Utils::readArray($movement["from"] ?? null);
+		/** @var array{x: float, y: float, z: float} $to */
+		$to = Utils::readArray($movement["to"] ?? null);
+		$movementToVector = Utils::arrayToVector3($to);
+		$movementFromVector = Utils::arrayToVector3($from);
+
+		$distance = MathUtil::distance2D($movementFromVector, $movementToVector);
+		$maxSingleMove = Utils::readFloat($constantData[ConstantPath::VELOCITY_MAX_SINGLE_MOVE]);
+		$maxDistanceY = Utils::readFloat($constantData[ConstantPath::VELOCITY_MAX_DISTANCE_Y]);
+
+		// A vertical-only motion update must not discard a horizontal response sample.
+        // A substantial horizontal reset to near-zero, however, supersedes the sample.
+		if($horizontalSpeed > $minimumSpeed && $horizontalDelta >= $minimumDelta){
+            return self::buildResult(false);
+        }
+
+		if ($horizontalDelta >= $minimumDelta) {
+			return self::buildResult(false);
+		}
+
+		$dy = $movementToVector->y - $movementFromVector->y;
+
+		// Teleports, corrections, and large lag/backlog steps must not be scored as anti-velocity.
+		if($distance > $maxSingleMove || abs($dy) > $maxDistanceY){
+			return self::buildResult(false);
+		}
+
+		$dx = $movementToVector->x - $movementFromVector->x;
+		$dz = $movementToVector->z - $movementFromVector->z;
+
+		$projected = ($dx * $dirX) + ($dz * $dirZ);
+		$minimumForward = Utils::readFloat($constantData[ConstantPath::VELOCITY_MIN_HORIZONTAL_DISPLACEMENT]);
+		$displacementRatio = Utils::readFloat($constantData[ConstantPath::VELOCITY_REQUIRED_DISPLACEMENT_RATIO]);
+		$minimumForwardProjection = Utils::readFloat($constantData[ConstantPath::VELOCITY_MIN_FORWARD_PROJECTION]);
+		$minimumForwardRatio = Utils::readFloat($constantData[ConstantPath::VELOCITY_REQUIRED_FORWARD_RATIO]);
+
+		$minimumPath = max($minimumForward, $horizontalSpeed * $displacementRatio);
+		$minimumForward = max($minimumForwardProjection, $horizontalSpeed * $minimumForwardRatio);
+
+		$didNotRespond = $distance < $minimumPath && $projected < $minimumForward;
+
+		return self::buildResult($didNotRespond, [
+			"horizontalDelta" => $horizontalDelta,
+			"horizontalSpeed" => $horizontalSpeed,
+			"minimumDelta" => $minimumDelta,
+			"minimumSpeed" => $minimumSpeed,
+			"distance" => $distance,
+			"maxSingleMove" => $maxSingleMove,
+			"dy" => $dy,
+			"projected" => $projected,
+			"minimumPath" => $minimumPath,
+			"minimumForward" => $minimumForward
+		]);
 	}
 }
