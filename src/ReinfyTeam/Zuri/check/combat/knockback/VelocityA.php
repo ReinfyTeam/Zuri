@@ -93,6 +93,12 @@ class VelocityA extends Check {
 		$playerData = Utils::readArray($data["playerData"] ?? null);
 		$constantData = Utils::readArray($data["constantData"] ?? null);
 
+		// Don't check a player who has a nearby collision surface in the impulse direction.
+        // A wall can legitimately prevent the client from moving despite receiving velocity.
+		if(Utils::readBool($playerData["isBlockedAhead"])) {
+			return self::buildResult(false);
+		}
+
 		/** @var array{x:float,y:float,z:float} $oldMotion */
 		$oldMotion = Utils::readArray($playerData["oldMotion"] ?? null);
 		/** @var array{x:float,y:float,z:float} $newMotion */
