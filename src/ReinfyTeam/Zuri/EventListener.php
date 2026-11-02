@@ -78,6 +78,7 @@ use ReinfyTeam\Zuri\utils\BlockUtil;
 use ReinfyTeam\Zuri\utils\MathUtil;
 use ReinfyTeam\Zuri\utils\Utils;
 use ReinfyTeam\Zuri\utils\WorldUtil;
+use function is_int;
 use function microtime;
 
 /**
