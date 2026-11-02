@@ -26,7 +26,7 @@ jobs:
           pm-version-major: 5
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist
+        run: composer install --prefer-dist --ignore-platform-req=ext-webrtc
 
       - name: Check PHP code style
         run: composer run-script format:check
