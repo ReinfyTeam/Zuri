@@ -124,9 +124,9 @@ class EventListener implements Listener {
 			$playerZuri->setPitch($packet->getPitch());
 			$playerZuri->setYaw($packet->getYaw());
 			$playerZuri->setHeadYaw($packet->getHeadYaw());
-			$playerZuri->setInputMode($packet->getInputMode());
-			$playerZuri->setPlayMode($packet->getPlayMode());
-			$playerZuri->setInteractionMode($packet->getInteractionMode());
+			$playerZuri->setInputMode(self::modeValue($packet->getInputMode()));
+			$playerZuri->setPlayMode(self::modeValue($packet->getPlayMode()));
+			$playerZuri->setInteractionMode(self::modeValue($packet->getInteractionMode()));
 			$playerZuri->setTick($packet->getTick());
 			$playerZuri->setRawMove($packet->getRawMove());
 
@@ -844,6 +844,10 @@ class EventListener implements Listener {
 				]
 			], Check::TYPE_PLAYER);
 		}
+	}
+
+	private static function modeValue(int|\BackedEnum $mode) : int {
+		return is_int($mode) ? $mode : (int) $mode->value;
 	}
 
 	public function onPlayerItemUse(PlayerItemUseEvent $event) : void {
