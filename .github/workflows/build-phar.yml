@@ -24,10 +24,10 @@ jobs:
         with:
           php-version: 8.2
           pm-version-major: 5
-      
+
       - name: Install Composer dependencies
         run: composer install --prefer-dist
-      
+
       - name: Build plugin PHAR
         run: composer run-script build
 

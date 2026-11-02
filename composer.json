@@ -17,7 +17,7 @@
     ],
     "require-dev": {
         "php": ">=8.2",
-        "axolotl-pm/pocketmine-mp": "5.49.1",
+        "axolotl-pm/pocketmine-mp": "5.51.1",
         "phpstan/phpstan": "^2.2",
         "sof3/pharynx": "^0.3.8",
         "friendsofphp/php-cs-fixer": "^3.94.2"
