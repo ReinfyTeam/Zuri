@@ -1,54 +1,135 @@
-# Zuri Pocketmine-MP Anticheat 🛡️
-**Zuri** is an anticheat made to protect the server from any may unfair advantages from the players. A powerful anticheat made to destroy hackers from your server for PocketMine-MP.
+# Zuri
 
-**Zuri** attempts to enforce "vanilla Minecraft" mechanics, as well as preventing players from abusing weaknesses in Minecraft or its protocol, making your server more safe. Organized in different sections, various checks are performed to test players doing, covering a wide range including flying and speeding, combat hacks, fast block breaking and nukers, inventory hacks, chat spam and other types of malicious behaviour.
+Zuri is a beta anticheat plugin for PocketMine-MP API 5. It observes player
+movement, combat and block interactions, evaluates checks in worker threads,
+and reports violations to the server or configured moderation commands.
+
+[![PHPStan](https://github.com/ReinfyTeam/Zuri/actions/workflows/phpstan.yml/badge.svg)](https://github.com/ReinfyTeam/Zuri/actions/workflows/phpstan.yml)
+[![Build](https://github.com/ReinfyTeam/Zuri/actions/workflows/build-phar.yml/badge.svg)](https://github.com/ReinfyTeam/Zuri/actions/workflows/build-phar.yml)
+[![Latest release](https://img.shields.io/github/v/release/ReinfyTeam/Zuri)](https://github.com/ReinfyTeam/Zuri/releases/latest)
+[![License](https://img.shields.io/github/license/ReinfyTeam/Zuri)](LICENSE)
 
 > [!WARNING]
-> PocketMine-MP has reached its end of support, and development has shifted to community-driven forks like Axolotl-PM.
-> 
-> While this software was originally tested on the final version of PocketMine-MP, we advise caution when using alternative platforms. 
-> 
-> However, as we continue testing features across different forks, we will now accept and support issue reports for them.
+> Zuri is published as `1.4.2-BETA`. An anticheat can produce false positives
+> when the server is lagging, a player has unusual latency, or another plugin
+> changes movement or combat behavior. Test the configuration on a staging
+> server before enabling automatic punishments on a live server.
 
-😁 If you are interested with our projects, you may help us by:
-- [Donate via Ko-Fi](https://ko-fi.com/xqwtxon)
-- [Become a Patreon](https://patreon.com/xwertxy)
+## Requirements and compatibility
 
-Also, adding :star: a **Star** is also appreciated. ✨
+| Requirement | Supported scope |
+| --- | --- |
+| PocketMine-MP or Axolotl-PM | API `5.0.0` as declared in `plugin.yml` |
+| PHP | `8.2` or newer in Composer metadata and CI |
+| Runtime dependencies | Bundled into the built PHAR by the project build |
 
-🤔 Do you struggling with **bugs and issues?** Don't hesitate to tell us about it by [creating an issue](https://github.com/ReinfyTeam/Zuri/issues) or you may join us on our official [discord server](https://discord.com/invite/7u7qKsvSxg)!
+The repository pins Axolotl-PM `5.51.1` for development and PHPStan analysis.
+The CI workflow checks PHP syntax, PHPStan at maximum level, code style and the
+PHAR build. These checks do not certify every API 5 server revision or prove
+that a check is accurate for every Bedrock client.
 
-> ![Zuri Anticheat Meme](https://raw.githubusercontent.com/ReinfyTeam/Zuri/main/meme.jpg)
->
-> Zuri can catch hacker efficiently using native-threads built by PocketMine-MP to handle heavy CPU tasks. Unlike other **$100 Anticheat**, it is more systematic, lightweight, and easy to configure. It's too good right? 🤦
+## Installation
 
-# Features
-- You can easily configure everything in the config. ✅
-  - Configure easily the max violations and checks and more! ⚙️
-- It is more **lightweight** compared to paid anticheat. You don't have to struggle about the performance, with this anticheat, it can possible block them all easily! 💰
-- Multi-threading supported, all calculations and heavy mathematical checks are handled through multiple workers. ⚙️
+1. Download a verified `Zuri.phar` from [GitHub Releases](https://github.com/ReinfyTeam/Zuri/releases).
+2. Copy the PHAR to the server's `plugins/` directory.
+3. Start the server once to create `plugin_data/Zuri/config.yml`.
+4. Review the check thresholds, world bypass list, alerts and punishment commands.
+5. Start with punishments disabled or set to a non-destructive test command.
+6. Observe the alerts and violation history before enabling kicks or bans.
 
-# Forks / Dependencies
-Here are the **dependencies** were used in the plugin:
+Zuri registers the command aliases `/zuri`, `/anticheat`, `/ac` and `/zuriac`.
+The command permission is `zuri.command` by default.
 
-- [FormAPI Fix by DavyCraft648](https://github.com/DavyCraft648/FormAPI-PM)
-- [DiscordWebhookAPI by ReinfyTeam](https://github.com/ReinfyTeam/DiscordWebhookAPI/)
-- [Commando by Paroxity](https://github.com/ReinfyTeam/DiscordWebhookAPI/)
+## Current checks
 
-Some are for fixes and some are modified for compability.
+The current source registers these check groups:
 
-# Current Modules
-Currently, the plugin is on rewrite process to move its previous modules in other versions.
-- **Speed**
-    - **(A)**: Check for horizontal speed.
-    - **(B)**: Check for vertical speed.
-- **Reach**
-    - **(A)**: Check for reach distance.
-    - **(B)**: Check for block reach distance.
-- **Hitbox**
-    - **(A)**: Check if player can legitimately hit.
-    - **(B)**: Check for the bounding box hitbox with tolerance.
-# Feedbacks and Issue's
-- 😁 Your feedback and reviews are highly appriciated, if you ever find a bug or false-positive in certain modules, you can create an issue in our [github repository](https://github.com/ReinfyTeam/Zuri/issues)!
-- 👍 You can also view [Frequently asked questions article](https://github.com/ReinfyTeam/Zuri/wiki/Well-Known-Issues) about common encountered issues to our plugin, be sure to read that before creating an issue!
-> Please wait for the developer response to the issue since we have high amount of task and issue that we to do fix also ;)
+| Group | Checks |
+| --- | --- |
+| Movement | `SpeedA`, `SpeedB`, `FlyA`, `FlyB`, `NoSlowA` |
+| Combat | `ReachA`, `ReachB`, `HitboxA`, `HitboxB`, `VelocityA`, `VelocityB` |
+| Blocks | `FastBreakA`, `NukeA`, `ScaffoldA`, `TowerA` |
+| Items | `FastUseA` |
+
+The names describe the current implementation files. They are not a promise
+that every check detects every client modification, and they may change during
+the beta rewrite.
+
+## Commands and permissions
+
+The `/zuri` command currently exposes the debug subcommand through Commando.
+The command aliases use the same handler.
+
+| Command | Purpose |
+| --- | --- |
+| `/zuri` | Run the main Zuri command |
+| `/zuri debug` | Toggle or inspect the debug mode exposed by the current build |
+| `/anticheat debug` | Use the same command through the compatibility alias |
+| `/ac debug` | Use the same command through the compatibility alias |
+| `/zuriac debug` | Use the same command through the compatibility alias |
+
+The configured permissions are:
+
+| Permission | Default use |
+| --- | --- |
+| `zuri.command` | Use the Zuri command as an operator |
+| `zuri.bypass` | Bypass checks for selected players |
+| `zuri.alerts` | Receive violation and pre-violation alerts |
+
+Permission names can be changed in `zuri.permissions` inside the configuration.
+
+## Configuration
+
+Zuri creates `plugin_data/Zuri/config.yml`. The important sections are:
+
+| Section | Purpose |
+| --- | --- |
+| `zuri.language` | Select the active language and message prefix |
+| `zuri.threads` | Set thread count, worker count and queue capacity |
+| `zuri.metrics` | Set the metrics update delay |
+| `zuri.results_handler` | Set the result-processing delay |
+| `zuri.thresholds` | Adjust ping and TPS sensitivity multipliers |
+| `zuri.punishments` | Configure native or command-based kicks and bans |
+| `zuri.world_bypass` | Use a blacklist or whitelist of bypass worlds |
+| `zuri.alerts` | Enable pre-violation and violation messages |
+| `zuri.checks` | Enable checks and set pre-violation, maximum violation and punishment values |
+
+The loader checks `zuri.config_version` and refreshes an outdated configuration
+from the bundled resource. Back up the file before changing it, and keep the
+version key managed by the plugin.
+
+Native punishment settings use the server's kick or ban system. Command-based
+settings dispatch the configured command with `{player}` replaced by the
+affected player's name. Treat those commands as trusted server configuration.
+
+## Integrations
+
+Zuri can use the bundled DiscordWebhookAPI dependency for webhook reporting.
+Commando handles the command parser and SimplePacketHandler provides packet
+hooks used by the plugin. These dependencies are prepared by the build and are
+not separate plugins to copy into the server's `plugins/` directory.
+
+## Build and verification
+
+The repository uses Composer and Pharynx for the plugin build. The CI workflows
+run the following checks:
+
+```sh
+composer install --prefer-dist --ignore-platform-req=ext-webrtc
+composer run-script format:check
+composer run-script analyze
+composer run-script build
+```
+
+The build workflow uploads `build/Zuri.phar`. The release workflow downloads the
+successful artifact from the same commit before creating a GitHub Release. A
+local build or CI result does not replace a live false-positive test on the
+target server.
+
+## License and support
+
+Zuri is released under the LGPL-2.1 license in [LICENSE](LICENSE). Report a
+false positive with the server version, Zuri version, relevant configuration,
+latency and a complete log excerpt. Do not publish private player data in an
+issue. Use [GitHub Issues](https://github.com/ReinfyTeam/Zuri/issues) for bug
+reports and feature requests.
